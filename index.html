@@ -1657,7 +1657,7 @@ function topicOf(q){const s=q.toLowerCase(),lv=lvKey();return TOP.find(t=>t.re.t
 function cleanQ(q){return q.replace(/[?.!]+$/,"").replace(/^(what\s+(is|are|was|were)|define|explain|describe|tell me about|how (do|does|can) (i|we|you)|why (is|are|do|does))\s+(an?\s+|the\s+)?/i,"").trim().slice(0,60)||q.slice(0,60)}
 function qText(t,z){return "# Quiz: "+t+"\nQuestion "+(z.n+1)+" of "+z.list.length+"\n"+z.list[z.n][0]}
 function faithOf(q){return/\b(islam\w*|muslim\w*|quran|allah|prophet muhammad|hadith|mosque|ramadan|salah|zakat)\b/i.test(q)?"Islamic":/\b(christian\w*|bible|jesus|christ|church|god the father|gospel|apostles?|easter|christmas|baptism)\b/i.test(q)?"Christian":null}
-function mock(q,mode){
+function mockBase(q,mode){
  if(!mode){const W=work(q)||mathWork(q);if(W)return W}
  const T=topicOf(q),H=heads(T),k=cleanQ(q),F=/Religio|Divinity|Islamic/.test(D.sub)?faithOf(q):null,s=F?F+" "+D.sub:D.sub,L=lvKey(),nm=(T?T.n:k.charAt(0).toUpperCase()+k.slice(1))+(F?" ("+F+")":""),b="**"+k+"**";
  if(mode=="Explain simpler")return{t:"# "+nm+", simpler\n"+clLine(T)+(T?T.s:"Think of "+b+" as a small idea in "+s+".\n- Break it into small parts.\n- Learn one part at a time.\n- Say it back in your own words.")};
@@ -1666,6 +1666,83 @@ function mock(q,mode){
  if(mode=="Quiz me"){const list=T?T.q:[["Which is the best first step when working on "+k+"?",["Guess the answer","Understand the question","Skip to the end"],1],["What should you do after getting an answer?",["Check it","Ignore it","Hide it"],0]],z={list,n:0,score:0,t:nm};return{t:qText(nm,z),quiz:["q",z.list[0][1],z.list[0][2]],qz:z}}
  const lvl=L=="PLE"?"":L=="UACE"?"\n## Exam approach\nNote the command word (explain, analyse, evaluate) and structure your answer to match.":"\n## Exam tip\nShow your working and use the correct terms for full marks.";
  return{t:"# "+nm+"\n"+clLine(T)+"## 1. Definition\n"+(T?T.d:b+" is a topic in "+s+". Its exact meaning is given here in one clear sentence.")+"\n## 2. "+H[0]+"\n"+(T?T.h:"- Understand what is being asked.\n- Write down what you know.\n- Apply the rule step by step.\n- Check your answer.")+"\n## 3. "+H[1]+"\n"+(T?T.w:"- In classwork and exams in "+s+".\n- In daily life where this idea applies.")+clSec(T)+lvl+(D.sub=="Science"&&lvKey()=="PLE"&&!T?"\n## Science topics you can ask about\n"+SCI.map(t=>"- "+t.n).join("\n"):"")+(D.sub=="Mathematics"&&lvKey()=="PLE"&&!T?"\n## Mathematics topics you can ask about\n"+MATHP.map(t=>"- "+t.n+" ("+clRange(t)+")").join("\n")+"\nYou can also ask: What topics are in Primary 4?":"")+(/Religio|Divinity|Islamic/.test(D.sub)&&!F?"\n## Note\nAdd Christian or Islamic to your question to get the answer for your faith.":"")}}
+
+/* ===== ANSWER STYLE BY PLAN + SUPABASE (direct) =====
+ Free and Basic: only the exact thing asked. Standard: that thing plus a simple explanation.
+ Premium: full breakdown, unless the learner asks for the meaning only. */
+const SBU="https://pjdtlpnlvumpefxjmjpv.supabase.co/rest/v1/",SBK="sb_publishable_Y48beigB72EVErcQKDwrDA_sTxiHI6u",TKEY="ask_topics_v1";
+const sbCall=(path,opt,ms)=>{const c=new AbortController(),t=setTimeout(()=>c.abort(),ms||4000);return fetch(SBU+path,Object.assign({signal:c.signal},opt,{headers:Object.assign({apikey:SBK,"Content-Type":"application/json"},(opt||{}).headers)})).then(r=>{clearTimeout(t);return r.ok?r.json():Promise.reject(r.status)})};
+function dbTopic(r){let re;try{re=new RegExp(r.pattern,"i")}catch(e){return null}
+ const cl=(r.topic_classes||[]).slice().sort((a,b)=>a.sort_order-b.sort_order).map(c=>[c.class_code,c.terms,c.note]);
+ return{n:r.name,re,cl:cl.length?cl:undefined,d:r.definition||"",h:r.steps||"",w:r.uses||"",s:r.simple||"",e:r.examples||"",m:r.more||"",q:Array.isArray(r.quiz)?r.quiz:[],a:r.label_steps||"How to work it out",b:r.label_uses||"Where it is used",nd:r.detect===false?1:0,S:[r.subject_name],L:[r.level_code],db:1}}
+function putTopics(rows){let n=0;rows.forEach(r=>{const T=dbTopic(r);if(!T)return;const i=TOP.findIndex(t=>t.n==T.n&&String(t.S)==String(T.S)&&String(t.L)==String(T.L));if(i>=0)TOP[i]=T;else TOP.push(T);n++});return n}
+function loadTopics(){try{const c=JSON.parse(localStorage.getItem(TKEY)||"null");if(Array.isArray(c)&&c.length)putTopics(c)}catch(e){}
+ return sbCall("topics?select=*,topic_classes(class_code,terms,note,sort_order)&status=eq.published&order=sort_order",{},6000).then(rows=>{if(Array.isArray(rows)&&rows.length){putTopics(rows);try{localStorage.setItem(TKEY,JSON.stringify(rows))}catch(e){}}}).catch(()=>{})}
+loadTopics();
+/* what is the learner really asking? */
+function qIntent(q){const s=" "+String(q).toLowerCase().replace(/[^a-z0-9'\s]/g," ").replace(/\s+/g," ")+" ",h=r=>r.test(s);
+ const full=h(/\b(everything|all about|in details?|detailed|details|fully|completely|thoroughly|comprehensive|in depth|deeply|elaborate|break (it )?down|whole thing|tell me all|full explanation|describe)\b/);
+ const only=h(/\b(only|just|alone|merely)\b/),defw=h(/\b(define|definition|meaning|means?|mean by)\b/);
+ let f="gen";
+ if(h(/\b(examples?|for instance|illustrat\w*)\b/))f="ex";
+ else if(h(/\b(mistakes?|errors?|misconceptions?)\b/))f="mis";
+ else if(h(/\b(why|importance|important|used for|purpose|benefits?|advantages?|significance|use of|uses of)\b/))f="why";
+ else if(h(/\b(how|steps?|process|procedure|method|works?|working|formula|stages?|types of|kinds of|parts of|classification|ways)\b/))f="how";
+ else if(h(/\b(simple|simply|easy|easily|in short|summary|summarise|summarize|kid|child)\b/))f="simple";
+ else if(h(/\b(what (is|are|was|were)|what s|whats|who (is|are)|define|definition|meaning|means?|mean by|stand for)\b/))f="def";
+ return{f,full,only,defw}}
+function secOf(m,name){const x=String(m||"").match(new RegExp("(^|\\n)## "+name+"[^\\n]*\\n([\\s\\S]*?)(?=\\n## |$)","i"));return x?x[2].trim():""}
+function part(T,f,H){
+ if(f=="how"&&T.h)return[H[0],T.h];
+ if(f=="why"&&T.w)return[H[1],T.w];
+ if(f=="ex"&&T.e)return["Examples",T.e];
+ if(f=="mis"){const x=secOf(T.m,"Common mistakes");if(x)return["Common mistakes",x]}
+ if(f=="simple"&&T.s)return["In simple words",T.s];
+ return[null,T.d]}
+let VN=Math.floor(Math.random()*1000);
+function tiered(q){const T=topicOf(q);if(!T||!T.d)return null;
+ const pl=planName(),I=qIntent(q),H=heads(T),v=VN++,pk=a=>a[v%a.length],L=lvKey(),onlyReq=(I.only||I.defw)&&!I.full,
+  narrow=pl=="Free"||pl=="Basic"||onlyReq,sec=(h,b)=>b?"\n## "+h+"\n"+b:"";
+ const[hd,body]=part(T,I.f,H),one="# "+T.n+"\n"+(hd?"## "+hd+"\n":"")+body;
+ if(narrow&&pl!="Standard")return{t:one};
+ if(pl=="Standard"){
+  if(narrow)return{t:one};
+  return{t:one+(I.f=="simple"?sec("Meaning",T.d):sec("In simple words",T.s))}}
+ /* Premium: full breakdown, every part, with examples, mistakes and a quick check */
+ const defH=pk(["Definition","Meaning","What it is"]),simH=pk(["In simple words","Think of it this way","The easy way to see it"]);
+ const A={def:[defH,T.d],how:[H[0],T.h],why:[H[1],T.w],sim:[simH,T.s],ex:["Examples",T.e]};
+ let order=v%2?["def","sim","how","ex","why"]:["def","how","why","sim","ex"];
+ const first={how:"how",why:"why",ex:"ex",simple:"sim"}[I.f];
+ if(first){order=order.filter(x=>x!="def"&&x!=first);order=["def",first,...order]}
+ let t="# "+T.n+(clLine(T)?"\n"+clLine(T).trim():"")+order.map(k=>sec(A[k][0],A[k][1])).join("");
+ if(T.m)t+="\n"+(/^##/.test(T.m.trim())?"":"## Common mistakes\n")+T.m;
+ t+=clSec(T);
+ if(T.q&&T.q.length){const z=T.q[v%T.q.length];t+="\n## Quick check\n"+z[0]+"\n"+z[1].map((o,i)=>"- "+"ABC"[i]+". "+o).join("\n")+"\n**Answer:** "+z[1][z[2]]}
+ t+=L=="PLE"?"":L=="UACE"?"\n## Exam approach\nNote the command word (explain, analyse, evaluate) and structure your answer to match.":"\n## Exam tip\nShow your working and use the correct terms for full marks.";
+ return{t}}
+function mock(q,mode){
+ if(mode)return mockBase(q,mode);
+ const W=work(q)||mathWork(q);if(W)return W;
+ const t=tiered(q);if(t)return t;
+ const f=mockBase(q),pl=planName();f.un=1;
+ if(pl!="Premium"){const i=f.t.search(/\n## (Science|Mathematics) topics you can ask about|\n## Note\n/),tail=i>=0?f.t.slice(i):"";f.t=f.t.split(pl=="Standard"?"\n## 3.":"\n## 2.")[0]+tail}
+ return f}
+/* owner-written answers from Supabase (find_answer), chosen by plan */
+const MODEMAP={"Explain simpler":"simpler","Give an example":"example","More detail":"detail"};
+async function dbAnswer(q,mode){
+ if(mode&&!MODEMAP[mode])return null;
+ if(!mode&&(work(q)||mathWork(q)))return null;
+ const pl=planName(),I=qIntent(q),narrow=pl=="Free"||pl=="Basic"||((I.only||I.defw)&&!I.full);
+ const get=m=>sbCall("rpc/find_answer",{method:"POST",body:JSON.stringify({p_question:String(q).slice(0,300),p_level:D.lvl,p_subject:D.sub,p_mode:m,p_threshold:0.35})},3000).then(r=>Array.isArray(r)&&r[0]?r[0]:null).catch(()=>null);
+ const txt=r=>/^\s*#/.test(r.body_md)?r.body_md:"# "+r.title+"\n"+r.body_md;
+ let r=null,t="";
+ if(mode){r=await get(MODEMAP[mode]);if(r)t=txt(r)}
+ else if(narrow){r=await get("answer");if(r)t=txt(r)}
+ else if(pl=="Standard"){const[a,s]=await Promise.all([get("answer"),get("simpler")]);r=a||s;if(a&&s)t=txt(a)+"\n## In simple words\n"+s.body_md;else if(r)t=txt(r)}
+ else{const[d,a]=await Promise.all([get("detail"),get("answer")]);r=d||a;if(r)t=txt(r)}
+ return r?{t,aid:r.answer_id}:null}
+function logUn(q){try{q=String(q).trim().slice(0,300);if(q.length<3)return;fetch(SBU+"rpc/log_unanswered",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_question:q,p_level:D.lvl,p_subject:D.sub})}).catch(()=>{})}catch(e){}}
+function sendFb(m){try{if(m.aid&&m.fb)fetch(SBU+"rpc/submit_feedback",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_answer_id:m.aid,p_vote:m.fb})}).catch(()=>{})}catch(e){}}
 
 function bub(m,i,last){
  if(m.note)return `<div class="b i ai" data-i="${i}"><div class="md">${md(m.t)}</div><small>${hm(m.ts)}</small></div>`;
@@ -1711,16 +1788,20 @@ function plans(fs){
  `<div class="sec">HOW TO PAY</div>`+ST.map((t,k)=>`<div class="stp"><i>${k+1}</i><div>${t}</div></div>`).join("")+
  `<a class="btn" style="text-align:center;text-decoration:none;margin-bottom:28px" href="tel:*165*3*06124096%23">Dial *165*3*06124096#</a>`,fs?settings:closeP,e=>{const c=e.target.closest("[data-cp]");if(c){const t=c.dataset.cp,ok=()=>{c.textContent="Copied"};if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(ok,ok);else ok()}})}
 function stopS(){if(stream==null)return;clearInterval(stream);stream=null;if(sm){if(sm.w)sm.t=wBuild(sm);delete sm.stream;useW(sm.t)}sm=null;$("stat").textContent="Anything about your studies";$("send").innerHTML=SEND;save();render()}
+let AN=0;
 function ask(q,mode){
  if(stream!=null)return;if(capped())return limitMsg();const ch=D.chats.find(c=>c.id==D.cur);if(ch.title=="New chat"||ch.title=="Chat")ch.title=q.slice(0,32);
  const now=Date.now();stamps=stamps.filter(t=>now-t<6e4);
  const err=x=>{D.msgs.push({s:"i",err:1,t:x,q,mode,ts:Date.now()});save();render()};
  if(!navigator.onLine)return err("No internet connection. Check your network and try again.");
  if(stamps.length>=8)return err("Too many requests. Please wait a minute and try again.");
- stamps.push(now);sm=null;
- const f=mock(q,mode),m={s:"i",t:"",ts:Date.now(),q,mode,stream:1},w=f.t.split(/(?<=\s)/);if(f.quiz)m.quiz=f.quiz;if(f.qz)m.qz=f.qz;if(f.w)m.w=f.w;
+ stamps.push(now);sm=null;const tok=++AN;
  $("stat").textContent="typing…";$("send").innerHTML=STOP;
- stream=setTimeout(()=>{D.msgs.push(m);sm=m;let k=0;stream=setInterval(()=>{m.t+=w[k++]||"";if(k>=w.length){stopS();notify("Answer ready",'Your answer about "'+(q||"your question").slice(0,40)+'" is ready.');if(capped())limitMsg()}else render()},35)},600)}
+ stream=setTimeout(async()=>{let f=null;try{f=await Promise.race([dbAnswer(q,mode),new Promise(r=>setTimeout(()=>r(null),3200))])}catch(e){}
+  if(stream==null||tok!=AN)return;
+  if(!f)f=mock(q,mode);if(f.un&&!mode)logUn(q);
+  const m={s:"i",t:"",ts:Date.now(),q,mode,stream:1},w=f.t.split(/(?<=\s)/);if(f.quiz)m.quiz=f.quiz;if(f.qz)m.qz=f.qz;if(f.w)m.w=f.w;if(f.aid)m.aid=f.aid;
+  D.msgs.push(m);sm=m;let k=0;stream=setInterval(()=>{m.t+=w[k++]||"";if(k>=w.length){stopS();notify("Answer ready",'Your answer about "'+(q||"your question").slice(0,40)+'" is ready.');if(capped())limitMsg()}else render()},35)},600)}
 $("msgs").addEventListener("click",e=>{
  const c=e.target.closest("[data-chip]");if(c){if(stream!=null)return;const q0=(()=>{for(let i=D.msgs.length;i--;){const x=D.msgs[i];if(x.s=="o"&&!x.chip)return x.t}return"this topic"})();D.msgs.push({s:"o",t:c.dataset.chip,chip:1,ts:Date.now(),st:2});save();render();ask(q0,c.dataset.chip);return}
  const st=e.target.closest("[data-st]");if(st){$("inp").value=st.dataset.st;send();return}
@@ -1731,7 +1812,7 @@ $("msgs").addEventListener("click",e=>{
    showP("Share answer",P.map(x=>`<div class="row" data-p="${x[0]}"><div>${x[1]}</div></div>`).join("")+'<div class="row" data-p="cp"><div>Copy link</div></div>',closeP,e=>{const k=e.target.closest(".row")?.dataset.p;if(!k)return;if(k=="cp"){try{navigator.clipboard.writeText(L)}catch(x){}closeP();uiAlert("Link copied.");return}const f=P.find(x=>x[0]==k);closeP();window.open(f[2],"_blank")})};
   if(navigator.share){try{await navigator.share({title:"Ask Tr. David",text:T,url:L})}catch(e){if(e&&e.name!="AbortError")sheet()}}else sheet()})();return}
  if(m.w){if(a=="next"){m.w.shown=Math.min(m.w.shown+1,m.w.parts.length);m.t=wBuild(m)}if(a=="all"){m.w.shown=m.w.parts.length;m.t=wBuild(m)}if(a=="brk"){m.w.open[m.w.shown-1]=1;m.t=wBuild(m)}}
- if(a=="bm")m.bm=!m.bm;if(a=="up")m.fb=m.fb==1?0:1;if(a=="dn")m.fb=m.fb==-1?0:-1;
+ if(a=="bm")m.bm=!m.bm;if(a=="up")m.fb=m.fb==1?0:1;if(a=="dn")m.fb=m.fb==-1?0:-1;if(a=="up"||a=="dn")sendFb(m);
   if(a=="pick"&&m.pick==null){m.pick=+b.dataset.k;if(m.qz&&m.pick==m.quiz[2])m.qz.score++}
  if(a=="nq"&&m.qz&&m.pick!=null&&m.qz.n<m.qz.list.length-1){const z=m.qz;z.n++;m.quiz=["q",z.list[z.n][1],z.list[z.n][2]];m.pick=null;m.t=qText(z.t,z)}
  if(a=="retry"||a=="regen"){D.msgs.splice(i,1);save();render();ask(m.q,m.mode);return}
@@ -1808,7 +1889,7 @@ $("jump").onclick=()=>$("msgs").scrollTo({top:1e9,behavior:"smooth"});
  Set done to 1 on finished items, add new items, add a line to log, set updated to today.
  Never mark an item done unless it was built and tested. */
 const HANDOFF={
- "updated": "2026-10-29",
+ "updated": "2026-10-30",
  "about": [
   [
    "What this is",
@@ -1820,7 +1901,7 @@ const HANDOFF={
   ],
   [
    "How it should work (target)",
-   "1) The learner selects their level (PLE, UCE or UACE). 2) Subject tabs show only that level's subjects. 3) The learner asks by typing, voice or photo. 4) The app searches stored answers in Supabase across all three levels, then replies in the format of the learner's own level. 5) If nothing matches, it saves the question in an unanswered list. 6) The owner opens the admin panel, writes the answer and publishes it. 7) The owner sends announcements that pop up in the app for a duration the admin sets. Steps 4 to 7 are not built yet."
+   "1) The learner selects their level (PLE, UCE or UACE). 2) Subject tabs show only that level's subjects. 3) The learner asks by typing, voice or photo. 4) The app searches stored answers in Supabase across all three levels, then replies in the format of the learner's own level. 5) If nothing matches, it saves the question in an unanswered list. 6) The owner opens the admin panel, writes the answer and publishes it. 7) The owner sends announcements that pop up in the app for a duration the admin sets. Steps 4 and 5 are built (topics, answers lookup and unanswered list work through Supabase). Steps 6 and 7 (admin panel, announcements) are not built yet."
   ],
   [
    "How it works today",
@@ -1828,7 +1909,7 @@ const HANDOFF={
   ],
   [
    "Supabase notes",
-   "The database is built in the Supabase project Nova School Manager (pjdtlpnlvumpefxjmjpv, eu-west-1). That project was wiped on 2026-10-29 and reused for this app. The other project on the account, Excel Examination Services, belongs to a different app: do not touch it. Tables, all with row level security on: levels (PLE, UCE, UACE; 3 rows), subjects (59 rows), questions, question_phrasings, answers (per level and mode, draft or published, optional quiz JSON), unanswered_questions, announcements, feedback, admin_users. Public RPC functions for the learner app: log_unanswered(p_question, p_level, p_subject) and submit_feedback(p_answer_id, p_vote). Helper functions: is_admin() and is_owner(). Migrations: study_assistant_schema and tighten_function_security. Content so far: 60 Mathematics questions with answers (20 each for PLE, UCE and UACE), all saved as drafts so learners cannot see them until a teacher reviews and publishes them. Each question has one answer at one level; question positions are 1-20 for PLE, 101-120 for UCE and 201-220 for UACE. A question and its answer must both be published to be visible to learners. Still empty: announcements and admin_users, so no admin user exists yet. This app does not call Supabase yet. Learners include children, so keep personal data minimal."
+   "The database is built in the Supabase project Nova School Manager (pjdtlpnlvumpefxjmjpv, eu-west-1). That project was wiped on 2026-10-29 and reused for this app. The other project on the account, Excel Examination Services, belongs to a different app: do not touch it. Tables, all with row level security on: levels (PLE, UCE, UACE; 3 rows), subjects (59 rows), questions, question_phrasings, answers (per level and mode, draft or published, optional quiz JSON), unanswered_questions, announcements, feedback, admin_users. Public RPC functions for the learner app: log_unanswered(p_question, p_level, p_subject) and submit_feedback(p_answer_id, p_vote). Helper functions: is_admin() and is_owner(). Migrations: study_assistant_schema and tighten_function_security. Content so far: 60 Mathematics questions with answers (20 each for PLE, UCE and UACE), all saved as drafts so learners cannot see them until a teacher reviews and publishes them. Each question has one answer at one level; question positions are 1-20 for PLE, 101-120 for UCE and 201-220 for UACE. A question and its answer must both be published to be visible to learners. Still empty: announcements and admin_users, so no admin user exists yet. The app now calls Supabase directly: it reads published topics (cached on the phone), looks for owner-written answers with find_answer (only published ones are visible), logs unanswered questions with log_unanswered (question text, level and subject only) and sends Helpful or Not helpful votes with submit_feedback. Learners include children, so keep personal data minimal."
   ],
   [
    "Working notes",
@@ -2021,6 +2102,16 @@ const HANDOFF={
    ]
   ],
   [
+   "Answer styles and Supabase",
+   [
+    ["Answer style by plan: Free and Basic exact question only, Standard plus simple explanation, Premium full breakdown or meaning only when asked",1],
+    ["Read published topics from Supabase and look up find_answer, log unanswered questions, send feedback votes",1],
+    ["Publish the 60 draft Mathematics answers after teacher review (all still drafts, so learners cannot see them)",0],
+    ["Add topics for subjects other than Primary Mathematics and Science: questions with no topic get a placeholder answer and are logged as unanswered",0],
+    ["Try on a real phone; Free and Basic limits are not checked on the server",0]
+   ]
+  ],
+  [
    "Primary Mathematics syllabus",
    [
     ["Topics P1 to P7 with class and term tags (43 topics)",1],
@@ -2059,6 +2150,10 @@ const HANDOFF={
   ]
  ],
  "log": [
+  [
+   "2026-10-30",
+   "Answers now follow the plan. Free and Basic: only the exact thing asked (what is photosynthesis gives the meaning only; how does it work gives only the steps). Standard: the thing asked plus a short simple explanation. Premium: a full breakdown (meaning, steps, why it matters, simple words, examples, common mistakes, quick check with answer, exam tip) with no follow-up questions; if the learner says only, just, or asks to define or give the meaning, Premium gives the meaning alone, and words like everything, in detail or describe bring the full breakdown back. The question is read for what it asks (meaning, how, why, example, mistakes, simple). Regenerate gives a different but correct wording and order. Supabase: published topics are read straight from the topics table (cached, replace local topics of the same name, new ones are added), find_answer is tried first by plan (Free, Basic: answer; Standard: answer plus simpler; Premium: detail, else answer), unanswered questions go to log_unanswered, votes go to submit_feedback for Supabase answers. If Supabase is slow or down the app answers from its own topics. Tested in a headless browser only. sw.js CACHE name must be changed so phones pick this up."
+  ],
   [
    "2026-10-29",
    "Install page rebuilt exactly like the Nova School (My School) one: decided before first paint so there is no flash, full-screen blue page with the rounded-square logo, the name, one big Install button and an underlined Continue in browser link. Install opens the real install prompt (waits up to 3.5 seconds for the browser, shows Add to Home Screen steps on iPhone, tells the user if it is already installed). After Continue in browser a small round install button floats on the right. Never shown inside the installed app. sw.js cache is now v5."

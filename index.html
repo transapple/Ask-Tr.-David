@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ask Tr. David</title>
+<style>
+:root{--bg:#fff;--text:#111b21;--sub:#667781;--out:color-mix(in srgb,var(--green) 18%,#fff);--in:#fff;--wall:#efeae2;--green:#00a884;--bar:#fff;--tick:#34b7f1;--line:#e4e6e8;--sheet:#fff}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b141a;--text:#e9edef;--sub:#8696a0;--out:color-mix(in srgb,var(--green) 45%,#0b141a);--in:#202c33;--wall:#0b141a;--bar:#202c33;--line:#2a3942;--sheet:#233138}}
+:root[data-theme="dark"]{--bg:#0b141a;--text:#e9edef;--sub:#8696a0;--out:color-mix(in srgb,var(--green) 45%,#0b141a);--in:#202c33;--wall:#0b141a;--bar:#202c33;--line:#2a3942;--sheet:#233138}
+:root[data-theme="light"]{--bg:#fff;--text:#111b21;--sub:#667781;--out:color-mix(in srgb,var(--green) 18%,#fff);--in:#fff;--wall:#efeae2;--bar:#fff;--line:#e4e6e8;--sheet:#fff}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}html,body{height:100%}
+body{background:var(--bg);color:var(--text);font:1rem/1.35 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif}
+#app{display:flex;flex-direction:column;height:100%;max-width:800px;margin:0 auto;background:var(--wall);padding-bottom:env(safe-area-inset-bottom,0px)}
+header{display:flex;align-items:center;gap:10px;padding:calc(10px + env(safe-area-inset-top,0px)) 14px 10px 8px;background:var(--bar);border-bottom:1px solid var(--line)}
+.av{width:40px;height:40px;border-radius:50%;background:var(--green);color:#fff;display:grid;place-items:center;font-size:17px;font-weight:600}
+#nm{font-weight:600;font-size:17px}.t{font-size:12px;color:var(--sub)}
+.ic{background:none;border:0;color:var(--sub);cursor:pointer;padding:6px;display:grid;place-items:center}
+svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#msgs{flex:1;overflow-y:auto;padding:12px 10px;display:flex;flex-direction:column;gap:4px}
+.b{max-width:78%;padding:7px 10px 5px;border-radius:14px;word-wrap:break-word;white-space:pre-wrap;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;box-shadow:0 1px 1px rgba(0,0,0,.1)}
+.b.o{align-self:flex-end;background:var(--out);border-bottom-right-radius:4px}
+.b.i{align-self:flex-start;background:var(--in);border-bottom-left-radius:4px}
+.b small{float:right;margin:7px 0 0 10px;font-size:11px;color:var(--sub);display:inline-flex;align-items:center;gap:3px}
+.b small svg{width:16px;height:16px;stroke-width:2.4}.rd{color:var(--tick)}
+.day{align-self:center;background:var(--in);color:var(--sub);font-size:12px;padding:4px 12px;border-radius:10px;margin:8px 0}
+#editing{display:none;background:var(--bar);padding:8px 16px;font-size:13px;color:var(--green);border-top:1px solid var(--line)}
+#cmp{display:flex;gap:4px;align-items:center;padding:6px 8px;background:var(--bar)}
+#cmp .ic{padding:4px;flex-shrink:0}#cmp .ic svg{width:22px;height:22px}
+#inp{flex:1;min-width:0;width:100%;border:0;border-radius:20px;padding:9px 12px;font-size:15px;background:var(--wall);color:var(--text);font:inherit;outline:0}
+#send{width:38px;height:38px;flex-shrink:0;border:0;border-radius:50%;background:var(--green);color:#fff;display:grid;place-items:center;cursor:pointer}
+#send svg{stroke-width:2.2}
+#srch{display:none;gap:8px;align-items:center;padding:8px 12px;background:var(--bar);border-bottom:1px solid var(--line)}
+#sq{flex:1;border:0;border-radius:20px;padding:9px 14px;background:var(--wall);color:var(--text);font:inherit;outline:0}
+#cnt{font-size:12px;color:var(--sub);white-space:nowrap}mark{background:#ffd54a;color:#111;border-radius:3px}
+#more{position:fixed;display:none;top:calc(52px + env(safe-area-inset-top,0px));right:10px;background:var(--sheet);color:var(--text);border-radius:10px;box-shadow:0 4px 18px rgba(0,0,0,.3);min-width:200px;overflow:hidden;z-index:8}
+#more div{padding:14px 18px;cursor:pointer}#more div:active{background:var(--wall)}
+#scrim{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:flex-end;justify-content:center;z-index:9}
+#sheet{width:100%;max-width:500px;padding:0 10px calc(10px + env(safe-area-inset-bottom,0px))}
+#sheet div{background:var(--sheet);text-align:center;padding:16px;font-size:17px;cursor:pointer;border-top:1px solid var(--line);color:#0a84ff}
+#sheet div:first-child{border-radius:14px 14px 0 0;border-top:0}#sheet div:nth-last-child(2){border-radius:0 0 14px 14px}
+#sheet .x{border-radius:14px;margin-top:8px;font-weight:600;border:0}#sheet .dl{color:#ff453a}
+#panel{position:fixed;inset:0;margin:0 auto;max-width:800px;background:var(--bg);display:none;flex-direction:column;z-index:7}
+#pbody{flex:1;overflow-y:auto}
+.row{display:flex;align-items:center;gap:14px;padding:15px 18px;border-bottom:1px solid var(--line);cursor:pointer}
+.row:active{background:var(--wall)}.row small{display:block;color:var(--sub);font-size:13px}.row.danger{color:#ff453a}
+.row input{width:22px;height:22px;accent-color:var(--green);pointer-events:none;flex-shrink:0}
+.ri{width:28px;height:28px;color:var(--text);display:grid;place-items:center;flex-shrink:0}.ri svg{width:24px;height:24px;stroke-width:1.8}
+#subs{display:flex;gap:8px;overflow-x:auto;padding:8px 12px;background:var(--bar);border-bottom:1px solid var(--line)}
+#subs button,.chips button,.st,.lk{border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:16px;padding:6px 12px;font:inherit;font-size:13px;cursor:pointer;white-space:nowrap}
+#subs .on,.lk.on,.act .on,#mic.on{background:var(--green);color:#fff;border-color:var(--green)}#mic.on{border-radius:50%}
+.b.ai{max-width:100%}.md h3{font-size:1.1em;margin:2px 0 4px}.md h4{margin:8px 0 2px;color:var(--green)}.md p{margin:3px 0}.md ul,.md ol{margin:3px 0 3px 20px}
+.md table{border-collapse:collapse;margin:6px 0;width:100%}.md td{border:1px solid var(--line);padding:4px 8px;font-size:.9em}.md tr:first-child td{font-weight:600}.md code{background:var(--wall);padding:1px 5px;border-radius:4px}
+.act,.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.act button{border:0;background:none;color:var(--sub);font:inherit;font-size:12px;cursor:pointer;padding:3px 8px;border-radius:10px}.act{clear:both}.act button{padding:14px 14px 8px;display:grid;place-items:center}.act button svg{width:23px;height:23px}.act.out{align-self:flex-start;margin:-6px 0 8px 0;gap:4px}.act .on{background:none;border:0;color:var(--green)}.act .on svg{fill:currentColor}.act button:active{background:var(--wall)}
+.opt{display:block;width:100%;text-align:left;margin-top:6px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit;cursor:pointer}.opt.ok{border-color:#2f9e44;background:#2f9e4430}.opt.bad{border-color:#ff453a;background:#ff453a30}
+.err{border:1px solid #ff453a}.note{text-align:center;font-size:12px;color:var(--sub);padding:3px 10px 6px;background:var(--bar)}.note a{color:var(--green);font-weight:600;text-decoration:none;white-space:nowrap}
+.fld{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit}
+.b img{display:block;max-width:100%;border-radius:8px;margin-bottom:4px}.st{display:block;margin:8px auto;white-space:normal}.lk.dg{color:#ff453a}
+:root[data-hc]{--sub:var(--text);--line:var(--text)}
+#hl .row{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.lvl{margin:0 14px;border-bottom:1px solid var(--line)}
+.lvh{width:100%;display:flex;justify-content:space-between;align-items:center;background:none;border:0;padding:12px 4px;color:var(--text);cursor:pointer}
+.lvh svg{width:20px;height:20px;transition:transform .2s}.lvh.open svg{transform:rotate(180deg)}
+.lvt{color:var(--text);font-size:1.2em;font-weight:700;font-family:inherit}
+.lvc{display:flex;flex-wrap:wrap;gap:6px;padding:0 4px 12px}
+.lvc button{border:1px solid var(--text);background:none;color:var(--text);border-radius:8px;padding:6px 10px;font:inherit;font-size:.85em;cursor:pointer}
+.lvc .on{background:var(--text);color:var(--bg)}
+.empty{padding:50px 20px;text-align:center;color:var(--sub)}
+#clrsel{position:sticky;bottom:0;display:block;width:calc(100% - 28px);margin:14px;padding:14px;border:0;border-radius:12px;background:#ff453a;color:#fff;font:600 16px inherit;cursor:pointer}
+#clrsel:disabled{opacity:.4;cursor:default}
+.sws{display:flex;gap:16px;flex-wrap:wrap;padding:20px 18px}
+.sw{width:46px;height:46px;border-radius:50%;border:3px solid transparent;box-shadow:inset 0 0 0 3px var(--bg);cursor:pointer}.sw.on{border-color:var(--text)}
+.sec{padding:16px 18px 0;color:var(--sub);font-size:13px;text-transform:uppercase;letter-spacing:.5px}
+#bdg{position:absolute;top:-2px;right:-2px;width:12px;height:12px;border-radius:50%;background:#ff453a;border:2px solid var(--bar);box-sizing:border-box;display:none}
+#ann{display:none;align-items:center;gap:10px;padding:10px 12px 10px 14px;background:var(--sheet,#fff);color:var(--text);border-bottom:1px solid var(--line);border-left:4px solid var(--green)}
+#ann b{display:block;font-size:14px}#annb{font-size:13px;color:var(--sub);margin-top:2px;white-space:pre-wrap;word-wrap:break-word}
+#annx{border:0;background:none;color:var(--green);font:600 14px inherit;padding:8px 6px;cursor:pointer}
+#jump{position:fixed;right:14px;bottom:calc(84px + env(safe-area-inset-bottom,0px));width:42px;height:42px;border-radius:50%;border:0;background:var(--sheet,#fff);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.3);display:none;place-items:center;z-index:5;cursor:pointer}
+</style></head><body>
+<div id="app">
+<header><div id="hd" style="display:flex;align-items:center;gap:10px;flex:1"><div id="avw" role="button" aria-label="What's new" style="position:relative;cursor:pointer"><div class="av" id="av">A</div><span id="bdg"></span></div><div><div id="nm">Alex</div><div class="t" id="stat">online</div></div></div><button class="ic" id="dots" aria-label="Menu"><svg viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button></header>
+<div id="ann"><div style="flex:1;min-width:0"><b id="annt"></b><div id="annb"></div></div><button id="annx">Hide</button></div>
+<div id="srch"><input id="sq" placeholder="Search chat history" autocomplete="off"><span id="cnt"></span><button class="ic" id="sx" aria-label="Close search"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+<div id="subs"></div>
+<div id="msgs"></div>
+<button id="jump" aria-label="Scroll to latest"><svg viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></svg></button>
+<div id="editing">Editing message. Tap here to cancel.</div>
+<div id="cmp"><input id="file" type="file" accept="image/*" hidden><button class="ic" id="ph" aria-label="Photo question"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="15" rx="3"/><circle cx="12" cy="12.5" r="3.5"/></svg></button><button class="ic" id="mic" aria-label="Voice question"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg></button><input id="inp" placeholder="Ask a question" autocomplete="off"><button id="send" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg></button></div>
+<div class="note">Ask Tr. David anything about your studies. Call on <a href="tel:+256788737517">+256 788 737517</a></div>
+</div>
+<div id="dlgx" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);place-items:center;z-index:120;padding:20px"><div style="background:var(--sheet,#fff);color:var(--text,#111);border-radius:14px;padding:20px;width:100%;max-width:320px;box-shadow:0 4px 18px rgba(0,0,0,.3)"><div id="dlgm" style="font-size:16px;line-height:1.4;margin-bottom:14px;white-space:pre-wrap"></div><input id="dlgi" autocomplete="off" style="display:none;width:100%;box-sizing:border-box;margin-bottom:14px;padding:10px;font-size:16px;border:1px solid var(--line,#ccc);border-radius:8px;background:var(--wall,#fff);color:inherit"><div style="display:flex;justify-content:flex-end;gap:8px"><button id="dlgc" style="background:none;border:0;padding:8px 14px;font-size:15px;color:inherit;cursor:pointer">Cancel</button><button id="dlgo" style="background:var(--green,#00a884);color:#fff;border:0;border-radius:8px;padding:8px 18px;font-size:15px;cursor:pointer">OK</button></div></div></div>
+<div id="more"><div data-a="n">New chat</div><div data-a="h">Chat history</div><div data-a="b">Saved answers</div><div data-a="s">Search chat</div><div data-a="cc" style="color:#e03131">Clear chat</div><div data-a="g">Settings</div></div>
+<div id="panel"></div>
+<div id="scrim"><div id="sheet"></div></div>
+<script>
+const AVATAR="data:image/jpeg;base64,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";
+const $=id=>document.getElementById(id);let ei=null,q="";const sel=new Set();
+const BOT=["haha nice","what, really?","let’s do it","send pics","on my way","Okay","Tell me more","Sounds good"];
+const K1='<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const K2='<svg viewBox="0 0 24 24"><path d="M1.5 12.5L6 17l9-10M10 15.5l1.5 1.5L21 7"/></svg>';
+const AI={
+share:'<svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.5l6.8-4M8.6 13.5l6.8 4"/></svg>',
+copy:'<svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 012-2h9"/></svg>',
+bm:'<svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></svg>',
+up:'<svg viewBox="0 0 24 24"><path d="M7 11v9H3v-9zM7 11l4-8a2 2 0 012 2v4h6a2 2 0 012 2.3l-1.3 6.5A2 2 0 0117.7 20H7"/></svg>',
+dn:'<svg viewBox="0 0 24 24"><g transform="rotate(180 12 12)"><path d="M7 11v9H3v-9zM7 11l4-8a2 2 0 012 2v4h6a2 2 0 012 2.3l-1.3 6.5A2 2 0 0117.7 20H7"/></g></svg>',
+regen:'<svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 11-2.5-5.8M20 4v5h-5"/></svg>'};
+const IC={
+doc:'<svg viewBox="0 0 24 24"><path d="M7 3h8l4 4v14H7zM15 3v4h4M10 12h6M10 16h6"/></svg>',
+star:'<svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/></svg>',
+bell:'<svg viewBox="0 0 24 24"><path d="M6 9a6 6 0 1112 0c0 6 2 7 2 7H4s2-1 2-7M10 20a2 2 0 004 0"/></svg>',
+dl:'<svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>',
+sun:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+moon:'<svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>',
+pal:'<svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 100 18c1.1 0 1.6-.8 1.6-1.6 0-.9-.6-1.2-.6-2 0-.8.6-1.4 1.5-1.4H17a4 4 0 004-4c0-4.4-4-9-9-9z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7" r="1"/></svg>',
+clr:'<svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><path d="M9.5 8.5l5 5M14.5 8.5l-5 5"/></svg>',
+user:'<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg>',eye:'<svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',bin:'<svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v5M14 11v5"/></svg>'};
+const CH='<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>';
+let D={name:"Alex",msgs:[],trash:[],acc:"#00a884"};
+try{const x=JSON.parse(localStorage.getItem("chat_single2"));if(x&&x.msgs)D=x}catch(e){}
+D.trash=D.trash||[];if(!D.annSeen)D.annSeen={};if(!D.notes)D.notes=[{t:"Welcome",b:"Answers that arrive while you are away will show up here.",ts:Date.now(),r:0}];D.acc=D.acc||"#00a884";
+const save=()=>{try{localStorage.setItem("chat_single2",JSON.stringify(D,function(k,v){return(this===D&&k=="msgs")||k=="img"?undefined:v}))}catch(e){}};
+const hm=t=>new Date(t).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
+const dl=t=>{const d=new Date(t);return d.toDateString()==new Date().toDateString()?"Today":d.toLocaleDateString()};
+const esc=s=>s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const isDark=()=>D.theme?D.theme=="dark":matchMedia("(prefers-color-scheme:dark)").matches;
+function applyTheme(){const r=document.documentElement;if(D.theme)r.dataset.theme=D.theme;else delete r.dataset.theme;r.style.setProperty("--green",D.acc);r.style.fontSize=(D.fs||16)+"px";if(D.hc)r.dataset.hc=1;else delete r.dataset.hc}
+function hl(t){t=esc(t);if(!q)return t;const e=esc(q).replace(/[.*+?^${}()|[\]\\]/g,"\\$&");return t.replace(new RegExp(e,"gi"),x=>"<mark>"+x+"</mark>")}
+function render(){
+ $("nm").textContent=D.name;if(!$("av").firstElementChild)$("av").innerHTML='<img src="'+AVATAR+'" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block">';let h="",last="",n=0;const lb=D.msgs.map(x=>x.s).lastIndexOf("i");
+ D.msgs.forEach((m,i)=>{if(q&&!m.t.toLowerCase().includes(q))return;n++;const d=dl(m.ts);if(d!=last){h+=`<div class="day">${d}</div>`;last=d}
+ if(m.s=="i"){h+=bub(m,i,i==lb);return}
+ h+=`<div class="b ${m.s}" data-i="${i}">${m.img?'<img src="'+m.img+'">':""}${hl(m.t)}<small>${m.ed?"edited ":""}${hm(m.ts)}${m.s=="o"?`<span class="${m.st==2?"rd":""}" style="display:inline-flex">${m.st?K2:K1}</span>`:""}</small></div>`});
+ if(!D.msgs.length&&!q)h=empty();$("cnt").textContent=q?n+" found":"";if(q&&!n)h='<div class="day">No messages found</div>';
+ $("msgs").innerHTML=h;$("msgs").scrollTop=1e9;subs()}
+function stopEdit(){ei=null;$("inp").value="";$("editing").style.display="none"}
+function send(){
+ const v=$("inp").value.trim();if(!v||stream!=null)return;
+ if(ei!=null){const m=D.msgs[ei];if(m){m.t=v;m.ed=1}stopEdit();save();render();return}
+ if(D.sub=="General"){const t=detectSub(v);if(t)setSub(t)}
+ const m={s:"o",t:v,ts:Date.now(),st:0};D.msgs.push(m);$("inp").value="";save();render();
+ m.st=2;ask(v)}
+function toTrash(arr){D.trash.push(...arr.map(m=>({...m,dt:Date.now()})))}
+function sheet(i){
+ const m=D.msgs[i],s=$("sheet");
+ s.innerHTML=(m.s=="o"?'<div data-a="e">Edit</div>':'')+'<div class="dl" data-a="d">Delete</div><div class="x" data-a="x">Cancel</div>';
+ $("scrim").style.display="flex";
+ s.onclick=e=>{const a=e.target.dataset.a;if(!a)return;$("scrim").style.display="none";
+  if(a=="d"){toTrash(D.msgs.splice(i,1));save();render()}
+  if(a=="e"){ei=i;$("inp").value=m.t;$("editing").style.display="block";$("inp").focus()}}}
+$("scrim").onclick=e=>{if(e.target.id=="scrim")$("scrim").style.display="none"};
+/* panels */
+/* custom dialogs (replace alert / confirm / prompt) */
+let dlgCancel=null;
+function uiDlg(o){
+ const d=$("dlgx"),inp=$("dlgi");
+ $("dlgm").textContent=o.msg;
+ inp.style.display=o.input?"block":"none";if(o.input)inp.value=o.def||"";
+ $("dlgc").style.display=o.alertOnly?"none":"inline-block";
+ $("dlgo").textContent=o.ok||"OK";
+ $("dlgo").style.background=o.danger?"#e03131":"var(--green,#00a884)";
+ const done=ok=>{d.style.display="none";dlgCancel=null;if(ok&&o.onOk)o.onOk(o.input?inp.value:undefined)};
+ dlgCancel=()=>done(false);
+ $("dlgo").onclick=()=>done(true);$("dlgc").onclick=()=>done(false);
+ d.onclick=e=>{if(e.target===d)done(false)};
+ inp.onkeydown=e=>{if(e.key=="Enter")done(true)};
+ d.style.display="grid";if(o.input){inp.focus();inp.select()}else $("dlgo").focus()}
+function uiAlert(msg){uiDlg({msg,alertOnly:1})}
+function uiConfirm(msg,onOk,ok){uiDlg({msg,onOk,ok:ok||"OK",danger:/delete|clear|permanently/i.test(msg)})}
+function uiPrompt(msg,def,onOk){uiDlg({msg,def,input:1,onOk,ok:"Save"})}
+function showP(title,body,back,onclick){
+ $("panel").innerHTML=`<header><button class="ic" id="pb" aria-label="Back">${CH}</button><div style="font-weight:600;font-size:18px">${title}</div></header><div id="pbody">${body}</div>`;
+ $("panel").style.display="flex";$("pb").onclick=back;$("pbody").onclick=onclick||null}
+function closeP(){$("panel").style.display="none"}
+function settings(){
+ showP("Settings",`<div class="row" data-a="pf"><span class="ri">${IC.user}</span><div>Learner profile<small>Name, class, language</small></div></div>
+ <div class="row" data-a="ac"><span class="ri">${IC.eye}</span><div>Accessibility<small>Text size, contrast</small></div></div>
+ <div class="row" data-a="th"><span class="ri">${isDark()?IC.sun:IC.moon}</span><div>Switch theme<small>${isDark()?"Dark":"Light"} mode</small></div></div>
+ <div class="row" data-a="ct"><span class="ri">${IC.pal}</span><div>Chat theme<small>Choose a color</small></div></div>
+ <div class="row" data-a="wn"><span class="ri">${IC.star}</span><div>What's new<small>${D.notes.filter(x=>!x.r).length?D.notes.filter(x=>!x.r).length+" new":"Announcements and updates"}</small></div></div>
+ <div class="row" data-a="nt"><span class="ri">${IC.bell}</span><div>Away alerts<small>${D.notif?"On":"Off"}: phone alert when an answer is ready</small></div></div>
+ <div class="row" data-a="ex"><span class="ri">${IC.dl}</span><div>Export chat<small>Download as a text file</small></div></div>
+ <div class="row" data-a="tr"><span class="ri">${IC.bin}</span><div>Trash<small>${D.trash.length} message${D.trash.length==1?"":"s"}</small></div></div>
+ <div class="row" data-a="ho"><span class="ri">${IC.doc}</span><div>Project handoff<small>${hoCount()[0]} done, ${hoCount()[1]-hoCount()[0]} remaining</small></div></div>`,closeP,e=>{
+  const a=e.target.closest(".row")?.dataset.a;
+  if(a=="th"){D.theme=isDark()?"light":"dark";applyTheme();save();settings()}
+  if(a=="ct")chatTheme();if(a=="nt")toggleNotif();if(a=="wn")notifs();if(a=="ho")handoff();if(a=="pf")profile();if(a=="ac")access();
+  if(a=="ex"){const t=D.msgs.map(m=>"["+new Date(m.ts).toLocaleString()+"] "+(m.s=="o"?"You":D.name)+": "+m.t).join("\n");const u=URL.createObjectURL(new Blob([t||"No messages"],{type:"text/plain"}));const l=document.createElement("a");l.href=u;l.download="chat-history.txt";l.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
+  if(a=="tr"){sel.clear();trash()}})}
+function updateBadge(){$("bdg").style.display=D.notes.some(x=>!x.r)?"block":"none"}
+function notify(t,b){
+ if(!document.hidden)return;
+ D.notes.unshift({t,b,ts:Date.now(),r:0});D.notes=D.notes.slice(0,50);save();updateBadge();
+ if(D.notif&&"Notification"in window&&Notification.permission=="granted"){try{const n=new Notification(t,{body:b});n.onclick=()=>{window.focus();n.close()}}catch(e){}}}
+let annT=0;
+function hideAnn(){clearTimeout(annT);$("ann").style.display="none"}
+/* called when the admin panel sends an announcement: {id,title,body,duration (seconds, 0 = until hidden)} */
+function showAnn(a){
+ if(!a||!a.title)return;if(a.id!=null){if(D.annSeen[a.id])return;D.annSeen[a.id]=1}
+ D.notes.unshift({t:a.title,b:a.body||"",ts:Date.now(),r:0});D.notes=D.notes.slice(0,50);save();updateBadge();
+ $("annt").textContent=a.title;$("annb").textContent=a.body||"";$("ann").style.display="flex";
+ clearTimeout(annT);if(+a.duration>0)annT=setTimeout(hideAnn,a.duration*1000)}
+window.receiveAnnouncement=showAnn;
+$("annx").onclick=hideAnn;
+$("avw").onclick=()=>{$("more").style.display="none";notifs(true)};
+function toggleNotif(){
+ if(D.notif){D.notif=false;save();settings();return}
+ if(!("Notification"in window)){uiAlert("This browser does not support notifications.");return}
+ const fin=p=>{if(p=="granted"){D.notif=true;save();settings()}else uiAlert("Notifications are blocked. Turn them on in your browser settings.")};
+ if(Notification.permission=="granted")fin("granted");else if(Notification.permission=="denied")fin("denied");else Notification.requestPermission().then(fin)}
+function notifs(direct){
+ const L=D.notes,body=L.length?'<div class="row danger" data-a="nclr"><div>Clear all</div></div>'+L.map(n=>`<div class="row" style="display:block"><b>${n.r?"":'<span style="color:#ff453a">&#9679; </span>'}${esc(n.t)}</b><div style="margin-top:2px">${esc(n.b||"")}</div><small>${dl(n.ts)}, ${hm(n.ts)}</small></div>`).join(""):'<div class="empty">Nothing new</div>';
+ L.forEach(n=>n.r=1);save();updateBadge();
+ showP("What's new",body,direct?closeP:settings,e=>{if(e.target.closest("[data-a=nclr]")){D.notes=[];save();updateBadge();notifs(direct)}})}
+function chatTheme(){
+ const C=["#00a884","#1c7ed6","#7048e8","#d6336c","#e8590c","#2f9e44"];
+ showP("Chat theme",`<div class="sec">Color</div><div class="sws">${C.map(c=>`<div class="sw ${c==D.acc?"on":""}" data-c="${c}" style="background:${c}"></div>`).join("")}</div>`,settings,e=>{
+  const c=e.target.dataset.c;if(c){D.acc=c;applyTheme();save();chatTheme()}})}
+function trash(){
+ const T=D.trash;
+ if(!T.length){showP("Trash",'<div class="empty">Trash is empty</div>',settings);return}
+ const all=sel.size==T.length;
+ showP("Trash",`<div class="row" data-a="all"><input type="checkbox" ${all?"checked":""}><div>Select all</div></div>`+
+ T.map((m,i)=>`<div class="row" data-i="${i}"><input type="checkbox" ${sel.has(i)?"checked":""}><div>${esc(m.t)}<small>${m.s=="o"?"You":esc(D.name)}, ${new Date(m.dt||m.ts).toLocaleString([],{dateStyle:"short",timeStyle:"short"})}</small></div></div>`).join("")+
+ `<button id="clrsel" ${sel.size?"":"disabled"}>${all?"Clear all":sel.size?"Clear selected ("+sel.size+")":"Clear selected"}</button>`,
+ ()=>{sel.clear();settings()},e=>{
+  if(e.target.id=="clrsel"){if(!sel.size)return;
+   uiConfirm("Permanently clear "+sel.size+" message"+(sel.size==1?"":"s")+" from trash?",()=>{D.trash=D.trash.filter((_,i)=>!sel.has(i));sel.clear();save();trash()},"Clear");return}
+  const r=e.target.closest(".row");if(!r)return;
+  if(r.dataset.a=="all"){if(all)sel.clear();else T.forEach((_,i)=>sel.add(i))}
+  else{const i=+r.dataset.i;sel.has(i)?sel.delete(i):sel.add(i)}
+  const y=$("pbody").scrollTop;trash();$("pbody").scrollTop=y})}
+/* menu + search */
+$("dots").onclick=e=>{e.stopPropagation();const m=$("more");m.style.display=m.style.display=="block"?"none":"block"};
+document.addEventListener("pointerdown",e=>{if(!e.target.closest("#more")&&!e.target.closest("#dots"))$("more").style.display="none"});
+function closeSearch(){q="";$("sq").value="";$("srch").style.display="none";render()}
+$("sx").onclick=closeSearch;$("sq").oninput=()=>{q=$("sq").value.trim().toLowerCase();render()};
+$("more").onclick=e=>{const a=e.target.dataset.a;if(!a)return;$("more").style.display="none";
+ if(a=="s"){$("srch").style.display="flex";$("sq").focus()}
+ if(a=="cc"){if(D.msgs.length){toTrash(D.msgs.slice());D.msgs.length=0;stopEdit();save();render()}}
+ if(a=="g")settings();if(a=="n")newChat();if(a=="h")history();if(a=="b")saved()};
+$("editing").onclick=stopEdit;$("send").onclick=()=>stream!=null?stopS():send();$("inp").onkeydown=e=>{if(e.key=="Enter")send()};
+let tm,sx,sy;
+$("msgs").addEventListener("pointerdown",e=>{const b=e.target.closest(".b.o");if(!b)return;sx=e.clientX;sy=e.clientY;tm=setTimeout(()=>sheet(+b.dataset.i),500)});
+["pointerup","pointercancel","pointerleave"].forEach(n=>$("msgs").addEventListener(n,()=>clearTimeout(tm)));
+$("msgs").addEventListener("pointermove",e=>{if(Math.abs(e.clientX-sx)>8||Math.abs(e.clientY-sy)>8)clearTimeout(tm)});
+$("msgs").addEventListener("contextmenu",e=>e.preventDefault());
+
+D.name="Ask Tr. David";D.sub=D.sub||"General";D.lvl=["PLE","UCE","UACE"].includes(D.lvl)?D.lvl:(/^Primary/.test(D.grade||"")?"PLE":/^Senior [56]$/.test(D.grade||"")?"UACE":"UCE");delete D.grade;D.lang=D.lang||"English";D.pname=D.pname||"";D.fs=D.fs||16;
+if(!D.chats){D.chats=[{id:1,title:"Chat",msgs:D.msgs||[]}];D.cur=1}
+D.msgs=(D.chats.find(c=>c.id==D.cur)||D.chats[0]).msgs;
+if(D.sub=="Math")D.sub="Mathematics";if(D.sub=="Computer Studies")D.sub="ICT";D.chats.forEach(c=>{if(c.sub=="Computer Studies")c.sub="ICT"});
+const GR=[["PLE: Primary (P1 to P7)",["English","Mathematics","Science","Social Studies","Religious Education"]],
+["UCE: O-Level (S1 to S4)",["English","Mathematics","Biology","Chemistry","Physics","History","Geography","Christian Religious Education","Islamic Religious Education","Kiswahili","Entrepreneurship","Agriculture","ICT","Physical Education","Art and Design","Performing Arts"]],
+["UACE: A-Level (S5 to S6)",["General Paper","Subsidiary ICT","Subsidiary Mathematics","Mathematics","Physics","Chemistry","Biology","Economics","Geography","History","Literature in English","Divinity","Islamic Studies","Entrepreneurship","Agriculture","Fine Art","Kiswahili","Technical Drawing","Food and Nutrition"]]];
+const lvKey=()=>D.lvl;
+const lvIdx=()=>({PLE:0,UCE:1,UACE:2})[lvKey()];
+const subsList=()=>["General",...GR[lvIdx()][1]];
+function fixSub(){if(!subsList().includes(D.sub))D.sub="General"}
+fixSub();
+D.chats.forEach(c=>{if(!c.sub)c.sub=c.id==D.cur?D.sub:"General";if(!c.lv)c.lv=lvKey()});
+const SUBRULES=[
+[/\b(noun|verb|adjective|adverb|pronoun|preposition|grammar|tense|sentence|punctuation|synonym|antonym|vocabulary|comprehension|essay|paragraph)s?\b/i,["English","Literacy","General Paper"]],
+[/\b(fractions?|percent(age)?s?|equations?|algebra|pythagoras|triangles?|geometry|angles?|perimeter|area of|decimals?|ratios?|multipl\w*|divid\w*|calculate|solve|simplify|factori[sz]e|simultaneous|quadratic|probability|statistics|mean|median)\b|\d\s*[+\-×x*\/÷=]\s*\d/i,["Mathematics","Subsidiary Mathematics"]],
+[/\b(photosynthesis|cells?|organisms?|respiration|digestion|digestive|blood|ecosystem|reproduction|enzymes?|bacteria|genes?|heredity|plants?|animals?)\b/i,["Biology","Science"]],
+[/\b(atoms?|elements?|acids?|bases?|alkali|reactions?|molecules?|periodic table|compounds?|electrolysis|oxidation|chemical)\b/i,["Chemistry","Science"]],
+[/\b(forces?|energy|motion|electricity|current|voltage|circuits?|light|sound|magnets?|magnetism|pressure|velocity|acceleration|states of matter|heat)\b/i,["Physics","Science"]],
+[/\b(crops?|livestock|farming|fertili[sz]ers?|poultry|irrigation)\b/i,["Agriculture"]],
+[/\b(computers?|internet|software|hardware|spreadsheet|database|programming)\b/i,["ICT","Subsidiary ICT"]],
+[/\b(demand|supply|inflation|gdp|trade|money|market)\b/i,["Economics"]],
+[/\b(quran|islam|muslim|prophet muhammad|hadith)\b/i,["Islamic Religious Education","Islamic Studies","Religious Education"]],
+[/\b(bible|jesus|church|christian|prophets?|apostles?)\b/i,["Christian Religious Education","Divinity","Religious Education"]],
+[/\b(history|kingdoms?|colonial|colonialism|independence|empire|kabaka|world war|slave trade|ancient)\b/i,["History","Social Studies"]],
+[/\b(maps?|climate|rainfall|rivers?|mountains?|soils?|erosion|population|weather|vegetation|latitude)\b/i,["Geography","Social Studies"]],
+[/\b(business|profit|entrepreneurs?|entrepreneurship|savings?)\b/i,["Entrepreneurship"]]];
+function detectSub(v){const L=subsList();for(const[r,c]of SUBRULES){if(r.test(v)){const f=c.find(x=>L.includes(x));if(f)return f==="Social Studies"&&L.includes("Science")&&SCIRE.test(v)?"Science":f}}if(L.includes("Science")&&SCIRE.test(v))return"Science";return null}
+function setSub(sb){if(sb==D.sub&&D.chats.some(c=>c.id==D.cur&&c.sub==sb&&(c.lv||lvKey())==lvKey()))return;stopS();stopEdit();
+ const cur=D.chats.find(c=>c.id==D.cur);if(cur&&!cur.msgs.length&&D.chats.length>1)D.chats=D.chats.filter(c=>c!==cur);
+ D.sub=sb;let c=D.chats.find(x=>x.sub==sb&&(x.lv||lvKey())==lvKey());
+ if(!c){c={id:Date.now(),title:"New chat",sub:sb,lv:lvKey(),msgs:[]};D.chats.unshift(c)}
+ sw(c.id)}
+const gen=x=>["Explain the main ideas of "+x,"Give me a revision summary for "+x,"What are common exam questions in "+x+"?"];
+const STARTS={General:["How do I study better for exams?","What is photosynthesis?","Explain fractions simply"],Mathematics:["How do I solve 2x + 5 = 11?","What is the Pythagoras theorem?","Explain percentages"],Science:["How do plants make food?","What are the states of matter?","How is rain formed?"],English:["What is a noun?","How do I write a good essay?","Explain the past tense"],History:["What caused World War 1?","Who built the pyramids?","What was the Industrial Revolution?"]};
+const SEND=$("send").innerHTML,STOP='<svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" style="fill:currentColor"/></svg>';
+let stream=null,sm=null,stamps=[];
+function md(t){t=esc(t);let o="",m=null;const cl=()=>{if(m){o+="</"+m+">";m=null}},il=x=>x.replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/`(.+?)`/g,"<code>$1</code>");
+ for(const l of t.split("\n")){
+  if(/^\|/.test(l)){if(/^\|[-| :]+\|?$/.test(l))continue;if(m!="table"){cl();o+="<table>";m="table"}o+="<tr>"+l.split("|").slice(1,-1).map(c=>"<td>"+il(c.trim())+"</td>").join("")+"</tr>";continue}
+  const b=l.match(/^(\d+)\. (.*)/),u=l.match(/^- (.*)/);
+  if(b){if(m!="ol"){cl();o+="<ol>";m="ol"}o+="<li>"+il(b[2])+"</li>"}
+  else if(u){if(m!="ul"){cl();o+="<ul>";m="ul"}o+="<li>"+il(u[1])+"</li>"}
+  else{cl();if(/^## /.test(l))o+="<h4>"+il(l.slice(3))+"</h4>";else if(/^# /.test(l))o+="<h3>"+il(l.slice(2))+"</h3>";else if(l.trim())o+="<p>"+il(l)+"</p>"}}
+ cl();return o}
+/* ===== WORKED SOLUTIONS: real step-by-step working, shown a little at a time ===== */
+const gcd=(a,b)=>{a=Math.abs(a);b=Math.abs(b);while(b){const t=a%b;a=b;b=t}return a};
+const FR=(n,d=1)=>{if(d<0){n=-n;d=-d}const g=gcd(n,d)||1;return{n:n/g,d:d/g}};
+const fa=(x,y)=>FR(x.n*y.d+y.n*x.d,x.d*y.d),fng=x=>FR(-x.n,x.d),fs=(x,y)=>fa(x,fng(y)),fm=(x,y)=>FR(x.n*y.n,x.d*y.d),fd=(x,y)=>FR(x.n*y.d,x.d*y.n),fz=x=>x.n===0,fab=x=>FR(Math.abs(x.n),x.d),fe=(x,y)=>x.n===y.n&&x.d===y.d;
+const fstr=x=>x.d===1?String(x.n):x.n+"/"+x.d;
+const fdec=x=>{let d=x.d;while(d%2===0)d/=2;while(d%5===0)d/=5;return(d===1?"= ":"\u2248 ")+String(+(x.n/x.d).toFixed(4))};
+const cs=(a,v)=>{const s=a.n<0?"-":"",n=Math.abs(a.n);return s+(n===1?"":String(n))+v+(a.d===1?"":"/"+a.d)};
+const rl=(a,b,v)=>{let o=fz(a)?"":cs(a,v);if(!fz(b))o+=o?(b.n<0?" - ":" + ")+fstr(fab(b)):fstr(b);return o||"0"};
+const pretty=s=>s.replace(/\*/g," \u00d7 ").replace(/(?<=[0-9a-z)])\s*([+\-])\s*/g," $1 ").replace(/\s+/g," ").trim();
+function parseLin(src,v){
+ const T=src.match(/\d+\.?\d*|\.\d+|[a-z]|[+\-*\/()]/g)||[];
+ if(T.join("")!==src.replace(/\s/g,""))return null;
+ for(let k=0;k<T.length-1;k++)if(/^[\d.]/.test(T[k])&&/^[\d.]/.test(T[k+1]))return null;
+ let i=0,bad=false;const Z=()=>({a:FR(0),b:FR(0)});
+ const num=s=>{if(s.replace(".","").length>7){bad=true;return FR(0)}const p=s.split("."),f=p[1]||"";return FR(parseInt((p[0]||"0")+f,10),Math.pow(10,f.length))};
+ const isN=t=>t!==undefined&&/^[\d.]/.test(t);
+ function prim(){const t=T[i];if(t===undefined){bad=true;return Z()}
+  if(t==="("){i++;const r=expr();if(T[i]===")")i++;else bad=true;return r}
+  if(isN(t)){i++;return{a:FR(0),b:num(t)}}
+  if(t===v){i++;return{a:FR(1),b:FR(0)}}
+  bad=true;i++;return Z()}
+ function fac(){if(T[i]==="-"){i++;const r=fac();return{a:fng(r.a),b:fng(r.b)}}if(T[i]==="+"){i++;return fac()}return prim()}
+ function mul(x,y){if(fz(x.a))return{a:fm(y.a,x.b),b:fm(y.b,x.b)};if(fz(y.a))return{a:fm(x.a,y.b),b:fm(x.b,y.b)};bad=true;return x}
+ function term(){let r=fac();for(;;){const t=T[i];
+  if(t==="*"){i++;r=mul(r,fac())}
+  else if(t==="/"){i++;const d=fac();if(!fz(d.a)||fz(d.b)){bad=true;return r}r={a:fd(r.a,d.b),b:fd(r.b,d.b)}}
+  else if(t==="("||t===v||isN(t))r=mul(r,prim());
+  else break}return r}
+ function expr(){let r=term();while(T[i]==="+"||T[i]==="-"){const s=T[i++],y=term();r=s==="+"?{a:fa(r.a,y.a),b:fa(r.b,y.b)}:{a:fs(r.a,y.a),b:fs(r.b,y.b)}}return r}
+ const r=expr();if(i<T.length)bad=true;return bad?null:r}
+function eqOf(q){
+ const t=q.toLowerCase().replace(/[\u2212\u2013\u2014]/g,"-").replace(/[\u00d7\u00b7]/g,"*").replace(/\u00f7/g,"/")
+  .replace(/\b(?:is equal to|equal to|equals)\b/g," = ").replace(/\bplus\b/g," + ").replace(/\bminus\b/g," - ").replace(/\b(?:times|multiplied by)\b/g," * ").replace(/\bdivided by\b/g," / ");
+ const i=t.indexOf("=");if(i<0||t.indexOf("=",i+1)>=0)return null;
+ const ok=s=>/^[0-9a-z.+\-*\/()]+$/.test(s)&&!/[a-z]{2,}/.test(s);
+ const lt=t.slice(0,i).trim().split(/\s+/).filter(Boolean),rt=t.slice(i+1).trim().split(/\s+/).filter(Boolean),Lk=[],Rk=[];
+ for(let k=lt.length-1;k>=0&&ok(lt[k]);k--)Lk.unshift(lt[k]);
+ for(let k=0;k<rt.length;k++){const s=rt[k].replace(/[?!,;:]+$/,"").replace(/\.$/,"");if(!ok(s))break;Rk.push(s);if(s!==rt[k])break}
+ if(!Lk.length||!Rk.length)return null;
+ const L=Lk.join(" "),R=Rk.join(" "),vs=[...new Set((L+R).match(/[a-z]/g)||[])];
+ if(vs.length!==1)return null;const v=vs[0],l=parseLin(L,v),r=parseLin(R,v);
+ return l&&r?{L,R,v,l,r}:null}
+function solveLin(E){
+ const{L,R,v,l,r}=E,P=[],aL=l.a,bL=l.b,aR=r.a,bR=r.b,eq0=pretty(L)+" = "+pretty(R),norm=x=>x.replace(/[\s\u00d7*]/g,"");
+ let m1="An equation is like a balance scale: both sides must always stay equal. The letter "+v+" stands for the number we do not know, and our job is to get "+v+" alone on one side.";
+ if(fz(aR)&&!fz(aL))m1+=" Read it in words: "+(fe(aL,FR(1))?"the number "+v:fstr(aL)+" times "+v)+(fz(bL)?"":bL.n>0?", plus "+fstr(bL):", minus "+fstr(fab(bL)))+" gives "+fstr(bR)+".";
+ P.push({h:"Write down the equation",t:eq0,more:m1});
+ const s1=rl(aL,bL,v)+" = "+rl(aR,bR,v);
+ if(norm(s1)!==norm(eq0))P.push({h:"Tidy each side",t:s1,more:"Before solving, tidy each side. Multiply out any brackets (the number outside multiplies every term inside). Then add the "+v+" terms together and add the plain numbers together. We write the "+v+" term first."});
+ let A=aL;const B=bL,C=bR;
+ if(!fz(aR)){const op=aR.n>0?" - ":" + ",t=cs(fab(aR),v);A=fs(aL,aR);
+  P.push({h:"Collect the "+v+" terms on one side",t:rl(aL,bL,v)+op+t+" = "+rl(aR,bR,v)+op+t+"\n"+rl(A,B,v)+" = "+fstr(C),more:"The "+v+" terms are on both sides, so we move them to one side. We "+(aR.n>0?"subtract ":"add ")+t+" on both sides. This removes the "+v+" term from the right side. Always do the same thing to both sides so the equation stays balanced."})}
+ let X,end;
+ if(fz(A)){const same=fe(B,C);
+  P.push({h:"Look at what is left",t:fstr(B)+" = "+fstr(C),more:"The "+v+" terms cancelled out, so the result no longer depends on "+v+"."});
+  end=same?"**This is always true, so every value of "+v+" is a solution.**":"**This is never true, so there is no solution.**"}
+ else{
+  let D=C;
+  if(!fz(B)){const add=B.n<0,ab=fstr(fab(B)),op=add?" + ":" - ";D=fs(C,B);
+   P.push({h:"Get "+v+" on its own on the left",t:rl(A,B,v)+op+ab+" = "+fstr(C)+op+ab+"\n"+cs(A,v)+" = "+fstr(D),more:"Look at what is being done to "+v+". Here "+ab+" is being "+(add?"subtracted":"added")+". The opposite of "+(add?"subtracting":"adding")+" "+ab+" is "+(add?"adding":"subtracting")+" "+ab+", so we "+(add?"add":"subtract")+" "+ab+" on both sides. On the left: "+fstr(B)+(add?" + ":" - ")+ab+" = 0, so only the "+v+" term is left. On the right: "+fstr(C)+op+ab+" = "+fstr(D)+"."})}
+  X=fd(D,A);
+  if(!fe(A,FR(1))){
+   if(A.n===1)P.push({h:"Find "+v,t:cs(A,v)+" \u00d7 "+A.d+" = "+fstr(D)+" \u00d7 "+A.d+"\n"+v+" = "+fstr(X),more:cs(A,v)+" means "+v+" divided by "+A.d+". The opposite of dividing by "+A.d+" is multiplying by "+A.d+", so we multiply both sides by "+A.d+". On the left it gives "+v+". On the right: "+fstr(D)+" \u00d7 "+A.d+" = "+fstr(X)+"."});
+   else{const den=A.d===1&&A.n>0?fstr(A):"("+fstr(A)+")";
+    P.push({h:"Divide to find "+v,t:cs(A,v)+" \u00f7 "+den+" = "+fstr(D)+" \u00f7 "+den+"\n"+v+" = "+fstr(X)+(X.d===1?"":" ("+fdec(X)+")"),more:A.d===1?cs(A,v)+" means "+fstr(A)+" multiplied by "+v+". The opposite of multiplying by "+fstr(A)+" is dividing by "+fstr(A)+", so we divide both sides by "+fstr(A)+". On the left: "+cs(A,v)+" \u00f7 "+den+" = "+v+". On the right: "+fstr(D)+" \u00f7 "+den+" = "+fstr(X)+".":"Divide both sides by the number in front of "+v+" so that "+v+" is left on its own."})}}
+  const val=(a,b)=>fa(fm(a,X),b),lv=val(aL,bL),rv=val(aR,bR);
+  if(fe(lv,rv)){const sub=s=>pretty(s).replace(new RegExp(v,"g"),"("+fstr(X)+")");
+   P.push({h:"Check your answer",t:"Left side: "+sub(L)+" = "+fstr(lv)+"\nRight side: "+sub(R)+" = "+fstr(rv)+"\nBoth sides are equal, so "+v+" = "+fstr(X)+" is correct.",more:"To be sure, put your answer back into the original equation in place of "+v+". If both sides give the same number, the answer is correct. If they are different, go back and look for a mistake."})}
+  end="**Answer: "+v+" = "+fstr(X)+(X.d===1?"":" ("+fdec(X)+")")+"**"}
+ return{title:"Solving "+eq0,parts:P,end}}
+function wBuild(m){const w=m.w;let o="# "+w.title+"\n"+w.intro+"\n";for(let i=0;i<w.shown;i++){const p=w.parts[i];o+="## Step "+(i+1)+": "+p.h+"\n"+p.t+"\n";if(w.open[i])o+="**Why we do this:** "+p.more+"\n"}if(w.shown>=w.parts.length)o+=w.end;return o}
+function work(q){const E=eqOf(q);if(!E)return null;const S=solveLin(E);if(!S||!S.parts.length)return null;
+ const w={title:S.title,intro:(D.pname?"Hi "+D.pname+". ":"")+"Here is the full working, a little at a time. Tap **Next step** to continue, or **Break this step down** if a step is not clear.",parts:S.parts,end:S.end,shown:Math.min(2,S.parts.length),open:{}};
+ return{t:wBuild({w}),w}}
+function wBtns(m,i){const w=m.w,c=w.shown-1,p=w.parts[c];return'<div class="chips"><button data-act="next" data-i="'+i+'">Next step</button>'+(p&&p.more&&!w.open[c]?'<button data-act="brk" data-i="'+i+'">Break this step down</button>':"")+'<button data-act="all" data-i="'+i+'">Show all steps</button></div>'}
+const TOP0=[
+{re:/\bnouns?\b/,n:"Noun",a:"How to use it",b:"Where it is used",
+d:"A **noun** is a word that names a person, place, animal, thing or idea.",
+h:"- Use a noun as the **subject**: “The teacher is kind.”\n- Use it as the **object**: “I read a book.”\n- Put **a, an** or **the** before it: “a pen, the school”.\n- Add **s** for more than one: “book, books”.\n- Start names of people and places with a **capital letter**: “David, Kampala”.",
+w:"- In **every sentence**: nouns tell who or what the sentence is about.\n- In **speaking and writing**: stories, letters, essays, labels and news.\n- In **all subjects**: “river” in Geography, “cell” in Biology, “triangle” in Mathematics.",
+s:"A noun is a **naming word**.\nIf you can see it, touch it, or think about it, it is probably a noun.\nAsk yourself: “Is it a person, a place, an animal or a thing?” If yes, it is a noun.",
+e:"- **People:** teacher, mother, David\n- **Places:** school, Kampala, market\n- **Animals:** cow, goat, hen\n- **Things:** book, pen, table\n- **Ideas:** love, honesty, freedom",
+m:"## Types of nouns\n- **Common nouns** name general things: girl, city.\n- **Proper nouns** name special people or places and start with a capital letter: Amina, Uganda.\n- **Abstract nouns** name ideas or feelings: kindness, fear.\n- **Collective nouns** name a group: a team, a flock.\n## Number\n- Countable nouns have a plural: pen, pens.\n- Uncountable nouns have no plural: water, rice, advice.\n## Common mistakes\n- Forgetting the capital letter on proper nouns.\n- Using “a” with an uncountable noun: say “some water”, not “a water”.",
+q:[["Which word is a noun?",["quickly","teacher","run"],1],["Which one is a proper noun?",["city","Kampala","river"],1],["Which one is an abstract noun?",["honesty","table","goat"],0]]},
+{re:/\bverbs?\b/,n:"Verb",a:"How to use it",b:"Where it is used",
+d:"A **verb** is a word that shows an action, a state or something that happens.",
+h:"- Every sentence needs a verb: “She **sings**.”\n- Match the verb to the subject: “He **plays**, they **play**”.\n- Change the verb to show time: “walk, walked, will walk”.\n- Use helping verbs: “is, are, has, will” with the main verb.",
+w:"- In **every complete sentence**.\n- To tell **what people do**: run, write, cook.\n- To tell **what is or was**: is, was, seem.\n- In **instructions and stories**: “Mix the flour.” “The boy opened the door.”",
+s:"A verb is a **doing word**.\nIt tells what someone or something does: run, eat, sleep.\nSome verbs show being: is, am, are.",
+e:"- **Action:** run, jump, write, cook\n- **Being:** is, am, are, was\n- **Helping:** has, will, can, must\n- In a sentence: “The children **sing** and **dance**.”",
+m:"## Kinds of verbs\n- **Action verbs** show doing: kick, read.\n- **Linking verbs** join the subject to more information: is, seem, become.\n- **Helping verbs** go with a main verb: “She **has** finished.”\n## Tenses\n- Present: I walk. Past: I walked. Future: I will walk.\n## Common mistakes\n- Wrong agreement: say “She goes”, not “She go”.\n- Mixing tenses in one sentence.",
+q:[["Which word is a verb?",["table","dance","happy"],1],["Choose the correct sentence.",["She go to school.","She goes to school.","She going to school."],1],["Which is a helping verb?",["will","book","blue"],0]]},
+{re:/adjective/,n:"Adjective",a:"How to use it",b:"Where it is used",
+d:"An **adjective** is a word that describes a noun or pronoun.",
+h:"- Put it **before a noun**: “a **tall** boy”.\n- Or **after is, are, was**: “The boy is **tall**.”\n- Add **er / est** to compare: “tall, taller, tallest”.\n- Use **more / most** with long adjectives: “more beautiful”.",
+w:"- In **descriptions**: people, places, things, feelings.\n- In **stories and essays** to make writing clear and interesting.\n- In **advertising and reports**: “fresh milk”, “heavy rain”.",
+s:"An adjective is a **describing word**.\nIt tells us more about a noun: what kind, what colour, how many, how big.",
+e:"- **Kind:** kind, clever, brave\n- **Colour:** red, green, black\n- **Size:** big, small, tall\n- **Number:** three, many, few\n- In a sentence: “The **old** man carried a **heavy** bag.”",
+m:"## Degrees\n- Positive: fast. Comparative: faster. Superlative: fastest.\n## Order\n- Opinion, size, age, colour, then the noun: “a nice big old red car”.\n## Common mistakes\n- Using “more taller”: say “taller”.\n- Using an adjective instead of an adverb: “She sings **well**”, not “good”.",
+q:[["Which word is an adjective?",["beautiful","sing","Kampala"],0],["What is the comparative of “small”?",["smallest","smaller","more small"],1],["In “a red apple”, which word describes?",["apple","a","red"],2]]},
+{re:/past tense|past simple/,n:"Past tense",a:"How to use it",b:"Where it is used",
+d:"The **past tense** is the form of a verb that shows something happened before now.",
+h:"- Add **ed** to most verbs: “walk, walked”.\n- Some verbs change completely (irregular): “go, went”, “eat, ate”.\n- Use it with words like **yesterday, last week, ago**.\n- In questions and negatives use **did**: “Did you eat?” “I did not eat.”",
+w:"- When **telling stories** or what happened.\n- In **diaries, letters and news reports**.\n- In **history lessons**: “The kingdom grew.”",
+s:"Past tense means it **already happened**.\nToday I walk. Yesterday I **walked**.",
+e:"- walk, **walked**\n- play, **played**\n- go, **went**\n- see, **saw**\n- “Yesterday we **cooked** matooke.”",
+m:"## Regular and irregular\n- Regular verbs end in ed: jumped.\n- Irregular verbs change: buy, bought.\n## Spelling rules\n- Verbs ending in e add d: love, loved.\n- Consonant plus y becomes ied: cry, cried.\n## Common mistakes\n- “I goed”: say “I went”.\n- “Did you went?”: say “Did you go?”",
+q:[["What is the past tense of “go”?",["goed","went","gone"],1],["Which sentence is in the past tense?",["I eat rice.","I ate rice.","I will eat rice."],1],["Past tense of “play”?",["played","plaied","plays"],0]]},
+{re:/fraction/,n:"Fraction",a:"How to work with it",b:"Where it is used",
+d:"A **fraction** is a part of a whole, written as one number over another, like 3/4.",
+h:"- The **bottom number** (denominator) tells how many equal parts the whole has.\n- The **top number** (numerator) tells how many parts you take.\n- To **add** fractions with the same bottom: add the tops: 1/5 + 2/5 = 3/5.\n- To **simplify**, divide top and bottom by the same number: 4/8 = 1/2.",
+w:"- **Sharing**: half a cake, a quarter of the money.\n- **Measuring**: 1/2 litre, 3/4 metre.\n- **Cooking, shopping and time**: half an hour.\n- **Higher maths**: ratios, percentages, algebra.",
+s:"Imagine a chapati cut into 4 equal pieces. If you eat 1 piece, you ate **1 out of 4**. That is the fraction 1/4.",
+e:"- 1/2 (one half)\n- 1/4 (one quarter)\n- 3/4 (three quarters)\n- Add: 1/4 + 2/4 = 3/4\n- Simplify: 6/8 = 3/4",
+m:"## Kinds of fractions\n- **Proper:** top smaller than bottom: 2/5.\n- **Improper:** top bigger: 7/4.\n- **Mixed:** whole plus fraction: 1 3/4.\n## Different bottoms\n- Find a common denominator first: 1/2 + 1/3 = 3/6 + 2/6 = 5/6.\n## Common mistakes\n- Adding the bottoms: 1/4 + 1/4 is 2/4, not 2/8.",
+q:[["In 3/5, what is the denominator?",["3","5","8"],1],["What is 1/4 + 2/4?",["3/8","3/4","2/4"],1],["Simplify 4/8.",["1/2","2/4","1/4"],0]]},
+{re:/percent/,n:"Percentage",a:"How to calculate it",b:"Where it is used",
+d:"A **percentage** is a number out of 100. The sign % means “per hundred”.",
+h:"- To write a fraction as a percentage, **multiply by 100**: 1/2 × 100 = 50%.\n- To find a percentage of a number: **divide by 100, then multiply**: 20% of 50 = 20 ÷ 100 × 50 = 10.\n- To find a percentage mark: (marks ÷ total) × 100.",
+w:"- **School marks**: 45 out of 50 is 90%.\n- **Shopping**: discounts and prices.\n- **Banks**: interest on savings and loans.\n- **News and data**: population, rainfall, taxes.",
+s:"Percent means **out of 100**. If you score 50%, you got 50 out of every 100, which is half.",
+e:"- 50% = 1/2\n- 25% = 1/4\n- 10% of 200 = 20\n- 15 out of 20 = 75%",
+m:"## Methods\n- 10% is found by dividing by 10.\n- 1% is found by dividing by 100.\n## Percentage change\n- Change ÷ original × 100.\n## Common mistakes\n- Forgetting to divide by the **original** amount.\n- Mixing decimals and percentages: 0.5 is 50%, not 5%.",
+q:[["What is 50% of 80?",["40","50","30"],0],["Write 1/4 as a percentage.",["14%","25%","40%"],1],["15 out of 20 as a percentage?",["70%","75%","80%"],1]]},
+{re:/pythagoras/,n:"Pythagoras theorem",a:"How to use the formula",b:"Where it is used",
+d:"The **Pythagoras theorem** says that in a right-angled triangle, the square of the longest side (hypotenuse) equals the sum of the squares of the other two sides: **a² + b² = c²**.",
+h:"- Find the **hypotenuse c**: the side opposite the right angle.\n- To find c: c = √(a² + b²).\n- To find a short side: a = √(c² − b²).\n- Example: sides 3 and 4: 9 + 16 = 25, so c = 5.",
+w:"- **Construction**: checking square corners.\n- **Navigation and maps**: shortest distance between two points.\n- **Ladders and roofs**: finding heights and lengths.\n- **Geometry exams**: right-angled triangles.",
+s:"In a triangle with a square corner, **short side² + short side² = long side²**.\n3² + 4² = 5².",
+e:"- 3, 4, 5: 9 + 16 = 25\n- 5, 12, 13: 25 + 144 = 169\n- Sides 6 and 8 give hypotenuse 10.",
+m:"## Pythagorean triples\n- Whole-number sets such as 3, 4, 5 and 8, 15, 17.\n## Converse\n- If a² + b² = c², the triangle has a right angle.\n## Common mistakes\n- Using the theorem on triangles with no right angle.\n- Forgetting to take the square root at the end.",
+q:[["Sides 3 and 4. What is the hypotenuse?",["5","6","7"],0],["Which side is the hypotenuse?",["Opposite the right angle","Shortest side","Any side"],0],["Does 5, 12, 13 satisfy a² + b² = c²?",["Yes","No","Only sometimes"],0]]},
+{re:/photosynthesis/,n:"Photosynthesis",a:"How it works",b:"Where it happens and why it matters",
+d:"**Photosynthesis** is the process by which green plants make their own food from carbon dioxide and water, using light energy.",
+h:"- **Chlorophyll** in the leaves traps sunlight.\n- The plant takes in **carbon dioxide** through the leaves and **water** through the roots.\n- It makes **glucose** (food) and releases **oxygen**.\n- Equation: carbon dioxide + water → glucose + oxygen (in light).",
+w:"- In **green leaves**, mainly in the chloroplasts.\n- It gives us **food and oxygen** and removes carbon dioxide.\n- It is the base of **food chains** on land and in water.",
+s:"Plants **cook their own food** using sunlight, air and water. In the process they give out the oxygen we breathe.",
+e:"- A maize plant making food in the sun\n- Algae in a lake giving off oxygen\n- A leaf turning blue-black with iodine, showing starch was made",
+m:"## What is needed\n- Light, chlorophyll, carbon dioxide and water.\n## Products\n- Glucose, stored as starch, and oxygen.\n## Factors affecting the rate\n- Light intensity, temperature, carbon dioxide level.\n## Common mistakes\n- Mixing it up with respiration: respiration releases energy and happens all the time.",
+q:[["What gas do plants take in for photosynthesis?",["Oxygen","Carbon dioxide","Nitrogen"],1],["Which green substance traps light?",["Chlorophyll","Starch","Glucose"],0],["What gas is released?",["Oxygen","Hydrogen","Carbon dioxide"],0]]}
+];
+const P=(n,re,a,b,d,h,w,s,e,m,q)=>({n,re,a,b,d,h,w,s,e,m,q,S:["Science"],L:["PLE"]});
+const SCI=[
+P("Living and non-living things",/living things|non[- ]?living|characteristics of living/,"What living things do","Examples and why it matters",
+"**Living things** grow, feed, breathe, move, reproduce, respond to changes and die. **Non-living things** do not do these things.",
+"Living things show seven signs (remember **MRS GREN**):\n- **M**ove\n- **R**espire (breathe)\n- **S**ense (respond to changes)\n- **G**row\n- **R**eproduce\n- **E**xcrete (remove waste)\n- **N**eed food (nutrition)",
+"- **Living:** a goat, a mango tree, a person, a mushroom.\n- **Non-living:** a stone, a table, water, a car.\n- A dry seed is still living because it can germinate when it gets water.",
+"Living things **grow, eat, breathe and have babies**. A goat is living. A stone is not.",
+"- **Living:** hen, maize plant, child, mushroom\n- **Non-living:** pen, soil, water, fire",
+"## Common mistakes\n- Fire and rivers move, but they are not living. They do not feed or reproduce.\n- A dead tree was once living; it is now non-living.",
+[["Which one is a living thing?",["Stone","Mango tree","Table"],1],["Which sign means getting rid of waste?",["Excrete","Grow","Move"],0],["Which one is non-living?",["Goat","Water","Maize plant"],1]]),
+P("Flowers and pollination",/flower|pollinat|fertili[sz]ation|stamen|pistil|petal|anther|stigma|\bovary\b|sepal/,"Parts and how it works","Why flowers matter",
+"A **flower** is the part of a plant that makes seeds. **Pollination** is the moving of pollen from the anther to the stigma.",
+"- **Petals** attract insects.\n- **Sepals** protect the flower bud.\n- **Stamen** (male part) = anther + filament. The anther makes **pollen**.\n- **Pistil** (female part) = stigma + style + ovary. The ovary has **ovules**.\n- Pollen lands on the stigma (**pollination**). It joins an ovule (**fertilisation**). The ovule becomes a seed and the ovary becomes the fruit.\n- Pollination agents: **insects, wind, water, birds**.",
+"- Flowers make **seeds and fruits** such as beans, oranges and mangoes.\n- Bees and butterflies carry pollen while looking for nectar.\n- Without pollination there are no seeds or fruits, so farmers need pollinators.",
+"Pollen moves from one flower part to another. Then the flower makes a seed.",
+"- Self-pollination: pollen goes to the same flower or plant.\n- Cross-pollination: pollen goes to another plant.\n- Wind pollinated: maize, grass. Insect pollinated: bean, pumpkin.",
+"## Self and cross pollination\n- **Self-pollination:** pollen falls on a stigma of the same flower or plant.\n- **Cross-pollination:** pollen goes to a flower on another plant.\n## Common mistakes\n- Pollination is not the same as fertilisation.",
+[["Which part of the flower makes pollen?",["Stigma","Anther","Ovary"],1],["Which agent carries pollen in maize?",["Wind","Bees only","Fish"],0],["After fertilisation, the ovary becomes a…",["Leaf","Fruit","Root"],1]]),
+P("Seed dispersal",/dispers|how seeds (are )?(spread|scattered)/,"How seeds are spread","Why it matters",
+"**Seed dispersal** is the spreading of seeds away from the parent plant.",
+"- **Wind:** light or winged seeds, like jacaranda and cotton.\n- **Water:** floating seeds, like coconut.\n- **Animals:** hooked seeds stick to fur (black-jack); fleshy fruits are eaten (mango, guava) and the seeds drop later.\n- **Explosion:** pods burst and throw seeds (beans, peas).\n- **Man:** people carry and plant seeds.",
+"- Seeds get **space, light, water and soil**, so young plants do not crowd the parent.\n- Plants reach **new places**.",
+"Seeds travel so new plants have room to grow. They travel by wind, water, animals, bursting pods and people.",
+"- Wind: jacaranda, dandelion\n- Water: coconut\n- Animals: black-jack, mango\n- Explosion: bean pod",
+"## Features\n- Wind seeds are light with wings or hairs.\n- Water seeds float.\n- Animal seeds have hooks or are sweet and fleshy.",
+[["How is a coconut seed spread?",["Wind","Water","Explosion"],1],["Why do seeds need to spread?",["To get space and light","To get heavy","To change colour"],0],["Which seeds have hooks?",["Black-jack","Coconut","Jacaranda"],0]]),
+P("Germination",/germinat|embryo|cotyledon|dormant|seed structure|parts of a seed/,"How a seed germinates","Conditions and importance",
+"**Germination** is when a seed starts to grow into a young plant.",
+"- The seed takes in **water** and swells.\n- The **radicle** (young root) comes out first and grows down.\n- The **plumule** (young shoot) grows up.\n- Food stored in the **cotyledon** feeds the seedling until it grows leaves.",
+"Seeds need three things to germinate:\n- **Water**\n- **Air (oxygen)**\n- **Warmth**\nSeeds do **not** need light to germinate, but young plants need light to grow well.",
+"A seed is a baby plant asleep. With water, air and warmth it wakes up and grows.",
+"- Bean seed: two cotyledons (dicot)\n- Maize grain: one cotyledon (monocot)\n- Experiment: seeds in dry cotton wool do not germinate",
+"## Parts of a seed\n- **Seed coat:** protects the seed.\n- **Embryo:** radicle + plumule.\n- **Cotyledon:** stores food.\n## Common mistakes\n- Thinking seeds need sunlight to germinate.",
+[["Which part of the seed grows into the root?",["Plumule","Radicle","Cotyledon"],1],["Which is NOT needed for germination?",["Water","Warmth","Sunlight"],2],["What does the cotyledon do?",["Stores food","Makes pollen","Traps light"],0]]),
+P("Photosynthesis",/photosynth|chlorophyll|make (their |its )?(own )?food|starch test/,"How it happens","Why it matters",
+"**Photosynthesis** is how green plants make their own food using sunlight, water and carbon dioxide.",
+"- Roots take in **water** and leaves take in **carbon dioxide** from the air.\n- **Chlorophyll** (the green substance) traps sunlight.\n- The plant makes **glucose** (food) and gives out **oxygen**.\n- Glucose is changed to **starch** and stored.\n- Equation: water + carbon dioxide → glucose + oxygen (in sunlight).",
+"- It happens in **green leaves**.\n- It gives people and animals **food and oxygen**.\n- It starts every **food chain**.",
+"Plants **cook their own food** in their leaves using sunlight. They give out the oxygen we breathe.",
+"- Test a leaf for starch with iodine: it turns blue-black.\n- A plant in a dark cupboard becomes pale and weak.",
+"## Needed\n- Sunlight, chlorophyll, water, carbon dioxide.\n## Common mistakes\n- Plants do not get food from the soil. Soil gives water and mineral salts.",
+[["What gas do plants take in?",["Oxygen","Carbon dioxide","Hydrogen"],1],["Where does photosynthesis happen?",["Roots","Green leaves","Flowers only"],1],["What gas is given out?",["Oxygen","Smoke","Carbon dioxide"],0]]),
+P("Transpiration",/transpir|stomata|water loss in plants/,"How it happens","Why it matters",
+"**Transpiration** is the loss of water vapour from the leaves of a plant.",
+"- Roots take in water. The stem carries it up to the leaves.\n- Water evaporates through tiny holes called **stomata**.\n- This pulls more water up the plant.",
+"- It **cools** the plant.\n- It **moves water and mineral salts** up the plant.\n- It is faster in **hot, dry, windy** weather.",
+"A plant ‘sweats’ through its leaves. Water goes out as vapour.",
+"- A polythene bag tied over a leafy branch collects water droplets after some hours.",
+"",
+[["Through which holes does water leave the leaf?",["Stomata","Roots","Petals"],0],["Transpiration is fastest in…",["Cold wet weather","Hot dry windy weather","Darkness"],1],["Transpiration is loss of…",["Water vapour","Oxygen","Seeds"],0]]),
+P("Parts of a plant and their functions",/parts of (a )?plant|\broots?\b|\bstems?\b|\bleaf\b|\bleaves\b|taproot|fibrous root|plant parts/,"What each part does","Types of roots and why parts matter",
+"A flowering plant has **roots, a stem, leaves, flowers and fruits**. Each part has a job.",
+"- **Roots:** hold the plant in the soil, take in water and mineral salts, and may store food (cassava, carrot).\n- **Stem:** supports the plant, carries water and food, and may store food (sugarcane).\n- **Leaves:** make food by photosynthesis and lose water by transpiration.\n- **Flowers:** make seeds.\n- **Fruits:** protect seeds.",
+"- **Taproot** system: one main root (beans, mango).\n- **Fibrous** root system: many thin roots (maize, grass).\n- Food stored in different parts: roots (cassava), stems (Irish potato tuber), leaves (cabbage), seeds (beans).",
+"A plant is like a house: roots are the foundation, the stem is the pillar, leaves are the kitchen.",
+"- Taproot: bean, orange\n- Fibrous roots: maize, millet\n- Edible leaf: cabbage\n- Edible root: cassava, carrot",
+"",
+[["Which part holds the plant in the soil?",["Roots","Leaves","Flowers"],0],["Which plant has fibrous roots?",["Maize","Bean","Mango"],0],["Which part makes food?",["Leaves","Stem","Roots"],0]]),
+P("Types of plants",/types of plants|classification of plants|flowering plants|non[- ]?flowering|monocot|dicot|\bferns?\b|\bmoss|\balgae\b|\bfungi\b|mushroom|\bmould/,"How plants are grouped","Examples",
+"Plants are grouped into **flowering plants** (make flowers and seeds) and **non-flowering plants** (no flowers).",
+"- **Flowering plants** with one seed leaf (**monocots**): maize, millet, grass, banana. They have fibrous roots and parallel-veined leaves.\n- **Flowering plants** with two seed leaves (**dicots**): beans, mango, orange. They have taproots and net-veined leaves.\n- **Non-flowering plants:** ferns, mosses, algae and fungi (mushroom, mould).",
+"- Fungi do not have chlorophyll, so they cannot make food.\n- Algae grow in water.\n- Ferns and mosses grow in damp places.",
+"If it has flowers and seeds it is a flowering plant. If it does not, it is non-flowering.",
+"- Monocot: maize\n- Dicot: bean\n- Non-flowering: fern, moss, mushroom",
+"",
+[["Which is a monocot?",["Maize","Bean","Mango"],0],["Which is a non-flowering plant?",["Fern","Orange","Bean"],0],["Dicots have what kind of roots?",["Fibrous","Taproots","None"],1]]),
+P("Domestic animals",/domestic animals?|livestock|\bcattle\b|\bgoats?\b|\bsheep\b|\bpigs?\b|poultry|\bhens?\b|chickens?|\brabbits?\b|farm animals|animal products/,"What they give us and how to care for them","Uses",
+"**Domestic animals** are animals kept by people for food, work or money.",
+"- **Cattle:** milk, meat, hides, manure, ploughing.\n- **Goats and sheep:** meat, milk, skins.\n- **Pigs:** meat (pork).\n- **Poultry (hens):** eggs and meat.\n- **Dogs:** guard homes. **Cats:** catch rats.\nCare: give them **food, clean water, shelter**, and **treat or vaccinate** them against diseases.",
+"- Animals are kept on farms and at home.\n- Their products are sold for income.\n- Manure improves the soil.",
+"Domestic animals live with people. People feed them, and they give us milk, meat, eggs and help.",
+"- Milk: cow, goat\n- Eggs: hen\n- Work: ox ploughing\n- Wool: sheep",
+"",
+[["Which domestic animal gives eggs?",["Hen","Goat","Pig"],0],["Which animal is kept to guard the home?",["Dog","Cow","Hen"],0],["Which is a product of cattle?",["Milk","Eggs","Honey"],0]]),
+P("Classification of animals",/classif\w* (of )?animals|\bmammals?\b|\bbirds?\b|\breptiles?\b|\bamphibians?\b|\bfish\b|vertebrate|invertebrate|warm[- ]blooded|cold[- ]blooded/,"Groups and their features","Examples",
+"**Classification** means putting animals into groups that share features. Animals with a backbone are **vertebrates**. Animals without a backbone are **invertebrates**.",
+"Vertebrates:\n- **Mammals:** have hair or fur, give birth to live young and feed them milk (cow, human, bat).\n- **Birds:** have feathers, wings, a beak, lay eggs (hen, eagle).\n- **Reptiles:** dry scaly skin, lay eggs on land (lizard, snake, crocodile).\n- **Amphibians:** moist skin, live in water and on land (frog, toad).\n- **Fish:** scales, gills, fins, live in water (tilapia).\nInvertebrates: **insects** (6 legs), **spiders** (8 legs), worms, snails.",
+"- Warm-blooded: mammals and birds.\n- Cold-blooded: reptiles, amphibians, fish, insects.\n- A bat is a **mammal** (it gives milk), not a bird.",
+"Animals are sorted by body features: hair, feathers, scales, wet skin, or no backbone.",
+"- Mammal: goat\n- Bird: hen\n- Reptile: lizard\n- Amphibian: frog\n- Fish: tilapia\n- Insect: bee",
+"",
+[["Which animal is a mammal?",["Bat","Frog","Lizard"],0],["Which group breathes with gills?",["Fish","Birds","Mammals"],0],["How many legs does an insect have?",["4","6","8"],1]]),
+P("Insects and life cycles",/insects?|butterfl|housefl|cockroach|\bbees?\b|\bants?\b|life cycle|metamorphosis|\blarva|\bpupa|\bnymph|\bmosquito/,"Features and life cycles","Harmful and useful insects",
+"**Insects** are animals with 6 legs and a body in 3 parts (head, thorax, abdomen). Most have wings and antennae.",
+"- **Complete metamorphosis (4 stages):** egg → larva → pupa → adult. Examples: butterfly, housefly, mosquito, bee.\n- **Incomplete metamorphosis (3 stages):** egg → nymph → adult. Examples: cockroach, grasshopper.\n- A **housefly** spreads germs from dirt to food. A **mosquito** spreads malaria. A **bee** gives honey and pollinates flowers.",
+"- **Useful:** bees (honey, pollination), butterflies (pollination), silkworms (silk).\n- **Harmful:** mosquitoes (malaria), houseflies (diarrhoea, cholera), tsetse flies (sleeping sickness), locusts (eat crops).",
+"Insects have six legs. Many change shape as they grow, like a caterpillar becoming a butterfly.",
+"- Butterfly: egg, caterpillar, pupa, butterfly.\n- Cockroach: egg, nymph, adult.",
+"",
+[["How many legs does an insect have?",["6","8","4"],0],["Which insect has a nymph stage?",["Cockroach","Butterfly","Housefly"],0],["Which stage comes after the larva?",["Egg","Pupa","Nymph"],1]]),
+P("Food chains and food webs",/food chains?|food webs?|\bproducers?\b|\bconsumers?\b|predator|\bprey\b|herbivore|carnivore|omnivore|feeding habit/,"How they work","Why they matter",
+"A **food chain** shows how energy passes from one living thing to another when they feed. A **food web** is many food chains joined together.",
+"- A food chain starts with a **producer** (a green plant).\n- **Consumers** eat other things: **herbivores** eat plants, **carnivores** eat animals, **omnivores** eat both.\n- Example: grass → grasshopper → frog → snake → eagle.\n- The arrow means ‘is eaten by’.\n- A **predator** hunts a **prey**.",
+"- Energy from the sun passes through each link.\n- Plants are the base of every food chain.\n- If one living thing dies out, the others are affected.",
+"Plants make food. An animal eats the plant. Another animal eats that animal.",
+"- Herbivore: cow, goat\n- Carnivore: lion, eagle\n- Omnivore: human, chicken",
+"",
+[["What does every food chain start with?",["A green plant","A lion","A snake"],0],["An animal that eats only plants is a…",["Herbivore","Carnivore","Omnivore"],0],["Which is an omnivore?",["Human","Cow","Lion"],0]]),
+P("Habitats and adaptation",/habitats?|ecosystem|adapt|\bcommunity\b|camouflage/,"What they are and how living things adapt","Examples",
+"A **habitat** is the place where a plant or animal lives. **Adaptation** is a feature that helps a living thing to survive in its habitat.",
+"- **Fish:** gills and fins for water.\n- **Camel:** hump stores fat, wide feet for sand.\n- **Chameleon:** changes colour (camouflage) to hide.\n- **Cactus:** thick stem stores water, thorns instead of leaves.\n- **Water lily:** floating leaves.\n- **Birds:** hollow bones and wings for flying.",
+"- Habitats in Uganda: lakes (Victoria), forests (Bwindi), savannah (Queen Elizabeth), wetlands, swamps.\n- A group of living things and their environment working together is an **ecosystem**.",
+"A habitat is a living thing’s home. Its body parts help it live there.",
+"- Frog: pond\n- Monkey: forest\n- Fish: water\n- Termite: soil",
+"",
+[["What is a habitat?",["Where an organism lives","A kind of food","A type of soil"],0],["Why does a fish have gills?",["To breathe in water","To fly","To dig"],0],["Which plant is adapted to a dry place?",["Cactus","Water lily","Papyrus"],0]]),
+P("The five senses",/senses|sense organs?|sense of|\bsight\b|\bhearing\b|\bsmell\b|\btaste\b|\btouch\b|\beyes?\b|\bears?\b|tongue|\bnose\b/,"The organs and what they do","Caring for them",
+"The **five senses** help us know what is around us: **sight, hearing, smell, taste and touch**.",
+"- **Eye:** sight.\n- **Ear:** hearing.\n- **Nose:** smell.\n- **Tongue:** taste (sweet, sour, salty, bitter).\n- **Skin:** touch (also feels heat, cold, pain and pressure).",
+"- Never put sharp things in the ear, and do not read in dim light.\n- Do not look straight at the sun.\n- Wash the face and hands to keep the skin healthy.",
+"We use our eyes to see, ears to hear, nose to smell, tongue to taste and skin to touch.",
+"- Eye sees a rainbow\n- Ear hears a drum\n- Tongue tastes sugar\n- Skin feels hot water",
+"",
+[["Which organ is for hearing?",["Ear","Eye","Nose"],0],["The tongue is for…",["Taste","Sight","Smell"],0],["Which is NOT one of the five senses?",["Walking","Smell","Touch"],0]]),
+P("Digestive system",/digest|alimentary|stomach|intestine|oesophagus|food canal|\bliver\b|swallow/,"How food is digested","Parts and care",
+"**Digestion** is the breaking down of food into small pieces the body can use.",
+"Food travels through the **alimentary canal**:\n- **Mouth:** teeth chew; saliva starts digestion.\n- **Oesophagus:** carries food to the stomach.\n- **Stomach:** churns food and mixes it with juices.\n- **Small intestine:** digestion ends and food is **absorbed** into the blood.\n- **Large intestine:** takes in water.\n- Waste leaves through the **anus**.",
+"- The **liver** makes bile, which helps digest fats.\n- Chew food well, wash hands before eating, and eat on time.",
+"Food goes down a long tube. The body takes what it needs and passes out the rest.",
+"- Mouth → oesophagus → stomach → small intestine → large intestine → anus",
+"",
+[["Where is digested food absorbed?",["Small intestine","Mouth","Oesophagus"],0],["Which tube carries food to the stomach?",["Oesophagus","Windpipe","Vein"],0],["Where does digestion start?",["Mouth","Stomach","Anus"],0]]),
+P("Teeth",/\bteeth\b|\btooth\b|incisor|canine|molar|dental|tooth decay/,"Types and care","Why teeth matter",
+"**Teeth** cut, tear and grind food.",
+"- **Incisors:** cut food (front).\n- **Canines:** tear food (pointed).\n- **Premolars and molars:** grind food (back).\n- Children have **20 milk teeth**, adults have **32 permanent teeth**.\n- A tooth has an **enamel** (hard covering), **dentine** and **pulp** (nerves and blood).",
+"- Brush teeth twice a day, use a toothbrush and toothpaste.\n- Avoid too many sweets.\n- Visit a dentist.\n- Sugar and germs cause **tooth decay**.",
+"Teeth help us chew. Front teeth cut, pointed teeth tear, back teeth grind.",
+"- Cut an apple: incisors\n- Tear meat: canines\n- Chew a groundnut: molars",
+"",
+[["Which teeth tear food?",["Canines","Molars","Incisors"],0],["How many permanent teeth does an adult have?",["20","32","28"],1],["What can cause tooth decay?",["Sugar and germs","Water","Milk only"],0]]),
+P("Heart and blood circulation",/\bheart\b|\bblood\b|circulat|\barter(y|ies)\b|\bveins?\b|pulse|red blood cell|white blood cell/,"How blood moves","Care of the heart",
+"The **circulatory system** carries blood around the body. The **heart** is the pump.",
+"- **Arteries** carry blood **away from** the heart.\n- **Veins** carry blood **to** the heart.\n- **Capillaries** are tiny vessels that join them.\n- Blood carries **oxygen, digested food and waste**.\n- **Red cells** carry oxygen, **white cells** fight germs, **platelets** help blood clot.",
+"- The pulse can be felt at the wrist.\n- Exercise, a balanced diet and avoiding smoking keep the heart healthy.",
+"The heart pumps blood like a pump. Blood carries food and air to all parts of the body.",
+"- Pulse at rest is about 70 beats per minute.",
+"",
+[["Which part pumps blood?",["Heart","Lung","Kidney"],0],["Which cells fight germs?",["White blood cells","Red blood cells","Platelets"],0],["Veins carry blood…",["To the heart","Away from the heart","Only to the lungs"],0]]),
+P("Breathing and the lungs",/breath|\blungs?\b|respirat|windpipe|trachea|inhal|exhal/,"How we breathe","Care of the lungs",
+"**Breathing** is taking in air (**inhaling**) and pushing it out (**exhaling**).",
+"- Air enters through the **nose**, goes down the **windpipe**, and reaches the **lungs**.\n- In the lungs oxygen goes into the blood, and carbon dioxide leaves.\n- When we inhale, the ribs move up and out, and the **diaphragm** moves down.\n- Inhaled air has more oxygen. Exhaled air has more carbon dioxide and water vapour.",
+"- Breathe through the nose, avoid smoke and dust.\n- Smoking damages the lungs.\n- Diseases: pneumonia, TB, asthma.",
+"We breathe in air for oxygen and breathe out carbon dioxide.",
+"- Breathing rate rises after running.",
+"",
+[["Which gas do we breathe in for the body?",["Oxygen","Carbon dioxide","Smoke"],0],["Which organs do we breathe with?",["Lungs","Kidneys","Liver"],0],["Which gas is breathed out more?",["Carbon dioxide","Oxygen","Hydrogen"],0]]),
+P("Skeleton and muscles",/skeleton|\bbones?\b|muscle|\bjoints?\b|\bskull\b|\bribs?\b|backbone|spine/,"What they do","Care of bones and muscles",
+"The **skeleton** is the framework of bones in the body. **Muscles** pull on bones to make them move.",
+"- It **supports** the body and gives it shape.\n- It **protects** soft organs: the skull protects the brain, ribs protect the heart and lungs.\n- It **allows movement** at **joints** (hinge: knee; ball and socket: shoulder, hip).\n- Muscles work in pairs: when one **contracts** the other **relaxes**.",
+"- Eat foods rich in calcium (milk, small fish).\n- Do exercise.\n- A broken bone is a **fracture**.",
+"Bones hold up the body. Muscles pull the bones so we can move.",
+"- Skull, ribs, backbone, arm bones, leg bones",
+"",
+[["Which bones protect the heart and lungs?",["Ribs","Skull","Backbone"],0],["Which joint is a hinge?",["Knee","Shoulder","Hip"],0],["Muscles move bones by…",["Contracting","Freezing","Drying"],0]]),
+P("Excretion",/excret|\bkidneys?\b|\burine\b|\bsweat\b/,"How the body removes waste","Care",
+"**Excretion** is the removal of waste made by the body.",
+"- **Kidneys** clean the blood and make **urine**.\n- **Skin** removes **sweat**.\n- **Lungs** remove **carbon dioxide**.\n- The **large intestine** removes solid waste (this is egestion).",
+"- Drink plenty of clean water.\n- Bathe daily so sweat does not block the pores.",
+"The body must throw out waste, just like we throw out rubbish.",
+"- Urine, sweat, carbon dioxide",
+"",
+[["Which organ makes urine?",["Kidneys","Lungs","Heart"],0],["Sweat is removed by the…",["Skin","Heart","Liver"],0],["Lungs remove…",["Carbon dioxide","Urine","Sweat"],0]]),
+P("Food and nutrition",/nutrient|balanced diet|food (class|group|nutrient)|carbohydrate|protein|vitamin|kwashiorkor|marasmus|scurvy|rickets|anaemia|deficiency|mineral salts?|energy giving|body building|protective food|malnutrition|\bdiet\b/,"Food classes and what they do","Deficiency diseases",
+"**Nutrients** are the useful parts of food. A **balanced diet** has all nutrients in the right amounts.",
+"- **Carbohydrates** give energy (posho, matooke, rice, sweet potato).\n- **Proteins** build the body (beans, meat, eggs, fish).\n- **Fats and oils** give energy and keep warm (butter, groundnuts).\n- **Vitamins and mineral salts** protect the body (fruits, vegetables).\n- **Water** and **roughage** (fibre) are also needed.",
+"- Kwashiorkor: lack of protein (swollen belly and feet).\n- Marasmus: lack of food generally (very thin).\n- Scurvy: lack of vitamin C. Rickets: lack of vitamin D or calcium.\n- Anaemia: lack of iron. Night blindness: lack of vitamin A.\n- Eat a mix of foods.",
+"Eat different foods: one for energy, one for body building, one for protection.",
+"- Energy giving: posho\n- Body building: beans\n- Protective: oranges and greens",
+"",
+[["Which nutrient builds the body?",["Proteins","Carbohydrates","Water"],0],["Lack of vitamin C causes…",["Scurvy","Rickets","Anaemia"],0],["Which food gives energy?",["Posho","Orange","Water"],0]]),
+P("Malaria",/malaria|mosquito net|anopheles|plasmodium/,"How it spreads and how to prevent it","Signs and treatment",
+"**Malaria** is a disease caused by a tiny germ (plasmodium) spread by the female **Anopheles mosquito**.",
+"- A mosquito bites a sick person, then bites another person and passes on the germ.\n- Prevent it by:\n  - sleeping under a **treated mosquito net**\n  - **clearing bushes** and **draining stagnant water** where mosquitoes breed\n  - covering water containers\n  - **spraying** houses\n  - wearing long sleeves in the evening",
+"- **Signs:** fever, headache, shivering, vomiting, body pains.\n- **Treatment:** go to a health centre for a test and take the full dose of medicine.",
+"Malaria is spread by the bite of a mosquito. Sleep under a net.",
+"- Breeding places: stagnant water, old tins, tyres with water",
+"",
+[["Which mosquito spreads malaria?",["Female Anopheles","Housefly","Tsetse fly"],0],["Best way to prevent malaria at night?",["Treated mosquito net","Drinking tea","Eating sugar"],0],["Mosquitoes breed in…",["Stagnant water","Dry sand","Fire"],0]]),
+P("Cholera and typhoid",/cholera|typhoid|dysentery|diarrh|water[- ]borne|oral rehydration/,"How they spread and how to prevent them","Signs and treatment",
+"**Cholera** and **typhoid** are diseases caused by germs in dirty water and food.",
+"- Germs spread by **dirty water, uncovered food, flies and dirty hands**.\n- Prevent them by:\n  - **boiling drinking water**\n  - **washing hands** with soap after the latrine and before eating\n  - using **latrines**\n  - covering food and keeping flies away",
+"- **Signs:** watery diarrhoea, vomiting, weakness, fever (typhoid).\n- **Treatment:** go to a health worker quickly. Give **oral rehydration solution (ORS)** to replace lost water.",
+"Dirty water and dirty hands spread these diseases. Clean water and soap stop them.",
+"- Make ORS: clean water + sugar + salt (or use ORS packets)",
+"",
+[["What replaces water lost in diarrhoea?",["ORS","Soda","Tea only"],0],["Which stops cholera spreading?",["Boiling water","Playing outside","Sleeping late"],0],["Cholera is spread by…",["Dirty water","Sunlight","Wind"],0]]),
+P("HIV and AIDS",/\bhiv\b|\baids\b/,"How it spreads and how to prevent it","Care and living with HIV",
+"**HIV** is a virus that weakens the body’s defence against diseases. **AIDS** is the stage when the body is very weak.",
+"- HIV spreads through **unprotected sex with an infected person**, **sharing sharp objects** like razor blades and needles, **infected blood**, and from an **infected mother to her baby**.\n- Prevent it by **abstaining until marriage**, being faithful, **not sharing sharp objects**, and using **safe blood**.",
+"- HIV is **not** spread by hugging, shaking hands, sharing food, mosquito bites or sitting together.\n- People living with HIV should be treated kindly. **ARVs** (medicine) help them live long, healthy lives.",
+"HIV is a virus. It does not spread by playing or eating together.",
+"- Do not share razor blades or needles",
+"",
+[["HIV spreads through…",["Sharing razor blades","Shaking hands","Mosquito bites"],0],["Medicine that helps people with HIV?",["ARVs","Panadol only","Soda"],0],["How should we treat people living with HIV?",["With kindness","Avoid them","Laugh at them"],0]]),
+P("Common diseases and immunisation",/disease|germs?|infection|immunis|immuniz|vaccin|measles|polio|tuberculosis|\btb\b|bilharzia|worms?\b|tetanus|whooping|communicable|\bscabies\b|jiggers?|\bcold\b|\bflu\b/,"How diseases spread and are prevented","Immunisation and care",
+"A **disease** is a condition that stops the body from working well. **Germs** (bacteria, viruses, protozoa, fungi) and **worms** cause communicable diseases.",
+"- **Measles, polio, TB, tetanus, whooping cough** are prevented by **immunisation** (vaccines).\n- **Bilharzia** comes from swimming in dirty water with snails.\n- **Worms** come from dirty hands, food and bare feet; wear shoes and wash hands.\n- **Jiggers and scabies** come from dirty places and lack of washing.\n- Spread by: air, water, food, insects, touch.",
+"- Take children to immunisation at a health centre: BCG, polio, DPT, measles.\n- Keep clean, eat well, and sleep under a net.\n- Go to the health centre when sick.",
+"Germs can make us ill. Vaccines, clean hands and clean water keep us well.",
+"- Prevented by vaccines: polio, measles, TB, tetanus",
+"",
+[["Which disease is prevented by immunisation?",["Measles","Malaria","Scabies"],0],["Bilharzia is got from…",["Dirty water","Clean wind","Fresh milk"],0],["Wearing shoes helps prevent…",["Jiggers and worms","Measles","Malaria"],0]]),
+P("First aid",/first aid|\bwounds?\b|\bbleed|\bburns?\b|snake ?bite|fracture|faint|choking|nose ?bleed|first aid box/,"What to do","The first aid box",
+"**First aid** is the first help given to an injured or sick person before a doctor or health worker arrives.",
+"- **Cuts:** wash with clean water and soap, cover with a clean cloth or bandage.\n- **Nose bleeding:** sit leaning forward and pinch the soft part of the nose.\n- **Burns:** pour cool clean water for several minutes. Do not put oil or toothpaste.\n- **Snake bite:** keep the person calm and still, and take them to the health centre quickly.\n- **Fainting:** lay the person down and raise the legs.\n- **Fracture:** keep the limb still and get help.",
+"A first aid box has: bandages, cotton wool, gauze, plasters, scissors, soap, antiseptic, gloves, safety pins.",
+"First aid is quick help to someone hurt, while waiting for a nurse.",
+"- Washing a cut\n- Cooling a burn with water",
+"",
+[["What do you pour on a burn?",["Cool clean water","Oil","Toothpaste"],0],["Which is in a first aid box?",["Bandage","Charcoal","Ball"],0],["For a fainting person you…",["Lay them down","Make them run","Give water immediately"],0]]),
+P("Hygiene and sanitation",/hygiene|sanitation|latrine|hand ?wash|cleanliness|refuse|waste disposal|\bbath|rubbish|compost|tippy tap/,"How to keep clean","Why it matters",
+"**Hygiene** is keeping our bodies clean. **Sanitation** is keeping our surroundings clean.",
+"- **Personal hygiene:** bathe daily, brush teeth, wash hands with soap, cut nails, wear clean clothes.\n- **Home hygiene:** sweep, wash utensils, cover food, use a latrine, cover water.\n- **Waste:** put rubbish in pits, burn or compost, and never throw it in water.",
+"- Wash hands **after using the latrine** and **before eating**.\n- A **tippy tap** is a simple way to wash hands.\n- Good hygiene prevents cholera, worms, scabies and diarrhoea.",
+"Clean bodies and clean homes keep germs away.",
+"- Latrine\n- Rubbish pit\n- Tippy tap",
+"",
+[["When should we wash our hands?",["After the latrine","Never","Only on Sundays"],0],["Sanitation is keeping…",["Our surroundings clean","Our hair long","Our shoes new"],0],["What is a tippy tap?",["A hand-washing device","A game","A toy"],0]]),
+P("Drugs and drug abuse",/\bdrugs?\b|\balcohol\b|smok|tobacco|marijuana|drug abuse|medicine/,"Types and dangers","Staying safe",
+"A **drug** is any substance that changes how the body works. **Medicines** are useful drugs. **Drug abuse** is the wrong use of drugs.",
+"- **Harmful drugs:** alcohol, tobacco (cigarettes), marijuana (bhang), miraa, heroin.\n- **Effects:** damage the lungs, liver and brain; cause addiction, poor school work and accidents.\n- **Medicines:** use only when a health worker advises, in the correct dose.",
+"- Say **no** to harmful drugs.\n- Keep medicines away from small children.\n- Seek help from parents, teachers or counsellors.",
+"Some drugs help sick people. Others harm the body.",
+"- Medicine: antimalarial tablets\n- Harmful drug: cigarettes",
+"",
+[["Which is a harmful drug?",["Tobacco","Water","Milk"],0],["Medicines should be taken…",["As advised by a health worker","Any time","Mixed with soda"],0],["Drug abuse can cause…",["Addiction","Strong bones","Good marks"],0]]),
+P("States of matter",/states? of matter|\bsolids?\b|\bliquids?\b|\bgas(es)?\b|\bmatter\b|\bparticles\b|\bmass\b and volume/,"Properties of each state","Examples and changes",
+"**Matter** is anything that has mass and takes up space. It exists as a **solid**, a **liquid** or a **gas**.",
+"- **Solid:** fixed shape and volume (stone, wood).\n- **Liquid:** no fixed shape, takes the shape of its container, fixed volume (water, milk).\n- **Gas:** no fixed shape or volume, spreads to fill any space (air, steam).\n- Particles are close together in solids, a little apart in liquids, and far apart in gases.",
+"- Water can be **ice** (solid), **water** (liquid) or **steam** (gas).\n- Heating gives particles energy; cooling takes it away.",
+"Matter is everything around you that you can touch or that takes up space. It can be hard, runny or like air.",
+"- Solid: book\n- Liquid: juice\n- Gas: oxygen",
+"",
+[["Which has a fixed shape?",["Solid","Liquid","Gas"],0],["Air is a…",["Gas","Solid","Liquid"],0],["Steam is water in the form of a…",["Gas","Solid","Liquid"],0]]),
+P("Changes in matter",/melting|freezing|evaporat|condensation|boiling point|physical change|chemical change|rusting|burning|dissolv|solubility|decay|expansion|contraction/,"Types of changes","Examples",
+"A **physical change** does not make a new substance and can be reversed. A **chemical change** makes a new substance and cannot easily be reversed.",
+"- **Physical changes:** melting, freezing, boiling, evaporation, condensation, dissolving sugar in water.\n- **Chemical changes:** burning wood, rusting iron, cooking food, rotting fruit, souring milk.",
+"- **Melting:** solid → liquid. **Freezing:** liquid → solid.\n- **Evaporation:** liquid → gas. **Condensation:** gas → liquid.\n- Heat makes things **expand**, cooling makes them **contract**.",
+"If you can get the same thing back (like ice melting and freezing again), it is a physical change.",
+"- Physical: ice melts.\n- Chemical: iron rusts, wood burns.",
+"",
+[["Which is a chemical change?",["Rusting","Melting","Evaporation"],0],["Gas changing to liquid is called…",["Condensation","Melting","Freezing"],0],["Which is a physical change?",["Ice melting","Wood burning","Food rotting"],0]]),
+P("Mixtures and separation",/mixtures?|separat|filtration|\bfilter|decant|sieving|distillation|\bsolutions?\b|\bsolute\b|\bsolvent\b|evaporating dish|winnowing|\bmagnetic separation/,"Methods of separating mixtures","Examples",
+"A **mixture** is made when two or more substances are mixed but do not join chemically.",
+"- **Decanting:** pour off a liquid from a solid that has settled (muddy water).\n- **Filtering:** use filter paper or cloth to separate an insoluble solid from a liquid.\n- **Sieving:** separate big pieces from small (flour, sand).\n- **Evaporation:** heat a solution until the water goes, leaving salt.\n- **Winnowing:** wind blows light husks from grain.\n- **Using a magnet:** separate iron from sand.\n- **Distillation:** collect pure water from salty water.",
+"- A **solution** is a solute (like salt) dissolved in a solvent (like water).\n- Substances that dissolve are **soluble** (sugar), those that do not are **insoluble** (sand).",
+"A mixture is two or more things together. We can often get them apart again.",
+"- Salt + water: evaporation\n- Sand + water: filtering\n- Iron filings + sand: magnet",
+"",
+[["Which method gets salt from salty water?",["Evaporation","Winnowing","Sieving"],0],["Which method separates iron from sand?",["Magnet","Decanting","Evaporation"],0],["Sugar in water is a…",["Solution","Solid","Gas"],0]]),
+P("Air",/\bair\b|oxygen|carbon dioxide|nitrogen|atmosphere|\bpropert(y|ies) of air|air pressure|\bburning needs/,"What air is and does","Uses and properties",
+"**Air** is a mixture of gases around the Earth.",
+"- About **78% nitrogen**, **21% oxygen**, and small amounts of carbon dioxide, water vapour and others.\n- Air **has mass**, **takes up space**, **exerts pressure**, and **has no colour or smell**.",
+"- **Oxygen:** for breathing and burning.\n- **Carbon dioxide:** plants use it for photosynthesis.\n- **Nitrogen:** used by plants to make proteins.\n- Wind is **moving air**; it dries clothes and turns windmills.",
+"Air is all around us. We cannot see it, but we need it to breathe.",
+"- Burning needs oxygen: a candle in a closed jar goes out.\n- A tyre pumped with air stays firm.",
+"",
+[["Which gas is the most in air?",["Nitrogen","Oxygen","Carbon dioxide"],0],["Which gas do we need for burning?",["Oxygen","Nitrogen","Steam"],0],["Moving air is called…",["Wind","Cloud","Rain"],0]]),
+P("Water cycle",/water cycle|rain formation|rain (is )?form|how (is )?rain|\bclouds?\b/,"The stages","Why it matters",
+"The **water cycle** is the movement of water from the earth to the sky and back.",
+"- **Evaporation:** the sun heats water in lakes and rivers and it rises as vapour.\n- **Condensation:** the vapour cools high up and forms **clouds**.\n- **Precipitation:** water falls as **rain**, hail or snow.\n- Water flows back to rivers and lakes, and some soaks into the ground.",
+"- It gives us rain for crops and drinking.\n- Plants also add water vapour through transpiration.",
+"Water goes up as vapour, makes clouds, and comes back down as rain.",
+"- Puddle drying in the sun: evaporation",
+"",
+[["Water turning to vapour is…",["Evaporation","Condensation","Freezing"],0],["Clouds form by…",["Condensation","Melting","Burning"],0],["Rain, hail and snow are…",["Precipitation","Evaporation","Transpiration"],0]]),
+P("Water",/\bwater\b|safe water|clean water|purif|water sources?|drinking water|properties of water|water pollution/,"Sources and purification","Uses",
+"**Water** is a liquid with no colour, taste or smell when pure. All living things need it.",
+"- **Sources:** rain, rivers, lakes, springs, wells, boreholes, tap water.\n- **Purifying:** **boil** to kill germs, **filter** to remove dirt, add **chlorine**, let mud **settle** and decant.\n- **Properties:** it boils at 100 °C, freezes at 0 °C, and dissolves many substances.",
+"- Uses: drinking, cooking, washing, farming, making electricity, transport.\n- **Safe water** is clean, clear and free from germs.\n- Protect water sources and do not pollute them.",
+"Water is life. We should drink only clean, safe water.",
+"- Boiled water is safe to drink.\n- A borehole is a source of clean water.",
+"",
+[["At what temperature does water boil?",["100 °C","0 °C","50 °C"],0],["How do we kill germs in water?",["Boil it","Stir it","Shake it"],0],["Which is a source of water?",["Spring","Chalk","Smoke"],0]]),
+P("Soil",/\bsoils?\b|\bloam\b|\bclay\b|\bsandy\b|humus|soil erosion|conservation of soil|terrac|contour|soil fertility|water in soil/,"Types and components","Soil erosion and conservation",
+"**Soil** is the top loose layer of the earth where plants grow.",
+"- **Components:** rock particles, **humus**, water, air, living things.\n- **Types:** **sandy** (large grains, drains fast), **clay** (tiny grains, holds water, sticky), **loam** (mixture of both with humus; best for crops).\n- **Soil layers:** topsoil, subsoil, bedrock.",
+"- **Erosion:** soil washed or blown away by water or wind.\n- **Causes:** cutting trees, overgrazing, bad farming.\n- **Prevent by:** planting trees and grass, **terracing**, **contour ploughing**, mulching, crop rotation.\n- Soil gives **plants water and mineral salts**.",
+"Soil is made of tiny pieces of rock and rotten plants. Plants grow in it.",
+"- Loam is best for most crops.\n- Terraces on steep hills in Kigezi",
+"",
+[["Which soil is best for crops?",["Loam","Sandy","Clay"],0],["Which soil drains water fastest?",["Sandy","Clay","Loam"],0],["Terracing prevents…",["Soil erosion","Rain","Wind"],0]]),
+P("Rocks",/\brocks?\b|igneous|sedimentary|metamorphic|\bminerals?\b|weathering|\blava\b|\bgranite\b|\blimestone\b/,"Types and formation","Uses",
+"**Rocks** are hard, natural materials that make up the Earth’s crust.",
+"- **Igneous rocks:** formed when hot melted rock (lava) cools (granite, basalt).\n- **Sedimentary rocks:** formed when layers of mud, sand and shells settle and harden (sandstone, limestone).\n- **Metamorphic rocks:** formed when other rocks are changed by heat and pressure (marble, slate).\n- **Weathering** breaks rocks into small pieces that form soil.",
+"- Uses: building (stones, bricks), road making, cement (limestone), tiles (marble), salt and copper from mines.\n- Uganda has copper at Kilembe and limestone at Tororo.",
+"Rocks are hard stones. Over time they break into soil.",
+"- Granite, limestone, marble",
+"",
+[["Rocks made from cooled lava are…",["Igneous","Sedimentary","Metamorphic"],0],["Marble is…",["Metamorphic","Igneous","Sedimentary"],0],["Breaking of rocks is…",["Weathering","Cooking","Freezing"],0]]),
+P("Heat",/\bheat\b|temperature|thermometer|conduction|convection|radiation|conductors? of heat|\bwarm\b/,"Sources and how heat moves","Effects and uses",
+"**Heat** is a form of energy that makes things warm. **Temperature** tells how hot or cold something is and is measured with a **thermometer** in degrees Celsius (°C).",
+"- **Sources:** the sun, fire, electricity, friction.\n- Heat moves from a hot place to a cold place in three ways:\n  - **Conduction:** through solids (a spoon in hot tea).\n  - **Convection:** through liquids and gases (hot air rises).\n  - **Radiation:** as rays, through empty space (heat from the sun).",
+"- Heat makes things **expand**; cooling makes them **contract**.\n- **Good conductors:** metals. **Poor conductors (insulators):** wood, plastic, cloth.\n- Uses: cooking, drying clothes, ironing, warming.",
+"Heat is what makes things warm. It always moves from hot things to cold things.",
+"- Sun heats us by radiation.\n- Metal spoon gets hot by conduction.",
+"",
+[["How does heat from the sun reach us?",["Radiation","Conduction","Convection"],0],["Which is a good conductor of heat?",["Metal","Wood","Plastic"],0],["Temperature is measured with a…",["Thermometer","Ruler","Balance"],0]]),
+P("Light",/\blight\b|sky (is )?blue|blue sky|shadow|reflect|refract|rainbow|luminous|mirror|\bsun\b ?light|opaque|transparent|translucent/,"How light behaves","Sources and uses",
+"**Light** is a form of energy that lets us see. It travels in **straight lines**.",
+"- **Luminous objects** make their own light (sun, fire, bulb, torch). **Non-luminous** objects do not (moon, book); we see them when light **reflects** off them.\n- **Shadow:** formed when an opaque object blocks light.\n- **Reflection:** light bounces off a shiny surface such as a mirror.\n- **Rainbow:** white light splits into 7 colours: red, orange, yellow, green, blue, indigo, violet.\n- Materials: **transparent** (glass), **translucent** (tissue paper), **opaque** (wood).",
+"- Uses: seeing, photosynthesis, solar energy.\n- Light travels faster than sound: you see lightning before you hear thunder.",
+"We see because light enters our eyes. Light goes in straight lines, so objects block it and make shadows.",
+"- Torch, candle, sun: luminous\n- Mirror: reflection",
+"",
+[["Which object is luminous?",["Sun","Moon","Mirror"],0],["Light travels in…",["Straight lines","Circles","Zigzags"],0],["A shadow forms when light is blocked by an…",["Opaque object","Transparent object","Mirror"],0]]),
+P("Sound",/\bsound|vibrat|\becho\b|\bpitch\b|loudness|\bnoise\b|musical instrument|thunder/,"How sound is made","How it travels",
+"**Sound** is a form of energy made by **vibrating** objects.",
+"- Sound travels as **waves** through solids, liquids and gases, but **not through a vacuum**.\n- It travels fastest in solids and slowest in gases.\n- **Pitch** is how high or low a sound is. **Loudness** is how strong it is.\n- An **echo** is sound that bounces back from a hard surface.",
+"- Uses: talking, music, warning, sonar.\n- Too much noise can harm hearing.\n- Musical instruments: drum (hit), guitar (plucked), flute (blown).",
+"When something shakes quickly, it makes sound. We hear it when the sound reaches our ears.",
+"- Drum: vibrating skin\n- Radio: vibrating speaker",
+"",
+[["Sound is caused by…",["Vibrations","Colours","Magnets"],0],["Sound travels fastest in…",["Solids","Gases","Space"],0],["An echo is sound…",["Bouncing back","Being absorbed","Stopped"],0]]),
+P("Electricity",/electric|circuit|\bcurrent\b|\bcells?\b|battery|\bbulb\b|\bswitch\b|insulator|conductor|short circuit|\bfuse\b|\bsolar panel/,"Circuits and conductors","Safety and uses",
+"**Electricity** is a form of energy made when electric charges flow along a path called a **circuit**.",
+"- A simple circuit has a **cell or battery**, **wires**, a **switch** and a **bulb**. The bulb lights only if the circuit is **complete (closed)**.\n- **Conductors** let electricity pass (metals, graphite). **Insulators** do not (plastic, rubber, wood, glass).\n- **Series circuit:** one path. **Parallel circuit:** more than one path.",
+"- Sources: dry cells, batteries, solar panels, generators, hydroelectric power (Jinja).\n- Uses: lighting, cooking, ironing, radio, TV, machines.\n- **Safety:** never touch bare wires, do not use wet hands, do not fly kites near power lines, use fuses.",
+"Electricity flows around a loop. If the loop is broken, the bulb goes off.",
+"- Conductor: copper wire\n- Insulator: rubber cover on wire",
+"",
+[["A bulb lights when the circuit is…",["Complete","Broken","Open"],0],["Which is an insulator?",["Rubber","Copper","Iron"],0],["What does a switch do?",["Opens or closes the circuit","Makes light","Stores water"],0]]),
+P("Magnets",/magnet|\bpoles?\b|attract|repel|compass|magnetic/,"Properties of magnets","Uses",
+"A **magnet** is an object that attracts iron, steel, nickel and cobalt.",
+"- A magnet has two **poles**: **north** and **south**.\n- **Unlike poles attract** (N and S). **Like poles repel** (N and N, or S and S).\n- A freely hanging magnet points **north–south**; this is how a **compass** works.\n- **Magnetic materials:** iron, steel, nickel. **Non-magnetic:** wood, plastic, paper, copper.",
+"- Uses: compasses, fridge doors, separating iron from rubbish, loudspeakers, electric bells.\n- Keep magnets away from phones and keep them with keepers to avoid weakening.",
+"A magnet pulls some metals toward it. Opposite ends pull each other, same ends push apart.",
+"- Picks up a nail, pin, paper clip",
+"",
+[["Like poles…",["Repel","Attract","Melt"],0],["A magnet attracts…",["Iron","Wood","Paper"],0],["A compass needle points…",["North–south","East only","Down"],0]]),
+P("Force and simple machines",/\bforces?\b|simple machine|\blevers?\b|pulley|inclined plane|\bramp\b|wheel and axle|\bscrew\b|\bwedge\b|friction|gravity|\bload\b|\beffort\b|fulcrum|\bpush\b|\bpull\b/,"Types and how they work","Examples",
+"A **force** is a push or a pull. It is measured in **newtons (N)**. A **simple machine** makes work easier.",
+"- Forces can move, stop, change shape or change direction of objects.\n- **Friction** slows movement between surfaces. **Gravity** pulls things to the ground. **Weight** is the pull of gravity on an object.\n- **Simple machines:**\n  - **Lever:** a bar on a **fulcrum** (seesaw, crowbar, scissors)\n  - **Pulley:** a wheel with a rope (flagpole, well)\n  - **Inclined plane:** a ramp\n  - **Wheel and axle:** (bicycle, steering wheel)\n  - **Screw** and **wedge:** (screw, axe, knife)",
+"- Friction is useful for walking and braking; reduce it with oil, grease and wheels.\n- Machines **reduce the effort** needed.",
+"A force is a push or a pull. A machine helps us lift or move things with less effort.",
+"- Seesaw: lever\n- Ramp: inclined plane\n- Bicycle: wheel and axle",
+"",
+[["A seesaw is a…",["Lever","Pulley","Wedge"],0],["A force is a…",["Push or pull","Colour","Sound"],0],["Friction can be reduced by…",["Oil","Sand","Water"],0]]),
+P("Energy",/\benergy\b|renewable|\bfuels?\b|solar (power|energy|panel)|biogas|firewood|charcoal|hydro|wind (power|energy|mill)|forms? of energy|sources? of energy/,"Forms and sources","Uses and saving",
+"**Energy** is the ability to do work. It can change from one form to another.",
+"- **Forms:** heat, light, sound, electrical, chemical (food, fuel), kinetic (moving), potential (stored).\n- **Sources:** the **sun** (main source), wood, charcoal, petrol, diesel, paraffin, water (hydroelectric), wind, biogas.\n- **Renewable:** sun, wind, water, biogas, wood (if replanted). **Non-renewable:** petrol, diesel, coal.",
+"- Uses: cooking, transport, lighting, machines.\n- **Save energy:** switch off lights, use energy-saving stoves, plant trees.",
+"Energy makes things happen. Food gives people energy; petrol gives energy to a car.",
+"- Dry cell: chemical → electrical\n- Bulb: electrical → light and heat",
+"",
+[["Main source of energy on Earth?",["The sun","Coal","Wind"],0],["Which is renewable?",["Sun","Petrol","Diesel"],0],["Food stores…",["Chemical energy","Sound energy","Light only"],0]]),
+P("Weather and climate",/weather|climate|rain gauge|wind vane|barometer|anemometer|rainfall|\bwind\b|\bhumidity\b/,"Elements and instruments","Uses",
+"**Weather** is the condition of the atmosphere in a place at a given time. **Climate** is the average weather over many years.",
+"- **Elements:** temperature, rainfall, wind, clouds, humidity, sunshine.\n- **Instruments:** **thermometer** (temperature), **rain gauge** (rainfall), **wind vane** (wind direction), **anemometer** (wind speed), **barometer** (air pressure), **hygrometer** (humidity).",
+"- Uganda has two rainy seasons (March to May and September to November) and two dry seasons.\n- Weather affects farming, transport, clothing and health.\n- A **weather chart** records daily weather using symbols.",
+"Weather is what it is like outside today: sunny, rainy, windy or cloudy.",
+"- Rain gauge: measures rainfall in mm",
+"",
+[["Which instrument measures rainfall?",["Rain gauge","Thermometer","Wind vane"],0],["Weather over many years is…",["Climate","Season","Rain"],0],["A wind vane shows wind…",["Direction","Speed","Heat"],0]]),
+P("Earth’s movements: day, night and seasons",/rotation|revolution|day and night|\bseasons?\b|\beclipse|\borbit\b|leap year|equinox|moon phases?/,"Rotation, revolution and eclipses","What they cause",
+"The Earth **rotates** (spins) on its axis once in **24 hours** and **revolves** (goes around) the sun once in **365¼ days**.",
+"- **Rotation** causes **day and night**.\n- **Revolution** (with the tilt of the Earth) causes the **seasons**.\n- A **leap year** has 366 days because of the extra quarter days adding up.\n- A **solar eclipse** happens when the moon is between the sun and Earth. A **lunar eclipse** happens when the Earth is between the sun and moon.",
+"- Because of rotation the sun seems to rise in the east and set in the west.\n- Moon phases come from the moon’s orbit around Earth (about 28 days).",
+"The Earth spins like a top. Where the sun shines it is day; where it does not it is night.",
+"- 24 hours: one day\n- 365 days: one year",
+"",
+[["What causes day and night?",["Rotation","Revolution","Eclipse"],0],["How long does Earth take to go round the sun?",["365¼ days","24 hours","30 days"],0],["A solar eclipse occurs when the…",["Moon is between sun and Earth","Earth is between sun and moon","Sun goes out"],0]]),
+P("The solar system",/solar system|\bplanets?\b|\bsun\b|\bmoon\b|\bstars?\b|\bearth\b|mercury|venus|\bmars\b|jupiter|saturn|neptune|uranus|\bspace\b|galaxy|satellite/,"Parts of the solar system","Facts",
+"The **solar system** is the sun and everything that moves around it, including planets, moons and asteroids.",
+"- **The sun** is a star, the centre of the solar system, and gives light and heat.\n- **8 planets** in order from the sun: **Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune**.\n- **The moon** is Earth’s natural satellite. It gives no light of its own; it reflects sunlight.\n- **Stars** are huge balls of hot gas that make their own light.",
+"- Earth is the only planet known to have life.\n- Jupiter is the biggest planet. Mercury is nearest the sun.\n- Remember: **My Very Educated Mother Just Served Us Noodles**.",
+"The sun is in the middle, and the planets go around it. We live on planet Earth.",
+"- Jupiter: biggest planet\n- Moon: Earth’s satellite",
+"",
+[["Which planet is nearest the sun?",["Mercury","Earth","Mars"],0],["The moon is a…",["Satellite","Star","Planet"],0],["How many planets are there?",["8","9","7"],0]]),
+P("Pollution",/pollut|\bsmoke\b|\bdump|plastic|litter|global warming|greenhouse|\bnoise pollution/,"Types and causes","Effects and prevention",
+"**Pollution** is adding harmful things to air, water or soil.",
+"- **Air pollution:** smoke from vehicles, factories and burning rubbish.\n- **Water pollution:** waste, chemicals and oil put in rivers and lakes.\n- **Soil pollution:** plastic, chemicals, dumped rubbish.\n- **Noise pollution:** too much loud sound.",
+"- **Effects:** diseases, death of fish and plants, bad smell, acid rain, climate change.\n- **Prevent:** reduce, **reuse**, **recycle**, plant trees, bury or burn rubbish properly, avoid polythene bags.",
+"Pollution is dirt that harms living things. We should keep our air, water and soil clean.",
+"- Smoke, dumped plastic, oil in a lake",
+"",
+[["Smoke causes…",["Air pollution","Water pollution","Soil erosion"],0],["Which helps reduce pollution?",["Recycling","Dumping rubbish","Burning plastic"],0],["Which is a type of pollution?",["Noise","Reading","Cooking"],0]]),
+P("Conservation of the environment",/conserv|plant(ing)? trees|deforest|afforest|reforest|wetlands?|environment|national park|endangered|wildlife|\bforests?\b/,"Ways to protect nature","Why it matters",
+"**Conservation** is protecting and wisely using natural resources such as forests, water, soil and wildlife.",
+"- Plant trees (**afforestation** and **reforestation**).\n- Do not cut trees without replacing them.\n- Protect **wetlands**, rivers and lakes.\n- Keep **wild animals** in national parks (Murchison Falls, Queen Elizabeth).\n- Control bush burning and overgrazing.",
+"- **Deforestation** (cutting trees) causes soil erosion, floods, drought and loss of habitats.\n- Trees give us wood, rain, shade and clean air.",
+"We must look after our environment, because we depend on it.",
+"- Planting a tree\n- Protecting a wetland",
+"",
+[["Planting trees where there were none is…",["Afforestation","Deforestation","Erosion"],0],["Wild animals are kept safe in…",["National parks","Markets","Schools"],0],["Cutting down trees causes…",["Soil erosion","More rain always","Clean air"],0]]),
+P("Measurement",/measur|\blength\b|\bmass\b|\bvolume\b|\bmetres?\b|\blitres?\b|kilogram|\bbalance\b|measuring cylinder|stopwatch|ruler|tape measure/,"Units and instruments","Examples",
+"**Measurement** is finding the size or amount of something using standard units.",
+"- **Length:** metre (m), centimetre, kilometre. Use a ruler or tape measure.\n- **Mass:** kilogram (kg), gram. Use a beam balance or scale.\n- **Volume:** litre (l), millilitre. Use a measuring cylinder or jug.\n- **Time:** second, minute, hour. Use a clock or stopwatch.\n- **Temperature:** degrees Celsius (°C). Use a thermometer.",
+"- 1 m = 100 cm. 1 km = 1000 m. 1 kg = 1000 g. 1 l = 1000 ml.\n- Read a measuring cylinder with your eye level with the bottom of the curve.",
+"We measure so everyone gets the same answer about how long, heavy or full something is.",
+"- Mass of sugar: kg\n- Water in a jerrycan: litres",
+"",
+[["Which unit measures mass?",["Kilogram","Metre","Litre"],0],["1 kg equals…",["1000 g","100 g","10 g"],0],["Which instrument measures volume?",["Measuring cylinder","Ruler","Thermometer"],0]])
+];
+
+TOP0.forEach(t=>{t.S=/noun|verb|adjective|past/i.test(t.n)?["English","General Paper","Literacy"]:/fraction|percentage|pythagoras/i.test(t.n)?["Mathematics","Subsidiary Mathematics"]:["Science","Biology"]});
+const TOP=[...SCI,...TOP0];
+const SCIRE=new RegExp(SCI.map(t=>t.re.source).join("|"),"i");
+function heads(T){if(T&&T.a)return[T.a,T.b];const s=D.sub;
+ if(/Science|Biology|Chemistry|Physics|Agriculture|Nutrition/.test(s))return["How it works","Where it happens and why it matters"];
+ if(/Mathematics|Technical Drawing/.test(s))return["How to work it out","Where it is used"];
+ if(/History/.test(s))return["How it developed","Why it matters"];
+ if(/Geography|Social Studies|Economics/.test(s))return["How it works","Where it is found and why it matters"];
+ if(/Religio|Divinity|Islamic/.test(s))return["What it teaches","How it is lived out"];
+ if(/English|Literature|Literacy|Kiswahili|Luganda|French|German|Arabic|Latin|Chinese|Language|General Paper/.test(s))return["How to use it","Where it is used"];
+ return["How it works","Where it applies"]}
+function topicOf(q){const s=q.toLowerCase(),lv=lvKey();return TOP.find(t=>t.re.test(s)&&(!t.S||D.sub=="General"||t.S.includes(D.sub))&&(!t.L||t.L.includes(lv)))||null}
+function cleanQ(q){return q.replace(/[?.!]+$/,"").replace(/^(what\s+(is|are|was|were)|define|explain|describe|tell me about|how (do|does|can) (i|we|you)|why (is|are|do|does))\s+(an?\s+|the\s+)?/i,"").trim().slice(0,60)||q.slice(0,60)}
+function qText(t,z){return "# Quiz: "+t+"\nQuestion "+(z.n+1)+" of "+z.list.length+"\n"+z.list[z.n][0]}
+function faithOf(q){return/\b(islam\w*|muslim\w*|quran|allah|prophet muhammad|hadith|mosque|ramadan|salah|zakat)\b/i.test(q)?"Islamic":/\b(christian\w*|bible|jesus|christ|church|god the father|gospel|apostles?|easter|christmas|baptism)\b/i.test(q)?"Christian":null}
+function mock(q,mode){
+ if(!mode){const W=work(q);if(W)return W}
+ const T=topicOf(q),H=heads(T),k=cleanQ(q),F=/Religio|Divinity|Islamic/.test(D.sub)?faithOf(q):null,s=F?F+" "+D.sub:D.sub,L=lvKey(),nm=(T?T.n:k.charAt(0).toUpperCase()+k.slice(1))+(F?" ("+F+")":""),b="**"+k+"**";
+ if(mode=="Explain simpler")return{t:"# "+nm+", simpler\n"+(T?T.s:"Think of "+b+" as a small idea in "+s+".\n- Break it into small parts.\n- Learn one part at a time.\n- Say it back in your own words.")};
+ if(mode=="Give an example")return{t:"# Examples of "+nm.toLowerCase()+"\n"+(T?T.e:"- Example 1: a simple case of "+b+".\n- Example 2: a case from daily life.\n- Example 3: a case from an exam question.")};
+ if(mode=="More detail")return{t:"# "+nm+", in more detail\n## Definition\n"+(T?T.d:b+" is a topic in "+s+". State its exact meaning first.")+"\n## "+H[0]+"\n"+(T?T.h:"- Understand what is being asked.\n- Write what you know.\n- Apply the rule step by step.\n- Check your answer.")+"\n## "+H[1]+"\n"+(T?T.w:"- In classwork and exams in "+s+".\n- In daily life where this idea applies.")+"\n"+(T?T.m:"## Common mistakes\n- Skipping steps.\n- Mixing up similar terms.")+"\n## Examples\n"+(T?T.e:"- A simple example from "+s+".")};
+ if(mode=="Quiz me"){const list=T?T.q:[["Which is the best first step when working on "+k+"?",["Guess the answer","Understand the question","Skip to the end"],1],["What should you do after getting an answer?",["Check it","Ignore it","Hide it"],0]],z={list,n:0,score:0,t:nm};return{t:qText(nm,z),quiz:["q",z.list[0][1],z.list[0][2]],qz:z}}
+ const lvl=L=="PLE"?"":L=="UACE"?"\n## Exam approach\nNote the command word (explain, analyse, evaluate) and structure your answer to match.":"\n## Exam tip\nShow your working and use the correct terms for full marks.";
+ return{t:"# "+nm+"\n## 1. Definition\n"+(T?T.d:b+" is a topic in "+s+". Its exact meaning is given here in one clear sentence.")+"\n## 2. "+H[0]+"\n"+(T?T.h:"- Understand what is being asked.\n- Write down what you know.\n- Apply the rule step by step.\n- Check your answer.")+"\n## 3. "+H[1]+"\n"+(T?T.w:"- In classwork and exams in "+s+".\n- In daily life where this idea applies.")+lvl+(D.sub=="Science"&&lvKey()=="PLE"&&!T?"\n## Science topics you can ask about\n"+SCI.map(t=>"- "+t.n).join("\n"):"")+(/Religio|Divinity|Islamic/.test(D.sub)&&!F?"\n## Note\nAdd Christian or Islamic to your question to get the answer for your faith.":"")}}
+
+function bub(m,i,last){
+ if(m.err)return `<div class="b i err" data-i="${i}">${esc(m.t)}<div class="act"><button data-act="retry" data-i="${i}">Retry</button></div></div>`;
+ const A=[["copy","Copy"],["bm",m.bm?"Saved":"Save",m.bm],["up","Helpful",m.fb==1],["dn","Not helpful",m.fb==-1],["share","Share"]];
+ let h=`<div class="b i ai" data-i="${i}"><div class="md">${md(m.t)}</div>`;
+ if(m.quiz){h+=m.quiz[1].map((o,k)=>`<button class="opt ${m.pick!=null?(k==m.quiz[2]?"ok":k==m.pick?"bad":""):""}" data-act="pick" data-i="${i}" data-k="${k}">${esc(o)}</button>`).join("")+(m.pick!=null?`<p>${m.pick==m.quiz[2]?"Correct, well done.":"Not quite. The correct answer is highlighted."}</p>`+(m.qz?(m.qz.n<m.qz.list.length-1?`<div class="chips"><button data-act="nq" data-i="${i}">Next question</button></div>`:`<p><b>Quiz finished: ${m.qz.score} out of ${m.qz.list.length}.</b></p>`):""):"")}
+ let act="";
+ if(!m.stream){act=`<div class="act out">${A.map(a=>`<button class="${a[2]?"on":""}" data-act="${a[0]}" data-i="${i}" aria-label="${a[1]}" title="${a[1]}">${AI[a[0]]}</button>`).join("")}${last?`<button data-act="regen" data-i="${i}" aria-label="Regenerate" title="Regenerate">${AI.regen}</button>`:""}</div>`;
+  if(last)h+=(m.w&&m.w.shown<m.w.parts.length)?wBtns(m,i):`<div class="chips">${["Explain simpler","Give an example","More detail","Quiz me"].map(c=>`<button data-chip="${c}">${c}</button>`).join("")}</div>`}
+ return h+`<small>${hm(m.ts)}</small></div>${act}`}
+function stopS(){if(stream==null)return;clearInterval(stream);stream=null;if(sm){if(sm.w)sm.t=wBuild(sm);delete sm.stream}sm=null;$("stat").textContent="online";$("send").innerHTML=SEND;save();render()}
+function ask(q,mode){
+ if(stream!=null)return;const ch=D.chats.find(c=>c.id==D.cur);if(ch.title=="New chat"||ch.title=="Chat")ch.title=q.slice(0,32);
+ const now=Date.now();stamps=stamps.filter(t=>now-t<6e4);
+ const err=x=>{D.msgs.push({s:"i",err:1,t:x,q,mode,ts:Date.now()});save();render()};
+ if(!navigator.onLine)return err("No internet connection. Check your network and try again.");
+ if(stamps.length>=8)return err("Too many requests. Please wait a minute and try again.");
+ stamps.push(now);sm=null;
+ const f=mock(q,mode),m={s:"i",t:"",ts:Date.now(),q,mode,stream:1},w=f.t.split(/(?<=\s)/);if(f.quiz)m.quiz=f.quiz;if(f.qz)m.qz=f.qz;if(f.w)m.w=f.w;
+ $("stat").textContent="typing…";$("send").innerHTML=STOP;
+ stream=setTimeout(()=>{D.msgs.push(m);sm=m;let k=0;stream=setInterval(()=>{m.t+=w[k++]||"";if(k>=w.length){stopS();notify("Answer ready",'Your answer about "'+(q||"your question").slice(0,40)+'" is ready.')}else render()},35)},600)}
+$("msgs").addEventListener("click",e=>{
+ const c=e.target.closest("[data-chip]");if(c){if(stream!=null)return;const q0=(()=>{for(let i=D.msgs.length;i--;){const x=D.msgs[i];if(x.s=="o"&&!x.chip)return x.t}return"this topic"})();D.msgs.push({s:"o",t:c.dataset.chip,chip:1,ts:Date.now(),st:2});save();render();ask(q0,c.dataset.chip);return}
+ const st=e.target.closest("[data-st]");if(st){$("inp").value=st.dataset.st;send();return}
+ const b=e.target.closest("[data-act]");if(!b)return;const i=+b.dataset.i,m=D.msgs[i],a=b.dataset.act;
+ if(a=="copy"){navigator.clipboard&&navigator.clipboard.writeText(m.t.replace(/[#*`|]/g,""));return}
+ if(a=="share"){const t=m.t.replace(/[#*`|]/g,"");
+  if(navigator.share){navigator.share({text:t}).catch(()=>{})}
+  else{navigator.clipboard&&navigator.clipboard.writeText(t);uiAlert("Sharing is not supported here. The answer was copied instead.")}return}
+ if(m.w){if(a=="next"){m.w.shown=Math.min(m.w.shown+1,m.w.parts.length);m.t=wBuild(m)}if(a=="all"){m.w.shown=m.w.parts.length;m.t=wBuild(m)}if(a=="brk"){m.w.open[m.w.shown-1]=1;m.t=wBuild(m)}}
+ if(a=="bm")m.bm=!m.bm;if(a=="up")m.fb=m.fb==1?0:1;if(a=="dn")m.fb=m.fb==-1?0:-1;
+  if(a=="pick"&&m.pick==null){m.pick=+b.dataset.k;if(m.qz&&m.pick==m.quiz[2])m.qz.score++}
+ if(a=="nq"&&m.qz&&m.pick!=null&&m.qz.n<m.qz.list.length-1){const z=m.qz;z.n++;m.quiz=["q",z.list[z.n][1],z.list[z.n][2]];m.pick=null;m.t=qText(z.t,z)}
+ if(a=="retry"||a=="regen"){D.msgs.splice(i,1);save();render();ask(m.q,m.mode);return}
+ save();render()});
+function subs(){$("subs").innerHTML='<button data-all="1">All subjects</button>'+subsList().map(x=>`<button class="${x==D.sub?"on":""}" data-s="${x}">${x}</button>`).join("");const o=$("subs").querySelector(".on");if(o)o.scrollIntoView({inline:"center",block:"nearest"})}
+function allSubs(){showP("All subjects",[GR[lvIdx()]].map(g=>`<div class="sec">${g[0]}</div><div class="sws" style="gap:8px"><button class="lk ${"General"==D.sub?"on":""}" data-s="General">General</button>${g[1].map(x=>`<button class="lk ${x==D.sub?"on":""}" data-s="${x}">${x}</button>`).join("")}</div>`).join(""),closeP,e=>{const x=e.target.dataset.s;if(x){closeP();setSub(x)}})}
+$("subs").onclick=e=>{if(e.target.dataset.all)return allSubs();const s=e.target.dataset.s;if(s)setSub(s)};
+function empty(){return`<div class="empty"><b style="font-size:1.25em">Hello${D.pname?" "+esc(D.pname):""}, what do you want to learn?</b><p style="margin:6px 0 12px">${lvKey()} · Subject: ${D.sub}. Pick a question or type your own.</p>${(STARTS[D.sub]||gen(D.sub)).map(x=>`<button class="st" data-st="${x}">${x}</button>`).join("")}</div>`}
+$("ph").onclick=()=>$("file").click();
+$("file").onchange=()=>{const f=$("file").files[0];if(!f||stream!=null)return;D.msgs.push({s:"o",t:"Photo question",img:URL.createObjectURL(f),ts:Date.now(),st:2});$("file").value="";save();render();ask("the question in your photo")};
+$("mic").onclick=()=>{const R=window.SpeechRecognition||window.webkitSpeechRecognition;if(!R){uiAlert("Voice input is not supported in this browser.");return}const r=new R();r.lang="en-US";$("mic").classList.add("on");r.onresult=e=>{$("inp").value=e.results[0][0].transcript;send()};r.onend=()=>$("mic").classList.remove("on");r.start()};
+function sw(id){D.cur=id;const ch=D.chats.find(c=>c.id==id);D.msgs=ch.msgs;if(ch.sub&&subsList().includes(ch.sub))D.sub=ch.sub;stopS();stopEdit();q="";$("sq").value="";$("srch").style.display="none";save();render();closeP()}
+function newChat(){const c={id:Date.now(),title:"New chat",sub:D.sub,lv:lvKey(),msgs:[]};D.chats.unshift(c);sw(c.id)}
+function history(){showP("Chat history",`<div class="row" data-a="new"><div><b>New chat</b></div></div><div style="padding:10px 14px"><input id="hq" class="fld" placeholder="Search chats"></div><div id="hl"></div>`,closeP,e=>{
+ const r=e.target.closest(".row");if(!r)return;const id=+r.dataset.id,a=e.target.dataset.a||r.dataset.a,c=D.chats.find(x=>x.id==id);
+ if(a=="new")return newChat();
+ if(lp){lp=0;return}
+ if(e.target.closest("[data-a=more]"))return chatSheet(id);
+ sw(id)});$("hq").oninput=hlist;hlist();longp()}
+function hlist(){const f=$("hq").value.toLowerCase();$("hl").innerHTML=D.chats.filter(c=>c.title.toLowerCase().includes(f)).map(c=>`<div class="row" data-id="${c.id}"><div style="flex:1;min-width:0"><b>${esc(c.title)}</b><small>${c.msgs.length} messages</small></div><button class="ic" data-a="more" aria-label="Options"><svg viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button></div>`).join("")}
+let lp=0;
+function longp(){let t;const h=$("hl");h.onpointerdown=e=>{const w=e.target.closest(".row");if(!w)return;t=setTimeout(()=>{lp=1;chatSheet(+w.dataset.id)},500)};
+ h.onpointerup=()=>{clearTimeout(t);setTimeout(()=>lp=0,300)};h.onpointercancel=h.onpointerleave=()=>clearTimeout(t);h.oncontextmenu=e=>e.preventDefault()}
+function chatSheet(id){const c=D.chats.find(x=>x.id==id),s=$("sheet");
+ s.innerHTML='<div data-a="r">Rename</div><div class="dl" data-a="d">Delete</div><div class="x" data-a="x">Cancel</div>';$("scrim").style.display="flex";
+ s.onclick=e=>{const a=e.target.dataset.a;if(!a)return;$("scrim").style.display="none";
+  if(a=="r"){uiPrompt("Rename chat",c.title,n=>{if(n&&n.trim()){c.title=n.trim();save();hlist()}})}
+  if(a=="d")uiConfirm("Delete this chat?",()=>{D.chats=D.chats.filter(x=>x.id!=id);if(!D.chats.length)D.chats=[{id:Date.now(),title:"New chat",msgs:[]}];if(D.cur==id){sw(D.chats[0].id);history()}else{save();hlist()}},"Delete")}}
+function saved(){const L=[];D.chats.forEach(c=>c.msgs.forEach(m=>{if(m.bm)L.push(m)}));showP("Saved answers",L.length?L.map(m=>`<div class="row" style="display:block"><b>${esc(m.q||"Answer")}</b><div class="md">${md(m.t)}</div></div>`).join(""):'<div class="empty">No saved answers yet</div>',closeP)}
+const op=(a,v)=>a.map(x=>`<option ${x==v?"selected":""}>${x}</option>`).join("");
+const LVS=[["PLE","Primary"],["UCE","O-Level"],["UACE","A-Level"]];
+const CLS=()=>`<div style="display:flex;flex-direction:column;gap:8px;padding:8px 18px">${LVS.map(([k,n])=>`<button class="lk ${k==D.lvl?"on":""}" data-lvl="${k}" style="width:100%;text-align:left">${k} · ${n}</button>`).join("")}</div>`;
+function profile(){showP("Learner profile",`<div class="sec">Name</div><div style="padding:8px 18px"><input class="fld" id="pn" value="${esc(D.pname)}" placeholder="Your name"></div><div class="sec">Select level</div>${CLS()}<div class="sec">Language</div><div style="padding:8px 18px"><select class="fld" id="pl">${op(["English","French","Spanish","Swahili","Arabic","Hindi"],D.lang)}</select></div>`,settings,e=>{const c=e.target.dataset.lvl;if(c&&c!=D.lvl){D.lvl=c;fixSub();setSub(D.sub);profile()}});
+ $("pn").oninput=()=>{D.pname=$("pn").value.trim();save()};$("pl").onchange=()=>{D.lang=$("pl").value;save()}}
+function access(){showP("Accessibility",`<div class="sec">Text size</div><div class="sws">${[[14,"Small"],[16,"Medium"],[20,"Large"]].map(a=>`<button class="lk ${D.fs==a[0]?"on":""}" data-fs="${a[0]}">${a[1]}</button>`).join("")}</div><div class="row" data-a="hc"><input type="checkbox" ${D.hc?"checked":""}><div>High contrast</div></div>`,settings,e=>{const f=e.target.dataset.fs;if(f)D.fs=+f;if(e.target.closest("[data-a=hc]"))D.hc=!D.hc;applyTheme();save();access()})}
+applyTheme();render();updateBadge();$("msgs").addEventListener("scroll",()=>{const m=$("msgs");$("jump").style.display=m.scrollHeight-m.scrollTop-m.clientHeight>250?"grid":"none"});
+$("jump").onclick=()=>$("msgs").scrollTo({top:1e9,behavior:"smooth"});
+
+/* ===== PROJECT HANDOFF =====
+ FOR CLAUDE: whenever you change this app, update the HANDOFF object below.
+ Set done to 1 on finished items, add new items, add a line to log, set updated to today.
+ Never mark an item done unless it was built and tested. */
+const HANDOFF={
+ "updated": "2026-10-29",
+ "about": [
+  [
+   "What this is",
+   "The app is named Ask Tr. David (shown in the title and as the chat name). It is a mobile-first study assistant for learners in Uganda, built as one HTML file (chatroom_single.html). It serves three levels: PLE (primary), UCE (O-Level) and UACE (A-Level)."
+  ],
+  [
+   "Purpose and benefit",
+   "Many learners have no teacher beside them when they get stuck. The app gives each learner a study helper on their phone that answers in the format of their own class level. The owner controls the answers, so they are correct for the syllabus. Questions it cannot answer are collected for the owner to answer, so the app improves over time. The owner can also send announcements."
+  ],
+  [
+   "How it should work (target)",
+   "1) The learner selects their level (PLE, UCE or UACE). 2) Subject tabs show only that level's subjects. 3) The learner asks by typing, voice or photo. 4) The app searches stored answers in Supabase across all three levels, then replies in the format of the learner's own level. 5) If nothing matches, it saves the question in an unanswered list. 6) The owner opens the admin panel, writes the answer and publishes it. 7) The owner sends announcements that pop up in the app for a duration the admin sets. Steps 4 to 7 are not built yet."
+  ],
+  [
+   "How it works today",
+   "One self-contained HTML file with plain JavaScript. No network calls, works offline. State lives in the object D, saved by save() to browser storage. Replies come from the placeholder generator mock(q,mode) and stream word by word. The exception is equations such as 2x + 5 = 11: work(q) solves them for real (parser eqOf, solver solveLin) and shows the working in stages with Next step, Break this step down and Show all steps buttons (state is kept in m.w, text is rebuilt by wBuild). Every other question still gets the placeholder. Level comes from lvKey(): Primary = PLE, Senior 5 and 6 = UACE, other Senior = UCE. Subject lists are in GR and filtered by subsList() and fixSub(). Panels use showP(). Popups use uiAlert, uiConfirm and uiPrompt. The announcement banner is driven by window.receiveAnnouncement({id,title,body,duration}), where duration is in seconds and 0 means it stays until Hide. The device back button is handled by a block of code near the end of the script."
+  ],
+  [
+   "Supabase notes",
+   "The database is built in the Supabase project Nova School Manager (pjdtlpnlvumpefxjmjpv, eu-west-1). That project was wiped on 2026-10-29 and reused for this app. The other project on the account, Excel Examination Services, belongs to a different app: do not touch it. Tables, all with row level security on: levels (PLE, UCE, UACE; 3 rows), subjects (59 rows), questions, question_phrasings, answers (per level and mode, draft or published, optional quiz JSON), unanswered_questions, announcements, feedback, admin_users. Public RPC functions for the learner app: log_unanswered(p_question, p_level, p_subject) and submit_feedback(p_answer_id, p_vote). Helper functions: is_admin() and is_owner(). Migrations: study_assistant_schema and tighten_function_security. Content so far: 60 Mathematics questions with answers (20 each for PLE, UCE and UACE), all saved as drafts so learners cannot see them until a teacher reviews and publishes them. Each question has one answer at one level; question positions are 1-20 for PLE, 101-120 for UCE and 201-220 for UACE. A question and its answer must both be published to be visible to learners. Still empty: announcements and admin_users, so no admin user exists yet. This app does not call Supabase yet. Learners include children, so keep personal data minimal."
+  ],
+  [
+   "Working notes",
+   "The owner uses the Claude mobile app and dictates by voice. Misheard words: shirt or short = chat; clear shirt = clear chat; Superbase = Supabase; the one report = the Report button; three upright dot = the three-dot menu; USCE probably = UACE. When the owner asks a question, answer it and do not start changing things. Ask before anything risky or irreversible. Keep replies short for a phone. Test every change in Playwright (load the file, click, check for script errors). Everything so far was tested in a headless browser only, never on a real phone."
+  ],
+  [
+   "Update rule (for Claude)",
+   "Whenever you change this app, update the HANDOFF block in this file: set done to 1 for finished items, add new items, add a line to log, and set updated to today. Never mark something done unless it was built and tested."
+  ]
+ ],
+ "tasks": [
+  [
+   "Front end",
+   [
+    [
+     "Chat: typed, voice and photo questions, edit own messages, ticks, search, history, saved answers, trash, export",
+     1
+    ],
+    [
+     "Clear chat in the three-dot menu, instant, goes to Trash",
+     1
+    ],
+    [
+     "Export chat in Settings",
+     1
+    ],
+    [
+     "Device back button closes layers; three presses to exit",
+     1
+    ],
+    [
+     "Custom popups replace all browser alerts",
+     1
+    ],
+    [
+     "Answer icons under the card: copy, save, helpful, not helpful, share, regenerate",
+     1
+    ],
+    [
+     "Report and Listen removed",
+     1
+    ],
+    [
+     "Long-press menu only on the learner's own messages",
+     1
+    ],
+    [
+     "Equal 10 px side margins",
+     1
+    ],
+    [
+     "Three-dot menu at top right",
+     1
+    ],
+    [
+     "What's new in Settings, red dot on avatar, avatar opens What's new",
+     1
+    ],
+    [
+     "Announcement banner with Hide only and admin-set duration",
+     1
+    ],
+    [
+     "Away alerts switch",
+     1
+    ],
+    [
+     "Scroll-to-latest button",
+     1
+    ],
+    [
+     "Subject tabs follow the selected level (PLE, UCE, UACE)",
+     1
+    ],
+    [
+     "Answer format differs by level (placeholder text)",
+     1
+    ],
+    [
+     "Project handoff screen inside the app",
+     1
+    ],
+    [
+     "Test everything on a real phone",
+     0
+    ],
+    [
+     "Make it an installable app (PWA) so exit, offline and phone alerts work",
+     0
+    ],
+    [
+     "Level-specific starter questions on the empty screen",
+     0
+    ],
+    [
+     "Voice input language setting",
+     0
+    ],
+    [
+     "Hide the Project handoff screen from learners (owner or developer only)",
+     0
+    ]
+   ]
+  ],
+  [
+   "Supabase (database)",
+   [
+    [
+     "Choose the Supabase project (or create a new one)",
+     1
+    ],
+    [
+     "Create tables with row level security: answers, unanswered_questions, announcements, admin users",
+     1
+    ],
+    [
+     "Add the owner as the first admin user",
+     0
+    ],
+    [
+     "Look up answers across all three levels and reply in the learner's level",
+     0
+    ],
+    [
+     "Show a no-answer-yet reply and save the question as unanswered",
+     0
+    ],
+    [
+     "Fetch announcements and call receiveAnnouncement",
+     0
+    ],
+    [
+     "Real quiz questions from stored answers",
+     0
+    ]
+   ]
+  ],
+  [
+   "Admin panel (not started)",
+   [
+    [
+     "Decide technology: Expo / React Native app or installable PWA",
+     0
+    ],
+    [
+     "Secure login and roles",
+     0
+    ],
+    [
+     "Dashboard: questions asked, unanswered, answered, by level and subject",
+     0
+    ],
+    [
+     "Unanswered queue: write the answer for the right level and publish",
+     0
+    ],
+    [
+     "Answer library: create, edit, search, reorder, CSV import, preview",
+     0
+    ],
+    [
+     "Announcements with start, end and display duration",
+     0
+    ],
+    [
+     "Feedback view: helpful and not-helpful counts per answer",
+     0
+    ]
+   ]
+  ],
+  [
+   "Worked solutions",
+   [
+    [
+     "Real step-by-step working for equations such as 2x + 5 = 11, with Next step, Break this step down and Show all steps buttons",
+     1
+    ],
+    [
+     "Real working for other maths: fractions, percentages, Pythagoras, area and more",
+     0
+    ],
+    [
+     "Show stored answers in stages (definition first, then working) using the same buttons",
+     0
+    ],
+    [
+     "Fix: chats are saved but not restored when the app is reopened (existing issue)",
+     0
+    ]
+   ]
+  ],
+  [
+   "Content",
+   [
+    [
+     "Write answers topic by topic with Claude through the Supabase connector",
+     0
+    ],
+    [
+     "Teacher review before answers go live",
+     0
+    ]
+   ]
+  ]
+ ],
+ "log": [
+  [
+   "2026-10-29",
+   "Moved Clear chat and Export chat; added back button behaviour and three-press exit; custom popups; icon-only answer actions under the card; share added; Report and Listen removed; long press only on own messages; equal side margins."
+  ],
+  [
+   "2026-10-29",
+   "Built What's new, avatar dot, announcement banner, away alerts and scroll-to-latest. Subject tabs now follow the class level, with level-specific answer formats."
+  ],
+  [
+   "2026-10-29",
+   "Put this Project handoff inside the app."
+  ],
+  [
+   "2026-10-29",
+   "Study assistant database built in Nova School Manager: 9 tables with row level security, 2 public RPCs, 2 migrations. Schema and advisors re-checked afterwards. Learner-side test was run during the database build, not re-run here. App not connected yet."
+  ],
+  [
+   "2026-10-29",
+   "Renamed the app to Teacher David, your assistant (page title, chat name, handoff). The Supabase project is still called Nova School Manager: it must be renamed in the Supabase dashboard."
+  ],
+  [
+   "2026-10-29",
+   "Profile picture in the chat header is now the owner's photo, embedded in the file (full photo, no crop, 256 px JPEG, about 9 KB)."
+  ],
+  [
+   "2026-10-29",
+   "Renamed the app again to Ask TR David, your assistant (page title, chat name, handoff)."
+  ],
+  [
+   "2026-10-29",
+   "Name spelling changed to Ask Tr. David, your assistant (Tr. with a dot, small r)."
+  ],
+  [
+   "2026-10-29",
+   "Removed \"your assistant\" from the name. The app is now just Ask Tr. David (page title, chat name, handoff)."
+  ],
+  [
+   "2026-10-29",
+   "New answer format for every subject and level: no greeting or filler. First answer is 1. Definition, 2. How to use it, 3. Where it is used. Explain simpler gives a short plain version, Give an example gives examples only, More detail gives definition, use, places, extra points, mistakes and examples, Quiz me asks several questions with a score. The Class picker is now Select level (PLE, UCE, UACE only; saved as D.lvl, no class numbers). Primary subjects are English, Mathematics, Science, Social Studies and Religious Education; Religious Education covers both faiths and answers are filtered Christian or Islamic from the words in the question (faithOf). UCE list reduced (Computer Studies renamed ICT; languages and technical subjects removed). Primary Science (PLE) content added: 49 topics written from general knowledge of the Ugandan primary science syllabus (living things, plants, animals, human body, health and diseases, matter, air, water, soil, rocks, heat, light, sound, electricity, magnets, force and machines, energy, weather, earth and space, pollution, conservation, measurement). Each has definition, how, where, simpler, examples, more detail and 3 quiz questions. NOT yet checked against the NCDC syllabus or textbooks: a teacher must review before publishing. Topic questions are matched by keywords in the SCI list; questions with no match get the placeholder plus a list of topics. Each subject tab now has its own separate chat per level: switching to a subject shows that subject's own page (fresh the first time, restored when you come back), and the old chat stays in history. Typing a question while on General auto-switches to the matching subject tab by keywords (detectSub / SUBRULES). Section headings now depend on the topic and subject (photosynthesis uses 1. Definition, 2. How it works, 3. Where it happens and why it matters; history uses How it developed and Why it matters). Real content is written for 8 starter topics (noun, verb, adjective, past tense, fraction, percentage, Pythagoras, photosynthesis); other topics use the same layout with placeholder wording until real answers come from the database."
+  ],
+  [
+   "2026-10-29",
+   "Database content pilot: 60 Mathematics questions and answers (20 per level), saved as drafts. The other 56 subjects are not written yet."
+  ],
+  [
+   "2026-10-29",
+   "Added real step-by-step working for equations (tested on 18 cases, including brackets, x on both sides, fractions and no-solution). Answers are shown in stages with Next step, Break this step down and Show all steps. Found an existing issue: saved chats are not restored on reopen."
+  ]
+ ]
+};
+function hoCount(){let d=0,t=0;HANDOFF.tasks.forEach(g=>g[1].forEach(i=>{t++;if(i[1])d++}));return[d,t]}
+function hoText(){const[d,t]=hoCount();let o="ASK TR. DAVID: PROJECT HANDOFF (updated "+HANDOFF.updated+")\n"+d+" of "+t+" items done\n\n";
+ HANDOFF.about.forEach(a=>o+=a[0].toUpperCase()+"\n"+a[1]+"\n\n");
+ HANDOFF.tasks.forEach(g=>{o+=g[0].toUpperCase()+"\n"+g[1].map(i=>(i[1]?"[done] ":"[remaining] ")+i[0]).join("\n")+"\n\n"});
+ o+="LOG\n"+HANDOFF.log.map(l=>l[0]+": "+l[1]).join("\n");return o}
+function handoff(){
+ const[d,t]=hoCount(),pct=Math.round(d/t*100);
+ const body=`<div style="padding:12px 18px"><b>${d} of ${t} done</b> <span style="color:var(--sub)">(${pct}%)</span><div style="height:8px;border-radius:4px;background:var(--wall);margin:8px 0"><div style="height:8px;border-radius:4px;background:var(--green);width:${pct}%"></div></div><small style="color:var(--sub)">Updated ${esc(HANDOFF.updated)}</small></div>
+ <div class="row" data-a="cp"><div>Copy full handoff as text<small>Paste it to another Claude to continue</small></div></div>`+
+ HANDOFF.tasks.map(g=>`<div class="sec">${esc(g[0])} (${g[1].filter(i=>i[1]).length}/${g[1].length})</div>`+g[1].map(i=>`<div class="row" style="display:block"><span style="color:${i[1]?"var(--green)":"var(--sub)"};font-weight:700">${i[1]?"&#10003;":"&#9675;"}</span> <span style="${i[1]?"":"font-weight:600"}">${esc(i[0])}</span></div>`).join("")).join("")+
+ '<div class="sec">About</div>'+HANDOFF.about.map(a=>`<div style="padding:8px 18px"><b>${esc(a[0])}</b><div style="margin-top:3px;color:var(--sub);white-space:pre-wrap">${esc(a[1])}</div></div>`).join("")+
+ '<div class="sec">Log</div>'+HANDOFF.log.map(l=>`<div style="padding:8px 18px"><small style="color:var(--sub)">${esc(l[0])}</small><div>${esc(l[1])}</div></div>`).join("");
+ showP("Project handoff",body,settings,e=>{if(e.target.closest("[data-a=cp]")){const x=hoText();
+  const fb=()=>{const ta=document.createElement("textarea");ta.value=x;document.body.appendChild(ta);ta.select();try{document.execCommand("copy")}catch(_){}ta.remove();uiAlert("Handoff copied.")};
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(x).then(()=>uiAlert("Handoff copied."),fb);else fb()}})}
+/* device back button: closes the top-most open layer; at the root, 3 quick presses exit */
+(function(){
+ const open=id=>getComputedStyle($(id)).display!="none";
+ const any=()=>["dlgx","scrim","more","panel","srch","editing"].some(open);
+ let pushed=false,skip=0,last=0,stage=0,toastEl=null,dlg=null,tt=0;
+ const push=()=>{try{history.pushState({chat:1},"")}catch(e){}};
+ push(); /* guard entry so back at the root can be intercepted */
+ function sync(){
+  if(any()&&!pushed){push();pushed=true}
+  else if(!any()&&pushed){pushed=false;skip++;try{history.back()}catch(e){}}
+ }
+ function hideAll(){stage=0;clearTimeout(tt);if(toastEl){toastEl.remove();toastEl=null}if(dlg){dlg.remove();dlg=null}}
+ function toast(t){
+  hideAll();stage=1;
+  toastEl=document.createElement("div");toastEl.textContent=t;
+  toastEl.style.cssText="position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:rgba(30,30,30,.92);color:#fff;padding:10px 18px;border-radius:20px;font-size:14px;z-index:99;pointer-events:none";
+  document.body.appendChild(toastEl);
+  tt=setTimeout(()=>{if(toastEl){toastEl.remove();toastEl=null}},2000);
+ }
+ function exitApp(){
+  removeEventListener("popstate",onPop);hideAll();
+  try{window.close()}catch(e){}
+  try{history.back()}catch(e){}
+  setTimeout(()=>{location.replace("about:blank")},400);
+ }
+ function showDlg(){
+  hideAll();stage=2;
+  dlg=document.createElement("div");
+  dlg.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.45);display:grid;place-items:center;z-index:99";
+  dlg.innerHTML='<div id="xbox" style="background:var(--sheet,#fff);color:var(--text,#111);border-radius:14px;padding:20px;min-width:240px;box-shadow:0 4px 18px rgba(0,0,0,.3)"><div style="font-weight:600;font-size:17px;margin-bottom:6px">Exit the app?</div><div style="font-size:13px;opacity:.7;margin-bottom:16px">Press back again to exit, or tap anywhere to cancel.</div><div style="display:flex;justify-content:flex-end;gap:8px"><button id="xno" style="background:none;border:0;padding:8px 14px;font-size:15px;color:inherit;cursor:pointer">Cancel</button><button id="xok" style="background:var(--green,#00a884);color:#fff;border:0;border-radius:8px;padding:8px 18px;font-size:15px;cursor:pointer">OK</button></div></div>';
+  document.body.appendChild(dlg);
+  dlg.onclick=e=>{if(e.target.id=="xok")exitApp();else hideAll()};
+ }
+ function rootBack(){
+  const now=Date.now();
+  if(now-last>2000){hideAll()}
+  last=now;
+  if(stage>=2){exitApp();return}
+  push();
+  if(stage==0)toast("Press back again to exit");
+  else showDlg();
+ }
+ function onPop(){
+  if(skip){skip--;return}
+  if(any()){
+   pushed=false;
+   if(open("dlgx")){dlgCancel&&dlgCancel();if(open("dlgx"))$("dlgx").style.display="none"}
+   else if(open("scrim"))$("scrim").style.display="none";
+   else if(open("more"))$("more").style.display="none";
+   else if(open("panel")){const b=$("pb");b&&b.onclick?b.onclick():closeP()}
+   else if(open("srch"))closeSearch();
+   else if(open("editing"))stopEdit();
+   sync();
+  }else rootBack();
+ }
+ addEventListener("popstate",onPop);
+ /* tapping anywhere cancels the exit prompt */
+ document.addEventListener("pointerdown",e=>{if(stage>0&&!(dlg&&e.target.id=="xok"))hideAll()},true);
+ const mo=new MutationObserver(sync);
+ ["dlgx","scrim","more","panel","srch","editing"].forEach(id=>mo.observe($(id),{attributes:true,attributeFilter:["style"]}));
+})();
+</script></body></html>

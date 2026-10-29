@@ -1,6 +1,48 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.json">
+<script>
+/* Install page: decided before first paint so there is no flash.
+   Shown only in a normal browser tab; never inside the installed app. */
+(function () {
+  try {
+    var m = function (q) { return window.matchMedia && window.matchMedia(q).matches; };
+    var standalone = m("(display-mode: standalone)") || m("(display-mode: fullscreen)") || m("(display-mode: minimal-ui)") || window.navigator.standalone === true;
+    var skip = false;
+    try { skip = sessionStorage.getItem("ask_pgContinue") === "1"; } catch (e) {}
+    if (!standalone && !skip) document.documentElement.classList.add("pg-on");
+  } catch (e) {}
+})();
+</script>
+<style>
+  #pgGate{display:none;position:fixed;top:0;right:0;bottom:0;left:0;z-index:2147483000;overflow:auto;
+    background:linear-gradient(160deg,#0000b9 0%,#0a3fd8 100%);color:#fff;text-align:center;
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-tap-highlight-color:transparent;
+    padding:24px calc(24px + env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) calc(24px + env(safe-area-inset-left));
+    flex-direction:column;align-items:center;justify-content:center;}
+  html.pg-on #pgGate{display:flex;}
+  html.pg-on,html.pg-on body{overflow:hidden;}
+  #pgGate .pg-box{width:100%;max-width:340px;margin:auto;display:flex;flex-direction:column;align-items:center;}
+  #pgGate .pg-logo{width:128px;height:128px;border-radius:28px;display:block;background:#0000ba;box-shadow:0 14px 36px rgba(0,0,0,.38);}
+  #pgGate .pg-name{margin:22px 0 42px;font-size:34px;line-height:1.1;font-weight:800;letter-spacing:.2px;}
+  #pgGate .pg-install{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;height:56px;border:0;border-radius:16px;
+    background:#ffd800;color:#0a1a6e;font:700 18px/1 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;cursor:pointer;
+    box-shadow:0 10px 24px rgba(0,0,0,.3);transition:transform .08s ease,background .15s ease,opacity .15s ease;}
+  #pgGate .pg-install:hover{background:#ffe44d;}
+  #pgGate .pg-install:active{transform:scale(.98);}
+  #pgGate .pg-install:disabled{opacity:.75;cursor:default;transform:none;}
+  #pgGate .pg-continue{margin-top:20px;padding:10px 14px;color:rgba(255,255,255,.88);font-size:15px;font-weight:500;text-decoration:underline;text-underline-offset:3px;}
+  #pgGate .pg-continue:hover{color:#fff;}
+  #pgGate .pg-install:focus-visible,#pgGate .pg-continue:focus-visible{outline:3px solid #fff;outline-offset:3px;}
+  #pgGate .pg-msg{margin:14px 0 0;font-size:14px;line-height:1.5;color:rgba(255,255,255,.92);}
+  @media (max-height:520px){#pgGate .pg-name{margin-bottom:24px;}#pgGate .pg-logo{width:88px;height:88px;border-radius:20px;}}
+  #pgGate .pg-install,#pwaInstallBtn{margin:0;padding:0;}
+</style>
+<meta name="theme-color" content="#0000b9">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Ask Tr. David"><meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="icon" type="image/png" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
 <title>Ask Tr. David</title>
 <style>
 :root{--bg:#fff;--text:#111b21;--sub:#667781;--out:color-mix(in srgb,var(--green) 18%,#fff);--in:#fff;--wall:#efeae2;--green:#00a884;--bar:#fff;--tick:#34b7f1;--line:#e4e6e8;--sheet:#fff}
@@ -23,11 +65,12 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 .b small svg{width:16px;height:16px;stroke-width:2.4}.rd{color:var(--tick)}
 .day{align-self:center;background:var(--in);color:var(--sub);font-size:12px;padding:4px 12px;border-radius:10px;margin:8px 0}
 #editing{display:none;background:var(--bar);padding:8px 16px;font-size:13px;color:var(--green);border-top:1px solid var(--line)}
-#cmp{display:flex;gap:4px;align-items:center;padding:6px 8px;background:var(--bar)}
+#cmp{display:flex;gap:4px;align-items:center;padding:6px 16px;background:var(--bar)}#iw{flex:1;min-width:0;display:flex;align-items:center;background:var(--wall);border-radius:24px;padding:3px 7px 3px 8px;gap:2px}
+#ps{display:flex;justify-content:space-between;align-items:center;padding:0 26px 6px;background:var(--bar);font-size:11px;color:var(--sub)}#psl,#psr{border:1px solid var(--line);background:var(--bg);font:inherit;color:inherit;display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:16px}#psl{cursor:pointer}#psl i{width:8px;height:8px;border-radius:50%;display:inline-block}#psl b{color:var(--text);font-weight:600}
 #cmp .ic{padding:4px;flex-shrink:0}#cmp .ic svg{width:22px;height:22px}
-#inp{flex:1;min-width:0;width:100%;border:0;border-radius:20px;padding:9px 12px;font-size:15px;background:var(--wall);color:var(--text);font:inherit;outline:0}
+#inp{flex:1;min-width:0;width:100%;border:0;border-radius:20px;padding:9px 6px 9px 6px;font-size:15px;background:transparent;color:var(--text);font:inherit;outline:0}
 #send{width:38px;height:38px;flex-shrink:0;border:0;border-radius:50%;background:var(--green);color:#fff;display:grid;place-items:center;cursor:pointer}
-#send svg{stroke-width:2.2}
+#inp::placeholder{font-size:14px}#send svg{stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
 #srch{display:none;gap:8px;align-items:center;padding:8px 12px;background:var(--bar);border-bottom:1px solid var(--line)}
 #sq{flex:1;border:0;border-radius:20px;padding:9px 14px;background:var(--wall);color:var(--text);font:inherit;outline:0}
 #cnt{font-size:12px;color:var(--sub);white-space:nowrap}mark{background:#ffd54a;color:#111;border-radius:3px}
@@ -44,7 +87,7 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 .row:active{background:var(--wall)}.row small{display:block;color:var(--sub);font-size:13px}.row.danger{color:#ff453a}
 .row input{width:22px;height:22px;accent-color:var(--green);pointer-events:none;flex-shrink:0}
 .ri{width:28px;height:28px;color:var(--text);display:grid;place-items:center;flex-shrink:0}.ri svg{width:24px;height:24px;stroke-width:1.8}
-#subs{display:flex;gap:8px;overflow-x:auto;padding:8px 12px;background:var(--bar);border-bottom:1px solid var(--line)}
+#subs{display:none!important;gap:8px;overflow-x:auto;padding:8px 12px;background:var(--bar);border-bottom:1px solid var(--line)}
 #subs button,.chips button,.st,.lk{border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:16px;padding:6px 12px;font:inherit;font-size:13px;cursor:pointer;white-space:nowrap}
 #subs .on,.lk.on,.act .on,#mic.on{background:var(--green);color:#fff;border-color:var(--green)}#mic.on{border-radius:50%}
 .b.ai{max-width:100%}.md h3{font-size:1.1em;margin:2px 0 4px}.md h4{margin:8px 0 2px;color:var(--green)}.md p{margin:3px 0}.md ul,.md ol{margin:3px 0 3px 20px}
@@ -74,17 +117,167 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 #ann b{display:block;font-size:14px}#annb{font-size:13px;color:var(--sub);margin-top:2px;white-space:pre-wrap;word-wrap:break-word}
 #annx{border:0;background:none;color:var(--green);font:600 14px inherit;padding:8px 6px;cursor:pointer}
 #jump{position:fixed;right:14px;bottom:calc(84px + env(safe-area-inset-bottom,0px));width:42px;height:42px;border-radius:50%;border:0;background:var(--sheet,#fff);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.3);display:none;place-items:center;z-index:5;cursor:pointer}
+#auth{position:fixed;inset:0;z-index:30;background:var(--bg);color:var(--text);overflow-y:auto;display:block}.ab{max-width:420px;margin:0 auto;padding-bottom:40px}
+.fw{padding:6px 18px}.fw label{font-size:13px;color:var(--sub);display:flex;justify-content:space-between;margin-bottom:3px}.fw .fld{width:100%}.hn{font-size:12px;min-height:16px;color:var(--sub);white-space:pre-wrap;margin-top:3px}.hn.e{color:#e03131}.hn.g{color:var(--green)}.hn .ok{color:var(--green)}.hn .no{color:var(--sub)}.hn .lk{margin:4px 4px 0 0}
+.fe{padding:6px 18px;font-size:14px;white-space:pre-wrap}.btn{display:block;margin:10px 18px;width:calc(100% - 36px);padding:13px;border:0;border-radius:24px;background:var(--green);color:#fff;font:inherit;font-weight:600;cursor:pointer}.btn:disabled{opacity:.6}.pcard{text-align:center;padding:22px 18px 12px}.pav{width:72px;height:72px;border-radius:50%;background:var(--green);color:#fff;font-size:30px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 10px}.pcn{font-size:18px;font-weight:700}.pcu{font-size:13px;color:var(--sub);margin-top:2px}.pbn{margin:14px 18px 4px;padding:13px 14px;border-radius:0;border-left-width:6px;background:rgba(255,159,10,.16);border:1px solid rgba(255,159,10,.45);line-height:1.4;font-weight:600}.pbn.ok{background:rgba(0,168,132,.12);border-color:rgba(0,168,132,.4)}
+.pc{margin:14px 18px;border:1px solid var(--a);background:var(--bg);box-shadow:0 2px 6px rgba(0,0,0,.14)}
+.pch{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--a);color:#fff}.pch i{flex:none;width:30px;height:30px;border:2px solid #fff;font-style:normal;font-weight:800;display:flex;align-items:center;justify-content:center}.pch b{font-size:20px;letter-spacing:1px;text-transform:uppercase}
+.ptag{padding:10px 14px;font-size:14px;line-height:1.45;border-bottom:1px solid var(--line);background:rgba(128,128,128,.07);background:color-mix(in srgb,var(--a) 9%,transparent)}
+.pst{display:flex}.pst div{flex:1;text-align:center;padding:12px 4px;border-right:1px solid var(--line)}.pst div:last-child{border-right:0}.pst b{display:block;font-size:20px;color:var(--a)}.pst span{font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:.5px}
+.pay{margin:12px 18px;padding:16px;border-radius:0;text-align:center;background:rgba(255,204,0,.18);border:1px solid rgba(230,175,0,.6)}.pay .pl{font-size:13px;color:var(--sub);text-transform:uppercase;letter-spacing:.5px}.pay .pcode{font-size:32px;font-weight:800;letter-spacing:3px;margin:4px 0}.pay .pid{font-size:15px}.pcp{margin-top:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:16px;padding:6px 16px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.stp{display:flex;gap:12px;margin:12px 18px;align-items:flex-start}.stp i{flex:none;width:28px;height:28px;border-radius:4px;background:var(--green);color:#fff;font-style:normal;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:14px}.stp div{padding-top:3px;line-height:1.45}
+.sh{cursor:pointer;color:var(--green);font-weight:600}.pw{position:relative}.pw .fld{padding-right:46px}.eye{position:absolute;right:4px;top:0;bottom:0;width:42px;border:0;background:none;color:var(--sub);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}.eye svg{width:22px;height:22px;pointer-events:none}.rm{display:flex;align-items:center;gap:10px;padding:8px 18px;font-size:14px;color:var(--text);cursor:pointer}.rm input{width:18px;height:18px;accent-color:var(--green);margin:0}.bk{display:block;width:fit-content;margin:12px auto;padding:8px 16px;text-align:center;border-radius:24px;background:rgba(0,168,132,.12);background:color-mix(in srgb,var(--green) 14%,transparent);color:var(--green);font-weight:600;font-size:14px;cursor:pointer}.ar{display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px 12px;padding:0 18px}.ar .al{padding:9px 0}.al{padding:9px 18px;color:var(--green);cursor:pointer;font-size:14px}
 </style></head><body>
+<button id="pwaInstallBtn" title="Install App" style="display:none;position:fixed;right:18px;bottom:calc(120px + env(safe-area-inset-bottom));z-index:999;width:52px;height:52px;border-radius:50%;background:#0000b9;color:#fff;border:none;box-shadow:0 6px 18px rgba(0,0,185,.4);align-items:center;justify-content:center;cursor:pointer;">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+</button>
+
+<div id="pgGate" role="dialog" aria-modal="true" aria-label="Ask Tr. David">
+  <div class="pg-box">
+    <img class="pg-logo" src="icon-192.png" alt="Ask Tr. David logo" width="128" height="128">
+    <div class="pg-name">Ask Tr. David</div>
+    <button type="button" id="pgInstall" class="pg-install">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <span>Install</span>
+    </button>
+    <a href="#" id="pgContinue" class="pg-continue">Continue in browser</a>
+    <p id="pgMsg" class="pg-msg" role="status" aria-live="polite" hidden></p>
+  </div>
+</div>
+
+<script>
+// ---------- PWA: install page + install button + service worker ----------
+(function () {
+  var root = document.documentElement;
+  var btn = document.getElementById("pgInstall");
+  var label = btn.querySelector("span");
+  var cont = document.getElementById("pgContinue");
+  var msg = document.getElementById("pgMsg");
+  var logo = document.querySelector("#pgGate .pg-logo");
+  var fab = document.getElementById("pwaInstallBtn"); // small floating button, used after "Continue in browser"
+  var ua = navigator.userAgent || "";
+  var isIOS = /iphone|ipad|ipod/i.test(ua) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1);
+  var deferred = null, waiters = [], busy = false, installedNow = false;
+
+  function isStandalone() {
+    var m = function (q) { return window.matchMedia && window.matchMedia(q).matches; };
+    return m("(display-mode: standalone)") || m("(display-mode: fullscreen)") || m("(display-mode: minimal-ui)") || window.navigator.standalone === true;
+  }
+  function getFlag() { try { return localStorage.getItem("ask_pgInstalled") === "1"; } catch (e) { return false; } }
+  function setFlag(on) { try { on ? localStorage.setItem("ask_pgInstalled", "1") : localStorage.removeItem("ask_pgInstalled"); } catch (e) {} }
+  function gateVisible() { return root.classList.contains("pg-on"); }
+
+  function toast(text) {
+    var t = document.getElementById("pwaToast");
+    if (!t) {
+      t = document.createElement("div");
+      t.id = "pwaToast";
+      t.style.cssText = "position:fixed;left:50%;bottom:84px;transform:translateX(-50%);max-width:88vw;background:#161A26;color:#fff;padding:12px 16px;border-radius:12px;font:600 13.5px/1.4 system-ui,sans-serif;z-index:1000;box-shadow:0 8px 24px rgba(0,0,0,.3);text-align:center;";
+      document.body.appendChild(t);
+    }
+    t.textContent = text;
+    t.style.display = "block";
+    clearTimeout(t._h);
+    t._h = setTimeout(function () { t.style.display = "none"; }, 8000);
+  }
+  function notify(text) {
+    if (gateVisible()) { msg.textContent = text; msg.hidden = false; } else { toast(text); }
+  }
+  function setBusy(on, text) { busy = on; btn.disabled = on; label.textContent = text || "Install"; }
+  function syncFab() {
+    if (!fab) return;
+    fab.style.display = (!isStandalone() && !installedNow && (deferred || isIOS)) ? "flex" : "none";
+  }
+  function waitForPrompt(ms) {
+    return new Promise(function (resolve) {
+      var done = false;
+      var t = setTimeout(function () { if (!done) { done = true; resolve(null); } }, ms);
+      waiters.push(function (e) { if (!done) { done = true; clearTimeout(t); resolve(e); } });
+    });
+  }
+
+  async function doInstall() {
+    if (busy) return;
+    var p = deferred;
+    if (!p) {
+      if (isIOS) { notify("To install: tap the Share icon, then \u201CAdd to Home Screen\u201D."); return; }
+      if (installedNow || getFlag()) { notify("Ask Tr. David is already installed on this device. Open it from your home screen or app list."); return; }
+      // The browser can take a second or two after the first visit before it allows the install.
+      setBusy(true, "Preparing\u2026");
+      p = await waitForPrompt(3500);
+      setBusy(false);
+      if (!p) { notify("To install, open your browser menu (\u22EE) and tap \u201CInstall app\u201D or \u201CAdd to Home screen\u201D."); return; }
+    }
+    deferred = null; // a prompt can only be used once
+    try {
+      p.prompt();
+      var choice = await p.userChoice;
+      if (choice && choice.outcome === "accepted") {
+        setBusy(true, "Installing\u2026");
+        notify("Installing\u2026 Ask Tr. David will appear on your home screen in a few moments.");
+        setTimeout(function () { if (busy && !installedNow) setBusy(false); }, 90000); // safety: never leave the button stuck
+      } else {
+        notify("Install cancelled. You can install any time from your browser menu (\u22EE) \u2192 \u201CInstall app\u201D.");
+      }
+    } catch (err) {
+      notify("Couldn\u2019t start the install. Open your browser menu (\u22EE) and tap \u201CInstall app\u201D or \u201CAdd to Home screen\u201D.");
+    }
+    syncFab();
+  }
+
+  window.addEventListener("beforeinstallprompt", function (e) {
+    e.preventDefault();
+    deferred = e;
+    setFlag(false); // the browser only offers this when the app is NOT installed
+    waiters.splice(0).forEach(function (fn) { fn(e); });
+    syncFab();
+  });
+  window.addEventListener("appinstalled", function () {
+    installedNow = true;
+    deferred = null;
+    setFlag(true);
+    setBusy(true, "Installed \u2713");
+    notify("Ask Tr. David is installed. Open it from your home screen or app list.");
+    syncFab();
+  });
+
+  btn.addEventListener("click", doInstall);
+  if (fab) fab.addEventListener("click", doInstall);
+  cont.addEventListener("click", function (e) {
+    e.preventDefault();
+    try { sessionStorage.setItem("ask_pgContinue", "1"); } catch (err) {}
+    root.classList.remove("pg-on");
+    syncFab();
+  });
+
+  // If the bundled icon file is missing, fall back to the logo embedded in this page.
+  logo.addEventListener("error", function () {
+    var l = document.querySelector('link[rel="apple-touch-icon"]');
+    if (l && logo.src !== l.href) logo.src = l.href;
+  });
+
+  if (isStandalone()) setFlag(true); // remember that the app exists on this device
+  syncFab();
+
+  if ("serviceWorker" in navigator) {
+    // A real same-origin file (blob: URLs are rejected for service workers). Upload sw.js next to this file.
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).catch(function (err) { console.warn("SW registration failed:", err); });
+    });
+  }
+})();
+</script>
+
 <div id="app">
-<header><div id="hd" style="display:flex;align-items:center;gap:10px;flex:1"><div id="avw" role="button" aria-label="What's new" style="position:relative;cursor:pointer"><div class="av" id="av">A</div><span id="bdg"></span></div><div><div id="nm">Alex</div><div class="t" id="stat">online</div></div></div><button class="ic" id="dots" aria-label="Menu"><svg viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button></header>
+<header><div id="hd" style="display:flex;align-items:center;gap:10px;flex:1"><div id="avw" role="button" aria-label="What's new" style="position:relative;cursor:pointer"><div class="av" id="av">A</div><span id="bdg"></span></div><div><div id="nm">Alex</div><div class="t" id="stat">Anything about your studies</div></div></div><button class="ic" id="dots" aria-label="Menu"><svg viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button></header>
 <div id="ann"><div style="flex:1;min-width:0"><b id="annt"></b><div id="annb"></div></div><button id="annx">Hide</button></div>
 <div id="srch"><input id="sq" placeholder="Search chat history" autocomplete="off"><span id="cnt"></span><button class="ic" id="sx" aria-label="Close search"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
 <div id="subs"></div>
 <div id="msgs"></div>
 <button id="jump" aria-label="Scroll to latest"><svg viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></svg></button>
 <div id="editing">Editing message. Tap here to cancel.</div>
-<div id="cmp"><input id="file" type="file" accept="image/*" hidden><button class="ic" id="ph" aria-label="Photo question"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="15" rx="3"/><circle cx="12" cy="12.5" r="3.5"/></svg></button><button class="ic" id="mic" aria-label="Voice question"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg></button><input id="inp" placeholder="Ask a question" autocomplete="off"><button id="send" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg></button></div>
-<div class="note">Ask Tr. David anything about your studies. Call on <a href="tel:+256788737517">+256 788 737517</a></div>
+<div id="cmp"><input id="file" type="file" accept="image/*" hidden><div id="iw"><button class="ic" id="ph" aria-label="Photo question"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="15" rx="3"/><circle cx="12" cy="12.5" r="3.5"/></svg></button><button class="ic" id="mic" aria-label="Voice question"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg></button><input id="inp" placeholder="Ask questions, make research" autocomplete="off"><button id="send" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button></div></div>
+<div id="ps"><button id="psl" type="button" aria-label="Your plan"></button><span id="psr"></span></div>
 </div>
 <div id="dlgx" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);place-items:center;z-index:120;padding:20px"><div style="background:var(--sheet,#fff);color:var(--text,#111);border-radius:14px;padding:20px;width:100%;max-width:320px;box-shadow:0 4px 18px rgba(0,0,0,.3)"><div id="dlgm" style="font-size:16px;line-height:1.4;margin-bottom:14px;white-space:pre-wrap"></div><input id="dlgi" autocomplete="off" style="display:none;width:100%;box-sizing:border-box;margin-bottom:14px;padding:10px;font-size:16px;border:1px solid var(--line,#ccc);border-radius:8px;background:var(--wall,#fff);color:inherit"><div style="display:flex;justify-content:flex-end;gap:8px"><button id="dlgc" style="background:none;border:0;padding:8px 14px;font-size:15px;color:inherit;cursor:pointer">Cancel</button><button id="dlgo" style="background:var(--green,#00a884);color:#fff;border:0;border-radius:8px;padding:8px 18px;font-size:15px;cursor:pointer">OK</button></div></div></div>
 <div id="more"><div data-a="n">New chat</div><div data-a="h">Chat history</div><div data-a="b">Saved answers</div><div data-a="s">Search chat</div><div data-a="cc" style="color:#e03131">Clear chat</div><div data-a="g">Settings</div></div>
@@ -125,6 +318,7 @@ const isDark=()=>D.theme?D.theme=="dark":matchMedia("(prefers-color-scheme:dark)
 function applyTheme(){const r=document.documentElement;if(D.theme)r.dataset.theme=D.theme;else delete r.dataset.theme;r.style.setProperty("--green",D.acc);r.style.fontSize=(D.fs||16)+"px";if(D.hc)r.dataset.hc=1;else delete r.dataset.hc}
 function hl(t){t=esc(t);if(!q)return t;const e=esc(q).replace(/[.*+?^${}()|[\]\\]/g,"\\$&");return t.replace(new RegExp(e,"gi"),x=>"<mark>"+x+"</mark>")}
 function render(){
+ try{updPlan()}catch(e){}
  $("nm").textContent=D.name;if(!$("av").firstElementChild)$("av").innerHTML='<img src="'+AVATAR+'" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block">';let h="",last="",n=0;const lb=D.msgs.map(x=>x.s).lastIndexOf("i");
  D.msgs.forEach((m,i)=>{if(q&&!m.t.toLowerCase().includes(q))return;n++;const d=dl(m.ts);if(d!=last){h+=`<div class="day">${d}</div>`;last=d}
  if(m.s=="i"){h+=bub(m,i,i==lb);return}
@@ -134,7 +328,7 @@ function render(){
 function stopEdit(){ei=null;$("inp").value="";$("editing").style.display="none"}
 function send(){
  const v=$("inp").value.trim();if(!v||stream!=null)return;
- if(ei!=null){const m=D.msgs[ei];if(m){m.t=v;m.ed=1}stopEdit();save();render();return}
+ if(ei!=null){const m=D.msgs[ei];if(m){m.t=v;m.ed=1;m.st=2;D.msgs.splice(ei+1);stopEdit();save();render();ask(v);return}stopEdit();return}
  if(D.sub=="General"){const t=detectSub(v);if(t)setSub(t)}
  const m={s:"o",t:v,ts:Date.now(),st:0};D.msgs.push(m);$("inp").value="";save();render();
  m.st=2;ask(v)}
@@ -171,7 +365,7 @@ function showP(title,body,back,onclick){
  $("panel").style.display="flex";$("pb").onclick=back;$("pbody").onclick=onclick||null}
 function closeP(){$("panel").style.display="none"}
 function settings(){
- showP("Settings",`<div class="row" data-a="pf"><span class="ri">${IC.user}</span><div>Learner profile<small>Name, class, language</small></div></div>
+ showP("Settings",`<div class="row" data-a="pf"><span class="ri">${IC.user}</span><div>Learner profile<small>Name, class, account</small></div></div>
  <div class="row" data-a="ac"><span class="ri">${IC.eye}</span><div>Accessibility<small>Text size, contrast</small></div></div>
  <div class="row" data-a="th"><span class="ri">${isDark()?IC.sun:IC.moon}</span><div>Switch theme<small>${isDark()?"Dark":"Light"} mode</small></div></div>
  <div class="row" data-a="ct"><span class="ri">${IC.pal}</span><div>Chat theme<small>Choose a color</small></div></div>
@@ -179,10 +373,11 @@ function settings(){
  <div class="row" data-a="nt"><span class="ri">${IC.bell}</span><div>Away alerts<small>${D.notif?"On":"Off"}: phone alert when an answer is ready</small></div></div>
  <div class="row" data-a="ex"><span class="ri">${IC.dl}</span><div>Export chat<small>Download as a text file</small></div></div>
  <div class="row" data-a="tr"><span class="ri">${IC.bin}</span><div>Trash<small>${D.trash.length} message${D.trash.length==1?"":"s"}</small></div></div>
+ <div class="row" data-a="pl"><span class="ri">${IC.star}</span><div>Free plan and upgrade<small>${FQ().used.toLocaleString()} words used</small></div></div>
  <div class="row" data-a="ho"><span class="ri">${IC.doc}</span><div>Project handoff<small>${hoCount()[0]} done, ${hoCount()[1]-hoCount()[0]} remaining</small></div></div>`,closeP,e=>{
   const a=e.target.closest(".row")?.dataset.a;
   if(a=="th"){D.theme=isDark()?"light":"dark";applyTheme();save();settings()}
-  if(a=="ct")chatTheme();if(a=="nt")toggleNotif();if(a=="wn")notifs();if(a=="ho")handoff();if(a=="pf")profile();if(a=="ac")access();
+  if(a=="ct")chatTheme();if(a=="nt")toggleNotif();if(a=="wn")notifs();if(a=="ho")handoff();if(a=="pl")plans(1);if(a=="pf")profile();if(a=="ak")AK.open();if(a=="ac")access();
   if(a=="ex"){const t=D.msgs.map(m=>"["+new Date(m.ts).toLocaleString()+"] "+(m.s=="o"?"You":D.name)+": "+m.t).join("\n");const u=URL.createObjectURL(new Blob([t||"No messages"],{type:"text/plain"}));const l=document.createElement("a");l.href=u;l.download="chat-history.txt";l.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
   if(a=="tr"){sel.clear();trash()}})}
 function updateBadge(){$("bdg").style.display=D.notes.some(x=>!x.r)?"block":"none"}
@@ -271,7 +466,7 @@ const SUBRULES=[
 [/\b(history|kingdoms?|colonial|colonialism|independence|empire|kabaka|world war|slave trade|ancient)\b/i,["History","Social Studies"]],
 [/\b(maps?|climate|rainfall|rivers?|mountains?|soils?|erosion|population|weather|vegetation|latitude)\b/i,["Geography","Social Studies"]],
 [/\b(business|profit|entrepreneurs?|entrepreneurship|savings?)\b/i,["Entrepreneurship"]]];
-function detectSub(v){const L=subsList();for(const[r,c]of SUBRULES){if(r.test(v)){const f=c.find(x=>L.includes(x));if(f)return f==="Social Studies"&&L.includes("Science")&&SCIRE.test(v)?"Science":f}}if(L.includes("Science")&&SCIRE.test(v))return"Science";return null}
+function detectSub(v){const L=subsList();if(lvKey()=="PLE"&&L.includes("Mathematics")&&(/\bmath(s|ematics)?\b/i.test(v)||MATHP.some(t=>!t.nd&&t.re.test(v))))return"Mathematics";for(const[r,c]of SUBRULES){if(r.test(v)){const f=c.find(x=>L.includes(x));if(f)return f==="Social Studies"&&L.includes("Science")&&SCIRE.test(v)?"Science":f}}if(L.includes("Science")&&SCIRE.test(v))return"Science";return null}
 function setSub(sb){if(sb==D.sub&&D.chats.some(c=>c.id==D.cur&&c.sub==sb&&(c.lv||lvKey())==lvKey()))return;stopS();stopEdit();
  const cur=D.chats.find(c=>c.id==D.cur);if(cur&&!cur.msgs.length&&D.chats.length>1)D.chats=D.chats.filter(c=>c!==cur);
  D.sub=sb;let c=D.chats.find(x=>x.sub==sb&&(x.lv||lvKey())==lvKey());
@@ -827,7 +1022,626 @@ P("Measurement",/measur|\blength\b|\bmass\b|\bvolume\b|\bmetres?\b|\blitres?\b|k
 ];
 
 TOP0.forEach(t=>{t.S=/noun|verb|adjective|past/i.test(t.n)?["English","General Paper","Literacy"]:/fraction|percentage|pythagoras/i.test(t.n)?["Mathematics","Subsidiary Mathematics"]:["Science","Biology"]});
-const TOP=[...SCI,...TOP0];
+/* ===== PRIMARY MATHEMATICS SYLLABUS (P1 to P7) =====
+ Each topic: cl = [class, terms, what is learned + sample question]. Built from general knowledge of the
+ Ugandan primary syllabus (NOT yet checked against NCDC books): a teacher must review before publishing. */
+const PCN={P1:"Primary 1",P2:"Primary 2",P3:"Primary 3",P4:"Primary 4",P5:"Primary 5",P6:"Primary 6",P7:"Primary 7"};
+const MP=(n,re,cl,d,h,w,s,e,m,q,a,b,nd)=>({n,re,cl,d,h,w,s,e,m,q,a:a||"How to work it out",b:b||"Where it is used",nd:nd||0,S:["Mathematics"],L:["PLE"]});
+const MATHP=[
+MP("Word problems",/word problems?|story sums?|story problems?|problem solving|solve (a |the )?(word )?problem/,
+["P1","P2","P3","P4","P5","P6","P7"].map(c=>[c,[1,2,3],"Solve word problems using the operations learned in "+PCN[c]+"."]),
+`A **word problem** is a maths question told as a short story. You must decide which operation to use, then solve it.`,
+`- **Read** the problem twice.\n- **Underline** the numbers and the question.\n- **Choose** the operation: total or joining → add; take away or left → subtract; equal groups → multiply; sharing equally → divide.\n- **Write** a number sentence.\n- **Solve** it and **check** the answer.\n- **Write** the answer with its unit (shillings, kg, metres).`,
+`- Shopping, travel, farming, sharing and building.\n- Every exam paper has word problems.`,
+`Turn the story into a number sentence, then solve the number sentence.`,
+`- Amina had 25 mangoes and gave 8 to Ben: 25 − 8 = 17 mangoes left.\n- 6 boxes each hold 12 pencils: 6 × 12 = 72 pencils.\n- Share 56 books among 8 pupils: 56 ÷ 8 = 7 books each.`,
+`## Key words\n- Add: total, altogether, sum, in all.\n- Subtract: left, remain, difference, how many more.\n- Multiply: each, groups of, times.\n- Divide: share, equally, per.\n## Common mistakes\n- Using the wrong operation.\n- Forgetting the unit in the answer.`,
+[["“Ben had 12 sweets and ate 5.” Which operation?",["Add","Subtract","Multiply"],1],["“4 boxes with 6 pens each.” How many pens?",["10","24","64"],1],["“Share 20 books among 5 pupils.” Each gets…",["4","15","100"],0]]),
+
+MP("LCM and HCF",/\blcm\b|\bhcf\b|\bgcf\b|l\.c\.m|h\.c\.f|least common multiple|lowest common multiple|highest common factor|greatest common (factor|divisor)/,
+[["P5",[2],"HCF and LCM by listing. Q: Find the HCF of 12 and 18."],["P6",[1],"LCM and HCF using prime factors; word problems."],["P7",[1],"Revision with word problems (bells ringing together, cutting equal pieces)."]],
+`The **LCM** (lowest common multiple) of two numbers is the smallest number that both of them divide into exactly. The **HCF** (highest common factor) is the biggest number that divides both exactly.`,
+`- **LCM by listing:** write multiples of each number until you meet the first one they share.\n- **HCF by listing:** write all factors of each number and pick the biggest one they share.\n- **Using prime factors:** LCM takes every prime factor at its highest power; HCF takes only the common prime factors at their lowest power.`,
+`- LCM: when two events repeat and meet again (two bells ringing).\n- HCF: cutting things into the biggest equal pieces; simplifying fractions.`,
+`LCM is the first time two counting lists meet. HCF is the biggest number that fits into both.`,
+`- Multiples of 4: 4, 8, **12**; multiples of 6: 6, **12**. So LCM of 4 and 6 = 12.\n- Factors of 12: 1, 2, 3, 4, **6**, 12; factors of 18: 1, 2, 3, **6**, 9, 18. So HCF = 6.`,
+`## Prime factor method (12 and 18)\n- 12 = 2 × 2 × 3 and 18 = 2 × 3 × 3.\n- HCF = 2 × 3 = 6. LCM = 2 × 2 × 3 × 3 = 36.\n## Common mistakes\n- Mixing up LCM and HCF. LCM is never smaller than the numbers; HCF is never bigger.`,
+[["HCF of 12 and 18?",["3","6","9"],1],["LCM of 4 and 6?",["12","24","10"],0],["Which is a common multiple of 3 and 5?",["8","15","20"],1]]),
+
+MP("Prime and composite numbers",/prime|composite/,
+[["P5",[1],"Prime and composite numbers up to 50. Q: Is 17 prime?"],["P6",[1],"Prime factors and factor trees. Q: Write 12 as a product of primes."]],
+`A **prime number** has exactly two factors: 1 and itself. A **composite number** has more than two factors. The number 1 is neither.`,
+`- Test a number by trying to divide it by 2, 3, 5, 7…\n- If one of them divides exactly, the number is composite.\n- Primes up to 30: 2, 3, 5, 7, 11, 13, 17, 19, 23, 29.\n- 2 is the only even prime.\n- Factor tree: keep splitting until every branch is prime. 12 = 2 × 2 × 3.`,
+`- Finding LCM and HCF.\n- Simplifying fractions.\n- Number puzzles and exam questions.`,
+`A prime number can only be shared out in two ways: 1 group of itself, or itself groups of 1.`,
+`- Prime: 2, 3, 5, 7, 11, 13.\n- Composite: 4 (1, 2, 4), 9 (1, 3, 9), 12.\n- 36 = 2 × 2 × 3 × 3.`,
+`## Common mistakes\n- Saying 1 is prime.\n- Saying all odd numbers are prime (9 and 15 are not).`,
+[["Which is a prime number?",["9","11","15"],1],["How many factors does a prime number have?",["1","2","3"],1],["The only even prime is…",["2","4","6"],0]]),
+
+MP("Factors and multiples",/factors?|multiples?|divisib(le|ility)/,
+[["P4",[2],"Multiples of 2 to 10 and factors of numbers up to 50. Q: List the factors of 12."],["P5",[1],"Divisibility tests for 2, 3, 4, 5, 6, 9, 10."],["P5",[2],"Common factors and common multiples of two numbers."]],
+`A **factor** of a number divides it exactly with no remainder. A **multiple** of a number is what you get when you multiply it by 1, 2, 3, 4…`,
+`- Factors of 12: look for pairs that multiply to 12: 1 × 12, 2 × 6, 3 × 4. Factors: 1, 2, 3, 4, 6, 12.\n- Multiples of 4: 4, 8, 12, 16, 20…\n- Divisibility tests: by 2 if the last digit is even; by 5 if it ends in 0 or 5; by 10 if it ends in 0; by 3 if the digit sum divides by 3; by 9 if the digit sum divides by 9.`,
+`- Simplifying fractions, finding LCM and HCF.\n- Sharing things equally.`,
+`Factors are the numbers that fit exactly into a number. Multiples are the counting list of a number.`,
+`- Factors of 18: 1, 2, 3, 6, 9, 18.\n- Multiples of 7: 7, 14, 21, 28.\n- 123: 1 + 2 + 3 = 6, so it is divisible by 3.`,
+`## Facts\n- A number is a factor of itself and of every multiple of itself.\n- 1 is a factor of every number.\n## Common mistakes\n- Leaving out 1 or the number itself when listing factors.`,
+[["Factors of 12 are…",["1, 2, 3, 4, 6, 12","1, 2, 5, 12","2, 4, 6, 8"],0],["Which is a multiple of 7?",["21","27","17"],0],["Which number is divisible by 3?",["124","123","125"],1]]),
+
+MP("Operations on fractions",/(add|subtract|multiply|divide|adding|subtracting|multiplying|dividing)\w* (the |two )?(fractions?|mixed numbers?)|fractions? (addition|subtraction|multiplication|division)|of a fraction|\d+\s*\/\s*\d+\s*[+\-−×x*÷]\s*\d+\s*\/\s*\d+/,
+[["P4",[2],"Add and subtract fractions with the same denominator. Q: 2/7 + 3/7."],["P5",[1],"Add and subtract fractions with different denominators, and mixed numbers. Q: 1/2 + 1/3."],["P5",[2],"Multiply a fraction by a whole number and by a fraction."],["P6",[1],"Divide fractions; mixed operations. Q: 1/2 ÷ 1/4."],["P7",[1],"Word problems with fractions."]],
+`Operations on fractions are adding, subtracting, multiplying and dividing fractions.`,
+`- **Same denominator:** add or subtract the numerators; keep the denominator.\n- **Different denominators:** find the LCM of the denominators, change both fractions to it, then add or subtract.\n- **Multiply:** multiply the tops, multiply the bottoms, then simplify.\n- **Divide:** keep the first fraction, change ÷ to ×, flip the second fraction, then multiply.\n- Always simplify the answer. Change improper fractions to mixed numbers.`,
+`- Sharing food, money and time.\n- Cooking, measuring and every upper primary exam.`,
+`To add fractions the pieces must be the same size. Make the bottoms equal first, then add the tops.`,
+`- 2/7 + 3/7 = 5/7\n- 1/2 + 1/3 = 3/6 + 2/6 = 5/6\n- 2/3 × 3/4 = 6/12 = 1/2\n- 1/2 ÷ 1/4 = 1/2 × 4/1 = 2\n- Type a sum like **3/4 + 1/8** and I will show every step.`,
+`## Common mistakes\n- Adding the bottoms: 1/4 + 1/4 is 2/4, not 2/8.\n- Forgetting to flip the second fraction when dividing.\n- Not simplifying the answer.`,
+[["2/7 + 3/7 = ?",["5/14","5/7","6/7"],1],["1/2 + 1/3 = ?",["2/5","5/6","1/6"],1],["2/3 × 3/4 = ?",["1/2","5/7","6/7"],0]]),
+
+MP("Fractions",/fractions?|numerator|denominator|\bhalf\b(?! past)|halves|\bquarters?\b(?! (past|to))|\bthirds?\b|equivalent|lowest terms|simplest form|improper|mixed numbers?|proper fraction/,
+[["P2",[3],"Halves and quarters of shapes and objects. Q: Colour half of the circle."],["P3",[1],"Fractions with denominators 2 to 10; numerator and denominator."],["P3",[2],"Compare fractions with the same denominator; equivalent fractions."],["P4",[1],"Proper, improper and mixed fractions; simplest form."],["P4",[2],"Fraction of a quantity. Q: 3/4 of 20."],["P5",[1],"Compare and order unlike fractions."],["P6",[1],"Fractions of quantities; fractions in money and measures."],["P7",[1],"Mixed operations and word problems with fractions."]],
+`A **fraction** is a part of a whole, written as one number over another, like 3/4.`,
+`- The **denominator** (bottom) tells how many equal parts the whole is cut into. The **numerator** (top) tells how many parts are taken.\n- **Equivalent fractions:** multiply or divide the top and bottom by the same number: 1/2 = 2/4 = 3/6.\n- **Simplify:** divide top and bottom by their HCF: 6/8 = 3/4.\n- **Improper to mixed:** 7/4 = 1 3/4 (7 ÷ 4 = 1 remainder 3). **Mixed to improper:** 2 1/3 = (2 × 3 + 1)/3 = 7/3.\n- **Fraction of a quantity:** 3/4 of 20 = (20 ÷ 4) × 3 = 15.\n- **Compare:** make the denominators the same, then compare the numerators.`,
+`- Sharing food and money; measuring half a kilogram or a quarter of an hour.\n- Cooking, time, percentages, ratio and algebra.`,
+`Imagine a chapati cut into 4 equal pieces. Eating 1 piece means you ate 1/4.`,
+`- 1/2 (one half), 1/4 (one quarter), 3/4 (three quarters).\n- Equivalent: 1/3 = 2/6 = 3/9.\n- Simplify: 12/16 = 3/4.\n- 3/4 of 20 = 15.`,
+`## Kinds of fractions\n- **Proper:** top smaller than bottom (2/5).\n- **Improper:** top bigger than or equal to bottom (7/4).\n- **Mixed:** whole number and fraction (1 3/4).\n## Common mistakes\n- Thinking 1/8 is bigger than 1/4 because 8 is bigger than 4. The bigger the bottom, the smaller the part.`,
+[["In 3/5 the denominator is…",["3","5","8"],1],["Which fraction equals 1/2?",["2/4","2/3","1/3"],0],["Simplify 6/8.",["3/4","2/3","1/2"],0],["3/4 of 20 = ?",["12","15","16"],1]]),
+
+MP("Decimals",/decimals?|decimal (point|places?)|\btenths?\b|hundredths?|thousandths?|nearest tenth/,
+[["P4",[2],"Tenths and hundredths; read and write decimals to 2 places. Q: Write 3/10 as a decimal."],["P5",[1],"Add and subtract decimals; compare decimals; fractions to decimals."],["P5",[2],"Multiply decimals by whole numbers and by 10, 100."],["P6",[1],"Multiply and divide decimals; rounding decimals."],["P7",[1],"Decimals in money, measures and word problems."]],
+`A **decimal** is a number with a decimal point that separates a whole part from a part smaller than 1, like 3.45.`,
+`- Places after the point: tenths, hundredths, thousandths.\n- **Add and subtract:** line up the decimal points.\n- **Fraction to decimal:** 1/2 = 0.5, 1/4 = 0.25, 3/5 = 0.6.\n- **Multiply:** ignore the points, multiply, then put as many decimal places in the answer as there are in the question altogether.\n- **Times 10, 100:** move the point 1 or 2 places to the right.`,
+`- Money, length, mass and capacity (2.5 kg, 1.75 m).\n- Percentages and measurements in science.`,
+`A decimal is a fraction written with a point. 0.5 means 5 tenths, which is a half.`,
+`- 0.5 + 0.25 = 0.75\n- 4.5 − 1.75 = 2.75\n- 0.3 × 4 = 1.2\n- 2.5 × 0.2 = 0.5 (25 × 2 = 50, two decimal places in total, so 0.50)`,
+`## Common mistakes\n- Not lining up the decimal points.\n- Thinking 0.45 is bigger than 0.5 because 45 is bigger than 5. Compare digit by digit: 0.50 > 0.45.`,
+[["Write 1/2 as a decimal.",["0.2","0.5","1.2"],1],["0.5 + 0.25 = ?",["0.75","0.30","0.55"],0],["In 3.45 the 4 is in the…",["Tenths place","Hundredths place","Ones place"],0]]),
+
+MP("Profit, loss and discount",/profit|\bloss\b|discount|commission|selling price|cost price|buying price|markup/,
+[["P6",[3],"Buying price and selling price; profit and loss. Q: Bought at 5 000, sold at 6 500."],["P7",[1],"Percentage profit and loss; discount and commission."]],
+`**Profit** is the extra money you get when you sell for more than you paid. **Loss** is the money lost when you sell for less than you paid. **Discount** is a reduction in price.`,
+`- Profit = selling price (SP) − cost price (CP), when SP is more than CP.\n- Loss = CP − SP, when CP is more than SP.\n- % profit = profit ÷ CP × 100. % loss = loss ÷ CP × 100.\n- Discount = marked price × discount rate. Price paid = marked price − discount.\n- Commission = a percentage of the sales earned by the seller.`,
+`- Shops, markets, farming and business.\n- Entrepreneurship in higher classes.`,
+`If you buy low and sell high you gain. If you buy high and sell low you lose.`,
+`- Bought a goat at 40 000 and sold at 50 000: profit = 10 000; % profit = 10 000 ÷ 40 000 × 100 = 25%.\n- A shirt costs 20 000 with 10% discount: discount = 2 000; you pay 18 000.`,
+`## Common mistakes\n- Dividing by the selling price. Percentage profit and loss use the cost price.\n- Subtracting the wrong way round.`,
+[["Cost price 5 000, selling price 6 500. Profit?",["1 000","1 500","11 500"],1],["Cost price 8 000, selling price 6 000. This is a…",["Profit of 2 000","Loss of 2 000","Loss of 14 000"],1],["A 10 000 item has a 10% discount. The discount is…",["100","1 000","9 000"],1]]),
+
+MP("Simple interest and tax",/interest|principal|\bvat\b|\btax\b|per annum|rate per year/,
+[["P7",[1],"Simple interest I = P × R × T ÷ 100; amount = principal + interest. Q: Interest on 100 000 at 5% for 2 years."],["P7",[2],"VAT and tax as percentages of a price."]],
+`**Simple interest** is the extra money paid on money saved or borrowed. The money saved or borrowed is the **principal** (P), R is the rate % per year and T is the time in years.`,
+`- Simple interest: I = P × R × T ÷ 100.\n- Amount = principal + interest.\n- **VAT** (value added tax) is a percentage added to a price. In Uganda it is 18%.\n- Tax = price × rate ÷ 100.`,
+`- Banks and savings groups (SACCOs).\n- Loans and buying goods with VAT.`,
+`Interest is the bank’s “thank you” for keeping your money, or the fee for borrowing it.`,
+`- P = 100 000, R = 5%, T = 2 years: I = 100 000 × 5 × 2 ÷ 100 = 10 000. Amount = 110 000.\n- VAT on 100 000 at 18% = 18 000.`,
+`## Common mistakes\n- Forgetting to divide by 100.\n- Using months instead of years for T without converting (6 months = 0.5 year).`,
+[["Simple interest on 100 000 at 5% for 2 years?",["5 000","10 000","15 000"],1],["In I = PRT ÷ 100, P is the…",["Principal","Profit","Percentage"],0],["Amount = ?",["Principal + interest","Principal − interest","Interest only"],0]]),
+
+MP("Percentages",/percent(age|ages)?|per cent|\d\s*%/,
+[["P5",[2],"Meaning of per cent; fractions and decimals to percentages. Q: Write 1/4 as a percentage."],["P6",[1],"Percentage of a quantity. Q: Find 20% of 50 000."],["P6",[2],"Increase and decrease by a percentage; percentage marks."],["P7",[1],"Percentage problems: profit, discount, interest, population."]],
+`A **percentage** is a number out of 100. The sign % means “per hundred”.`,
+`- **Fraction to percentage:** multiply by 100. 1/2 × 100 = 50%.\n- **Percentage of a number:** divide by 100, then multiply: 20% of 50 = 20 ÷ 100 × 50 = 10.\n- **Marks as a percentage:** (marks ÷ total) × 100.\n- **Increase or decrease:** find the percentage amount, then add it or subtract it.`,
+`- School marks and reports.\n- Discounts, interest, tax, population and statistics.`,
+`Per cent means out of 100. If you score 50%, you got 50 out of every 100, which is half.`,
+`- 50% = 1/2, 25% = 1/4, 10% = 1/10.\n- 10% of 200 = 20.\n- 15 out of 20 = 15/20 × 100 = 75%.\n- Increase 800 by 25%: 25% of 800 = 200, so the new amount is 1 000.\n- Type a question like **20% of 50 000** and I will show every step.`,
+`## Quick methods\n- 10% is found by dividing by 10. 1% is found by dividing by 100.\n## Common mistakes\n- Mixing decimals and percentages: 0.5 is 50%, not 5%.\n- Dividing by the new amount instead of the original amount when finding a percentage change.`,
+[["What is 50% of 80?",["40","50","30"],0],["Write 1/4 as a percentage.",["14%","25%","40%"],1],["15 out of 20 as a percentage?",["70%","75%","80%"],1]]),
+
+MP("Ratio and proportion",/\bratios?\b|proportion|in the ratio|direct proportion/,
+[["P6",[2],"Meaning of ratio; simplify ratios. Q: Simplify 8 : 12."],["P6",[3],"Share an amount in a given ratio. Q: Share 60 000 in the ratio 1 : 2."],["P7",[1],"Proportion and the unit method; rates."]],
+`A **ratio** compares two or more quantities of the same kind. It is written a : b.`,
+`- **Simplify:** divide both parts by their HCF: 8 : 12 = 2 : 3.\n- **Share in a ratio a : b:** add the parts (a + b); one part = amount ÷ total parts; then multiply by each ratio number.\n- **Proportion (unit method):** find the value of 1, then multiply to get the value of many.`,
+`- Sharing money or land fairly.\n- Mixing paint, cement and concrete; recipes; scale drawings.`,
+`A ratio says how many parts one thing has for each part of another.`,
+`- Share 60 000 in the ratio 1 : 2: total parts = 3; one part = 20 000; shares are 20 000 and 40 000.\n- 5 pens cost 2 500: 1 pen = 500; 8 pens = 4 000.`,
+`## Common mistakes\n- Dividing the amount by one of the ratio numbers instead of by the total of the parts.\n- Mixing units (compare metres with metres).`,
+[["Simplify 8 : 12",["2 : 3","4 : 6","3 : 2"],0],["Share 60 000 in the ratio 1 : 2. The bigger share is…",["20 000","40 000","30 000"],1],["5 pens cost 2 500. 1 pen costs…",["500","250","2 000"],0]]),
+
+MP("Speed, distance and time",/\bspeed\b|\bvelocity\b|km\/h|\bkph\b|average speed|how fast/,
+[["P6",[3],"Speed = distance ÷ time; kilometres per hour. Q: A bus covers 180 km in 3 hours."],["P7",[1],"Find distance and time; average speed; word problems."]],
+`**Speed** is the distance travelled in one unit of time. It is measured in kilometres per hour (km/h) or metres per second (m/s).`,
+`- Speed = distance ÷ time.\n- Distance = speed × time.\n- Time = distance ÷ speed.\n- Average speed = total distance ÷ total time.\n- Change minutes to hours first: 30 minutes = 0.5 hour.`,
+`- Journeys by bus, boda boda, train and aeroplane.\n- Races and travel planning.`,
+`Speed tells how far you go in one hour.`,
+`- 180 km in 3 hours: speed = 180 ÷ 3 = 60 km/h.\n- 60 km/h for 2.5 hours: distance = 150 km.\n- 120 km at 40 km/h: time = 3 hours.\n- Type a question like **speed of 180 km in 3 hours** to practise.`,
+`## Common mistakes\n- Using minutes and km together without converting.\n- Mixing up the three formulas. Use the triangle: D on top, S and T below.`,
+[["A bus covers 180 km in 3 hours. Speed?",["60 km/h","50 km/h","540 km/h"],0],["Distance = ?",["Speed × time","Speed ÷ time","Time ÷ speed"],0],["At 40 km/h, how long for 120 km?",["2 hours","3 hours","4 hours"],1]]),
+
+MP("Indices, squares and roots",/\bindices\b|\bindex\b|square roots?|squares? of numbers?|perfect squares?|cube roots?|\bpowers? of\b|exponent|\bsquared\b|\bcubed\b|square numbers?/,
+[["P5",[3],"Square numbers and square roots of perfect squares. Q: Find √49."],["P6",[2],"Cubes and cube roots; powers of numbers."],["P7",[1],"Laws of indices: aᵐ × aⁿ = aᵐ⁺ⁿ; a⁰ = 1."]],
+`An **index** (power) tells how many times a number is multiplied by itself. In 5³ the base is 5 and the index is 3. A **square root** undoes squaring.`,
+`- 7² = 7 × 7 = 49. 2³ = 2 × 2 × 2 = 8.\n- √49 = 7 because 7 × 7 = 49.\n- **Laws:** to multiply with the same base, add the indices: 3² × 3³ = 3⁵ = 243. To divide, subtract the indices.\n- Any number to the power 0 is 1.`,
+`- Area (square units) and volume (cubic units).\n- Powers in science, money growth and algebra.`,
+`Squaring a number means multiplying it by itself. A root takes you back.`,
+`- Squares: 1, 4, 9, 16, 25, 36, 49, 64, 81, 100.\n- √81 = 9.\n- 2⁵ = 32.\n- 5⁰ = 1.`,
+`## Common mistakes\n- Thinking 3² = 6. It is 3 × 3 = 9.\n- Multiplying the indices when you should add them.`,
+[["7² = ?",["14","49","77"],1],["√81 = ?",["9","8","40"],0],["2³ = ?",["6","8","9"],1]]),
+
+MP("Integers (positive and negative numbers)",/integers?|directed numbers?|negative numbers?|positive and negative|below zero|temperature below/,
+[["P6",[1],"Positive and negative numbers on a number line; compare them."],["P6",[2],"Add and subtract integers. Q: −3 + 5."],["P7",[1],"Integer problems: temperature, levels, money owed."]],
+`**Integers** are whole numbers that can be positive, negative or zero: … −3, −2, −1, 0, 1, 2, 3 …`,
+`- On a number line, numbers to the right are bigger.\n- −5 is smaller than −2.\n- Adding a negative is the same as subtracting: 5 + (−2) = 3.\n- Subtracting a negative is the same as adding: 5 − (−2) = 7.\n- To add −3 + 5, start at −3 and move 5 steps right: 2.`,
+`- Temperatures below zero, money owed, floors below ground, sea level.`,
+`Think of a thermometer: above zero is positive, below zero is negative.`,
+`- −3 + 5 = 2\n- 2 − 5 = −3\n- −2 − 4 = −6\n- −2 − (−4) = 2`,
+`## Common mistakes\n- Thinking −8 is bigger than −3.\n- Forgetting that subtracting a negative adds.`,
+[["−3 + 5 = ?",["2","−2","8"],0],["Which is the smallest?",["−4","−1","0"],0],["2 − 5 = ?",["3","−3","−7"],1]]),
+
+MP("BODMAS (order of operations)",/bodmas|order of operations|operations? order|brackets? first|\bbrackets\b/,
+[["P5",[3],"Order of operations with + − × ÷ and brackets. Q: 6 + 4 × 2."],["P6",[1],"BODMAS with fractions and decimals."],["P7",[1],"Mixed operations in word problems."]],
+`**BODMAS** is the order in which we do the operations when a sum has more than one: **B**rackets, **O**f, **D**ivision, **M**ultiplication, **A**ddition, **S**ubtraction.`,
+`- Work out brackets first.\n- Then “of” (for example 1/2 of 20), then division and multiplication, working from left to right.\n- Last, addition and subtraction, from left to right.\n- Division and multiplication are of equal rank. So are addition and subtraction.`,
+`- Every sum with mixed signs.\n- Calculators also follow this order.`,
+`Always do the “strong” operations first: brackets, then ÷ and ×, then + and −.`,
+`- 6 + 4 × 2 = 6 + 8 = 14 (not 20)\n- (6 + 4) × 2 = 10 × 2 = 20\n- 20 − 12 ÷ 4 = 20 − 3 = 17\n- 18 ÷ 3 × 2 = 6 × 2 = 12`,
+`## Common mistakes\n- Working strictly from left to right.\n- Doing addition before multiplication.`,
+[["6 + 4 × 2 = ?",["20","14","16"],1],["(6 + 4) × 2 = ?",["20","14","12"],0],["20 − 12 ÷ 4 = ?",["2","17","8"],1]]),
+
+MP("Circles",/circles?|circumference|\bradius\b|\bdiameter\b|\bpi\b|π|semi-?circle|\bchord\b/,
+[["P6",[3],"Parts of a circle: centre, radius, diameter, chord, arc."],["P7",[2],"Circumference C = π × d and area A = π × r². Use π = 22/7 or 3.14."]],
+`A **circle** is a round shape where every point on its edge is the same distance from the centre. The **radius** goes from the centre to the edge. The **diameter** goes across through the centre. The **circumference** is the distance around.`,
+`- Diameter = 2 × radius.\n- Circumference C = π × d = 2 × π × r.\n- Area A = π × r × r.\n- Use π = 22/7 (when the radius is a multiple of 7) or 3.14.`,
+`- Wheels, tanks, coins, round tables and gardens.\n- Finding fencing and covering areas.`,
+`The circumference is a rope around the circle; the diameter is the rope straight across.`,
+`- Radius 7 cm: diameter = 14 cm.\n- C = 2 × 22/7 × 7 = 44 cm.\n- A = 22/7 × 7 × 7 = 154 cm².`,
+`## Common mistakes\n- Using the diameter in the area formula without halving it.\n- Writing cm instead of cm² for area.`,
+[["The diameter is twice the…",["Radius","Chord","Arc"],0],["Radius 7 cm. Circumference (π = 22/7)?",["22 cm","44 cm","154 cm"],1],["Area of a circle is…",["π r²","2 π r","π d²"],0]]),
+
+MP("Volume and capacity",/\bvolume\b|cuboid|\bcubes?\b(?! roots?)|cubic (metres|centimetres)|cm³|m³/,
+[["P6",[2],"Volume of a cuboid = length × width × height. Q: 5 cm by 4 cm by 3 cm."],["P7",[2],"Volume and capacity: 1 000 cm³ = 1 litre; tanks and containers."]],
+`**Volume** is the amount of space a solid takes up. **Capacity** is how much a container can hold. Volume is measured in cubic units (cm³, m³).`,
+`- Volume of a cuboid = length × width × height.\n- Volume of a cube = side × side × side.\n- 1 000 cm³ = 1 litre. 1 m³ = 1 000 litres.\n- Capacity (litres) = volume (cm³) ÷ 1 000.`,
+`- Water tanks, jerrycans, boxes and trucks.\n- Building and packing.`,
+`Volume is how many small cubes fit inside the solid.`,
+`- 5 × 4 × 3 = 60 cm³.\n- Cube of side 3 cm: 3 × 3 × 3 = 27 cm³.\n- A tank 2 m × 1 m × 1 m = 2 m³ = 2 000 litres.`,
+`## Common mistakes\n- Adding the sides instead of multiplying.\n- Forgetting the unit is cubic.`,
+[["Volume of a cuboid 5 cm by 4 cm by 3 cm?",["12 cm³","60 cm³","47 cm³"],1],["1 000 cm³ equals…",["1 litre","10 litres","100 ml"],0],["Volume of a cube of side 3 cm?",["9 cm³","27 cm³","12 cm³"],1]]),
+
+MP("Perimeter and area",/perimeter|\barea\b|surface area|square (metres|centimetres|units)|distance around|fencing/,
+[["P3",[3],"Perimeter of squares and rectangles by adding the sides."],["P4",[3],"Area of rectangles and squares in square units. Q: Area of 8 m by 5 m."],["P5",[3],"Area of a triangle = ½ × base × height; compound shapes."],["P6",[2],"Area of parallelogram and trapezium; perimeter problems."],["P7",[2],"Area and perimeter of composite shapes; link to circles."]],
+`**Perimeter** is the distance around a shape. **Area** is the amount of flat surface inside a shape.`,
+`- Perimeter of a rectangle = 2 × (length + width). Square = 4 × side. Triangle = add the three sides.\n- Area of a rectangle = length × width. Square = side × side.\n- Area of a triangle = ½ × base × height.\n- Area of a parallelogram = base × height. Trapezium = ½ × (a + b) × height.\n- Area is in square units (cm², m²); perimeter is in ordinary units (cm, m).`,
+`- Fencing a garden (perimeter); tiling or painting a floor (area).\n- Plans for classrooms and farms.`,
+`Perimeter is a walk around the edge. Area is the carpet that covers the floor.`,
+`- Rectangle 8 m by 5 m: perimeter = 2 × (8 + 5) = 26 m; area = 8 × 5 = 40 m².\n- Triangle with base 6 cm and height 4 cm: area = ½ × 6 × 4 = 12 cm².`,
+`## Common mistakes\n- Mixing perimeter and area.\n- Using the slanted side instead of the height in the triangle formula.`,
+[["Perimeter of a rectangle 8 m by 5 m?",["13 m","26 m","40 m"],1],["Area of that rectangle?",["26 m²","40 m²","13 m²"],1],["Area of a triangle, base 6 cm, height 4 cm?",["24 cm²","12 cm²","10 cm²"],1]]),
+
+MP("Bearings and scale drawing",/bearings?|scale drawing|\bscale\b|map scale|compass (direction|point)s?|north.?east|three[- ]figure/,
+[["P5",[2],"Compass directions N, E, S, W and NE, NW, SE, SW."],["P6",[3],"Scale drawing: plans and maps. Q: Scale 1 cm to 5 m."],["P7",[2],"Bearings: measured clockwise from north in three figures (045°, 270°)."]],
+`A **scale** shows how a drawing compares with the real thing. A **bearing** is a direction measured as an angle clockwise from North, written with three figures.`,
+`- Scale 1 cm : 5 m means 1 cm on paper is 5 m in real life. Multiply the drawn length by 5 to get real length; divide real length by 5 to draw.\n- Bearings: North 000°, East 090°, South 180°, West 270°.\n- Always start from North and turn clockwise.\n- Back bearing: add or subtract 180°.`,
+`- Maps, house plans, ships, planes and hiking.`,
+`A map is a small copy of the real place. The scale tells how much smaller it is.`,
+`- Scale 1 cm : 5 m: a line of 6 cm stands for 30 m.\n- East = 090°, South = 180°, West = 270°.\n- Bearing of B from A is 060°: the back bearing is 240°.`,
+`## Common mistakes\n- Measuring from East instead of North.\n- Forgetting the 0 in 045°.`,
+[["Bearing of due east?",["090°","180°","270°"],0],["On a scale of 1 cm : 5 m, 6 cm stands for…",["11 m","30 m","1.2 m"],1],["Bearings are measured from…",["North, clockwise","East, clockwise","South, anticlockwise"],0]]),
+
+MP("Angles and lines",/\bangles?\b|right angle|acute|obtuse|reflex|\bparallel\b|perpendicular|protractor|straight lines?|types of lines|interior angles?|exterior angles?|vertically opposite/,
+[["P3",[3],"Straight, curved and parallel lines; right angles (square corners)."],["P4",[1],"Acute, right, obtuse and straight angles; measuring with a protractor."],["P5",[1],"Angles on a straight line (180°), at a point (360°), in a triangle (180°)."],["P6",[2],"Angles in quadrilaterals (360°); parallel lines."],["P7",[1],"Angles of polygons; mixed angle problems."]],
+`An **angle** is the amount of turn between two lines that meet at a point. It is measured in degrees (°).`,
+`- Acute: less than 90°. Right: exactly 90°. Obtuse: between 90° and 180°. Straight: 180°. Reflex: between 180° and 360°. Full turn: 360°.\n- Angles on a straight line add up to 180°. Angles around a point add up to 360°.\n- Angles in a triangle add up to 180°. In a quadrilateral they add up to 360°.\n- Sum of interior angles of a polygon = (n − 2) × 180°.\n- Parallel lines: alternate and corresponding angles are equal.\n- Use a protractor: put the centre on the vertex and the zero line on one arm.`,
+`- Corners of buildings, roofs and roads.\n- Geometry, bearings and construction.`,
+`An angle is how wide the lines open. A square corner is a right angle.`,
+`- Two angles of a triangle are 50° and 60°: the third = 180° − 110° = 70°.\n- On a straight line 110° + x = 180°, so x = 70°.\n- A hexagon (6 sides): (6 − 2) × 180° = 720°.`,
+`## Common mistakes\n- Reading the wrong scale on the protractor (inner or outer).\n- Forgetting the degree sign.`,
+[["Angles on a straight line add up to…",["90°","180°","360°"],1],["An angle of 120° is…",["Acute","Right","Obtuse"],2],["Two angles of a triangle are 50° and 60°. The third is…",["70°","80°","110°"],0]]),
+
+MP("Shapes (2D and 3D)",/shapes?|\bcircle\b|\bsquare\b|\btriangles?\b|rectangle|\bcylinder\b|\bcone\b|sphere|polygon|pentagon|hexagon|octagon|symmetry|\bfaces?\b|\bedges?\b|vertices|\bvertex\b|quadrilateral|rhombus|trapezium|parallelogram|isosceles|equilateral|scalene/,
+[["P1",[1],"Name and sort circle, square, triangle and rectangle."],["P2",[2],"Sides and corners; solid shapes: cube, cuboid, cylinder, cone, sphere."],["P3",[2],"Faces, edges and vertices; lines of symmetry."],["P4",[2],"Polygons: pentagon, hexagon, octagon; quadrilaterals."],["P5",[2],"Types of triangles: equilateral, isosceles, scalene, right-angled."],["P6",[1],"Nets of solids; symmetry and properties of shapes."],["P7",[1],"Revision of properties of shapes."]],
+`A **shape** is the form or outline of an object. **2D shapes** are flat (square, circle). **3D shapes** are solid (cube, cone).`,
+`- **Triangle:** 3 sides. **Rectangle:** 4 sides, opposite sides equal, 4 right angles. **Square:** 4 equal sides, 4 right angles. **Circle:** one curved edge, no corners.\n- **Polygons:** pentagon 5 sides, hexagon 6, octagon 8.\n- **Triangles:** equilateral (3 equal sides), isosceles (2 equal sides), scalene (no equal sides), right-angled (one 90° angle).\n- **Cube:** 6 faces, 12 edges, 8 vertices. **Cuboid:** same count, but rectangular faces.\n- **Cylinder:** 2 flat faces and 1 curved face. **Cone:** 1 flat and 1 curved. **Sphere:** 1 curved face.\n- **Line of symmetry:** a line that folds a shape into two matching halves.`,
+`- Buildings, boxes, balls, bricks and roofs.\n- Art, design and construction.`,
+`Look at the object. Count its sides and corners. The shape name follows.`,
+`- A door is a rectangle.\n- A football is a sphere.\n- A box of matches is a cuboid.\n- A square has 4 lines of symmetry.`,
+`## Common mistakes\n- Saying a square is not a rectangle. A square is a special rectangle.\n- Counting faces and edges wrongly.`,
+[["How many faces has a cube?",["4","6","8"],1],["Which shape has 3 sides?",["Triangle","Square","Circle"],0],["A rectangle has…",["4 sides and 4 right angles","3 sides","No corners"],0]]),
+
+MP("Position and direction",/position and direction|left and right|\bturn(ing)? (left|right)|\bdirections?\b|\babove\b|\bbelow\b|\bbehind\b|in front of|\bbeside\b|next to|coordinates?|co-ordinates?|grid reference/,
+[["P1",[1],"Position words: on, under, behind, in front of, beside; left and right."],["P2",[3],"Directions and simple routes; quarter and half turns."],["P3",[2],"Compass directions: north, south, east, west."],["P6",[1],"Reading and plotting points on a grid (x, y)."]],
+`**Position** tells where something is. **Direction** tells which way to go.`,
+`- Position words: on, under, above, below, behind, in front of, beside, between.\n- Left and right: face the same way as the person.\n- Compass: N (north), E (east), S (south), W (west).\n- Quarter turn = 90°; half turn = 180°; full turn = 360°.\n- On a grid, a point is written (x, y): move along first, then up.`,
+`- Giving directions to a place.\n- Reading maps.`,
+`Your right hand is the one you write with, for most people.`,
+`- The book is **on** the table; the cat is **under** it.\n- From school, go north for 3 km and then east for 2 km.\n- Point (3, 2): 3 across, 2 up.`,
+`## Common mistakes\n- Mixing left and right when the person faces you.\n- Writing the grid point as (y, x).`,
+[["Your right hand is on the…",["Right side","Left side","Top"],0],["North is opposite to…",["South","East","West"],0],["Point (3, 2) means 3 across and…",["2 up","2 down","3 up"],0]]),
+
+MP("Odd and even numbers",/\b(odd|even) numbers?\b|odd or even/,
+[["P2",[1],"Odd and even numbers up to 100. Q: Is 37 odd or even?"],["P3",[1],"Odd and even numbers up to 1 000; adding odd and even numbers."]],
+`**Even numbers** can be put into pairs with none left over. They end in 0, 2, 4, 6 or 8. **Odd numbers** always have one left over. They end in 1, 3, 5, 7 or 9.`,
+`- Look at the last digit only.\n- even + even = even; odd + odd = even; odd + even = odd.\n- Even numbers are in the 2 times table.`,
+`- Pairing pupils; house numbers; number patterns.`,
+`If you can share them in pairs, it is even. If one is left alone, it is odd.`,
+`- Even: 2, 4, 6, 8, 10.\n- Odd: 1, 3, 5, 7, 9.\n- 37 ends in 7, so it is odd.\n- 5 + 7 = 12 (odd + odd = even).`,
+`## Common mistakes\n- Thinking 0 is odd. 0 is even.`,
+[["Which number is even?",["17","24","35"],1],["Odd + odd = ?",["Odd","Even","Zero"],1],["Which number is odd?",["40","58","63"],2]]),
+
+MP("Number patterns and sequences",/patterns?|sequences?|next number|missing numbers?|number series|nth term|rule of the (pattern|sequence)/,
+[["P1",[3],"Pictures and shape patterns with colours and shapes."],["P2",[2],"Number patterns by adding 2, 5 or 10. Q: 2, 4, 6, __."],["P3",[2],"Increasing and decreasing number patterns."],["P4",[2],"Number sequences with a rule; find missing numbers."],["P5",[3],"Sequences with multiplication; square numbers."],["P6",[2],"General rule (nth term) of a pattern."],["P7",[2],"Sequences and nth term; revision."]],
+`A **number pattern** is a list of numbers that follow a rule. A **sequence** is a pattern in order. Each number is a **term**.`,
+`- Find the difference between neighbouring terms. If it is always the same, the pattern adds (or subtracts) that number.\n- If each term is multiplied (2, 4, 8, 16), find the multiplier.\n- Use the rule to find the missing or next term.\n- nth term of an adding pattern = first term + (n − 1) × difference.`,
+`- Calendars, savings plans and tiling patterns.\n- Algebra and higher mathematics.`,
+`Find what changes from one number to the next, then keep doing it.`,
+`- 2, 4, 6, 8, __ → 10 (add 2)\n- 20, 17, 14, __ → 11 (subtract 3)\n- 3, 6, 12, 24, __ → 48 (multiply by 2)\n- 3, 7, 11, 15: nth term = 4n − 1, so the 10th term is 39.`,
+`## Common mistakes\n- Guessing the rule from only two numbers.\n- Adding when the rule is multiplying.`,
+[["Next: 5, 10, 15, 20, __",["24","25","30"],1],["What is the rule? 20, 17, 14, 11",["Add 3","Subtract 3","Subtract 2"],1],["Missing number: 3, 6, 12, __, 48",["18","24","30"],1]]),
+
+MP("Sets",/\bsets?\b|venn|subsets?|universal set|empty set|intersection|\bunion\b/,
+[["P4",[3],"Sets: members, listing and naming. Q: List the set of even numbers less than 10."],["P5",[1],"Subsets, empty set, equal sets, universal set."],["P6",[1],"Venn diagrams: union and intersection of two sets."],["P7",[2],"Venn diagram word problems: n(A ∪ B) = n(A) + n(B) − n(A ∩ B)."]],
+`A **set** is a collection of things that belong together. The things in a set are its **members** or **elements**.`,
+`- Write members inside curly brackets: A = {2, 4, 6, 8}.\n- n(A) means the number of members: n(A) = 4.\n- **Subset:** every member of one set is in another. **Empty set:** { } with no members.\n- **Union (A ∪ B):** members in either set. **Intersection (A ∩ B):** members in both sets.\n- On a Venn diagram, overlapping circles show the intersection.`,
+`- Grouping pupils, subjects, crops or animals.\n- Survey problems.`,
+`A set is like a basket. The things inside are its members.`,
+`- A = {1, 2, 3, 4}, B = {3, 4, 5}: A ∩ B = {3, 4}; A ∪ B = {1, 2, 3, 4, 5}.\n- 30 pupils: 18 like football, 15 like netball, 5 like both: n(F ∪ N) = 18 + 15 − 5 = 28, so 2 like neither.`,
+`## Common mistakes\n- Counting members in the intersection twice.\n- Forgetting the curly brackets.`,
+[["A = {1, 2, 3}. How many members?",["2","3","4"],1],["A ∩ B means…",["Members in both sets","Members in either set","Members in neither"],0],["A = {1, 2}, B = {2, 3}. A ∪ B = ?",["{2}","{1, 2, 3}","{1, 3}"],1]]),
+
+MP("Average, mean, median, mode and range",/\baverage\b|arithmetic mean|\bthe mean\b|\bmedian\b|\bmodes?\b|\brange of\b|find the mean|calculate the mean/,
+[["P5",[3],"Average of a few numbers. Q: Average of 4, 6 and 8."],["P6",[3],"Mean, median, mode and range of a set of numbers."],["P7",[2],"Missing number given the average; word problems."]],
+`The **average (mean)** of some numbers is their sum divided by how many numbers there are. The **median** is the middle number when they are in order. The **mode** is the number that appears most. The **range** is the highest minus the lowest.`,
+`- Mean = sum of numbers ÷ number of numbers.\n- Median: put numbers in order; take the middle one. If there are two middle numbers, find their mean.\n- Mode: the number with the highest frequency.\n- Range = highest − lowest.\n- If the mean is known: total = mean × number of numbers.`,
+`- Test marks, rainfall, prices, temperatures and sports.`,
+`The mean is what each one would get if everything were shared equally.`,
+`- Mean of 6, 8, 10 = 24 ÷ 3 = 8.\n- Median of 3, 5, 9, 11, 12 = 9.\n- Mode of 2, 3, 3, 4, 5 = 3.\n- Range of 3, 5, 9, 11, 12 = 12 − 3 = 9.\n- Type **average of 6, 8 and 10** to see the working.`,
+`## Common mistakes\n- Finding the median without putting the numbers in order.\n- Dividing by the wrong count.`,
+[["Mean of 6, 8 and 10?",["6","8","24"],1],["Mode of 2, 3, 3, 4, 5?",["3","4","2"],0],["Median of 3, 5, 9, 11, 12?",["9","8","5"],0]]),
+
+MP("Data handling and graphs",/tally|pictographs?|pictograms?|bar graphs?|bar charts?|pie charts?|line graphs?|frequency tables?|statistics|data handling|interpret(ing)? (a )?(graph|chart)|\bgraphs?\b|\bcharts?\b/,
+[["P2",[3],"Collect data and tally; simple pictographs."],["P3",[2],"Pictographs and bar graphs with a key."],["P4",[2],"Read and draw bar graphs and tables."],["P5",[3],"Line graphs; frequency tables."],["P6",[3],"Pie charts: angle = (part ÷ total) × 360°."],["P7",[2],"Interpret graphs and combined data."]],
+`**Data handling** is collecting information and showing it in tables, tally marks and graphs so that we can read it easily.`,
+`- **Tally:** count in groups of five (IIII with a line across = 5).\n- **Pictograph:** pictures stand for numbers. Read the **key**.\n- **Bar graph:** the height of each bar shows the number.\n- **Line graph:** shows change over time.\n- **Pie chart:** angle = (part ÷ total) × 360°.`,
+`- Class surveys, weather records, sales, school marks and news.`,
+`A graph is a picture of numbers.`,
+`- Pie chart: 20 of 60 pupils like football: angle = 20 ÷ 60 × 360° = 120°.\n- Tally for 7: IIII II.`,
+`## Common mistakes\n- Ignoring the key or the scale on the axis.\n- Bars of different widths.`,
+[["A tally group of four strokes with one across stands for…",["4","5","6"],1],["A pie chart angle for 20 of 60 pupils?",["60°","90°","120°"],2],["A pictograph needs a…",["Key","Fence","Roof"],0]]),
+
+MP("Probability",/probabilit|\bchances? of\b|more likely|equally likely|\boutcomes?\b|coin toss|toss(ing)? a coin|\bdice\b|\bdie\b|certain or impossible/,
+[["P6",[3],"Chance words: certain, likely, unlikely, impossible."],["P7",[2],"Probability as a fraction = wanted outcomes ÷ all outcomes. Q: Probability of a 6 on a die."]],
+`**Probability** is the chance that something will happen. It is a number from 0 (impossible) to 1 (certain).`,
+`- Probability = number of wanted outcomes ÷ total number of outcomes.\n- Impossible = 0; certain = 1; even chance = 1/2.\n- Tossing a coin: 2 outcomes (head, tail). Rolling a die: 6 outcomes.`,
+`- Weather forecasts, games, raffles and surveys.`,
+`Count the ways you want it to happen, and divide by all the ways it can happen.`,
+`- Fair coin: P(head) = 1/2.\n- Fair die: P(6) = 1/6; P(even) = 3/6 = 1/2.\n- A bag has 3 red and 2 blue balls: P(red) = 3/5.`,
+`## Common mistakes\n- Writing probability as more than 1.\n- Forgetting to count all the outcomes.`,
+[["Probability of heads on a fair coin?",["1/2","1/3","1"],0],["A fair die: probability of a 6?",["1/6","1/3","6"],0],["An event that cannot happen is…",["Impossible","Certain","Likely"],0]]),
+
+MP("Roman numerals",/roman/,
+[["P3",[3],"Roman numerals I to XX."],["P4",[1],"Roman numerals up to C (100)."],["P5",[2],"Roman numerals up to 1 000; changing to and from Hindu-Arabic numbers."]],
+`**Roman numerals** are numbers written with letters: I, V, X, L, C, D, M.`,
+`- I = 1, V = 5, X = 10, L = 50, C = 100, D = 500, M = 1 000.\n- Add when a smaller letter comes after a bigger one: VI = 6, XV = 15.\n- Subtract when a smaller letter comes before a bigger one: IV = 4, IX = 9, XL = 40, XC = 90.\n- A letter is not repeated more than three times in a row.`,
+`- Clock faces, book chapters, building dates and names of kings.`,
+`Read from left to right. Small before big takes away; small after big adds.`,
+`- XIV = 10 + 4 = 14\n- XXIX = 20 + 9 = 29\n- 74 = LXXIV (50 + 20 + 4)\n- 49 = XLIX (40 + 9)`,
+`## Common mistakes\n- Writing IIII for 4 (it is IV).\n- Writing VX for 5 (it is just V).`,
+[["XIV = ?",["14","16","24"],0],["9 in Roman numerals is…",["VIIII","IX","XI"],1],["L stands for…",["10","50","100"],1]]),
+
+MP("Number bases",/number bases?|\bbase (two|2|three|3|four|4|five|5|six|6|seven|7|eight|8|ten|10)\b|binary|\bbase\b/,
+[["P6",[2],"Grouping in base 10 and base 5. Q: Write 12 in base 5."],["P6",[3],"Change between base 10 and bases 2 to 5."],["P7",[1],"Operations in other bases."]],
+`A **number base** is the number of digits used before we start a new place. We normally use base 10 (digits 0 to 9). In base 5 we only use 0, 1, 2, 3, 4.`,
+`- **Base 10 → base b:** divide repeatedly by b and write the remainders from bottom to top.\n- **Base b → base 10:** multiply each digit by its place value (1, b, b², …) and add.\n- Places in base 5 from the right: 1, 5, 25, 125.\n- Places in base 2: 1, 2, 4, 8, 16.`,
+`- Computers use base 2 (binary).\n- Time uses base 60 (seconds, minutes).`,
+`In base 5 you only have five fingers, so after 4 you start a new group.`,
+`- 12 in base 5: 12 ÷ 5 = 2 remainder 2, so 12 = 22 (base 5).\n- 13 in base 2: 13 → 1101 (base 2) because 8 + 4 + 1.\n- 101 (base 2) = 1 × 4 + 0 × 2 + 1 = 5.`,
+`## Common mistakes\n- Reading the remainders from top to bottom.\n- Using a digit that is not allowed in the base (a 5 in base 5).`,
+[["Write 12 in base 5.",["22","21","32"],0],["101 in base 2 equals what in base 10?",["3","5","10"],1],["Base 10 uses how many digits?",["2","5","10"],2]]),
+
+MP("Algebra and simple equations",/algebra|algebraic|simple equations?|like terms|substitut(e|ion)|unknown (number|value|letter)|solve for|find the value of [a-z]\b|what is x\b/,
+[["P3",[3],"Missing numbers in number sentences. Q: 5 + □ = 9."],["P4",[3],"Find the unknown number in simple number sentences."],["P5",[2],"Letters for unknown numbers; equations like x + 5 = 12."],["P6",[2],"Substitution; simplify expressions; one-step and two-step equations."],["P7",[1],"Solve equations; form equations from word problems; inequalities."]],
+`**Algebra** uses letters such as x or n for unknown numbers. An **expression** like 3x + 2 has no equals sign. An **equation** like 3x + 2 = 11 says two sides are equal.`,
+`- Do the **opposite operation on both sides** to keep the equation balanced.\n- x + 5 = 12: subtract 5 → x = 7.\n- 3x = 12: divide by 3 → x = 4.\n- Two steps: 2x + 5 = 11 → 2x = 6 → x = 3.\n- **Substitution:** if x = 3, then 4x + 1 = 13.\n- **Collect like terms:** 3x + 2x = 5x.\n- Type an equation such as **2x + 5 = 11** and I will show the working step by step.`,
+`- Finding unknown prices, ages and amounts.\n- All later mathematics and science.`,
+`An equation is a balance. Whatever you do to one side, do to the other.`,
+`- x + 5 = 12 → x = 7.\n- 3x = 12 → x = 4.\n- 2x + 5 = 11 → x = 3.\n- If n = 4: 3n − 2 = 10.`,
+`## Common mistakes\n- Doing something to one side only.\n- Writing 3x as 3 + x. It means 3 × x.`,
+[["Solve x + 5 = 12.",["x = 7","x = 17","x = 6"],0],["Solve 3x = 12.",["x = 4","x = 9","x = 36"],0],["If x = 3, then 4x + 1 = ?",["13","12","15"],0]]),
+
+MP("Rounding off and estimating",/round(ing)?( off)?|nearest (ten|hundred|thousand|whole|tenth)|estimat|approximat/,
+[["P4",[2],"Round numbers to the nearest 10 and 100. Q: Round 347 to the nearest ten."],["P5",[1],"Nearest 1 000; estimate sums and differences."],["P6",[2],"Round decimals to the nearest whole number and tenth."],["P7",[1],"Estimation in word problems."]],
+`**Rounding off** means changing a number to a nearby simpler one. An **estimate** is an answer that is close to the exact one.`,
+`- Underline the digit in the place you are rounding to.\n- Look at the digit to its right: **5 or more → round up; 4 or less → leave it.**\n- Replace the digits after it with zeros.\n- To estimate a sum, round each number first, then calculate.`,
+`- Shopping, checking answers and reporting large figures.`,
+`If the next digit is 5 or more, climb up. If it is 4 or less, stay.`,
+`- 347 → 350 (nearest 10); 300 (nearest 100).\n- 4 562 → 5 000 (nearest 1 000).\n- 3.46 → 3.5 (nearest tenth).\n- Estimate 298 + 403 ≈ 300 + 400 = 700.`,
+`## Common mistakes\n- Looking at the wrong digit.\n- Forgetting zeros after rounding.`,
+[["Round 347 to the nearest ten.",["340","350","300"],1],["Round 4 562 to the nearest thousand.",["4 000","5 000","4 600"],1],["Round 3.46 to the nearest tenth.",["3.4","3.5","3.46"],1]]),
+
+MP("Comparing and ordering numbers",/compar(e|ing|ison)|order(ing)? (of )?(the )?numbers|greater than|less than|ascending|descending|arrange (the )?numbers|bigger (number|than)|smaller (number|than)|largest number|smallest number/,
+[["P1",[1],"Compare groups: more, fewer, same; numbers to 10."],["P1",[2],"Greater than, less than, equal to for numbers up to 20."],["P2",[1],"Compare and order numbers up to 100."],["P3",[1],"Numbers up to 1 000; ascending and descending order."],["P4",[2],"Numbers up to 100 000."],["P5",[1],"Numbers up to 1 000 000; compare decimals and fractions."]],
+`**Comparing** numbers means finding which is bigger, smaller or equal. **Ordering** means arranging them from smallest to biggest (**ascending**) or biggest to smallest (**descending**).`,
+`- More digits means a bigger number.\n- If the digits are equal, compare from the left: thousands, then hundreds, tens, ones.\n- Use > (greater than), < (less than) and = (equal to). The sign opens towards the bigger number.\n- To order, find the smallest (or biggest) first, then the next.`,
+`- Prices, marks, distances, populations and rankings.`,
+`The open mouth of the sign always faces the bigger number: 9 > 4.`,
+`- 7 > 3 and 3 < 7.\n- 458 and 485: the hundreds are equal; tens 5 < 8, so 458 < 485.\n- Ascending: 9, 15, 23, 101.\n- Descending: 101, 23, 15, 9.`,
+`## Common mistakes\n- Comparing only the last digit.\n- Mixing ascending and descending.`,
+[["Which sign is correct? 8 __ 5",[">","<","="],0],["Ascending order: 23, 9, 15",["9, 15, 23","23, 15, 9","15, 9, 23"],0],["Which is bigger: 458 or 485?",["458","485","They are equal"],1]]),
+
+MP("Place value and value of digits",/place value|value of (a |the )?digit|face value|expanded form|\bdigits?\b|hundreds,? tens|ones and tens|thousands|ten thousand|million|writing numbers/,
+[["P2",[1],"Tens and ones in numbers up to 99. Q: In 47, what is the value of 4?"],["P3",[1],"Hundreds, tens and ones up to 999; expanded form."],["P4",[1],"Place value up to 99 999; reading and writing numbers in words."],["P5",[1],"Numbers up to 999 999; value and face value."],["P6",[1],"Numbers up to millions."],["P7",[1],"Revision of place value with large numbers."]],
+`**Place value** is the value a digit has because of where it stands in a number. The **face value** is the digit itself. The **value** of a digit = face value × its place.`,
+`- Make a place value chart from the right: ones, tens, hundreds, thousands, ten thousands, hundred thousands, millions.\n- Value of a digit = digit × value of its place. In 4 352, the 3 is in the hundreds place: 3 × 100 = 300.\n- **Expanded form:** 4 352 = 4 000 + 300 + 50 + 2.\n- A zero holds a place: 305 is not 35.`,
+`- Reading prices, phone credit, distances and populations.\n- Writing numbers in words on cheques and receipts.\n- Basis of addition, subtraction and rounding.`,
+`Each digit lives in a house. The house decides how much the digit is worth. In 52 the 5 lives in the tens house, so it is worth 50.`,
+`- 47: tens digit 4 is worth 40; ones digit 7 is worth 7.\n- 352 = 300 + 50 + 2.\n- 6 048: the 0 is in the hundreds place so its value is 0.\n- 25 600 in words: twenty-five thousand six hundred.`,
+`## Common mistakes\n- Giving the face value instead of the value: in 352 the value of 5 is 50, not 5.\n- Leaving out the zero that holds a place.`,
+[["What is the value of 5 in 352?",["5","50","500"],1],["Write 400 + 30 + 2 as a number.",["432","4 302","342"],0],["The 7 in 7 000 is in which place?",["Tens","Hundreds","Thousands"],2]]),
+
+MP("Multiplication and times tables",/multipl(y|ication|ied|ying)|times tables?|\btimes\b|\bproduct of\b|repeated addition/,
+[["P2",[2],"Repeated addition and equal groups. Q: 3 groups of 4."],["P2",[3],"Tables of 2, 3, 4, 5 and 10."],["P3",[1],"Times tables up to 10 × 10."],["P3",[2],"Multiply a 2-digit number by a 1-digit number. Q: 23 × 4."],["P4",[1],"Multiply by 2-digit numbers. Q: 34 × 12."],["P5",[1],"Multiply large numbers; multiply by 10, 100, 1 000."],["P6",[1],"Multiply decimals."]],
+`**Multiplication** is repeated addition: finding the total of equal groups. The answer is the **product**. The sign is ×.`,
+`- 4 × 3 means 4 groups of 3: 3 + 3 + 3 + 3 = 12.\n- Learn the times tables from 1 to 12.\n- For bigger numbers use long multiplication: multiply by the ones digit, then by the tens digit (put a 0 in the ones place), then add the answers.\n- Multiply by 10, 100, 1 000 by adding 1, 2, 3 zeros.\n- Type a sum such as **34 × 12** and I will show every step.`,
+`- Prices of many items, areas, and rows of desks.\n- Division, fractions and algebra depend on it.`,
+`× means “groups of”. 3 × 5 means three groups of five.`,
+`- 5 × 4 = 20\n- 23 × 4 = 92 (3 × 4 = 12, write 2 carry 1; 2 × 4 = 8, plus 1 = 9)\n- 34 × 12 = 408 (34 × 2 = 68; 34 × 10 = 340; 68 + 340 = 408)\n- 45 × 100 = 4 500`,
+`## Facts\n- Order does not matter: 3 × 5 = 5 × 3.\n- Anything × 0 = 0; anything × 1 is itself.\n## Common mistakes\n- Forgetting the zero placeholder in long multiplication.\n- Mixing times tables facts.`,
+[["6 × 7 = ?",["42","36","48"],0],["What is 23 × 4?",["82","92","102"],1],["45 × 100 = ?",["450","4 500","45 000"],1]]),
+
+MP("Division",/\bdivision\b|\bdivide(d)?\b|\bdividing\b|\bquotient\b|\bremainder\b|share equally|sharing equally/,
+[["P2",[3],"Sharing equally. Q: Share 10 sweets among 2 children."],["P3",[1],"Division as grouping and the opposite of multiplication; tables to 10 × 10."],["P3",[2],"Divide a 2-digit number by 1 digit, with remainder. Q: 47 ÷ 5."],["P4",[1],"Divide 3-digit numbers by 1-digit numbers."],["P5",[2],"Divide by 2-digit numbers; divide by 10 and 100."],["P6",[1],"Divide decimals."]],
+`**Division** is sharing or grouping a number into equal parts. The answer is the **quotient**. What is left over is the **remainder**. The sign is ÷.`,
+`- Ask: how many times does the divisor go into the number?\n- Long division: divide, multiply, subtract, bring down the next digit, and repeat.\n- Division is the opposite of multiplication: 12 ÷ 3 = 4 because 3 × 4 = 12.\n- Check: quotient × divisor + remainder = the number.\n- Type a sum such as **156 ÷ 12** and I will show every step.`,
+`- Sharing sweets, money or books equally.\n- Averages, rates, speed and unit prices.`,
+`Division is fair sharing: 12 mangoes shared among 4 children gives 3 each.`,
+`- 12 ÷ 3 = 4\n- 47 ÷ 5 = 9 remainder 2 (5 × 9 = 45; 47 − 45 = 2)\n- 156 ÷ 12 = 13\n- 3 500 ÷ 100 = 35`,
+`## Facts\n- Division by 0 is not possible.\n- Dividing by 1 gives the same number.\n## Common mistakes\n- Writing the quotient digits in the wrong place.\n- Forgetting the remainder.`,
+[["20 ÷ 4 = ?",["4","5","6"],1],["47 ÷ 5 gives remainder…",["1","2","3"],1],["The answer to a division is called the…",["Quotient","Product","Sum"],0]]),
+
+MP("Subtraction",/subtract|subtraction|\bminus\b|take away|difference (between|of)|borrow(ing)?/,
+[["P1",[2],"Take away from numbers up to 10. Q: 9 − 4."],["P1",[3],"Subtract within 20."],["P2",[2],"Subtract within 100 without borrowing. Q: 68 − 25."],["P2",[3],"Subtract within 100 with borrowing. Q: 52 − 27."],["P3",[1],"Subtract 3-digit numbers with regrouping. Q: 503 − 247."],["P4",[1],"Subtract numbers up to 100 000."],["P5",[1],"Subtract large numbers and decimals."]],
+`**Subtraction** is taking one number away from another to find what is left, called the **difference**. The sign is −.`,
+`- Write the bigger number on top, lining up ones, tens and hundreds.\n- Subtract the ones first. If the top digit is smaller, **borrow** 1 ten from the next place (it becomes 10 ones).\n- Then subtract the tens, then the hundreds.\n- Check by adding: answer + the number taken away = the first number.\n- Type a sum such as **503 − 247** and I will show every step.`,
+`- Finding change after buying; how many are left; differences in height, age or marks.`,
+`Subtraction is taking away: 8 sweets − 3 sweets = 5 sweets left.`,
+`- 9 − 4 = 5\n- 52 − 27 = 25 (2 − 7 is not possible; borrow: 12 − 7 = 5; then 4 − 2 = 2)\n- 503 − 247 = 256`,
+`## Words that mean subtract\n- take away, minus, difference, less, left, remain.\n## Common mistakes\n- Taking the smaller digit from the bigger one whichever is on top.\n- Forgetting to reduce the digit you borrowed from.\n- Order matters: 8 − 3 is not 3 − 8.`,
+[["12 − 5 = ?",["6","7","8"],1],["What is 52 − 27?",["25","35","29"],0],["If 40 − 15 = 25, then 25 + 15 = ?",["40","30","55"],0]]),
+
+MP("Addition",/\baddition\b|\badd\b|\badding\b|\bsum of\b|\bplus\b|regroup|carrying|total of|altogether/,
+[["P1",[2],"Add numbers with a total up to 10 using objects and the number line. Q: 4 + 3."],["P1",[3],"Add within 20."],["P2",[1],"Add within 100 without carrying. Q: 23 + 45."],["P2",[2],"Add within 100 with carrying. Q: 25 + 38."],["P3",[1],"Add 3-digit numbers. Q: 346 + 278."],["P4",[1],"Add numbers up to 100 000; word problems."],["P5",[1],"Add large numbers and decimals."]],
+`**Addition** is joining two or more numbers to get a bigger number called the **sum** or **total**. The sign is +.`,
+`- Line up the numbers so that ones are under ones, tens under tens, and so on.\n- Add the ones first, then the tens, then the hundreds.\n- If a column adds to 10 or more, write the ones digit and **carry** the tens to the next column.\n- Check by subtracting: sum − one number = the other number.\n- Type a sum such as **346 + 278** and I will show every step.`,
+`- Adding prices when shopping.\n- Totals: pupils in a school, marks in a test.\n- It is the basis of multiplication (repeated addition).`,
+`Addition is putting things together: 3 mangoes + 2 mangoes = 5 mangoes.`,
+`- 4 + 3 = 7\n- 25 + 38 = 63 (5 + 8 = 13, write 3 carry 1; 2 + 3 + 1 = 6)\n- 346 + 278 = 624`,
+`## Words that mean add\n- sum, total, altogether, plus, increase, in all.\n## Facts\n- Adding zero changes nothing: 8 + 0 = 8.\n- Order does not matter: 5 + 2 = 2 + 5.\n## Common mistakes\n- Forgetting the carried 1.\n- Lining up the digits wrongly.`,
+[["25 + 38 = ?",["53","63","73"],1],["What is the sum of 346 and 278?",["614","624","634"],1],["Which word means add?",["Altogether","Difference","Share"],0]]),
+
+MP("Time",/telling (the )?time|tell(ing)? time|\btime\b|\bclock\b|calendar|o.clock|days? of the week|months? of the year|24[- ]hour|12[- ]hour|hours? and minutes?|\ba\.m\.|\bp\.m\.|half past|quarter (past|to)/,
+[["P1",[3],"Days of the week; morning, afternoon, evening."],["P2",[1],"Months of the year; o’clock times."],["P2",[2],"Half past and quarter past/to; reading a clock."],["P3",[1],"Minutes; the 12-hour clock; calendars; a.m. and p.m."],["P4",[2],"24-hour clock; time in hours and minutes; duration."],["P5",[2],"Time problems and timetables."],["P6",[1],"Time linked to speed and travel."]],
+`**Time** tells when something happens or how long it takes. Units are seconds, minutes, hours, days, weeks, months and years.`,
+`- 60 seconds = 1 minute. 60 minutes = 1 hour. 24 hours = 1 day. 7 days = 1 week. 12 months = 1 year. 365 days = 1 year (366 in a leap year).\n- On a clock the short hand shows hours and the long hand shows minutes. Half past = 30 minutes. Quarter past = 15 minutes. Quarter to = 45 minutes.\n- The 12-hour clock uses a.m. (midnight to noon) and p.m. (noon to midnight).\n- 24-hour clock: add 12 to p.m. times: 3:30 p.m. = 15:30.\n- Duration = finish time − start time.`,
+`- School timetables, buses, appointments and cooking.\n- Speed problems.`,
+`The short hand is slow and tells the hour. The long hand is fast and tells the minutes.`,
+`- 2:30 p.m. = 14:30.\n- From 8:15 a.m. to 10:45 a.m. is 2 hours 30 minutes.\n- 150 minutes = 2 hours 30 minutes (150 ÷ 60).\n- Days: Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday.`,
+`## Months\n- 31 days: January, March, May, July, August, October, December.\n- 30 days: April, June, September, November.\n- February has 28 days (29 in a leap year).\n## Common mistakes\n- Treating 100 minutes as one hour.`,
+[["How many minutes in 1 hour?",["30","60","100"],1],["3:30 p.m. in 24-hour time is…",["03:30","13:30","15:30"],2],["8:15 a.m. to 10:45 a.m. is…",["2 h 30 min","2 h 45 min","3 h"],0]]),
+
+MP("Money",/\bmoney\b|\bcoins?\b|shillings?|\bugx\b|change from|shopping|\bbudget\b|\breceipt\b|\bbills?\b|notes and coins|buying and selling/,
+[["P1",[3],"Know the coins and notes: 50, 100, 200, 500, 1 000."],["P2",[2],"Add and subtract money up to 1 000 shillings; change."],["P3",[2],"Money up to 10 000; shopping bills."],["P4",[3],"Bills and receipts; simple budgets."],["P5",[3],"Money problems with fractions and percentages."],["P6",[1],"Savings and budgets."]],
+`**Money** is what we use to buy and sell. In Uganda the money is the shilling (UGX or Ush).`,
+`- Coins: 50, 100, 200, 500, 1 000. Notes: 1 000, 2 000, 5 000, 10 000, 20 000, 50 000.\n- Total cost = add the prices. Total cost of many equal items = number × price of one.\n- Change = money given − total cost.\n- A **budget** lists the money coming in (income) and going out (expenses).`,
+`- Shops, markets, saving and school fees.`,
+`Add what you buy, then take it from what you gave. What is left is your change.`,
+`- Sugar 4 500 + soap 2 000 = 6 500. Paid 10 000: change = 3 500.\n- 3 pens at 500 each = 1 500.`,
+`## Common mistakes\n- Forgetting to subtract the total from the money given.\n- Mixing 5 000 and 500.`,
+[["Total of 4 500 and 2 000?",["6 500","6 000","7 500"],0],["Pay 10 000 for goods costing 6 500. Change?",["3 500","4 500","3 000"],0],["Change = ?",["Money given − cost","Cost − money given","Money given + cost"],0]]),
+
+MP("Length, mass and capacity",/\blength\b|\bmetres?\b|\bmeters?\b|centimetres?|kilometres?|millimetres?|kilograms?|\bgrams?\b|\bmass\b|\bweigh|\bcapacity\b|\blitres?\b|millilitres?|units? of measure|convert(ing)? (units|between)|how (long|heavy)|measuring|measurement/,
+[["P1",[2],"Compare lengths (long, short, tall), masses (heavy, light) and capacity (full, empty)."],["P2",[2],"Measure length in metres and centimetres; mass in kg; capacity in litres."],["P3",[2],"Change m ↔ cm, kg ↔ g, l ↔ ml; use measuring instruments."],["P4",[3],"Add and subtract measures; kilometres."],["P5",[2],"Conversions with decimals; measure problems."],["P6",[2],"Reading scales; mixed measure problems."]],
+`**Measurement** is finding the size or amount of something using standard units. Length is how long, mass is how heavy, and capacity is how much a container holds.`,
+`- Length: 1 cm = 10 mm; 1 m = 100 cm; 1 km = 1 000 m.\n- Mass: 1 kg = 1 000 g; 1 tonne = 1 000 kg.\n- Capacity: 1 litre = 1 000 ml.\n- **Big unit → small unit: multiply.** **Small unit → big unit: divide.**\n- Instruments: ruler, tape measure (length); beam balance or scale (mass); measuring jug or cylinder (capacity).`,
+`- Buying cloth, sugar, milk and fuel; building and farming.`,
+`Pick the right ruler for the job: metres for a room, centimetres for a pencil, kilometres for a road.`,
+`- 2.5 m = 250 cm (× 100).\n- 3 kg 200 g = 3 200 g.\n- 1 500 ml = 1.5 l (÷ 1 000).\n- 4 km = 4 000 m.`,
+`## Common mistakes\n- Multiplying when you should divide.\n- Writing different units in one calculation.`,
+[["1 km = ?",["100 m","1 000 m","10 m"],1],["2.5 m in cm?",["25 cm","250 cm","2 500 cm"],1],["1 500 ml in litres?",["15 l","1.5 l","0.15 l"],1]],"How to measure and convert","Where it is used",1),
+
+MP("Counting and number names",/counting|\bcount\b|number names?|numbers? (up )?(to|from) \d+|writing numbers? in words|number words|number line|ordinal|before and after|numerals?|skip counting/,
+[["P1",[1],"Count, read and write 0 to 10; number names zero to ten. Q: Count the mangoes."],["P1",[2],"Numbers 11 to 20; before, after and between."],["P1",[3],"Numbers 21 to 99; ordinal numbers first to tenth."],["P2",[1],"Count up to 100 in ones, twos, fives and tens."],["P3",[1],"Count, read and write numbers up to 1 000; number names."]],
+`**Counting** means saying numbers in order to find how many things there are. A **number name** is the number written in words, like “seven”.`,
+`- Touch each object once and say the next number. The last number you say is the total.\n- Count forward by adding 1 and backward by taking away 1.\n- To count in twos, fives or tens, jump: 2, 4, 6… or 5, 10, 15…\n- A **number line** shows numbers in order. Moving right adds; moving left subtracts.\n- **Ordinal numbers** show position: 1st first, 2nd second, 3rd third.`,
+`- Counting money, pupils, goats and steps.\n- It is the base of all mathematics.`,
+`Counting is like climbing steps. Each step is one more.`,
+`- Count: 1, 2, 3, … 10.\n- Skip count by 5: 5, 10, 15, 20.\n- Number names: 12 twelve, 20 twenty, 40 forty, 100 one hundred.\n- Before 8 is 7. After 8 is 9. Between 7 and 9 is 8.`,
+`## Common mistakes\n- Counting one object twice or missing one.\n- Spelling: forty (not fourty).`,
+[["What comes after 14?",["13","15","16"],1],["Count in fives: 5, 10, 15, __",["16","20","25"],1],["Which is the number name for 12?",["Twelve","Twenty","Two"],0]]),
+
+MP("Sorting and matching",/sorting|matching|\bsort\b|group(ing)? (the )?(objects|things)|match (the )?(objects|things|pictures)|same and different/,
+[["P1",[1],"Sort objects by colour, shape and size; match objects that go together. Q: Put all the red bottle tops together."]],
+`**Sorting** means putting things that are alike into the same group. **Matching** means joining things that go together or are the same.`,
+`- Look at the things carefully.\n- Decide what is the same: colour, shape, size or use.\n- Put the things with that feature in one group.\n- Count the things in each group.`,
+`- At home: spoons with spoons, plates with plates.\n- It prepares you for counting and sets.`,
+`Sorting is like putting all the beans in one cup and all the maize in another.`,
+`- Sort red, blue and green bottle tops into three groups.\n- Match a shoe with its pair, and a cup with a saucer.`,
+`## Common mistakes\n- Mixing two features in one group (colour and size).\n- Not counting every group.`,
+[["Which things belong in one group?",["A banana and a mango (fruits)","A banana and a chair","A mango and a pencil"],0],["Sorting by colour: which group is correct?",["All red things together","Red and blue together","One red, one blue"],0],["We match a shoe with…",["Its pair","A spoon","A table"],0]])
+];
+
+/* ===== PRIMARY MATHEMATICS: class lines, syllabus lookup and step-by-step solvers ===== */
+const TERMTXT=a=>a.length==3?"All terms":a.length==1?"Term "+a[0]:"Terms "+a.join(" and ");
+const clRange=T=>{const c=[...new Set((T.cl||[]).map(x=>x[0]))].sort();return c.length?(c.length==1?PCN[c[0]]:PCN[c[0]]+" to "+PCN[c[c.length-1]]):""};
+const clLine=T=>T&&T.cl?"**Class:** "+clRange(T)+"\n":"";
+const clSec=T=>T&&T.cl?"\n## Where it is taught\n"+T.cl.map(x=>"- **"+PCN[x[0]]+", "+TERMTXT(x[1])+":** "+x[2]).join("\n")+"\n":"";
+const MSTART=["What topics are in Primary 4?","Explain place value","Solve 345 + 278","What is 3/4 + 1/8?"];
+const startsFor=()=>D.sub=="Mathematics"&&lvKey()=="PLE"?MSTART:(STARTS[D.sub]||gen(D.sub));
+const pn=n=>String(n).replace(/\B(?=(\d{3})+(?!\d))/g," ");
+const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+const PL=["ones","tens","hundreds","thousands","ten thousands","hundred thousands","millions","ten millions","hundred millions","billions"];
+const nfix=x=>String(Number(x.toFixed(6)));
+const pf=x=>Number.isInteger(x)?pn(x):nfix(x);
+function syllabusReply(q){
+ if(lvKey()!="PLE")return null;
+ if(!(D.sub=="Mathematics"||/\bmath(s|ematics)?\b/i.test(q)))return null;
+ if(!/(topics?|syllabus|scheme|learn|taught|teach|curriculum|content|covers?|\bterm\b)/i.test(q))return null;
+ const m=q.match(/\b(?:p|primary|class|grade)\s*-?\s*([1-7])\b/i);
+ const tm=q.match(/term\s*(1|2|3|one|two|three|i{1,3})\b/i);
+ const tn=tm?({one:1,two:2,three:3,i:1,ii:2,iii:3}[tm[1].toLowerCase()]||+tm[1]):0;
+ if(!m){
+  if(!/(syllabus|all topics|all classes|every class|scheme)/i.test(q))return null;
+  let o="# Primary Mathematics syllabus (P1 to P7)\nTopics by class. Ask “What topics are in Primary 4?” for the full list by term.\n";
+  for(const c of Object.keys(PCN)){o+="## "+PCN[c]+"\n"+MATHP.filter(t=>t.cl.some(x=>x[0]==c)).map(t=>t.n).join(", ")+"\n"}
+  return{t:o}}
+ const c="P"+m[1];let o="# "+PCN[c]+" Mathematics"+(tn?", Term "+tn:"")+"\n";
+ for(const T of tn?[tn]:[1,2,3]){
+  const L=[];MATHP.forEach(t=>t.cl.forEach(x=>{if(x[0]==c&&x[1].includes(T))L.push("- **"+t.n+":** "+x[2])}));
+  o+="## Term "+T+"\n"+(L.length?L.join("\n"):"- Revision of the work done so far.")+"\n"}
+ o+="Ask me about any topic to get its definition, steps, examples and a quiz.";
+ return{t:o}}
+function lvlAS(a,b){const m=Math.max(a,b);return m<=20?"Primary 1":m<=100?"Primary 2":m<=1000?"Primary 3":m<=100000?"Primary 4":"Primary 5 and above"}
+function addW(a,b){
+ const A=String(a).split("").reverse(),B=String(b).split("").reverse(),n=Math.max(A.length,B.length),P=[];let c=0;
+ P.push({h:"Line up the numbers",t:pn(a)+" + "+pn(b),more:"Write the numbers one under the other so that ones are under ones, tens under tens, and so on. We add from the right, starting with the ones."});
+ for(let i=0;i<n;i++){const x=+(A[i]||0),y=+(B[i]||0),s=x+y+c,d=s%10,nc=s>=10?1:0;
+  P.push({h:"Add the "+PL[i],t:cap(PL[i])+": "+x+" + "+y+(c?" + "+c+" (carried)":"")+" = "+s+(nc?"\nWrite "+d+" and carry 1 to the "+PL[i+1]+".":"\nWrite "+s+"."),more:"Add the two digits in this place"+(c?" and the 1 carried from the place before":"")+". If the total is 10 or more, write only the ones digit and carry the 1 to the next place on the left."});c=nc}
+ if(c)P.push({h:"Write the last carry",t:"Nothing is left to add, so write the carried 1 in front.",more:"The carried 1 has no digits to join, so it goes straight into the answer."});
+ const r=a+b;P.push({h:"Check your answer",t:pn(r)+" − "+pn(b)+" = "+pn(a)+"\nThis matches the first number, so the answer is correct.",more:"Subtraction undoes addition. If the sum minus one number gives the other number, the answer is right."});
+ return{title:"Adding "+pn(a)+" + "+pn(b),cls:lvlAS(a,b),parts:P,end:"**Answer: "+pn(a)+" + "+pn(b)+" = "+pn(r)+"**"}}
+function subW(a,b){
+ if(a<b){const S=subW(b,a);S.title="Subtracting "+pn(a)+" − "+pn(b);S.parts.unshift({h:"The first number is smaller",t:pn(a)+" is smaller than "+pn(b)+", so the answer is negative.\nWe work out "+pn(b)+" − "+pn(a)+" and then put a minus sign.",more:"You cannot take a bigger number from a smaller one and stay with positive numbers. The answer goes below zero."});S.end="**Answer: "+pn(a)+" − "+pn(b)+" = −"+pn(b-a)+"**";return S}
+ const A=String(a).split("").reverse(),B=String(b).split("").reverse(),n=A.length,P=[];let br=0;
+ P.push({h:"Line up the numbers",t:pn(a)+" − "+pn(b),more:"Write the bigger number on top, ones under ones, tens under tens. We subtract from the right, starting with the ones. If the top digit is too small we borrow from the next place."});
+ for(let i=0;i<n;i++){const x=+A[i],y=+(B[i]||0);let eff=x-br,nb=0,t=cap(PL[i])+": ",r;
+  if(eff<0){eff=9;nb=1;r=eff-y;t+=x+" lent 1 to the right, so it borrows 1 from the next place and becomes 9.\n9 − "+y+" = "+r}
+  else if(eff<y){nb=1;r=eff+10-y;t+=(br?x+" lent 1, so it is now "+eff+". ":"")+eff+" is smaller than "+y+", so borrow 1 from the next place.\n"+(eff+10)+" − "+y+" = "+r}
+  else{r=eff-y;t+=(br?x+" lent 1, so it is now "+eff+".\n":"")+eff+" − "+y+" = "+r}
+  P.push({h:"Subtract the "+PL[i],t,more:"Subtract the bottom digit from the top digit in this place. If the top digit is smaller, borrow 1 from the next place: it adds 10 to this digit, and the next place becomes 1 less."});br=nb}
+ const r=a-b;P.push({h:"Check your answer",t:pn(r)+" + "+pn(b)+" = "+pn(a)+"\nThis matches the first number, so the answer is correct.",more:"Addition undoes subtraction. If the answer plus the number taken away gives the first number, the answer is right."});
+ return{title:"Subtracting "+pn(a)+" − "+pn(b),cls:lvlAS(a,b),parts:P,end:"**Answer: "+pn(a)+" − "+pn(b)+" = "+pn(r)+"**"}}
+function mulW(a,b){
+ const r=a*b,P=[];
+ if(a<=12&&b<=12){
+  P.push({h:"What does × mean?",t:a+" × "+b+" means "+b+" groups of "+a+".",more:"Multiplication is a quick way of adding equal groups."});
+  P.push({h:"Add the groups",t:Array(b).fill(a).join(" + ")+" = "+r+"\nOr use the times table: "+a+" × "+b+" = "+r+".",more:"Adding the same number again and again is the same as multiplying."});
+  P.push({h:"Check with the other order",t:b+" × "+a+" = "+r+"\nOrder does not matter in multiplication, so the answer is correct.",more:"Swapping the numbers gives the same answer, so this is a quick check."});
+  return{title:"Multiplying "+a+" × "+b,cls:"Primary 2 to Primary 3 (times tables)",parts:P,end:"**Answer: "+a+" × "+b+" = "+r+"**"}}
+ let x=a,y=b;if(String(y).length>String(x).length){x=b;y=a}
+ const Y=String(y).split("").reverse().map(Number),par=[];
+ P.push({h:"Set up",t:pn(x)+" × "+pn(y),more:"We multiply the top number by each digit of the bottom number, starting from the ones digit. Each answer is called a partial answer. Then we add the partial answers."});
+ Y.forEach((d,i)=>{const p=x*d*Math.pow(10,i);
+  if(d==0){P.push({h:"Multiply by the "+PL[i]+" digit (0)",t:"The digit is 0, so this partial answer is 0.",more:"Anything multiplied by 0 is 0, so we can skip this line."});return}
+  par.push(p);
+  P.push({h:"Multiply by the "+PL[i]+" digit "+d,t:(i?"The "+d+" is in the "+PL[i]+" place, so it really means "+d*Math.pow(10,i)+".\n":"")+pn(x)+" × "+d+" = "+pn(x*d)+(i?"\nPut "+i+" zero"+(i>1?"s":"")+" at the end: "+pn(p):""),more:i?"When we multiply by a digit in the "+PL[i]+" place, we first multiply by the digit, then add "+i+" zero"+(i>1?"s":"")+" to account for its place value.":"Multiply the whole top number by this digit. Carry when a product is 10 or more."})});
+ if(par.length>1)P.push({h:"Add the partial answers",t:par.map(pn).join(" + ")+" = "+pn(r),more:"The final answer is the sum of all the partial answers."});
+ return{title:"Multiplying "+pn(a)+" × "+pn(b),cls:Y.length==1?"Primary 3 to Primary 4":Y.length==2?"Primary 4 to Primary 5":"Primary 5 and above",parts:P,end:"**Answer: "+pn(a)+" × "+pn(b)+" = "+pn(r)+"**"}}
+function divW(a,b){
+ if(b==0)return{title:"Dividing "+pn(a)+" ÷ 0",cls:"Primary 3",parts:[{h:"Look at the divisor",t:pn(a)+" ÷ 0",more:"No number multiplied by 0 gives "+pn(a)+", so division by 0 is not possible."}],end:"**Answer: not possible. We cannot divide by 0.**"};
+ const D1=String(a).split("").map(Number),P=[];let rem=0;
+ P.push({h:"Set up the division",t:pn(a)+" ÷ "+pn(b),more:"We ask how many times "+pn(b)+" goes into "+pn(a)+". We work from the left, one digit at a time: divide, multiply, subtract, bring down the next digit."});
+ for(let i=0;i<D1.length;i++){const cur=rem*10+D1[i],q=Math.floor(cur/b),r=cur-q*b;let t=i==0?"Take "+cur+". ":"Bring down "+D1[i]+(rem?" next to the remainder "+rem:"")+": we get "+cur+". ";
+  if(q==0)t+=pn(b)+" does not go into "+cur+", so write 0"+(i<D1.length-1?" and carry "+cur+" to the next digit.":".");
+  else t+=pn(b)+" × "+q+" = "+pn(b*q)+" and "+cur+" − "+pn(b*q)+" = "+r+". Write "+q+" in the answer.";
+  P.push({h:"Divide the "+(i==0?"first digit":"next digit"),t,more:"Find the biggest number of times the divisor goes into the number we have, multiply, then subtract to find what is left over."});rem=r}
+ const Q=Math.floor(a/b),R=a%b;
+ P.push({h:"Check your answer",t:pn(b)+" × "+pn(Q)+(R?" + "+R:"")+" = "+pn(a)+"\nThis matches the first number, so the answer is correct.",more:"Multiplication undoes division. Quotient × divisor + remainder must give the number we started with."});
+ return{title:"Dividing "+pn(a)+" ÷ "+pn(b),cls:b<=10&&a<=100?"Primary 3":b<=10?"Primary 4":"Primary 5",parts:P,end:"**Answer: "+pn(a)+" ÷ "+pn(b)+" = "+pn(Q)+(R?" remainder "+R:"")+"**"}}
+function fracFin(P,n,d,pre){
+ const r=FR(n,d),neg=r.n<0,an=Math.abs(r.n);
+ if(r.n!==n||r.d!==d)P.push({h:"Simplify",t:n+"/"+d+" = "+r.n+"/"+r.d+"\nDivide the top and bottom by "+gcd(n,d)+".",more:"A fraction is in its simplest form when the top and bottom share no factor except 1."});
+ let ans=r.d===1?String(r.n):r.n+"/"+r.d;
+ if(r.d>1&&an>r.d){const wh=Math.floor(an/r.d),rm=an%r.d;P.push({h:"Change to a mixed number",t:r.n+"/"+r.d+" = "+(neg?"−":"")+wh+(rm?" "+rm+"/"+r.d:"")+"\n"+an+" ÷ "+r.d+" = "+wh+(rm?" remainder "+rm:""),more:"An improper fraction has a top bigger than its bottom. Divide the top by the bottom: the quotient is the whole number and the remainder is the new top."});ans+=" = "+(neg?"−":"")+wh+(rm?" "+rm+"/"+r.d:"")}
+ return ans}
+function fracW(n1,d1,op,n2,d2){
+ if(!d1||!d2)return null;const s1=n1+"/"+d1,s2=n2+"/"+d2,P=[];let n,d,sym;
+ if(op=="+"||op=="-"){
+  sym=op=="+"?"+":"−";
+  P.push({h:"Write the fractions",t:s1+" "+sym+" "+s2,more:"The bottom number is the denominator (how many equal parts); the top is the numerator (how many parts we take). We can only add or subtract fractions that have the same denominator."});
+  let a=n1,b=n2,L=d1;
+  if(d1==d2){P.push({h:"Same denominator",t:"Both fractions have denominator "+d1+", so we can go straight to the tops.",more:"When the parts are the same size we only need to count them."})}
+  else{L=d1*d2/gcd(d1,d2);a=n1*(L/d1);b=n2*(L/d2);
+   P.push({h:"Find a common denominator",t:"The LCM of "+d1+" and "+d2+" is "+L+".",more:"The LCM of the denominators is the smallest number both go into. It is the easiest common denominator."});
+   P.push({h:"Change both fractions",t:s1+" = "+a+"/"+L+" (multiply top and bottom by "+L/d1+")\n"+s2+" = "+b+"/"+L+" (multiply top and bottom by "+L/d2+")",more:"Multiplying the top and bottom by the same number does not change the value of a fraction. It only cuts it into smaller equal pieces."})}
+  n=op=="+"?a+b:a-b;d=L;
+  P.push({h:op=="+"?"Add the numerators":"Subtract the numerators",t:a+" "+sym+" "+b+" = "+n+"\nKeep the denominator "+d+": "+n+"/"+d,more:"Add or subtract only the tops. The bottom stays the same because the pieces keep the same size."})}
+ else if(op=="*"){
+  P.push({h:"Write the fractions",t:s1+" × "+s2,more:"To multiply fractions we multiply straight across."});
+  n=n1*n2;d=d1*d2;
+  P.push({h:"Multiply across",t:"Tops: "+n1+" × "+n2+" = "+n+"\nBottoms: "+d1+" × "+d2+" = "+d+"\nSo "+n+"/"+d,more:"Multiply the numerators together and the denominators together."});sym="×"}
+ else{
+  if(n2==0)return null;sym="÷";
+  P.push({h:"Write the fractions",t:s1+" ÷ "+s2,more:"Dividing by a fraction is the same as multiplying by its flipped (reciprocal) fraction."});
+  P.push({h:"Keep, change, flip",t:"Keep "+s1+", change ÷ to ×, flip "+s2+" to "+d2+"/"+n2+".\n"+s1+" × "+d2+"/"+n2,more:"Keep the first fraction, change the sign to ×, and turn the second fraction upside down."});
+  n=n1*d2;d=d1*n2;
+  P.push({h:"Multiply across",t:"Tops: "+n1+" × "+d2+" = "+n+"\nBottoms: "+d1+" × "+n2+" = "+d+"\nSo "+n+"/"+d,more:"Now multiply the tops and the bottoms."})}
+ const ans=fracFin(P,n,d);
+ return{title:"Working out "+s1+" "+sym+" "+s2,cls:op=="+"||op=="-"?(d1==d2?"Primary 4":"Primary 5"):op=="*"?"Primary 5 to Primary 6":"Primary 6",parts:P,end:"**Answer: "+s1+" "+sym+" "+s2+" = "+ans+"**"}}
+function percW(p,N){
+ const v=p*N/100,P=[];
+ P.push({h:"What does per cent mean?",t:nfix(p)+"% means "+nfix(p)+" out of 100, which is "+nfix(p)+"/100.",more:"Per cent means per hundred."});
+ P.push({h:"Write it as a multiplication",t:nfix(p)+"% of "+pn(N)+" = "+nfix(p)+"/100 × "+pn(N),more:"“Of” means multiply."});
+ P.push({h:"Divide by 100, then multiply",t:pn(N)+" ÷ 100 = "+nfix(N/100)+"\n"+nfix(N/100)+" × "+nfix(p)+" = "+pf(v),more:"Dividing by 100 finds 1%. Multiplying by "+nfix(p)+" gives "+nfix(p)+"%."});
+ return{title:"Finding "+nfix(p)+"% of "+pn(N),cls:"Primary 5 to Primary 6",parts:P,end:"**Answer: "+nfix(p)+"% of "+pn(N)+" = "+pf(v)+"**"}}
+function lcmhcfW(kind,a,b){
+ if(a<1||b<1||a>500||b>500)return null;const g=gcd(a,b),L=a*b/g,P=[];
+ if(kind=="hcf"){
+  const fac=n=>{const f=[];for(let i=1;i<=n;i++)if(n%i==0)f.push(i);return f},fa_=fac(a),fb_=fac(b),com=fa_.filter(x=>fb_.includes(x));
+  P.push({h:"List the factors of "+a,t:fa_.join(", "),more:"A factor divides the number exactly."});
+  P.push({h:"List the factors of "+b,t:fb_.join(", "),more:"A factor divides the number exactly."});
+  P.push({h:"Find the common factors",t:com.join(", "),more:"The common factors are the ones in both lists."});
+  P.push({h:"Pick the highest",t:"The biggest common factor is "+g+".",more:"HCF means highest common factor."});
+  return{title:"HCF of "+a+" and "+b,cls:"Primary 5 to Primary 6",parts:P,end:"**Answer: HCF of "+a+" and "+b+" = "+g+"**"}}
+ if(L/a>14||L/b>14||L>600)return null;
+ const mul=n=>{const m=[];for(let i=n;i<=L;i+=n)m.push(i);return m};
+ P.push({h:"List the multiples of "+a,t:mul(a).join(", "),more:"Multiples are the answers in the times table of the number."});
+ P.push({h:"List the multiples of "+b,t:mul(b).join(", "),more:"Multiples are the answers in the times table of the number."});
+ P.push({h:"Find the first common multiple",t:"The first number in both lists is "+L+".",more:"LCM means lowest common multiple, the smallest number in both lists."});
+ return{title:"LCM of "+a+" and "+b,cls:"Primary 5 to Primary 6",parts:P,end:"**Answer: LCM of "+a+" and "+b+" = "+L+"**"}}
+function statW(kind,N){
+ const P=[],sorted=N.slice().sort((x,y)=>x-y),n=N.length,sum=N.reduce((x,y)=>x+y,0),L=N.join(", ");
+ if(kind=="mean"){const m=sum/n;
+  P.push({h:"Add all the numbers",t:N.join(" + ")+" = "+nfix(sum),more:"The average needs the total of all the numbers."});
+  P.push({h:"Count the numbers",t:"There are "+n+" numbers.",more:"We divide by how many numbers there are."});
+  P.push({h:"Divide the sum by the count",t:nfix(sum)+" ÷ "+n+" = "+nfix(m),more:"Average = sum ÷ number of numbers."});
+  return{title:"Average of "+L,cls:"Primary 5 to Primary 6",parts:P,end:"**Answer: average = "+nfix(m)+"**"}}
+ if(kind=="median"){
+  P.push({h:"Put the numbers in order",t:sorted.join(", "),more:"The median is the middle number, so the numbers must be in order first."});
+  let med,t;if(n%2){med=sorted[(n-1)/2];t="There are "+n+" numbers, so the middle one is the number in position "+(n+1)/2+": "+med+"."}
+  else{const x=sorted[n/2-1],y=sorted[n/2];med=(x+y)/2;t="There are "+n+" numbers, so there are two middle numbers: "+x+" and "+y+".\nTheir mean is ("+x+" + "+y+") ÷ 2 = "+nfix(med)+"."}
+  P.push({h:"Find the middle",t,more:"With an odd count there is one middle number. With an even count, take the mean of the two middle numbers."});
+  return{title:"Median of "+L,cls:"Primary 6",parts:P,end:"**Answer: median = "+nfix(med)+"**"}}
+ if(kind=="mode"){const f={};N.forEach(x=>f[x]=(f[x]||0)+1);const mx=Math.max(...Object.values(f)),md=Object.keys(f).filter(k=>f[k]==mx);
+  P.push({h:"Count how many times each number appears",t:Object.keys(f).map(k=>k+" appears "+f[k]+" time"+(f[k]>1?"s":"")).join("\n"),more:"The mode is the number that appears most often."});
+  return{title:"Mode of "+L,cls:"Primary 6",parts:P,end:mx==1?"**Answer: every number appears once, so there is no mode.**":"**Answer: mode = "+md.join(" and ")+"**"}}
+ const hi=sorted[n-1],lo=sorted[0];
+ P.push({h:"Find the highest and the lowest",t:"Highest = "+hi+"\nLowest = "+lo,more:"Look through the numbers for the biggest and the smallest."});
+ P.push({h:"Subtract",t:hi+" − "+lo+" = "+nfix(hi-lo),more:"Range = highest − lowest."});
+ return{title:"Range of "+L,cls:"Primary 6",parts:P,end:"**Answer: range = "+nfix(hi-lo)+"**"}}
+function arithSolve(q){
+ let t=q.toLowerCase().replace(/[−–—]/g,"-").replace(/,(?=\d{3}\b)/g,"");
+ let m;
+ if((m=t.match(/(lcm|l\.c\.m|least common multiple|lowest common multiple|hcf|h\.c\.f|gcf|highest common factor|greatest common (?:factor|divisor))\D*?(\d+)\s*(?:,|and|&)\s*(\d+)/))&&(t.match(/\d+/g)||[]).length==2)
+  return lcmhcfW(/lcm|l\.c\.m|multiple/.test(m[1])?"lcm":"hcf",+m[2],+m[3]);
+ if((m=t.match(/\b(average|mean|median|mode|range)\b\D*?((?:\d+(?:\.\d+)?\s*(?:,|and|&)?\s*)+)/))){
+  const N=m[2].match(/\d+(?:\.\d+)?/g).map(Number);
+  if(N.length>=2&&N.length<=15)return statW(m[1]=="average"?"mean":m[1],N)}
+ if((m=t.match(/(\d+(?:\.\d+)?)\s*(?:%|percent|per cent)\s*of\s*(\d+(?:\.\d+)?)/))&&(t.match(/\d+(?:\.\d+)?/g)||[]).length==2)return percW(+m[1],+m[2]);
+ if((m=t.match(/(\d+)\s*\/\s*(\d+)\s*(\+|plus|-|minus|×|\*|x|times|÷|divided by|\/)\s*(\d+)\s*\/\s*(\d+)/))&&(t.match(/\d+/g)||[]).length==4){
+  const o=m[3],op=/\+|plus/.test(o)?"+":/-|minus/.test(o)?"-":/×|\*|x|times/.test(o)?"*":"/";
+  return fracW(+m[1],+m[2],op,+m[4],+m[5])}
+ if(/\d\.\d/.test(t)||/(^|[\s(=])-\d/.test(t))return null;
+ if((t.match(/\d+/g)||[]).length!=2)return null;
+ let a,b,op;
+ if((m=t.match(/(?:sum of|add|total of)\s+(\d+)\s+(?:and|to|\+)\s+(\d+)/))){a=+m[1];b=+m[2];op="+"}
+ else if((m=t.match(/difference between\s+(\d+)\s+and\s+(\d+)/))){a=Math.max(+m[1],+m[2]);b=Math.min(+m[1],+m[2]);op="-"}
+ else if((m=t.match(/subtract\s+(\d+)\s+from\s+(\d+)/))){a=+m[2];b=+m[1];op="-"}
+ else if((m=t.match(/product of\s+(\d+)\s+and\s+(\d+)/))){a=+m[1];b=+m[2];op="*"}
+ else if((m=t.match(/divide\s+(\d+)\s+by\s+(\d+)/))){a=+m[1];b=+m[2];op="/"}
+ else if((m=t.match(/(?<![\d.\/])(\d+)\s*(\+|plus|-|minus|×|\*|x|times|multiplied by|÷|divided by|\s\/\s)\s*(\d+)(?!\d|[.,]\d|\/|%)/))){
+  a=+m[1];b=+m[3];const o=m[2].trim();op=/^(\+|plus)$/.test(o)?"+":/^(-|minus)$/.test(o)?"-":/^(×|\*|x|times|multiplied by)$/.test(o)?"*":"/"}
+ else return null;
+ if(a>999999999||b>999999999)return null;
+ if(op=="+")return addW(a,b);if(op=="-")return subW(a,b);
+ if(op=="*"){if(!Number.isSafeInteger(a*b))return null;return mulW(a,b)}
+ return divW(a,b)}
+function mathWork(q){
+ const s=syllabusReply(q);if(s)return s;
+ const S=arithSolve(q);if(!S||!S.parts.length)return null;
+ const w={title:S.title,intro:(D.pname?"Hi "+D.pname+". ":"")+"**Class:** "+S.cls+".\nHere is the full working, a little at a time. Tap **Next step** to continue, or **Break this step down** if a step is not clear.",parts:S.parts,end:S.end,shown:Math.min(2,S.parts.length),open:{}};
+ return{t:wBuild({w}),w}}
+
+TOP0.forEach(t=>{if(t.n=='Pythagoras theorem')t.L=['UCE','UACE']});
+const TOP=[...MATHP,...SCI,...TOP0];
 const SCIRE=new RegExp(SCI.map(t=>t.re.source).join("|"),"i");
 function heads(T){if(T&&T.a)return[T.a,T.b];const s=D.sub;
  if(/Science|Biology|Chemistry|Physics|Agriculture|Nutrition/.test(s))return["How it works","Where it happens and why it matters"];
@@ -842,16 +1656,18 @@ function cleanQ(q){return q.replace(/[?.!]+$/,"").replace(/^(what\s+(is|are|was|
 function qText(t,z){return "# Quiz: "+t+"\nQuestion "+(z.n+1)+" of "+z.list.length+"\n"+z.list[z.n][0]}
 function faithOf(q){return/\b(islam\w*|muslim\w*|quran|allah|prophet muhammad|hadith|mosque|ramadan|salah|zakat)\b/i.test(q)?"Islamic":/\b(christian\w*|bible|jesus|christ|church|god the father|gospel|apostles?|easter|christmas|baptism)\b/i.test(q)?"Christian":null}
 function mock(q,mode){
- if(!mode){const W=work(q);if(W)return W}
+ if(!mode){const W=work(q)||mathWork(q);if(W)return W}
  const T=topicOf(q),H=heads(T),k=cleanQ(q),F=/Religio|Divinity|Islamic/.test(D.sub)?faithOf(q):null,s=F?F+" "+D.sub:D.sub,L=lvKey(),nm=(T?T.n:k.charAt(0).toUpperCase()+k.slice(1))+(F?" ("+F+")":""),b="**"+k+"**";
- if(mode=="Explain simpler")return{t:"# "+nm+", simpler\n"+(T?T.s:"Think of "+b+" as a small idea in "+s+".\n- Break it into small parts.\n- Learn one part at a time.\n- Say it back in your own words.")};
- if(mode=="Give an example")return{t:"# Examples of "+nm.toLowerCase()+"\n"+(T?T.e:"- Example 1: a simple case of "+b+".\n- Example 2: a case from daily life.\n- Example 3: a case from an exam question.")};
- if(mode=="More detail")return{t:"# "+nm+", in more detail\n## Definition\n"+(T?T.d:b+" is a topic in "+s+". State its exact meaning first.")+"\n## "+H[0]+"\n"+(T?T.h:"- Understand what is being asked.\n- Write what you know.\n- Apply the rule step by step.\n- Check your answer.")+"\n## "+H[1]+"\n"+(T?T.w:"- In classwork and exams in "+s+".\n- In daily life where this idea applies.")+"\n"+(T?T.m:"## Common mistakes\n- Skipping steps.\n- Mixing up similar terms.")+"\n## Examples\n"+(T?T.e:"- A simple example from "+s+".")};
+ if(mode=="Explain simpler")return{t:"# "+nm+", simpler\n"+clLine(T)+(T?T.s:"Think of "+b+" as a small idea in "+s+".\n- Break it into small parts.\n- Learn one part at a time.\n- Say it back in your own words.")};
+ if(mode=="Give an example")return{t:"# Examples of "+nm.toLowerCase()+"\n"+clLine(T)+(T?T.e:"- Example 1: a simple case of "+b+".\n- Example 2: a case from daily life.\n- Example 3: a case from an exam question.")};
+ if(mode=="More detail")return{t:"# "+nm+", in more detail\n"+clLine(T)+"## Definition\n"+(T?T.d:b+" is a topic in "+s+". State its exact meaning first.")+"\n## "+H[0]+"\n"+(T?T.h:"- Understand what is being asked.\n- Write what you know.\n- Apply the rule step by step.\n- Check your answer.")+"\n## "+H[1]+"\n"+(T?T.w:"- In classwork and exams in "+s+".\n- In daily life where this idea applies.")+"\n"+(T?T.m:"## Common mistakes\n- Skipping steps.\n- Mixing up similar terms.")+"\n## Examples\n"+(T?T.e:"- A simple example from "+s+".")+clSec(T)};
  if(mode=="Quiz me"){const list=T?T.q:[["Which is the best first step when working on "+k+"?",["Guess the answer","Understand the question","Skip to the end"],1],["What should you do after getting an answer?",["Check it","Ignore it","Hide it"],0]],z={list,n:0,score:0,t:nm};return{t:qText(nm,z),quiz:["q",z.list[0][1],z.list[0][2]],qz:z}}
  const lvl=L=="PLE"?"":L=="UACE"?"\n## Exam approach\nNote the command word (explain, analyse, evaluate) and structure your answer to match.":"\n## Exam tip\nShow your working and use the correct terms for full marks.";
- return{t:"# "+nm+"\n## 1. Definition\n"+(T?T.d:b+" is a topic in "+s+". Its exact meaning is given here in one clear sentence.")+"\n## 2. "+H[0]+"\n"+(T?T.h:"- Understand what is being asked.\n- Write down what you know.\n- Apply the rule step by step.\n- Check your answer.")+"\n## 3. "+H[1]+"\n"+(T?T.w:"- In classwork and exams in "+s+".\n- In daily life where this idea applies.")+lvl+(D.sub=="Science"&&lvKey()=="PLE"&&!T?"\n## Science topics you can ask about\n"+SCI.map(t=>"- "+t.n).join("\n"):"")+(/Religio|Divinity|Islamic/.test(D.sub)&&!F?"\n## Note\nAdd Christian or Islamic to your question to get the answer for your faith.":"")}}
+ return{t:"# "+nm+"\n"+clLine(T)+"## 1. Definition\n"+(T?T.d:b+" is a topic in "+s+". Its exact meaning is given here in one clear sentence.")+"\n## 2. "+H[0]+"\n"+(T?T.h:"- Understand what is being asked.\n- Write down what you know.\n- Apply the rule step by step.\n- Check your answer.")+"\n## 3. "+H[1]+"\n"+(T?T.w:"- In classwork and exams in "+s+".\n- In daily life where this idea applies.")+clSec(T)+lvl+(D.sub=="Science"&&lvKey()=="PLE"&&!T?"\n## Science topics you can ask about\n"+SCI.map(t=>"- "+t.n).join("\n"):"")+(D.sub=="Mathematics"&&lvKey()=="PLE"&&!T?"\n## Mathematics topics you can ask about\n"+MATHP.map(t=>"- "+t.n+" ("+clRange(t)+")").join("\n")+"\nYou can also ask: What topics are in Primary 4?":"")+(/Religio|Divinity|Islamic/.test(D.sub)&&!F?"\n## Note\nAdd Christian or Islamic to your question to get the answer for your faith.":"")}}
 
 function bub(m,i,last){
+ if(m.note)return `<div class="b i ai" data-i="${i}"><div class="md">${md(m.t)}</div><small>${hm(m.ts)}</small></div>`;
+ if(m.lim)return `<div class="b i ai" data-i="${i}"><div style="display:flex;gap:10px;align-items:flex-start"><span style="flex:none;width:34px;height:34px;border-radius:50%;background:rgba(245,158,11,.16);color:#d97706;display:grid;place-items:center"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></span><div style="font-weight:700;font-size:16px;line-height:1.3;color:#d97706;padding-top:1px">${LIM1}</div></div>${rtime()?`<div style="display:flex;gap:8px;align-items:center;margin-top:10px;color:var(--sub);font-size:14px"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#2f80ed" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Your free plan resets at <b style="color:#2f80ed">${rtime()}</b></span></div>`:""}<button data-act="plans" data-i="${i}" style="display:block;width:100%;margin-top:12px;padding:12px 14px;border:0;border-radius:22px;background:var(--green);color:#fff;font:inherit;font-weight:700;cursor:pointer;text-align:center">${LIM2}</button><div class="chips"><button data-act="activate" data-i="${i}" style="color:#8b5cf6;border-color:#8b5cf6;font-weight:600">Activate plan</button></div><small>${hm(m.ts)}</small></div>`;
  if(m.err)return `<div class="b i err" data-i="${i}">${esc(m.t)}<div class="act"><button data-act="retry" data-i="${i}">Retry</button></div></div>`;
  const A=[["copy","Copy"],["bm",m.bm?"Saved":"Save",m.bm],["up","Helpful",m.fb==1],["dn","Not helpful",m.fb==-1],["share","Share"]];
  let h=`<div class="b i ai" data-i="${i}"><div class="md">${md(m.t)}</div>`;
@@ -860,9 +1676,41 @@ function bub(m,i,last){
  if(!m.stream){act=`<div class="act out">${A.map(a=>`<button class="${a[2]?"on":""}" data-act="${a[0]}" data-i="${i}" aria-label="${a[1]}" title="${a[1]}">${AI[a[0]]}</button>`).join("")}${last?`<button data-act="regen" data-i="${i}" aria-label="Regenerate" title="Regenerate">${AI.regen}</button>`:""}</div>`;
   if(last)h+=(m.w&&m.w.shown<m.w.parts.length)?wBtns(m,i):`<div class="chips">${["Explain simpler","Give an example","More detail","Quiz me"].map(c=>`<button data-chip="${c}">${c}</button>`).join("")}</div>`}
  return h+`<small>${hm(m.ts)}</small></div>${act}`}
-function stopS(){if(stream==null)return;clearInterval(stream);stream=null;if(sm){if(sm.w)sm.t=wBuild(sm);delete sm.stream}sm=null;$("stat").textContent="online";$("send").innerHTML=SEND;save();render()}
+/* ===== FREE PLAN: random word limit (2000 to 3000) per account, kept on this phone ===== */
+const LIM1="You have hit the maximum limit of the free plan.",LIM2="Upgrade to enjoy Unlimitedly.",LIM=LIM1+" "+LIM2,
+FQK=()=>"ask_free_"+((window.AK&&AK.me()&&AK.me().username)||""),
+FQW=q=>{try{localStorage.setItem(FQK(),JSON.stringify(q))}catch(e){}};
+const fmt=ms=>{ms=Math.max(0,Math.ceil((ms||0)/1000));const h=Math.floor(ms/3600),m=Math.floor(ms%3600/60),x=ms%60;return h+"h "+m+"m "+x+"s"},
+newCap=()=>1000+Math.floor(Math.random()*201);
+function FQ(){let q=null;try{q=JSON.parse(localStorage.getItem(FQK()))}catch(e){}
+ if(!q||q.v!=2){const o=q||{};q={v:2,cap:newCap(),used:o.used||0,left:o.left==null?null:o.left,seen:Date.now()};FQW(q)}return q}
+function useW(t){const q=FQ();q.used+=(String(t).match(/\S+/g)||[]).length;FQW(q)}
+function capped(){if(planName()!="Free")return false;const q=FQ();if(q.used<q.cap)return false;if(q.left==null){q.left=12600000+Math.floor(Math.random()*1800001);q.seen=Date.now();q.at=Date.now()+q.left;FQW(q)}return true}
+function rtime(){const q=FQ();if(q.left==null)return"";if(!q.at){q.at=Date.now()+q.left;FQW(q)}const d=new Date(q.at),t=d.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});return d.toDateString()==new Date().toDateString()?t:t+" tomorrow"}
+const PLANS4=["Free","Basic","Standard","Premium"],PCOL={Free:"#6b7c85",Basic:"#2f80ed",Standard:"#00a884",Premium:"#8b5cf6"},PVER={Free:"1.0",Basic:"1.0",Standard:"1.0",Premium:"1.0"},
+PK=()=>"ask_plan_"+((window.AK&&AK.me()&&AK.me().username)||"");
+function planName(){try{const p=localStorage.getItem(PK());return PLANS4.includes(p)?p:"Free"}catch(e){return"Free"}}
+function updPlan(){const p=planName(),l=document.getElementById("psl"),r=document.getElementById("psr");if(l)l.innerHTML='<i style="background:'+PCOL[p]+'"></i><b>'+p+' plan</b>';if(r)r.textContent="Version "+PVER[p]}
+/* TEMPORARY (testing only): Activate plan lets the tester pick any plan. REMOVE when the app is fully developed; a confirmed payment must set the plan instead. */
+function activatePlan(){const cur=planName();showP("Activate plan",'<div style="padding:12px 18px;color:var(--sub);line-height:1.4">Testing only. Pick any plan to try it. This will be removed when the app is fully developed.</div>'+PLANS4.map(x=>`<div class="row" data-pl="${x}"><span style="width:10px;height:10px;border-radius:50%;background:${PCOL[x]};flex:none;margin-right:12px"></span><div><b>${x}</b>${x==cur?'<small>Your current plan</small>':""}</div></div>`).join(""),closeP,e=>{const x=e.target.closest("[data-pl]")?.dataset.pl;if(!x)return;try{localStorage.setItem(PK(),x)}catch(er){}
+ if(x=="Free")FQW({v:2,cap:newCap(),used:0,left:null,seen:Date.now()});{const rm=a=>{for(let i=a.length;i--;)if(a[i].lim)a.splice(i,1)};rm(D.msgs);D.chats.forEach(c=>rm(c.msgs));save();render()}updPlan();closeP();uiAlert(x+" plan activated.")})}
+document.getElementById("psl").onclick=()=>plans();
+function limitMsg(){D.msgs.push({s:"i",lim:1,t:"**"+LIM+"**",ts:Date.now()});save();render()}
+function freeReset(){FQW({v:2,cap:newCap(),used:0,left:null,seen:Date.now()});const rm=a=>{for(let i=a.length;i--;)if(a[i].lim)a.splice(i,1)};rm(D.msgs);D.chats.forEach(c=>rm(c.msgs));D.msgs.push({s:"i",note:1,t:"Your free plan has been reset. You can continue asking.",ts:Date.now()});save();render();const h=document.getElementById("plh");if(h)h.innerHTML='<b>Free plan</b><div style="color:var(--sub);margin-top:3px">Your free words have been reset.</div>'}
+let _pn=performance.now();
+setInterval(()=>{const n=performance.now(),d=n-_pn;_pn=n;if(!(window.AK&&AK.me()))return;const q=FQ();if(q.left==null){if(q.used>=q.cap)capped();return}
+ const w=Date.now()-q.seen;q.left-=(w>3000?w:d);q.seen=Date.now();if(q.left<=0){freeReset();return}FQW(q)},1000);
+function plans(fs){
+ const q=FQ(),P=[["Basic","500","2,800","9,000","Fastest for quick answers","#2f80ed"],["Standard","750","4,550","16,500","For complex revision and every assignment","#00a884"],["Premium","1,100","6,650","24,000","For your toughest challenges, research and examinations preparation","#8b5cf6"]],
+ ST=['Tap the button at the bottom. It dials <b>*165*3*06124096#</b> with the merchant code already in it.','Enter the <b>amount</b> of your plan.','Choose <b>Mobile Money</b> as the mode of payment.','Confirm the ID name is <b>Alfred</b>.','Enter your <b>PIN</b> to confirm.'];
+ showP("Upgrade plans",(q.used>=q.cap?`<div class="pbn" id="plh">${LIM1}${rtime()?`<div style="font-weight:400;margin-top:5px">Your free plan resets at <b>${rtime()}</b></div>`:""}<div style="margin-top:5px">${LIM2}</div></div>`:`<div class="pbn ok" id="plh">Free plan · ${q.used.toLocaleString()} words used.<br>Upgrade to enjoy Unlimitedly.</div>`)+`<div class="sec">UPGRADE PLANS</div>`+
+ P.map((x,k)=>`<div class="pc" style="--a:${x[5]}"><div class="pch"><i>${k+1}</i><b>${x[0]}</b></div><div class="ptag">${x[4]}</div><div class="pst"><div><b>${x[1]}</b><span>Daily</span></div><div><b>${x[2]}</b><span>Weekly</span></div><div><b>${x[3]}</b><span>Monthly</span></div></div></div>`).join("")+
+ `<div class="sec">PAYMENT METHOD</div><div class="pay"><div class="pl">MTN Mobile Money · Merchant Code</div><div class="pcode">06124096</div><div class="pid">ID: <b>Alfred</b></div><button class="pcp" data-cp="06124096">Copy code</button></div>`+
+ `<div class="sec">HOW TO PAY</div>`+ST.map((t,k)=>`<div class="stp"><i>${k+1}</i><div>${t}</div></div>`).join("")+
+ `<a class="btn" style="text-align:center;text-decoration:none;margin-bottom:28px" href="tel:*165*3*06124096%23">Dial *165*3*06124096#</a>`,fs?settings:closeP,e=>{const c=e.target.closest("[data-cp]");if(c){const t=c.dataset.cp,ok=()=>{c.textContent="Copied"};if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(ok,ok);else ok()}})}
+function stopS(){if(stream==null)return;clearInterval(stream);stream=null;if(sm){if(sm.w)sm.t=wBuild(sm);delete sm.stream;useW(sm.t)}sm=null;$("stat").textContent="Anything about your studies";$("send").innerHTML=SEND;save();render()}
 function ask(q,mode){
- if(stream!=null)return;const ch=D.chats.find(c=>c.id==D.cur);if(ch.title=="New chat"||ch.title=="Chat")ch.title=q.slice(0,32);
+ if(stream!=null)return;if(capped())return limitMsg();const ch=D.chats.find(c=>c.id==D.cur);if(ch.title=="New chat"||ch.title=="Chat")ch.title=q.slice(0,32);
  const now=Date.now();stamps=stamps.filter(t=>now-t<6e4);
  const err=x=>{D.msgs.push({s:"i",err:1,t:x,q,mode,ts:Date.now()});save();render()};
  if(!navigator.onLine)return err("No internet connection. Check your network and try again.");
@@ -870,15 +1718,16 @@ function ask(q,mode){
  stamps.push(now);sm=null;
  const f=mock(q,mode),m={s:"i",t:"",ts:Date.now(),q,mode,stream:1},w=f.t.split(/(?<=\s)/);if(f.quiz)m.quiz=f.quiz;if(f.qz)m.qz=f.qz;if(f.w)m.w=f.w;
  $("stat").textContent="typing…";$("send").innerHTML=STOP;
- stream=setTimeout(()=>{D.msgs.push(m);sm=m;let k=0;stream=setInterval(()=>{m.t+=w[k++]||"";if(k>=w.length){stopS();notify("Answer ready",'Your answer about "'+(q||"your question").slice(0,40)+'" is ready.')}else render()},35)},600)}
+ stream=setTimeout(()=>{D.msgs.push(m);sm=m;let k=0;stream=setInterval(()=>{m.t+=w[k++]||"";if(k>=w.length){stopS();notify("Answer ready",'Your answer about "'+(q||"your question").slice(0,40)+'" is ready.');if(capped())limitMsg()}else render()},35)},600)}
 $("msgs").addEventListener("click",e=>{
  const c=e.target.closest("[data-chip]");if(c){if(stream!=null)return;const q0=(()=>{for(let i=D.msgs.length;i--;){const x=D.msgs[i];if(x.s=="o"&&!x.chip)return x.t}return"this topic"})();D.msgs.push({s:"o",t:c.dataset.chip,chip:1,ts:Date.now(),st:2});save();render();ask(q0,c.dataset.chip);return}
  const st=e.target.closest("[data-st]");if(st){$("inp").value=st.dataset.st;send();return}
- const b=e.target.closest("[data-act]");if(!b)return;const i=+b.dataset.i,m=D.msgs[i],a=b.dataset.act;
+ const b=e.target.closest("[data-act]");if(!b)return;const i=+b.dataset.i,m=D.msgs[i],a=b.dataset.act;if(a=="plans"){plans();return}if(a=="activate"){activatePlan();return}
  if(a=="copy"){navigator.clipboard&&navigator.clipboard.writeText(m.t.replace(/[#*`|]/g,""));return}
- if(a=="share"){const t=m.t.replace(/[#*`|]/g,"");
-  if(navigator.share){navigator.share({text:t}).catch(()=>{})}
-  else{navigator.clipboard&&navigator.clipboard.writeText(t);uiAlert("Sharing is not supported here. The answer was copied instead.")}return}
+ if(a=="share"){(async()=>{const L=await AK.short(m),T=(m.q||"Answer")+"\n";
+  const sheet=()=>{const E=encodeURIComponent,u=E(L),t=E(T+L),P=[["wa","WhatsApp","https://wa.me/?text="+t],["tg","Telegram","https://t.me/share/url?url="+u+"&text="+E(m.q||"Answer")],["fb","Facebook","https://www.facebook.com/sharer/sharer.php?u="+u],["x","X (Twitter)","https://twitter.com/intent/tweet?text="+E(m.q||"Answer")+"&url="+u],["sms","Messages (SMS)","sms:?&body="+t],["em","Email","mailto:?subject="+E("Ask Tr. David")+"&body="+t]];
+   showP("Share answer",P.map(x=>`<div class="row" data-p="${x[0]}"><div>${x[1]}</div></div>`).join("")+'<div class="row" data-p="cp"><div>Copy link</div></div>',closeP,e=>{const k=e.target.closest(".row")?.dataset.p;if(!k)return;if(k=="cp"){try{navigator.clipboard.writeText(L)}catch(x){}closeP();uiAlert("Link copied.");return}const f=P.find(x=>x[0]==k);closeP();window.open(f[2],"_blank")})};
+  if(navigator.share){try{await navigator.share({title:"Ask Tr. David",text:T,url:L})}catch(e){if(e&&e.name!="AbortError")sheet()}}else sheet()})();return}
  if(m.w){if(a=="next"){m.w.shown=Math.min(m.w.shown+1,m.w.parts.length);m.t=wBuild(m)}if(a=="all"){m.w.shown=m.w.parts.length;m.t=wBuild(m)}if(a=="brk"){m.w.open[m.w.shown-1]=1;m.t=wBuild(m)}}
  if(a=="bm")m.bm=!m.bm;if(a=="up")m.fb=m.fb==1?0:1;if(a=="dn")m.fb=m.fb==-1?0:-1;
   if(a=="pick"&&m.pick==null){m.pick=+b.dataset.k;if(m.qz&&m.pick==m.quiz[2])m.qz.score++}
@@ -888,7 +1737,7 @@ $("msgs").addEventListener("click",e=>{
 function subs(){$("subs").innerHTML='<button data-all="1">All subjects</button>'+subsList().map(x=>`<button class="${x==D.sub?"on":""}" data-s="${x}">${x}</button>`).join("");const o=$("subs").querySelector(".on");if(o)o.scrollIntoView({inline:"center",block:"nearest"})}
 function allSubs(){showP("All subjects",[GR[lvIdx()]].map(g=>`<div class="sec">${g[0]}</div><div class="sws" style="gap:8px"><button class="lk ${"General"==D.sub?"on":""}" data-s="General">General</button>${g[1].map(x=>`<button class="lk ${x==D.sub?"on":""}" data-s="${x}">${x}</button>`).join("")}</div>`).join(""),closeP,e=>{const x=e.target.dataset.s;if(x){closeP();setSub(x)}})}
 $("subs").onclick=e=>{if(e.target.dataset.all)return allSubs();const s=e.target.dataset.s;if(s)setSub(s)};
-function empty(){return`<div class="empty"><b style="font-size:1.25em">Hello${D.pname?" "+esc(D.pname):""}, what do you want to learn?</b><p style="margin:6px 0 12px">${lvKey()} · Subject: ${D.sub}. Pick a question or type your own.</p>${(STARTS[D.sub]||gen(D.sub)).map(x=>`<button class="st" data-st="${x}">${x}</button>`).join("")}</div>`}
+function empty(){return`<div class="empty"><b style="font-size:1.25em">Hello${D.pname?" "+esc(D.pname):""}, what do you want to learn?</b><p style="margin:6px 0 12px">${esc(D.cls||lvKey())} · Pick a question or type your own.</p>${startsFor().map(x=>`<button class="st" data-st="${x}">${x}</button>`).join("")}</div>`}
 $("ph").onclick=()=>$("file").click();
 $("file").onchange=()=>{const f=$("file").files[0];if(!f||stream!=null)return;D.msgs.push({s:"o",t:"Photo question",img:URL.createObjectURL(f),ts:Date.now(),st:2});$("file").value="";save();render();ask("the question in your photo")};
 $("mic").onclick=()=>{const R=window.SpeechRecognition||window.webkitSpeechRecognition;if(!R){uiAlert("Voice input is not supported in this browser.");return}const r=new R();r.lang="en-US";$("mic").classList.add("on");r.onresult=e=>{$("inp").value=e.results[0][0].transcript;send()};r.onend=()=>$("mic").classList.remove("on");r.start()};
@@ -913,8 +1762,18 @@ function saved(){const L=[];D.chats.forEach(c=>c.msgs.forEach(m=>{if(m.bm)L.push
 const op=(a,v)=>a.map(x=>`<option ${x==v?"selected":""}>${x}</option>`).join("");
 const LVS=[["PLE","Primary"],["UCE","O-Level"],["UACE","A-Level"]];
 const CLS=()=>`<div style="display:flex;flex-direction:column;gap:8px;padding:8px 18px">${LVS.map(([k,n])=>`<button class="lk ${k==D.lvl?"on":""}" data-lvl="${k}" style="width:100%;text-align:left">${k} · ${n}</button>`).join("")}</div>`;
-function profile(){showP("Learner profile",`<div class="sec">Name</div><div style="padding:8px 18px"><input class="fld" id="pn" value="${esc(D.pname)}" placeholder="Your name"></div><div class="sec">Select level</div>${CLS()}<div class="sec">Language</div><div style="padding:8px 18px"><select class="fld" id="pl">${op(["English","French","Spanish","Swahili","Arabic","Hindi"],D.lang)}</select></div>`,settings,e=>{const c=e.target.dataset.lvl;if(c&&c!=D.lvl){D.lvl=c;fixSub();setSub(D.sub);profile()}});
- $("pn").oninput=()=>{D.pname=$("pn").value.trim();save()};$("pl").onchange=()=>{D.lang=$("pl").value;save()}}
+const CLASSES=["Primary 4","Primary 5","Primary 6","Primary 7","Senior 1","Senior 2","Senior 3","Senior 4","Senior 5","Senior 6"],
+lvOf=c=>/^Primary/.test(c)?"PLE":/^Senior [56]$/.test(c)?"UACE":"UCE",
+GNm=()=>{const u=(window.AK&&AK.me()&&AK.me().username)||"";return u?u.charAt(0).toUpperCase()+u.slice(1).toLowerCase():""};
+function applyCls(c){D.cls=c;const l=lvOf(c);if(l!=D.lvl){D.lvl=l;fixSub();setSub(D.sub)}}
+function setCls(c){try{localStorage.setItem("ask_cls_"+((window.AK&&AK.me()&&AK.me().username)||""),c)}catch(e){}applyCls(c);save();render()}
+function clsPick(fp){const g=(t,l)=>`<div class="sec">${t}</div><div class="sws" style="gap:8px">${l.map(c=>`<button class="lk ${c==D.cls?"on":""}" data-c="${c}">${c}</button>`).join("")}</div>`;
+ showP("Select class",`<div style="padding:12px 18px;color:var(--sub);line-height:1.4">Choose your class. Ask Tr. David will give answers for your level.</div>`+g("Primary (PLE)",CLASSES.slice(0,4))+g("Senior 1 to 4 (O-Level)",CLASSES.slice(4,8))+g("Senior 5 and 6 (A-Level)",CLASSES.slice(8)),fp?profile:closeP,e=>{const c=e.target.dataset.c;if(c){setCls(c);fp?profile():closeP()}})}
+function profile(){const m=(window.AK&&AK.me())||{},nm=m.names||GNm(),LB={PLE:"Primary level",UCE:"O-Level",UACE:"A-Level"};
+ const row=(a,ic,t,x)=>`<div class="row" data-a="${a}"><span class="ri">${ic}</span><div>${t}<small>${x}</small></div></div>`;
+ showP("Learner profile",`<div class="pcard"><div class="pav">${esc((nm||"?").charAt(0).toUpperCase())}</div><div class="pcn">${esc(nm)}</div><div class="pcu">${esc(D.cls||"Class not chosen yet")}</div></div>`+
+  row("nm",IC.user,"Name",esc(nm))+row("cl",IC.doc,"Class",D.cls?esc(D.cls)+" · "+LB[D.lvl]:"Tap to choose your class")+row("ac",IC.star,"Account","Update names, username, phone, password, pin"),
+  settings,e=>{const a=e.target.closest(".row")?.dataset.a;if(a=="nm")AK.upd("names");if(a=="cl")clsPick(1);if(a=="ac")AK.open()})}
 function access(){showP("Accessibility",`<div class="sec">Text size</div><div class="sws">${[[14,"Small"],[16,"Medium"],[20,"Large"]].map(a=>`<button class="lk ${D.fs==a[0]?"on":""}" data-fs="${a[0]}">${a[1]}</button>`).join("")}</div><div class="row" data-a="hc"><input type="checkbox" ${D.hc?"checked":""}><div>High contrast</div></div>`,settings,e=>{const f=e.target.dataset.fs;if(f)D.fs=+f;if(e.target.closest("[data-a=hc]"))D.hc=!D.hc;applyTheme();save();access()})}
 applyTheme();render();updateBadge();$("msgs").addEventListener("scroll",()=>{const m=$("msgs");$("jump").style.display=m.scrollHeight-m.scrollTop-m.clientHeight>250?"grid":"none"});
 $("jump").onclick=()=>$("msgs").scrollTo({top:1e9,behavior:"smooth"});
@@ -1137,6 +1996,17 @@ const HANDOFF={
    ]
   ],
   [
+   "Primary Mathematics syllabus",
+   [
+    ["Topics P1 to P7 with class and term tags (43 topics)",1],
+    ["Class and term lookup: What topics are in Primary 4?",1],
+    ["Step-by-step working: + − × ÷, fraction sums, percent of a number, LCM, HCF, mean, median, mode, range",1],
+    ["Teacher check of every topic against NCDC books and the new curriculum",0],
+    ["Worked solutions for geometry, area, volume, ratio, speed, time and money questions",0],
+    ["Move topics to Supabase so the owner can edit them",0]
+   ]
+  ],
+  [
    "Content",
    [
     [
@@ -1148,9 +2018,50 @@ const HANDOFF={
      0
     ]
    ]
+  ],
+  [
+   "Before launch",
+   [
+    [
+     "REMOVE the temporary Activate plan button (function activatePlan and its button in the limit message) once the app is fully developed. Real payment confirmation must set the plan.",
+     0
+    ],
+    [
+     "Give each plan its version name in PVER (Free, Basic, Standard, Premium), shown bottom right",
+     0
+    ]
+   ]
   ]
  ],
  "log": [
+  [
+   "2026-10-29",
+   "Install page rebuilt exactly like the Nova School (My School) one: decided before first paint so there is no flash, full-screen blue page with the rounded-square logo, the name, one big Install button and an underlined Continue in browser link. Install opens the real install prompt (waits up to 3.5 seconds for the browser, shows Add to Home Screen steps on iPhone, tells the user if it is already installed). After Continue in browser a small round install button floats on the right. Never shown inside the installed app. sw.js cache is now v5."
+  ],
+  [
+   "2026-10-29",
+   "Compared with the TFG Admin zip: its index.html has no install screen, no manifest link and no service worker registration, so there was no install screen to copy. manifest.json and sw.js now follow the TFG Admin structure (app id, start_url with source=pwa, launch_handler, own-cache-only cleanup, network-first opening, same-site files refreshed in the background). sw.js cache is now v4."
+  ],
+  [
+   "2026-10-29",
+   "Icons redone for every phone: the logo sits at 80 percent on a full blue square, so circle launchers show the logo circle inside its yellow ring and square or rounded-square launchers show a clean blue square with the logo in the middle. Manifest lists each icon as any and as maskable. sw.js cache is now v4."
+  ],
+  [
+   "2026-10-29",
+   "Install screen: when the app is opened in a browser (not installed yet) a full-screen page shows the logo with two buttons, Continue in browser and Install app. Install app opens the phone's real install prompt (Android and desktop Chrome); on iPhone it shows the Add to Home Screen steps. It does not show when the app is already opened from the home screen, and after Continue it stays away for that browser tab. sw.js cache is now v2."
+  ],
+  [
+   "2026-10-29",
+   "Made the app a PWA with five files: index.html, manifest.json, sw.js, icon-192.png, icon-512.png (logo: Ask Teacher David). Name shows as Ask Tr. David, installs to the home screen and opens full screen. The service worker saves the app so it opens offline, loads the newest version when online, and never touches Supabase calls. When you change the app, change the CACHE name in sw.js (now ask-tr-david-v5, then v5, v6...) so phones pick up the update. Needs a public https address to install; not tested on a phone yet."
+  ],
+  [
+   "2026-10-29",
+   "Limit message: the green Upgrade to enjoy Unlimitedly. bar is now the button that opens the plans screen (no star, Upgrade your plan button removed); Activate plan stays. Activating Free (testing) starts a brand new free count at once, ignoring the reset time; when the new limit is reached it pauses again and shows the next reset time. Plan and version are shown in two containers under the question box; the version is now per plan in PVER (Free, Basic, Standard, Premium all 1.0 until named; replace each when the names are given). Send button is now an up arrow. Editing a message now deletes every message after it and gets a fresh answer from there, like Claude."
+  ],
+  [
+   "2026-10-29",
+   "Limit message redesigned (amber lock title, blue clock line for the reset time, green and purple Upgrade line) with two buttons: Upgrade your plan (opens the plans screen) and Activate plan. New strip under the question box: left shows the user's plan (Free, Basic, Standard or Premium, saved on the phone as ask_plan_USERNAME), right shows Version 1.0.0 (see PVER). Any paid plan removes the free limit for now (daily, weekly and monthly paid limits are NOT built). Activate plan is a TEMPORARY test control: REMOVE it (function activatePlan and the Activate plan button) once the app is fully developed and payments confirm plans for real."
+  ],
   [
    "2026-10-29",
    "Moved Clear chat and Export chat; added back button behaviour and three-press exit; custom popups; icon-only answer actions under the card; share added; Report and Listen removed; long press only on own messages; equal side margins."
@@ -1198,6 +2109,26 @@ const HANDOFF={
   [
    "2026-10-29",
    "Added real step-by-step working for equations (tested on 18 cases, including brackets, x on both sides, fractions and no-solution). Answers are shown in stages with Next step, Break this step down and Show all steps. Found an existing issue: saved chats are not restored on reopen."
+  ],
+  [
+   "2026-10-29",
+   "Primary Mathematics syllabus P1 to P7 built: 43 topics, each tagged with class and term (see MATHP). Answers show Class, definition, how to work it, where used, where it is taught by class and term, examples, quiz. Asking What topics are in Primary 4? (or Primary 5 Term 2) lists the syllabus for that class and term. Real step-by-step working added for addition, subtraction, multiplication, division, fraction sums, percentage of a number, LCM, HCF and mean, median, mode, range. Content written from general knowledge of the Uganda primary syllabus, NOT yet checked against NCDC books: a teacher must review before publishing."
+  ],
+  [
+   "2026-10-29",
+   "Login screens rearranged. Login: Show/Hide is now an eye icon inside the password box, a Remember login tick box sits between the password and the Login button (ticked = stay logged in; unticked = logged out when the browser closes), and only Forgot password and Create account sit under the Login button. Forgot password screen: Forgot pin and Forgot password and pin are shown under the Reset button. Forgot pin screen also links to Forgot password and pin. Not tested on a real phone yet."
+  ],
+  [
+   "2026-10-29",
+   "Create account form: no hint text shown at the start. Hints appear only while typing and mark each rule as done (names: two names and 8 letters; username: 5 to 10 capitals; phone: 10 digits; password: 8 characters, capital, small letter, number; pin: 5 numbers). No placeholders in any box; phone no longer starts with 0 pre-filled. If a username is taken, 3 other usernames are suggested (from the server, or made in the app if the server sends none); tapping one fills it in. Password suggestions show while the password is not yet valid. Not tested on a real phone yet."
+  ],
+  [
+   "2026-10-29",
+   "Free plan added (later changed: limit is now a random 1000 to 1200 words, and after it is hit a secret countdown of a random 3h30 to 4h runs in the app (users do not see the countdown, only the clock time it will reset, e.g. Your free plan resets at 1:25 AM), then the words reset, the limit message disappears and a short Your free plan has been reset message appears in the chat; the limit message stays in the chat and only the View upgrade plans button opens the plans screen). Each account gets a random limit of 2000 to 3000 words of answers, counted when an answer ends and saved on the phone (key ask_free_USERNAME). When the limit is reached the chat shows the upgrade message and an Upgrade plans screen (Basic, Standard, Premium, and MTN merchant code 06124096, ID Alfred, dial *165*3*06124096# with steps shown first). New questions are blocked after that. Settings has a Free plan and upgrade row. NOT built: paid plans are not switched on or counted (no way to confirm payment yet), and the limit is not checked on the server, so clearing browser data resets it. Not tested on a real phone yet."
+  ],
+  [
+   "2026-10-29",
+   "Chat screen and profile reshaped. Greeting now reads Hello plus the username with only the first letter capital (saved name updated on every login). Header shows Anything about your studies instead of online; the subject tabs and the footer text are hidden or removed (subjects are still detected in the background). Settings no longer has an Account row. Learner profile now has Name, Class and Account (language removed). Class is a dropdown at registration, Primary 4 to Senior 6, saved on the phone per username (key ask_cls_USERNAME) and sets the level: Primary = PLE, Senior 1 to 4 = UCE, Senior 5 and 6 = UACE. Existing accounts are asked to pick a class after login. NOT built: the class is not saved on the server (acct_create has no class field yet). Not tested on a real phone yet."
   ]
  ]
 };
@@ -1277,4 +2208,78 @@ function handoff(){
  const mo=new MutationObserver(sync);
  ["dlgx","scrim","more","panel","srch","editing"].forEach(id=>mo.observe($(id),{attributes:true,attributeFilter:["style"]}));
 })();
-</script></body></html>
+</script><div id="auth"><div class="ab"><div style="text-align:center;padding:calc(26px + env(safe-area-inset-top,0px)) 0 6px"><div class="av" id="alogo" style="margin:0 auto 8px;width:64px;height:64px"></div><b style="font-size:20px">Ask Tr. David</b><div class="t" id="ah">Loading…</div></div><div id="af"></div></div></div>
+<script>
+(function(){
+const PUBLIC_URL="https://asktrdavid.vercel.app/",BASE=(/^https:$/.test(location.protocol)&&!/^(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(location.hostname))?location.origin+location.pathname:PUBLIC_URL,CONTACT="",
+U="https://pjdtlpnlvumpefxjmjpv.supabase.co/rest/v1/rpc/",K="sb_publishable_Y48beigB72EVErcQKDwrDA_sTxiHI6u",LS=localStorage,SS=sessionStorage,$=id=>document.getElementById(id),
+EYE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+EYEOFF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.9 17.9A10.9 10.9 0 0 1 12 19C5 19 1 12 1 12a18.5 18.5 0 0 1 5.1-5.9M9.9 5.1A9.7 9.7 0 0 1 12 5c7 0 11 7 11 7a18.6 18.6 0 0 1-2.2 3.2M14.1 14.1a3 3 0 1 1-4.2-4.2M1 1l22 22"/></svg>',
+stg=()=>SS.getItem("ask_tok")?SS:LS;
+let H=location.hash,T=LS.getItem("ask_tok")||SS.getItem("ask_tok")||"",ME=null,tm={};
+const rpc=(f,b)=>fetch(U+f,{method:"POST",headers:{apikey:K,"Content-Type":"application/json"},body:JSON.stringify(b)}).then(r=>r.json()).then(r=>r&&typeof r.ok=="boolean"?r:{ok:false,err:"Something went wrong. Try again."}).catch(()=>({ok:false,err:"No internet. Check your connection and try again.",net:1}));
+const R={names:/^[A-Z][A-Za-z]+ [A-Z][A-Za-z]+$/,username:/^[A-Z]{5,10}$/,phone:/^0\d{9}$/,pin:/^\d{5}$/},
+MG={names:"At least 8 letters: two names with one space, each starting with a capital letter.",username:"5 to 10 capital letters only.",phone:"10 digits, starting with 0.",password:"At least 8 letters and numbers, with capital and small letters.",pin:"Exactly 5 numbers."},
+KM={uname:"username",phoneo:"phone",cpw:"password",cpin:"pin"},NEW={names:1,username:1,phone:1,password:1,pin:1},
+good=(k,v)=>k=="names"?R.names.test(v)&&v.length>=8:k=="password"?/^[A-Za-z0-9]{8,30}$/.test(v)&&/[A-Z]/.test(v)&&/[a-z]/.test(v)&&/\d/.test(v):R[k].test(v),
+mask=(k,v)=>{k=KM[k]||k;
+ if(k=="names")return v.replace(/[^A-Za-z ]/g,"").replace(/^ +/,"").replace(/ {2,}/g," ").replace(/^(\S*) (\S*).*$/,"$1 $2").replace(/(^|\s)([a-z])/g,(m,a,b)=>a+b.toUpperCase());
+ if(k=="username")return v.toUpperCase().replace(/[^A-Z]/g,"").slice(0,10);
+ if(k=="phone"){v=v.replace(/\D/g,"");if(!v)return"";return(v[0]=="0"?v:"0"+v).slice(0,10)}
+ if(k=="pin")return v.replace(/\D/g,"").slice(0,5);
+ if(k=="password")return v.replace(/[^A-Za-z0-9]/g,"").slice(0,30);return v},
+rnd=n=>crypto.getRandomValues(new Uint32Array(1))[0]%n,pk=s=>s[rnd(s.length)],
+gp=()=>{const U_="ABCDEFGHJKLMNPQRSTUVWXYZ",L_="abcdefghijkmnpqrstuvwxyz",N_="23456789";let a=[];for(let i=0;i<2;i++)a.push(pk(U_));for(let i=0;i<5;i++)a.push(pk(L_));for(let i=0;i<3;i++)a.push(pk(N_));for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]]}return a.join("")},
+PS={},ck=(k,v)=>{const n=v.length;k=KM[k]||k;
+ if(k=="names")return[[R.names.test(v),"Two names with one space"],[n>=8,"At least 8 letters ("+Math.min(n,8)+"/8)"]];
+ if(k=="username")return[[n>=5&&n<=10,"5 to 10 capital letters ("+n+"/10)"]];
+ if(k=="phone")return[[n==10,"10 digits, starting with 0 ("+n+"/10)"]];
+ if(k=="pin")return[[n==5,"Exactly 5 numbers ("+n+"/5)"]];
+ return[[n>=8,"At least 8 characters ("+Math.min(n,8)+"/8)"],[/[A-Z]/.test(v),"A capital letter"],[/[a-z]/.test(v),"A small letter"],[/\d/.test(v),"A number"]]},
+us=v=>{const A="ABCDEFGHIJKLMNOPQRSTUVWXYZ",b=v.slice(0,8),o=[];let g=0;while(o.length<3&&g++<40){const x=b+pk(A)+(b.length<8&&rnd(2)?pk(A):"");if(x.length>=5&&x.length<=10&&x!=v&&!o.includes(x))o.push(x)}return o},
+chips=(id,l)=>'<div>'+l.map(s=>`<button class="lk" data-f="${id}" data-v="${s}">${s}</button>`).join(" ")+'</div>',
+er=(m,g)=>{const f=$("ferr");if(f){f.textContent=m;f.style.color=g?"var(--green)":"#e03131"}},
+fb=(id,r)=>{const h=$("h_"+id);if(!h)return;h.className="hn e";h.textContent=r.err||"";let sg=r.suggest;const ip=$("x_"+id);if((!sg||!sg.length)&&ip&&ip.dataset.k=="username"&&!r.net&&/taken|exist|already|available|use/i.test(r.err||""))sg=us(ip.value);if(sg&&sg.length)h.insertAdjacentHTML("beforeend",chips(id,sg))};
+function form(el,items,btn,go,extra,pre){
+ el.innerHTML=items.map(([id,k,l])=>{const hid=k=="cpw"||k=="cpin";if(k=="cls")return`<div class="fw"><label>${l}</label><select class="fld" id="x_${id}" data-k="${k}" data-id="${id}"><option value="">Select class</option>${CLASSES.map(c=>`<option>${c}</option>`).join("")}</select><div class="hn" id="h_${id}"></div></div>`;return`<div class="fw"><label>${l}</label><div class="pw"><input class="fld" id="x_${id}" data-k="${k}" data-id="${id}" type="${hid?"password":"text"}" autocomplete="off" autocapitalize="off" ${/phone|pin/.test(k)?'inputmode="numeric"':""}>${hid?`<button type="button" class="eye" data-t="x_${id}" aria-label="Show password">${EYE}</button>`:""}</div><div class="hn" id="h_${id}"></div></div>`}).join("")+(pre||"")+'<div class="fe" id="ferr"></div><button class="btn" id="fgo">'+btn+"</button>"+(extra||"");
+ el.oninput=e=>{const i=e.target,k=i.dataset.k;if(!k)return;const id=i.dataset.id,h=$("h_"+id),v=mask(k,i.value);if(v!=i.value)i.value=v;if(!NEW[k])return;
+  if(!v){h.className="hn";h.innerHTML="";return}
+  if(!good(k,v)){h.className="hn";h.innerHTML=ck(k,v).map(c=>`<div class="${c[0]?"ok":"no"}">${c[0]?"✓":"○"} ${c[1]}</div>`).join("")+(k=="password"?chips(id,PS[id]||(PS[id]=[gp(),gp(),gp()])):"");return}
+  h.className="hn g";h.textContent="✓";
+  if(k=="username"||k=="phone"){clearTimeout(tm[id]);tm[id]=setTimeout(async()=>{const r=await rpc(k=="phone"?"acct_phone":"acct_username",k=="phone"?{p_p:v}:{p_u:v});const c=$("x_"+id);if(!c||c.value!=v)return;if(r.ok){h.className="hn g";h.textContent="✓ Available"}else fb(id,r)},400)}};
+ el.onfocusin=e=>{const i=e.target;if(i.dataset.k=="password"&&!i.value){PS[i.dataset.id]=[gp(),gp(),gp()];$("h_"+i.dataset.id).innerHTML=chips(i.dataset.id,PS[i.dataset.id])}};
+ el.onclick=async e=>{const t=e.target,d=t.dataset;
+  const eb=t.closest&&t.closest(".eye");if(eb){const i=$(eb.dataset.t);i.type=i.type=="password"?"text":"password";eb.innerHTML=i.type=="password"?EYE:EYEOFF;eb.setAttribute("aria-label",i.type=="password"?"Show password":"Hide password");return}
+  if(d.f){const i=$("x_"+d.f);i.value=d.v;i.dispatchEvent(new Event("input",{bubbles:true}));return}
+  if(d.go){scr(d.go);return}
+  if(t.id!="fgo")return;
+  const v={};const rmb=$("rm");v.rm=rmb?rmb.checked:true;for(const[id,k,l]of items){const x=$("x_"+id).value.trim();v[id]=x;if(!x||(k=="phone"&&x=="0"))return er(l+" is required.");if(NEW[k]&&!good(k,x))return er(l+": "+MG[k])}
+  er("");t.disabled=true;t.textContent="Please wait…";const r=await go(v);t.disabled=false;t.textContent=btn;
+  if(r&&!r.ok){const u=items.find(x=>x[1]=="username"),p=items.find(x=>x[1]=="phone");if(r.suggest&&u)fb(u[0],r);else if(/already exist/i.test(r.err||"")&&p)fb(p[0],r);else er(r.err||"Try again.")}}}
+const L=(s,t)=>`<div class="al" data-go="${s}">${t}</div>`,BK='<div class="bk" data-go="login">Back to login</div>',AR=(a,b)=>`<div class="ar">${a}${b}</div>`;
+function done(r,rm){if(r.ok){T=r.token;ME=r.me;const S=rm===false?SS:LS;LS.removeItem("ask_tok");LS.removeItem("ask_me");SS.removeItem("ask_tok");SS.removeItem("ask_me");S.setItem("ask_tok",T);S.setItem("ask_me",JSON.stringify(ME));enter()}return r}
+function scr(n){const f=$("af"),h=t=>$("ah").textContent=t;$("auth").style.display="block";
+ const FG=(w,id)=>async v=>{const r=await rpc("acct_forgot",{p_what:w,p_user:v.u,p_phone:v.p,p_secret:v.s,p_new:v.n});if(r.ok){scr("login");er((w=="pin"?"Pin":"Password")+" updated. Please login.",1)}return r};
+ if(n=="login"){h("Login");form(f,[["i","login","Names / Username"],["p","cpw","Password"]],"Login",async v=>done(await rpc("acct_login",{p_id:v.i,p_pass:v.p}),v.rm),AR(L("fp","Forgot password"),L("create","Create account")),'<label class="rm"><input type="checkbox" id="rm" checked>Remember login</label>')}
+ if(n=="create"){h("Create account");form(f,[["n","names","Names"],["u","username","Username"],["p","phone","Phone"],["k","cls","Class"],["w","password","Password"],["c","pin","Pin"]],"Create account",async v=>{const r=await rpc("acct_create",{p_names:v.n,p_user:v.u,p_phone:v.p,p_pass:v.w,p_pin:v.c});if(r.ok){try{LS.setItem("ask_cls_"+((r.me&&r.me.username)||v.u),v.k)}catch(e){}}return done(r)},L("login","I already have an account: Login"))}
+ if(n=="fp"){h("Forgot password");form(f,[["u","uname","Username"],["p","phoneo","Phone"],["s","cpin","Pin"],["n","password","New password"]],"Reset password",FG("password"),AR(L("fn","Forgot pin"),L("ct","Forgot password and pin"))+BK)}
+ if(n=="fn"){h("Forgot pin");form(f,[["u","uname","Username"],["p","phoneo","Phone"],["s","cpw","Password"],["n","pin","New pin"]],"Reset pin",FG("pin"),L("ct","Forgot password and pin")+BK)}
+ if(n=="ct"){h("Contact us");f.innerHTML='<div class="fw" style="line-height:1.5">If you forgot both your password and your pin, contact us and we will help you recover your account.</div>'+(CONTACT?`<a class="btn" style="text-align:center;text-decoration:none" href="tel:${CONTACT}">Call ${CONTACT}</a>`:"")+BK;f.onclick=e=>{if(e.target.dataset.go)scr(e.target.dataset.go)};f.oninput=null;f.onfocusin=null}}
+function enter(){$("auth").style.display="none";if(ME){D.pname=GNm();const c=LS.getItem("ask_cls_"+ME.username);if(c&&CLASSES.includes(c))applyCls(c);else D.cls="";save()}render();link();if(ME&&!D.cls)clsPick()}
+function out(){rpc("acct_logout",{p_t:T});T="";ME=null;LS.removeItem("ask_tok");LS.removeItem("ask_me");SS.removeItem("ask_tok");SS.removeItem("ask_me");closeP();scr("login")}
+const UI={names:[["n","names","New names"],["a","cpw","Confirm password"]],username:[["n","username","New username"],["a","cpw","Confirm password"]],phone:[["n","phone","New phone"],["a","cpw","Confirm password"]],password:[["n","password","New password"],["a","uname","Confirm username"],["b","cpw","Old password"],["c","cpin","Pin"]],pin:[["n","pin","New pin"],["a","uname","Confirm username"],["b","cpw","Password"],["c","cpin","Old pin"]]};
+function upd(w){showP("Update "+w,'<div id="ff"></div>',account);form($("ff"),UI[w],"Save",async v=>{const r=await rpc("acct_change",{p_t:T,p_what:w,p_new:v.n,p_a:v.a,p_b:v.b||"",p_c:v.c||""});if(r.relogin){out();return r}if(r.ok){ME=r.me;stg().setItem("ask_me",JSON.stringify(ME));account();uiAlert("Updated.")}return r})}
+function account(){showP("Update account",`<div class="pcard"><div class="pav">${esc((ME.names||"?").charAt(0).toUpperCase())}</div><div class="pcn">${esc(ME.names)}</div><div class="pcu">${esc(ME.username)} · ${esc(ME.phone)}</div></div>`+[["names","Update names"],["username","Update username"],["phone","Update phone"],["password","Update password"],["pin","Update pin"]].map(x=>`<div class="row" data-w="${x[0]}"><div>${x[1]}</div></div>`).join("")+'<div class="row danger" data-w="out"><div>Log out</div></div>',profile,e=>{const w=e.target.closest(".row")?.dataset.w;if(w=="out")out();else if(w)upd(w)})}
+const b64=s=>btoa(unescape(encodeURIComponent(s))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""),LV=["PLE","UCE","UACE"];
+async function link(){const m=H.match(/^#([sak])=(.+)$/);H="";if(!m)return;try{history.replaceState(null,"",location.pathname+location.search)}catch(e){}
+ try{let p;if(m[1]=="a"){const[l,s]=decodeURIComponent(m[2]).split("~");if(LV.includes(l)){D.lvl=l;fixSub();setSub(subsList().includes(s)?s:D.sub);save()}return}
+  if(m[1]=="k"){const r=await rpc("ask_share_get",{p_id:m[2].replace(/[^a-zA-Z0-9]/g,"").slice(0,24)});if(!r.ok){uiAlert(r.err||"This shared answer could not be opened.");return}p={l:r.l,s:r.s,q:r.q,t:r.t}}
+  else p=JSON.parse(decodeURIComponent(escape(atob(m[2].replace(/-/g,"+").replace(/_/g,"/")))));
+  showP("Shared answer",`<div style="padding:14px 18px"><div class="t">${esc(p.l+" · "+p.s)}</div><b>${esc(p.q||"")}</b><div class="md" style="margin-top:6px">${md(p.t)}</div></div><button class="btn" id="gx">Ask your own question</button>`,closeP,e=>{if(e.target.id=="gx"){closeP();if(LV.includes(p.l)){D.lvl=p.l;fixSub();setSub(subsList().includes(p.s)?p.s:D.sub);save()}}})}catch(e){}}
+window.AK={me:()=>ME,open:account,upd,short:async m=>{const r=await rpc("ask_share_put",{p_l:D.lvl,p_s:D.sub,p_q:(m.q||"").slice(0,300),p_t:m.t.slice(0,6000)});return r.ok&&r.id?BASE+"#k="+r.id:AK.link(m)},link:m=>BASE+"#s="+b64(JSON.stringify({l:D.lvl,s:D.sub,q:(m.q||"").slice(0,300),t:m.t.slice(0,6000)})),area:()=>BASE+"#a="+D.lvl+"~"+D.sub};
+$("alogo").style.cssText+=";background:url("+AVATAR+") center/cover";
+(async()=>{if(!T){scr("login");return}const r=await rpc("acct_me",{p_t:T});if(r.ok){ME=r.me;stg().setItem("ask_me",JSON.stringify(ME));enter()}else if(r.net&&stg().getItem("ask_me")){ME=JSON.parse(stg().getItem("ask_me"));enter()}else{T="";LS.removeItem("ask_tok");SS.removeItem("ask_tok");scr("login")}})();
+})();
+</script>
+
+</body></html>

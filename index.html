@@ -496,6 +496,10 @@ const subsList=()=>["General",...GR[lvIdx()][1]];
 function fixSub(){if(!subsList().includes(D.sub))D.sub="General"}
 fixSub();
 D.chats.forEach(c=>{if(!c.sub)c.sub=c.id==D.cur?D.sub:"General";if(!c.lv)c.lv=lvKey()});
+/* A keyword topic may only claim a short, direct question. A long question, or a request such as "write an article about...",
+ is not a topic lookup (the word "article" must not trigger the English topic Articles and determiners), so it goes to the AI step. */
+const TASKQ=/\b(write|compose|draft)\b[^.?!]{0,30}\b(an?|the)\s+(article|essay|letter|report|speech|story)\b[^.?!]*\b(about|on|for|to appear|regarding)\b|\b(article|essay|letter|report|speech)s?\s+(to|for)\s+(appear|be\s+(published|printed|read))\b/i;
+const kwOK=q=>{q=String(q||"");return q.trim().split(/\s+/).length<=18&&!TASKQ.test(q)};
 const SUBRULES=[
 [/\bwhat does .{1,30} mean\b|\bmeaning of (the )?words?\b|\bwhat is the meaning of\b/i,["English","Literacy","General Paper"]],
 [/\b(noun|verb|adjective|adverb|pronoun|preposition|grammar|tense|sentence|punctuation|synonym|antonym|vocabulary|comprehension|essay|paragraph)s?\b/i,["English","Literacy","General Paper"]],
@@ -511,10 +515,10 @@ const SUBRULES=[
 [/\b(history|kingdoms?|colonial|colonialism|independence|empire|kabaka|world war|slave trade|ancient)\b/i,["History","Social Studies"]],
 [/\b(maps?|climate|rainfall|rivers?|mountains?|soils?|erosion|population|weather|vegetation|latitude)\b/i,["Geography","Social Studies"]],
 [/\b(business|profit|entrepreneurs?|entrepreneurship|savings?)\b/i,["Entrepreneurship"]]];
-function detectSub(v){const L=subsList();if(lvKey()=="PLE"&&L.includes("Mathematics")&&(/\bmath(s|ematics)?\b/i.test(v)||MATHP.some(t=>!t.nd&&t.re.test(v))))return"Mathematics";if(lvKey()=="PLE"&&L.includes("English")&&(/\benglish\b/i.test(v)||ENGP.some(t=>!t.nd&&t.re.test(v))))return"English";for(const[r,c]of SUBRULES){if(r.test(v)){const f=c.find(x=>L.includes(x));if(f)return f==="Social Studies"&&L.includes("Science")&&SCIRE.test(v)?"Science":f}}if(L.includes("Science")&&SCIRE.test(v))return"Science";return null}
+function detectSub(v){const L=subsList();if(lvKey()=="PLE"&&L.includes("Mathematics")&&(/\bmath(s|ematics)?\b/i.test(v)||kwOK(v)&&MATHP.some(t=>!t.nd&&t.re.test(v))))return"Mathematics";if(lvKey()=="PLE"&&L.includes("English")&&(/\benglish\b/i.test(v)||kwOK(v)&&ENGP.some(t=>!t.nd&&t.re.test(v))))return"English";for(const[r,c]of SUBRULES){if(r.test(v)){const f=c.find(x=>L.includes(x));if(f)return f==="Social Studies"&&L.includes("Science")&&SCIRE.test(v)?"Science":f}}if(L.includes("Science")&&SCIRE.test(v))return"Science";return null}
 /* No subject tabs: every question is sorted by what it is about (Mathematics, English, Science...). The chat stays one chat. */
 function routeSub(q){q=String(q||"");let t=null;try{t=detectSub(q)}catch(e){}
- if(t)return t;const lo=q.toLowerCase(),L=subsList(),T=(typeof TOP!="undefined"?TOP:[]).find(x=>!x.nd&&x.re.test(lo)&&(!x.L||x.L.includes(lvKey()))&&x.S&&x.S.some(y=>L.includes(y)));
+ if(t)return t;const lo=q.toLowerCase(),L=subsList(),T=(typeof TOP!="undefined"?TOP:[]).find(x=>!x.nd&&(x.ai!=null||kwOK(lo))&&x.re.test(lo)&&(!x.L||x.L.includes(lvKey()))&&x.S&&x.S.some(y=>L.includes(y)));
  return T?T.S.find(y=>L.includes(y)):"General"}
 function setSub(sb){if(sb==D.sub&&D.chats.some(c=>c.id==D.cur&&c.sub==sb&&(c.lv||lvKey())==lvKey()))return;stopS();stopEdit();
  const cur=D.chats.find(c=>c.id==D.cur);if(cur&&!cur.msgs.length&&D.chats.length>1)D.chats=D.chats.filter(c=>c!==cur);
@@ -2462,7 +2466,7 @@ function heads(T){if(T&&T.a)return[T.a,T.b];const s=D.sub;
  if(/Religio|Divinity|Islamic/.test(s))return["What it teaches","How it is lived out"];
  if(/English|Literature|Literacy|Kiswahili|Luganda|French|German|Arabic|Latin|Chinese|Language|General Paper/.test(s))return["How to use it","Where it is used"];
  return["How it works","Where it applies"]}
-function topicOf(q){const s=q.toLowerCase(),lv=lvKey();return TOP.find(t=>t.re.test(s)&&(!t.S||D.sub=="General"||t.S.includes(D.sub))&&(D.sub!="General"||!t.nd)&&(!t.L||t.L.includes(lv)))||null}
+function topicOf(q){const s=q.toLowerCase(),lv=lvKey(),kw=kwOK(q);return TOP.find(t=>t.re.test(s)&&(kw||t.ai!=null)&&(!t.S||D.sub=="General"||t.S.includes(D.sub))&&(D.sub!="General"||!t.nd)&&(!t.L||t.L.includes(lv)))||null}
 function cleanQ(q){return q.replace(/[?.!]+$/,"").replace(/^(what\s+(is|are|was|were)|define|explain|describe|tell me about|how (do|does|can) (i|we|you)|why (is|are|do|does))\s+(an?\s+|the\s+)?/i,"").trim().slice(0,60)||q.slice(0,60)}
 function qText(t,z){return "# Quiz: "+t+"\nQuestion "+(z.n+1)+" of "+z.list.length+"\n"+z.list[z.n][0]}
 function faithOf(q){return/\b(islam\w*|muslim\w*|quran|allah|prophet muhammad|hadith|mosque|ramadan|salah|zakat)\b/i.test(q)?"Islamic":/\b(christian\w*|bible|jesus|christ|church|god the father|gospel|apostles?|easter|christmas|baptism)\b/i.test(q)?"Christian":null}
@@ -3069,6 +3073,10 @@ const HANDOFF={
   ]
  ],
  "log": [
+  [
+   "2026-10-30",
+   "Question recognition fixed. A long dictated question about deforestation and an article for the Daily Monitor was answered with the English topic Articles and determiners, because the word article matched that topic and the PLE English check ran before the subject rules. Now a keyword topic can only claim a short, direct question: more than 18 words, or a request such as write an article about, skips the built-in keyword topics (kwOK in the script, used by detectSub, routeSub and topicOf) and goes to the AI step. Short questions such as what is an article, what is a noun and how do I write a good essay still use the built-in topics. Tested with a fake server in a headless browser. Known limits: the app sends only the first 300 characters of a question to the AI, and at PLE a deforestation question is placed under Science (existing rule, there is a PLE topic Conservation of the environment) while UCE and UACE place it under Geography. Not yet tried on a real phone."
+  ],
   [
    "2026-10-30",
    "Ask Tr. David now asks the ai_answer Supabase function when the app's own topics and find_answer find nothing for a new question (not for follow-up requests). The saved topic is turned into the reply by the existing tiered() plan trimming: Free and Basic the exact thing asked, Standard plus simple words, Premium the full breakdown. Draft AI answers show a small label, AI generated, not yet checked; published ones do not. If the function says busy the learner sees a try-again message with a Retry button and the question is still logged as unanswered; if it has no answer the normal no-lesson reply and the unanswered log are used. AI topics are kept for the session so explain simpler, example and quiz me work on them, and they are left out of the random Quiz me. Tested only with a fake server in a headless browser (four plans, label on and off, busy, no answer, retry). Not yet tried against the live function or on a real phone. sw.js CACHE name must be changed so phones pick this up. WN_ON stays false."

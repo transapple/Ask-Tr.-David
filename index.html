@@ -64,6 +64,7 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 .b.i{align-self:flex-start;background:var(--in);border-bottom-left-radius:4px}
 .b small{float:right;margin:7px 0 0 10px;font-size:11px;color:var(--sub);display:inline-flex;align-items:center;gap:3px}
 .b small svg{width:16px;height:16px;stroke-width:2.4}.rd{color:var(--tick)}
+.aitag{display:inline-block;margin:0 0 6px;padding:2px 8px;border-radius:6px;background:rgba(245,158,11,.16);color:#b45309;font-size:11px;font-weight:700}
 .day{align-self:center;background:var(--in);color:var(--sub);font-size:12px;padding:4px 12px;border-radius:10px;margin:8px 0}
 #editing{display:none;background:var(--bar);padding:8px 16px;font-size:13px;color:var(--green);border-top:1px solid var(--line)}
 #cmp{display:flex;gap:4px;align-items:center;padding:6px 16px;background:var(--bar)}#iw{flex:1;min-width:0;display:flex;align-items:center;background:var(--wall);border-radius:24px;padding:3px 7px 3px 8px;gap:2px}
@@ -2468,7 +2469,7 @@ function faithOf(q){return/\b(islam\w*|muslim\w*|quran|allah|prophet muhammad|ha
 let QLAST="";
 function quizAns(q){
  const bare=isBare(q);let T=null;
- if(bare){const pool=TOP.filter(t=>t.q&&t.q.length&&(!t.L||t.L.includes(lvKey()))&&(D.sub=="General"||!t.S||t.S.includes(D.sub))),alt=pool.filter(t=>t.n!=QLAST),src=alt.length?alt:pool;T=src[Math.floor(Math.random()*src.length)]||null}
+ if(bare){const pool=TOP.filter(t=>!t.ai&&t.q&&t.q.length&&(!t.L||t.L.includes(lvKey()))&&(D.sub=="General"||!t.S||t.S.includes(D.sub))),alt=pool.filter(t=>t.n!=QLAST),src=alt.length?alt:pool;T=src[Math.floor(Math.random()*src.length)]||null}
  else T=topicOf(q);
  if(!T){const k=cleanQ(q);return bare?{t:"# Quiz\nI do not have a quiz ready for this level and subject yet."}:{t:"# Quiz: "+cap(k)+"\nI do not have a quiz on **"+k+"** yet. Say **quiz me** and I will pick a topic for you."}}
  QLAST=T.n;const list=T.q.slice().sort(()=>Math.random()-.5),z={list,n:0,score:0,t:T.n};
@@ -2518,7 +2519,7 @@ function part(T,f,H){
  if(f=="simple"&&T.s)return["In simple words",T.s];
  return[null,T.d]}
 let VN=Math.floor(Math.random()*1000);
-function tiered(q){const T=topicOf(q);if(!T||!T.d)return null;
+function tiered(q,T0){const T=T0||topicOf(q);if(!T||!T.d)return null;
  const pl=planName(),I=qIntent(q),H=heads(T),v=VN++,pk=a=>a[v%a.length],L=lvKey(),onlyReq=(I.only||I.defw)&&!I.full,
   narrow=pl=="Free"||pl=="Basic"||onlyReq,sec=(h,b)=>b?"\n## "+h+"\n"+b:"";
  const[hd,body]=part(T,I.f,H),one="# "+T.n+"\n"+(hd?"## "+hd+"\n":"")+body;
@@ -2577,6 +2578,28 @@ async function dbAnswer(q,mode){
  else if(pl=="Standard"){const[a,s]=await Promise.all([get("answer"),get("simpler")]);r=a||s;if(a&&s)t=txt(a)+"\n## In simple words\n"+s.body_md;else if(r)t=txt(r)}
  else{const[d,a]=await Promise.all([get("detail"),get("answer")]);r=d||a;if(r)t=txt(r)}
  return r?{t,aid:r.answer_id}:null}
+/* NEW QUESTIONS: ask the ai_answer Edge Function. Gemini writes the answer once and it is saved as a draft in Supabase.
+ The reply is built by tiered() so it follows the learner's plan; draft answers get the "AI generated, not yet checked" label. */
+const AIU=SBU.replace("/rest/v1/","/functions/v1/")+"ai_answer",escRe=x=>x.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+async function aiAnswer(q){
+ const c=new AbortController(),tm=setTimeout(()=>c.abort(),25000);
+ try{
+  const sub=D.sub=="General"?(detectSub(q)||"General"):D.sub;
+  const r=await fetch(AIU,{method:"POST",signal:c.signal,headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({question:String(q).slice(0,300),level:D.lvl,subject:sub,plan:planName()})});
+  if(!r.ok)return null;
+  const j=await r.json();
+  if(j.status=="busy")return{busy:1};
+  if(j.status=="found"&&j.kind=="answer"&&j.answer&&j.answer.body_md){const a=j.answer;return{t:/^\s*#/.test(a.body_md)?a.body_md:"# "+a.title+"\n"+a.body_md,aid:a.answer_id}}
+  const t=(j.status=="created"||(j.status=="found"&&j.kind=="topic"))?j.topic:null;
+  if(!t||!t.name||!t.definition)return null;
+  const dr=j.status=="created"||j.draft===true;
+  const T={n:String(t.name),re:new RegExp(escRe(String(q).trim().toLowerCase())),d:t.definition,h:t.steps||"",w:t.uses||"",s:t.simple||"",e:t.examples||"",m:t.more||"",q:Array.isArray(t.quiz)?t.quiz:[],a:t.label_steps||"How to work it out",b:t.label_uses||"Where it is used",nd:0,S:[sub],L:[D.lvl],ai:dr?1:0};
+  const f=tiered(q,T);if(!f)return null;
+  /* keep it for this session so "explain simpler", "give an example" and "quiz me" work on it */
+  TOP.push(T);const ax=TOP.filter(x=>x.ai!=null&&x.re&&x.db==null);if(ax.length>30)TOP.splice(TOP.indexOf(ax[0]),1);
+  if(dr)f.ai=1;
+  return f
+ }catch(e){return null}finally{clearTimeout(tm)}}
 function logUn(q){try{q=String(q).trim().slice(0,300);if(q.length<3)return;fetch(SBU+"rpc/log_unanswered",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_question:q,p_level:D.lvl,p_subject:D.sub})}).catch(()=>{})}catch(e){}}
 function sendFb(m){try{if(m.aid&&m.fb)fetch(SBU+"rpc/submit_feedback",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_answer_id:m.aid,p_vote:m.fb})}).catch(()=>{})}catch(e){}}
 
@@ -2585,7 +2608,7 @@ function bub(m,i,last){
  if(m.lim)return `<div class="b i ai" data-i="${i}"><div style="display:flex;gap:10px;align-items:flex-start"><span style="flex:none;width:34px;height:34px;border-radius:50%;background:rgba(245,158,11,.16);color:#d97706;display:grid;place-items:center"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></span><div style="font-weight:700;font-size:16px;line-height:1.3;color:#d97706;padding-top:1px">${LIM1}</div></div>${rtime()?`<div style="display:flex;gap:8px;align-items:center;margin-top:10px;color:var(--sub);font-size:14px"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#2f80ed" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Your free plan resets at <b style="color:#2f80ed">${rtime()}</b></span></div>`:""}<button data-act="plans" data-i="${i}" style="display:block;width:100%;margin-top:12px;padding:12px 14px;border:0;border-radius:22px;background:var(--green);color:#fff;font:inherit;font-weight:700;cursor:pointer;text-align:center">${LIM2}</button><div class="chips"><button data-act="activate" data-i="${i}" style="color:#8b5cf6;border-color:#8b5cf6;font-weight:600">Activate plan</button></div><small>${hm(m.ts)}</small></div>`;
  if(m.err)return `<div class="b i err" data-i="${i}">${esc(m.t)}<div class="act"><button data-act="retry" data-i="${i}">Retry</button></div></div>`;
  const A=[["copy","Copy"],["bm",m.bm?"Saved":"Save",m.bm],["up","Helpful",m.fb==1],["dn","Not helpful",m.fb==-1],["share","Share"]];
- let h=`<div class="b i ai" data-i="${i}"><div class="md">${md(m.t)}</div>`;
+ let h=`<div class="b i ai" data-i="${i}">${m.ai?'<div class="aitag">AI generated, not yet checked</div>':""}<div class="md">${md(m.t)}</div>`;
  if(m.quiz){h+=m.quiz[1].map((o,k)=>`<button class="opt ${m.pick!=null?(k==m.quiz[2]?"ok":k==m.pick?"bad":""):""}" data-act="pick" data-i="${i}" data-k="${k}">${esc(o)}</button>`).join("")+(m.pick!=null?`<p>${m.pick==m.quiz[2]?"Correct, well done.":"Not quite. The correct answer is highlighted."}</p>`+(m.qz?(m.qz.n<m.qz.list.length-1?`<div class="chips"><button data-act="nq" data-i="${i}">Next question</button></div>`:`<p><b>Quiz finished: ${m.qz.score} out of ${m.qz.list.length}.</b></p>`):""):"")}
  let act="";
  if(!m.stream){act=`<div class="act out">${A.map(a=>`<button class="${a[2]?"on":""}" data-act="${a[0]}" data-i="${i}" aria-label="${a[1]}" title="${a[1]}">${AI[a[0]]}</button>`).join("")}${last?`<button data-act="regen" data-i="${i}" aria-label="Regenerate" title="Regenerate">${AI.regen}</button>`:""}</div>`;
@@ -2671,8 +2694,13 @@ function ask(q,mode){
  $("stat").textContent="typing…";$("send").innerHTML=STOP;
  stream=setTimeout(async()=>{let f=null;try{f=await Promise.race([dbAnswer(q,mode),new Promise(r=>setTimeout(()=>r(null),3200))])}catch(e){}
   if(stream==null||tok!=AN)return;
-  if(!f)f=mock(q,mode);if(f.un&&!mode)logUn(q);
-  const m={s:"i",t:"",ts:Date.now(),q,mode,stream:1},w=f.t.split(/(?<=\s)/);if(f.quiz)m.quiz=f.quiz;if(f.qz)m.qz=f.qz;if(f.w)m.w=f.w;if(f.aid)m.aid=f.aid;
+  if(!f)f=mock(q,mode);
+  if(f.un&&!mode){const a=await aiAnswer(q);if(stream==null||tok!=AN)return;
+   if(a&&a.busy){logUn(q);stopS();return err("Many learners are asking right now. Please try again in a little while.")}
+   if(a&&a.t)f=a}
+  if(f.un&&!mode)logUn(q);
+  if(!f.ai&&!f.un){const Tm=topicOf(q);if(Tm&&Tm.ai)f.ai=1}
+  const m={s:"i",t:"",ts:Date.now(),q,mode,stream:1},w=f.t.split(/(?<=\s)/);if(f.quiz)m.quiz=f.quiz;if(f.qz)m.qz=f.qz;if(f.w)m.w=f.w;if(f.aid)m.aid=f.aid;if(f.ai)m.ai=1;
   D.msgs.push(m);sm=m;let k=0;stream=setInterval(()=>{m.t+=w[k++]||"";if(k>=w.length){stopS();notify("Answer ready",'Your answer about "'+(q||"your question").slice(0,40)+'" is ready.');if(gn){D.msgs.push({s:"i",note:1,up:1,t:gn,ts:Date.now()});save();render()}if(capped())limitMsg()}else render()},35)},600)}
 $("msgs").addEventListener("click",e=>{
 
@@ -2992,6 +3020,8 @@ const HANDOFF={
     ["Answer style by plan: Free and Basic exact question only, Standard plus simple explanation, Premium full breakdown or meaning only when asked",1],
     ["Quick-action buttons (Explain simpler, Give an example, More detail, Quiz me) removed on every plan. The learner types the request instead. Free: direct answer only. Basic: adds quizzes. Standard: adds explain simpler and examples. Premium: adds detailed answers by default. A request above the plan gets an upgrade note with a See plans button (planGate in the script). Quiz me with no topic picks a random topic; quiz on a named topic uses that topic.",1],
     ["Read published topics from Supabase and look up find_answer, log unanswered questions, send feedback votes",1],
+    ["New questions the database cannot answer: the app asks the ai_answer function (Gemini writes it once, saved as a draft). The reply follows the plan and shows the label AI generated, not yet checked. Written and tested with a fake server only; not yet tried against the live function or on a real phone",0],
+    ["Approve AI drafts: in Supabase open Table Editor, topics, find the row with ai_generated on and status draft, check the text and quiz, then change status to published. The label disappears once it is published. The admin panel for this is not built yet",0],
     ["Publish the 60 draft Mathematics answers after teacher review (all still drafts, so learners cannot see them)",0],
     ["Add topics for subjects other than Primary Mathematics and Science: questions with no topic get a placeholder answer and are logged as unanswered",0],
     ["Try on a real phone; Free and Basic limits are not checked on the server",0],
@@ -3039,6 +3069,10 @@ const HANDOFF={
   ]
  ],
  "log": [
+  [
+   "2026-10-30",
+   "Ask Tr. David now asks the ai_answer Supabase function when the app's own topics and find_answer find nothing for a new question (not for follow-up requests). The saved topic is turned into the reply by the existing tiered() plan trimming: Free and Basic the exact thing asked, Standard plus simple words, Premium the full breakdown. Draft AI answers show a small label, AI generated, not yet checked; published ones do not. If the function says busy the learner sees a try-again message with a Retry button and the question is still logged as unanswered; if it has no answer the normal no-lesson reply and the unanswered log are used. AI topics are kept for the session so explain simpler, example and quiz me work on them, and they are left out of the random Quiz me. Tested only with a fake server in a headless browser (four plans, label on and off, busy, no answer, retry). Not yet tried against the live function or on a real phone. sw.js CACHE name must be changed so phones pick this up. WN_ON stays false."
+  ],
   [
    "2026-10-30",
    "Changes asked by the owner: the typing box now has its own colour (different from the chat body) and the send button is blue. Quick-action buttons removed on all plans; plan rules now apply to typed requests (Free direct answer only; Basic adds quizzes; Standard adds explain simpler and examples; Premium adds detailed answers by default; Quiz me with no topic is random, with a topic it uses that topic; a request above the plan shows an upgrade note). Settings row is now Upgrade plan and the word count is hidden everywhere, including the plans screen. What's new is switched off (WN_ON false) until it reads from the database. The microphone shows a moving wave while listening. Tested: the request detection and plan rules in a script test. Not yet tried on a real phone."

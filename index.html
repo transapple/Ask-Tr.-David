@@ -331,7 +331,6 @@ function stopEdit(){ei=null;$("inp").value="";$("editing").style.display="none"}
 function send(){
  const v=$("inp").value.trim();if(!v||stream!=null)return;
  if(ei!=null){const m=D.msgs[ei];if(m){m.t=v;m.ed=1;m.st=2;D.msgs.splice(ei+1);stopEdit();save();render();ask(v);return}stopEdit();return}
- if(D.sub=="General"){const t=detectSub(v);if(t)setSub(t)}
  const m={s:"o",t:v,ts:Date.now(),st:0};D.msgs.push(m);$("inp").value="";save();render();
  m.st=2;ask(v)}
 function toTrash(arr){D.trash.push(...arr.map(m=>({...m,dt:Date.now()})))}
@@ -480,11 +479,12 @@ function fixSub(){if(!subsList().includes(D.sub))D.sub="General"}
 fixSub();
 D.chats.forEach(c=>{if(!c.sub)c.sub=c.id==D.cur?D.sub:"General";if(!c.lv)c.lv=lvKey()});
 const SUBRULES=[
+[/\bwhat does .{1,30} mean\b|\bmeaning of (the )?words?\b|\bwhat is the meaning of\b/i,["English","Literacy","General Paper"]],
 [/\b(noun|verb|adjective|adverb|pronoun|preposition|grammar|tense|sentence|punctuation|synonym|antonym|vocabulary|comprehension|essay|paragraph)s?\b/i,["English","Literacy","General Paper"]],
-[/\b(fractions?|percent(age)?s?|equations?|algebra|pythagoras|triangles?|geometry|angles?|perimeter|area of|decimals?|ratios?|multipl\w*|divid\w*|calculate|solve|simplify|factori[sz]e|simultaneous|quadratic|probability|statistics|mean|median)\b|\d\s*[+\-×x*\/÷=]\s*\d/i,["Mathematics","Subsidiary Mathematics"]],
+[/\b(fractions?|percent(age)?s?|equations?|algebra|pythagoras|triangles?|geometry|angles?|perimeter|area of|decimals?|ratios?|multipl\w*|divid\w*|calculate|solve|simplify|factori[sz]e|simultaneous|quadratic|probability|statistics|the mean|mean of|median)\b|\d\s*[+\-×x*\/÷=]\s*\d/i,["Mathematics","Subsidiary Mathematics"]],
 [/\b(photosynthesis|cells?|organisms?|respiration|digestion|digestive|blood|ecosystem|reproduction|enzymes?|bacteria|genes?|heredity|plants?|animals?)\b/i,["Biology","Science"]],
 [/\b(atoms?|elements?|acids?|bases?|alkali|reactions?|molecules?|periodic table|compounds?|electrolysis|oxidation|chemical)\b/i,["Chemistry","Science"]],
-[/\b(forces?|energy|motion|electricity|current|voltage|circuits?|light|sound|magnets?|magnetism|pressure|velocity|acceleration|states of matter|heat)\b/i,["Physics","Science"]],
+[/\b(forces?|energy|motion|electricity|electric current|voltage|circuits?|light|sound|magnets?|magnetism|pressure|velocity|acceleration|states of matter|heat)\b/i,["Physics","Science"]],
 [/\b(crops?|livestock|farming|fertili[sz]ers?|poultry|irrigation)\b/i,["Agriculture"]],
 [/\b(computers?|internet|software|hardware|spreadsheet|database|programming)\b/i,["ICT","Subsidiary ICT"]],
 [/\b(demand|supply|inflation|gdp|trade|money|market)\b/i,["Economics"]],
@@ -493,7 +493,11 @@ const SUBRULES=[
 [/\b(history|kingdoms?|colonial|colonialism|independence|empire|kabaka|world war|slave trade|ancient)\b/i,["History","Social Studies"]],
 [/\b(maps?|climate|rainfall|rivers?|mountains?|soils?|erosion|population|weather|vegetation|latitude)\b/i,["Geography","Social Studies"]],
 [/\b(business|profit|entrepreneurs?|entrepreneurship|savings?)\b/i,["Entrepreneurship"]]];
-function detectSub(v){const L=subsList();if(lvKey()=="PLE"&&L.includes("Mathematics")&&(/\bmath(s|ematics)?\b/i.test(v)||MATHP.some(t=>!t.nd&&t.re.test(v))))return"Mathematics";for(const[r,c]of SUBRULES){if(r.test(v)){const f=c.find(x=>L.includes(x));if(f)return f==="Social Studies"&&L.includes("Science")&&SCIRE.test(v)?"Science":f}}if(L.includes("Science")&&SCIRE.test(v))return"Science";return null}
+function detectSub(v){const L=subsList();if(lvKey()=="PLE"&&L.includes("Mathematics")&&(/\bmath(s|ematics)?\b/i.test(v)||MATHP.some(t=>!t.nd&&t.re.test(v))))return"Mathematics";if(lvKey()=="PLE"&&L.includes("English")&&(/\benglish\b/i.test(v)||ENGP.some(t=>!t.nd&&t.re.test(v))))return"English";for(const[r,c]of SUBRULES){if(r.test(v)){const f=c.find(x=>L.includes(x));if(f)return f==="Social Studies"&&L.includes("Science")&&SCIRE.test(v)?"Science":f}}if(L.includes("Science")&&SCIRE.test(v))return"Science";return null}
+/* No subject tabs: every question is sorted by what it is about (Mathematics, English, Science...). The chat stays one chat. */
+function routeSub(q){q=String(q||"");let t=null;try{t=detectSub(q)}catch(e){}
+ if(t)return t;const lo=q.toLowerCase(),L=subsList(),T=(typeof TOP!="undefined"?TOP:[]).find(x=>!x.nd&&x.re.test(lo)&&(!x.L||x.L.includes(lvKey()))&&x.S&&x.S.some(y=>L.includes(y)));
+ return T?T.S.find(y=>L.includes(y)):"General"}
 function setSub(sb){if(sb==D.sub&&D.chats.some(c=>c.id==D.cur&&c.sub==sb&&(c.lv||lvKey())==lvKey()))return;stopS();stopEdit();
  const cur=D.chats.find(c=>c.id==D.cur);if(cur&&!cur.msgs.length&&D.chats.length>1)D.chats=D.chats.filter(c=>c!==cur);
  D.sub=sb;let c=D.chats.find(x=>x.sub==sb&&(x.lv||lvKey())==lvKey());
@@ -966,7 +970,7 @@ P("Sound",/\bsound|vibrat|\becho\b|\bpitch\b|loudness|\bnoise\b|musical instrume
 "- Drum: vibrating skin\n- Radio: vibrating speaker",
 "",
 [["Sound is caused by…",["Vibrations","Colours","Magnets"],0],["Sound travels fastest in…",["Solids","Gases","Space"],0],["An echo is sound…",["Bouncing back","Being absorbed","Stopped"],0]]),
-P("Electricity",/electric|circuit|\bcurrent\b|\bcells?\b|battery|\bbulb\b|\bswitch\b|insulator|conductor|short circuit|\bfuse\b|\bsolar panel/,"Circuits and conductors","Safety and uses",
+P("Electricity",/electric|circuit|electric current|current electricity|\bcells?\b|battery|\bbulb\b|\bswitch\b|insulator|conductor|short circuit|\bfuse\b|\bsolar panel/,"Circuits and conductors","Safety and uses",
 "**Electricity** is a form of energy made when electric charges flow along a path called a **circuit**.",
 "- A simple circuit has a **cell or battery**, **wires**, a **switch** and a **bulb**. The bulb lights only if the circuit is **complete (closed)**.\n- **Conductors** let electricity pass (metals, graphite). **Insulators** do not (plastic, rubber, wood, glass).\n- **Series circuit:** one path. **Parallel circuit:** more than one path.",
 "- Sources: dry cells, batteries, solar panels, generators, hydroelectric power (Jinja).\n- Uses: lighting, cooking, ironing, radio, TV, machines.\n- **Safety:** never touch bare wires, do not use wet hands, do not fly kites near power lines, use fuses.",
@@ -1075,7 +1079,7 @@ MP("LCM and HCF",/\blcm\b|\bhcf\b|\bgcf\b|l\.c\.m|h\.c\.f|least common multiple|
 `## Prime factor method (12 and 18)\n- 12 = 2 × 2 × 3 and 18 = 2 × 3 × 3.\n- HCF = 2 × 3 = 6. LCM = 2 × 2 × 3 × 3 = 36.\n## Common mistakes\n- Mixing up LCM and HCF. LCM is never smaller than the numbers; HCF is never bigger.`,
 [["HCF of 12 and 18?",["3","6","9"],1],["LCM of 4 and 6?",["12","24","10"],0],["Which is a common multiple of 3 and 5?",["8","15","20"],1]]),
 
-MP("Prime and composite numbers",/prime|composite/,
+MP("Prime and composite numbers",/prime (numbers?|factors?|factori[sz]ation)|\bprimes\b|composite (numbers?|factors?)|\bcomposite\b/,
 [["P5",[1],"Prime and composite numbers up to 50. Q: Is 17 prime?"],["P6",[1],"Prime factors and factor trees. Q: Write 12 as a product of primes."]],
 `A **prime number** has exactly two factors: 1 and itself. A **composite number** has more than two factors. The number 1 is neither.`,
 `- Test a number by trying to divide it by 2, 3, 5, 7…\n- If one of them divides exactly, the number is composite.\n- Primes up to 30: 2, 3, 5, 7, 11, 13, 17, 19, 23, 29.\n- 2 is the only even prime.\n- Factor tree: keep splitting until every branch is prime. 12 = 2 × 2 × 3.`,
@@ -1085,7 +1089,7 @@ MP("Prime and composite numbers",/prime|composite/,
 `## Common mistakes\n- Saying 1 is prime.\n- Saying all odd numbers are prime (9 and 15 are not).`,
 [["Which is a prime number?",["9","11","15"],1],["How many factors does a prime number have?",["1","2","3"],1],["The only even prime is…",["2","4","6"],0]]),
 
-MP("Factors and multiples",/factors?|multiples?|divisib(le|ility)/,
+MP("Factors and multiples",/factors? (of|and)|multiples? (of|and)|common (factors?|multiples?)|\bfactors\b and \bmultiples\b|list the (factors|multiples)|divisib(le|ility)|\bmultiples? of \d/,
 [["P4",[2],"Multiples of 2 to 10 and factors of numbers up to 50. Q: List the factors of 12."],["P5",[1],"Divisibility tests for 2, 3, 4, 5, 6, 9, 10."],["P5",[2],"Common factors and common multiples of two numbers."]],
 `A **factor** of a number divides it exactly with no remainder. A **multiple** of a number is what you get when you multiply it by 1, 2, 3, 4…`,
 `- Factors of 12: look for pairs that multiply to 12: 1 × 12, 2 × 6, 3 × 4. Factors: 1, 2, 3, 4, 6, 12.\n- Multiples of 4: 4, 8, 12, 16, 20…\n- Divisibility tests: by 2 if the last digit is even; by 5 if it ends in 0 or 5; by 10 if it ends in 0; by 3 if the digit sum divides by 3; by 9 if the digit sum divides by 9.`,
@@ -1135,7 +1139,7 @@ MP("Profit, loss and discount",/profit|\bloss\b|discount|commission|selling pric
 `## Common mistakes\n- Dividing by the selling price. Percentage profit and loss use the cost price.\n- Subtracting the wrong way round.`,
 [["Cost price 5 000, selling price 6 500. Profit?",["1 000","1 500","11 500"],1],["Cost price 8 000, selling price 6 000. This is a…",["Profit of 2 000","Loss of 2 000","Loss of 14 000"],1],["A 10 000 item has a 10% discount. The discount is…",["100","1 000","9 000"],1]]),
 
-MP("Simple interest and tax",/interest|principal|\bvat\b|\btax\b|per annum|rate per year/,
+MP("Simple interest and tax",/simple interest|compound interest|interest (rate|on|for)|\binterest\b.*\d|principal|\bvat\b|\btax\b|per annum|rate per year/,
 [["P7",[1],"Simple interest I = P × R × T ÷ 100; amount = principal + interest. Q: Interest on 100 000 at 5% for 2 years."],["P7",[2],"VAT and tax as percentages of a price."]],
 `**Simple interest** is the extra money paid on money saved or borrowed. The money saved or borrowed is the **principal** (P), R is the rate % per year and T is the time in years.`,
 `- Simple interest: I = P × R × T ÷ 100.\n- Amount = principal + interest.\n- **VAT** (value added tax) is a percentage added to a price. In Uganda it is 18%.\n- Tax = price × rate ÷ 100.`,
@@ -1486,13 +1490,771 @@ MP("Sorting and matching",/sorting|matching|\bsort\b|group(ing)? (the )?(objects
 [["Which things belong in one group?",["A banana and a mango (fruits)","A banana and a chair","A mango and a pencil"],0],["Sorting by colour: which group is correct?",["All red things together","Red and blue together","One red, one blue"],0],["We match a shoe with…",["Its pair","A spoon","A table"],0]])
 ];
 
+/* ===== PRIMARY ENGLISH SYLLABUS (P4 to P7) =====
+ Each topic: cl = [class, terms, what is learned + sample question]. Built from general knowledge of the
+ Ugandan primary English syllabus (NOT yet checked against NCDC books): a teacher must review before publishing. */
+const EP=(n,re,cl,d,h,w,s,e,m,q,a,b,nd)=>({n,re,cl,d,h,w,s,e,m,q,a:a||"How to use it",b:b||"Where it is used",nd:nd||0,S:["English"],L:["PLE"]});
+const ENGP=[
+EP("Animals: young ones, homes, sounds and groups",/young ones?|baby animals?|animal homes?|homes? of animals|animal sounds?|sounds? of animals|collective nouns?|group names?|groups? of (animals|things)/i,
+[["P4",[1],"Young ones, homes and sounds of common animals. Q: What is the young one of a cow?"],["P5",[1],"Collective nouns for animals and things. Q: A ___ of bees."],["P6",[2],"More animal sounds and groups; use them in sentences."]],
+`Animals have special names for their **young ones**, **homes** and **sounds**. A **collective noun** is one word for a group.`,
+`- **Young ones:** cow → calf; goat → kid; sheep → lamb; hen → chick; dog → puppy; cat → kitten; pig → piglet; duck → duckling; horse → foal; lion → cub; frog → tadpole.
+- **Homes:** cow → shed or kraal; hen → coop; dog → kennel; pig → sty; bee → hive; bird → nest; lion → den; horse → stable; duck → pond.
+- **Sounds:** cow → moos; dog → barks; cat → meows; hen → clucks; cock → crows; sheep and goat → bleat; lion → roars; donkey → brays; bee → buzzes; snake → hisses; elephant → trumpets; owl → hoots; frog → croaks; duck → quacks.
+- **Groups:** a herd of cattle, a flock of sheep or birds, a swarm of bees, a litter of puppies, a pride of lions, a school of fish, a bunch of bananas, a bundle of firewood, a crowd of people, a team of players.`,
+`- In stories, descriptions and compositions.
+- In oral lessons and vocabulary tests.`,
+`Each animal has a baby name, a house and a voice. Groups of things also have special names.`,
+`- A calf is the young one of a cow.
+- A hen lives in a coop.
+- A swarm of bees flew over the garden.
+- The lion roars.`,
+`## Common mistakes
+- Saying “a flock of cows” (use herd).
+- Using “bark” for a cat.`,
+[["The young one of a goat is a…",["kid","calf","chick"],0],["A group of bees is a…",["swarm","herd","pride"],0],["A pig lives in a…",["sty","hive","nest"],0]]),
+EP("Singular and plural",/singular|plurals?\b|plural nouns?/i,
+[["P4",[1],"Plurals with s, es and ies. Q: Write the plural of “baby”."],["P4",[2],"Irregular plurals: man → men, child → children."],["P5",[1],"Plurals of nouns ending in f or fe; nouns with no plural."],["P6",[1],"Revision of singular and plural in sentences."]],
+`**Singular** means one thing. **Plural** means more than one.`,
+`- Most nouns add **s**: book → books.
+- Nouns ending in **s, x, z, ch, sh** add **es**: bus → buses, box → boxes, church → churches, dish → dishes.
+- Consonant + **y**: change y to **ies**: baby → babies, city → cities. Vowel + y: add s: boy → boys.
+- Many nouns ending in **f or fe** change to **ves**: leaf → leaves, knife → knives, wolf → wolves. (roof → roofs)
+- Nouns ending in **o**: tomato → tomatoes, potato → potatoes; but piano → pianos, photo → photos.
+- **Irregular** plurals: man → men, woman → women, child → children, foot → feet, tooth → teeth, mouse → mice, goose → geese, person → people.
+- Some stay the same: sheep, fish, deer.`,
+`- Writing correct sentences and matching verbs to subjects.
+- Spelling in tests and composition.`,
+`One is singular, many is plural. Usually we add s, but some words change in special ways.`,
+`- cup → cups; glass → glasses; lady → ladies; day → days; thief → thieves; child → children; sheep → sheep.`,
+`## Facts
+- Uncountable nouns have no plural: water, milk, rice, sugar.
+## Common mistakes
+- “childs”, “mans”, “foots”.`,
+[["Plural of “baby”?",["babys","babies","babyes"],1],["Plural of “child”?",["childs","childen","children"],2],["Plural of “knife”?",["knifes","knives","knifs"],1]]),
+EP("Gender",/\bgender|masculine|feminine|male and female (words|nouns)/i,
+[["P4",[1],"Masculine and feminine pairs: boy – girl, king – queen."],["P5",[1],"More pairs: bull – cow, host – hostess; common and neuter gender."],["P6",[2],"Gender in sentences and passages."]],
+`**Gender** tells whether a noun is male (**masculine**), female (**feminine**), either (**common**) or a thing (**neuter**).`,
+`- **Masculine:** man, boy, king, uncle, father, brother, husband, nephew, prince, bull, cock, ram, lion.
+- **Feminine:** woman, girl, queen, aunt, mother, sister, wife, niece, princess, cow, hen, ewe, lioness.
+- **Common gender** can be either: pupil, teacher, parent, child, cousin, doctor.
+- **Neuter gender** has no sex: table, book, river.
+- Some feminine words end in **-ess**: host → hostess, actor → actress, waiter → waitress, prince → princess.`,
+`- Choosing he, she or it correctly.
+- Passages about people and animals.`,
+`Gender sorts words into boy words, girl words, either words and thing words.`,
+`- king → queen; son → daughter; bridegroom → bride; widower → widow; gentleman → lady; landlord → landlady.`,
+`## Common mistakes
+- Calling a teacher “masculine” (teacher is common gender).`,
+[["Feminine of “uncle”?",["aunt","niece","madam"],0],["Masculine of “hen”?",["cock","ram","bull"],0],["“Pupil” is…",["common gender","neuter","feminine"],0]]),
+EP("Nouns",/\bnouns?\b|proper nouns?|common nouns?|abstract nouns?|countable|uncountable/i,
+[["P4",[1],"Common and proper nouns. Q: Pick the proper noun: city, Mbarara, girl."],["P4",[2],"Countable and uncountable nouns."],["P5",[1],"Abstract nouns: love, honesty, kindness."],["P6",[1],"Possessive nouns and noun phrases."],["P7",[1],"Nouns formed from verbs and adjectives."]],
+`A **noun** is a naming word. It names a person, animal, place, thing or idea.`,
+`- **Common nouns** name general things: girl, city, goat.
+- **Proper nouns** name particular people or places and start with a capital letter: Amina, Kampala, Nile.
+- **Collective nouns** name groups: a herd of cattle.
+- **Abstract nouns** name things you cannot touch: love, honesty, fear.
+- **Countable nouns** can be counted (three books). **Uncountable nouns** cannot (water, advice).
+- **Possessive nouns** show ownership: the girl’s bag, the boys’ books.
+- Nouns can be made from other words: happy → happiness, teach → teacher.`,
+`- In every sentence.
+- In names, labels, stories and letters.`,
+`A noun is the name of anything you can see, touch, feel or think about.`,
+`- Person: teacher, Ben.
+- Animal: cow.
+- Place: market, Gulu.
+- Thing: desk.
+- Idea: peace.`,
+`## Facts
+- Days, months and festivals are proper nouns: Monday, April, Easter.
+## Common mistakes
+- Writing names of people or places without a capital letter.`,
+[["Which is a proper noun?",["city","Mbarara","girl"],1],["“Honesty” is a…",["common noun","abstract noun","verb"],1],["“Water” is…",["countable","uncountable","a verb"],1]]),
+EP("Pronouns",/pronouns?|reflexive|possessive (pronouns?|adjectives?)|demonstrative|interrogative|relative pronouns?/i,
+[["P4",[1],"Personal pronouns: I, you, he, she, it, we, they."],["P4",[3],"Possessive pronouns: mine, yours, his, hers, ours, theirs."],["P5",[2],"Demonstrative pronouns: this, that, these, those."],["P6",[1],"Reflexive and interrogative pronouns."],["P7",[1],"Relative pronouns: who, whom, whose, which, that."]],
+`A **pronoun** is a word used in place of a noun, so we do not repeat the noun.`,
+`- **Personal (subject):** I, you, he, she, it, we, they. **Object:** me, you, him, her, it, us, them.
+- **Possessive adjectives:** my, your, his, her, its, our, their (go before a noun).
+- **Possessive pronouns:** mine, yours, his, hers, ours, theirs (stand alone).
+- **Demonstrative:** this, that, these, those.
+- **Reflexive:** myself, yourself, himself, herself, itself, ourselves, yourselves, themselves.
+- **Interrogative:** who, whom, whose, which, what (ask questions).
+- **Relative:** who, whom, whose, which, that (join a clause to a noun).`,
+`- To avoid repeating nouns.
+- In speaking, writing and reading.`,
+`A pronoun stands in for a noun: “Amina is kind. She helps us.”`,
+`- Ben called me. I thanked him.
+- This book is mine.
+- She hurt herself.
+- The girl who sang is my sister.`,
+`## Common mistakes
+- “Me and him went” → He and I went.
+- Mixing up its and it’s.`,
+[["“___ is my book.” (belongs to me)",["Mine","This is mine","I"],0],["“The boy hurt ___.”",["himself","hisself","him"],0],["Which is a relative pronoun?",["who","hers","those"],0]]),
+EP("Irregular verbs",/irregular verbs?|past participles?|regular verbs?|verb forms?|principal parts?/i,
+[["P4",[2],"Past forms of common irregular verbs: go → went."],["P5",[1],"Past participles: eaten, written, taken."],["P6",[2],"Irregular verb tables and use with have, has, had."]],
+`A **regular verb** adds **ed** to form the past. An **irregular verb** changes in another way.`,
+`- Regular: walk → walked → walked.
+- Irregular (base → past → past participle):
+- go → went → gone; see → saw → seen; do → did → done; be → was/were → been
+- eat → ate → eaten; drink → drank → drunk; give → gave → given; take → took → taken
+- write → wrote → written; speak → spoke → spoken; break → broke → broken; begin → began → begun
+- sing → sang → sung; swim → swam → swum; run → ran → run; come → came → come
+- buy → bought → bought; bring → brought → brought; catch → caught → caught; teach → taught → taught; think → thought → thought
+- know → knew → known; grow → grew → grown; fly → flew → flown; draw → drew → drawn; fall → fell → fallen`,
+`- Past tense and perfect tense sentences.
+- Spelling and grammar tests.`,
+`Some verbs change spelling in the past. You must learn them.`,
+`- Yesterday I went to the market.
+- She has written a letter.
+- They have eaten.`,
+`## Common mistakes
+- “goed”, “eated”, “runned”.
+- Using the past form after have: “I have went” (should be gone).`,
+[["Past of “go”?",["goed","went","gone"],1],["“She has ___ a letter.”",["wrote","written","write"],1],["Past of “buy”?",["buyed","bought","boughten"],1]]),
+EP("Modal verbs",/modals?|modal verbs?|can and could|may and might|ought to|should and must|must and should/i,
+[["P5",[2],"can, could, may, might. Q: ___ I go out, please?"],["P6",[1],"must, should, ought to; shall and will."],["P7",[2],"Modal verbs for advice, permission and possibility."]],
+`**Modal verbs** are helping verbs that show ability, permission, possibility, advice or duty.`,
+`- **can / could:** ability or permission: “I can swim.” “Could I borrow your pen?”
+- **may / might:** permission or possibility: “May I come in?” “It might rain.”
+- **must:** strong duty: “You must wear a uniform.”
+- **should / ought to:** advice: “You should read daily.”
+- **will / shall:** the future: “I will help.” “Shall we go?”
+- After a modal, use the **base verb** (no s, no ing): “She can sing.”`,
+`- Polite requests and rules.
+- Giving advice and talking about the future.`,
+`Modals tell how able, allowed or sure someone is.`,
+`- He can run fast.
+- You must not run in class.
+- We should wash our hands.`,
+`## Common mistakes
+- “She can sings.” (correct: She can sing.)
+- “He musts go.”`,
+[["“She ___ speak three languages.”",["can","cans","canning"],0],["Which gives advice?",["should","did","is"],0],["“You ___ not litter.” (strong rule)",["must","may","might"],0]]),
+EP("Subject-verb agreement",/subject[- ]verb|subject and verb|agreement/i,
+[["P5",[1],"Singular subject → verb with s. Q: The girl (sing) well."],["P6",[1],"Agreement with each, every, neither, either, there is/are."],["P7",[1],"Agreement with collective nouns and compound subjects."]],
+`The verb must **agree** with its subject: a singular subject takes a singular verb, and a plural subject takes a plural verb.`,
+`- **he, she, it** and singular nouns add **s** in the present: “The girl **sings**.”
+- **I, you, we, they** and plural nouns do not: “The girls **sing**.”
+- **is / was** for singular; **are / were** for plural; **I am**.
+- **Each, every, either, neither, everyone, somebody** are singular: “Each pupil **has** a book.”
+- **There is** a boy; **there are** boys.
+- Subjects joined by **and** are plural: “Ben and Amina **are** here.”
+- Collective nouns are usually singular: “The team **is** ready.”`,
+`- Every sentence in speaking and writing.
+- Grammar tests.`,
+`Make the verb match the subject: one person, one verb with s; many people, the plain verb.`,
+`- The dog barks. The dogs bark.
+- Neither of them is late.
+- There are five pens.`,
+`## Common mistakes
+- “The books is on the table.”
+- “Everyone are happy.”`,
+[["“The pupils ___ playing.”",["is","are","was"],1],["“Each of the boys ___ a book.”",["have","has","are"],1],["“There ___ three goats.”",["is","are","was"],1]]),
+EP("Verbs",/\bverbs?\b|action verbs?|helping verbs?|auxiliary|linking verbs?/i,
+[["P4",[1],"Action verbs (doing words). Q: Underline the verb: Amina sings."],["P4",[3],"Helping verbs: is, am, are, has, have."],["P5",[2],"Linking verbs: is, seem, become."],["P6",[1],"Verb phrases and transitive and intransitive verbs."]],
+`A **verb** is a doing or being word. Every sentence needs a verb.`,
+`- **Action verbs** show doing: run, write, cook.
+- **Linking verbs** join the subject to more information: is, am, are, was, were, seem, become.
+- **Helping verbs** go before a main verb: “She **is** reading.” “They **have** gone.” “We **did** not play.”
+- A **verb phrase** is a helping verb plus a main verb: has been sleeping.
+- **Transitive** verbs take an object (kick the ball). **Intransitive** verbs do not (She laughed).`,
+`- In every complete sentence.
+- To tell what people do or are.`,
+`The verb is the word that tells what someone does or is.`,
+`- The boys **play** football.
+- Mum **is** a nurse.
+- I **have** finished.`,
+`## Common mistakes
+- Writing a sentence with no verb.`,
+[["Which word is a verb? “The baby sleeps.”",["baby","sleeps","The"],1],["“She is reading.” The helping verb is…",["is","reading","She"],0],["Which is a linking verb?",["run","seem","jump"],1]]),
+EP("Present tenses",/present (simple|continuous|progressive|tense)|simple present|continuous tense|progressive tense/i,
+[["P4",[1],"Simple present for habits and facts. Q: She (go) to school daily."],["P4",[2],"Present continuous: is/am/are + ing."],["P5",[1],"Present tenses in questions and negatives."]],
+`The **simple present** tells about habits and facts. The **present continuous** tells about what is happening now.`,
+`- **Simple present:** base verb (add s for he, she, it): “She walks to school.”
+- Negative: do not / does not + base verb: “He does not eat meat.”
+- Question: Do / Does + subject + base verb: “Do you like milk?”
+- **Present continuous:** am / is / are + verb-ing: “They are playing.”
+- Words that help: every day, usually, always (simple); now, at the moment, today (continuous).`,
+`- Describing routines and what is happening now.
+- Writing instructions and news.`,
+`Habits and facts use the simple present. “Right now” uses am, is, are + ing.`,
+`- The sun rises in the east.
+- I am writing a letter.
+- Does Ben play football?`,
+`## Common mistakes
+- “He do not like it.” (does not)
+- “She is play.” (is playing)`,
+[["“Ben ___ football every day.”",["play","plays","playing"],1],["“They ___ singing now.”",["is","are","do"],1],["“She ___ not like tea.”",["do","does","is"],1]]),
+EP("Past tenses",/past (simple|continuous|progressive|tense)|simple past|used to/i,
+[["P4",[2],"Simple past with ed and irregular verbs. Q: Yesterday I (visit) my aunt."],["P5",[1],"Past continuous: was/were + ing."],["P6",[2],"Used to; past tense in stories and letters."]],
+`The **simple past** tells what happened and finished. The **past continuous** tells what was going on at that time.`,
+`- **Simple past:** add **ed** (walk → walked) or use the irregular form (go → went).
+- Negative: did not + base verb: “I did not see him.”
+- Question: Did + subject + base verb: “Did you eat?”
+- **Past continuous:** was / were + verb-ing: “I was reading when the phone rang.”
+- **Used to** shows a past habit: “We used to play near the river.”
+- Time words: yesterday, last week, ago, in 2020.`,
+`- Telling stories, writing letters about past events, reports.`,
+`Use the past for things that already happened.`,
+`- She cooked posho yesterday.
+- We went to church last Sunday.
+- It was raining when we left.`,
+`## Common mistakes
+- “Did you went?” (Did you go?)
+- “He didn’t saw.” (He didn’t see.)`,
+[["“Yesterday I ___ to the market.”",["go","went","going"],1],["“Did she ___ the book?”",["read","reads","reading"],0],["“We ___ playing when it rained.”",["was","were","are"],1]]),
+EP("Perfect tenses",/present perfect|past perfect|perfect tenses?/i,
+[["P6",[1],"Present perfect: has/have + past participle. Q: I (finish) my work."],["P7",[1],"Past perfect: had + past participle; for, since, already, yet."]],
+`The **present perfect** links the past to now. The **past perfect** tells what happened before another past event.`,
+`- **Present perfect:** has / have + past participle: “She has finished.”
+- Use **for** with a period (for two hours) and **since** with a starting point (since Monday).
+- Use already, yet, just, ever, never: “I have never seen a giraffe.”
+- **Past perfect:** had + past participle: “When I arrived, the bus had left.”`,
+`- Talking about experience and results.
+- Telling stories in the correct order.`,
+`Use have/has + a past form for things done by now. Use had for “before then”.`,
+`- I have lived here since 2019.
+- They have already eaten.
+- He had finished before we came.`,
+`## Common mistakes
+- “I have saw it.” (I have seen it.)
+- Using “since” with a period of time.`,
+[["“She ___ just arrived.”",["have","has","had been"],1],["“I have lived here ___ 2015.”",["for","since","ago"],1],["“The film ___ started when we arrived.”",["had","has","was"],0]]),
+EP("Future tense",/future (simple )?tense|simple future|shall and will|will and shall|be going to/i,
+[["P5",[2],"will/shall + verb. Q: Tomorrow I (visit) my uncle."],["P6",[3],"Going to for plans; future in questions."]],
+`The **future tense** tells about things that have not happened yet.`,
+`- **will / shall + base verb:** “I will help you.” “We shall meet tomorrow.”
+- **am / is / are going to + base verb** for plans: “I am going to buy a book.”
+- Negative: will not (won’t): “It will not rain.”
+- Question: Will you come?
+- Time words: tomorrow, next week, soon, tonight.`,
+`- Plans, promises, predictions and notices.`,
+`Use will for tomorrow, next week and other times to come.`,
+`- She will travel to Jinja next week.
+- It is going to rain.
+- Shall we start?`,
+`## Common mistakes
+- “I will went.” (I will go.)
+- “He will goes.”`,
+[["“Tomorrow we ___ visit grandmother.”",["will","did","was"],0],["“It will ___ tomorrow.”",["rains","rain","rained"],1],["Which shows a plan?",["I am going to cook","I cooked","I cook"],0]]),
+EP("Tenses",/\btenses?\b/i,
+[["P4",[1],"Simple present and simple past."],["P5",[2],"Continuous tenses and simple future."],["P6",[2],"Present perfect."],["P7",[1],"Past perfect and mixed tenses."]],
+`A **tense** shows the time of an action: past, present or future.`,
+`- **Present:** I walk. I am walking. I have walked.
+- **Past:** I walked. I was walking. I had walked.
+- **Future:** I will walk. I am going to walk.
+- Look for time words: yesterday, now, tomorrow, already, since.
+- Keep the **same tense** in one sentence or story unless the time changes.`,
+`- Writing and speaking about any time.`,
+`Tense tells when something happens.`,
+`- Present: She sings. Past: She sang. Future: She will sing.`,
+`## Common mistakes
+- Changing tense by mistake in the middle of a story.`,
+[["“He ___ yesterday.” Which tense?",["future","past","present"],1],["“We will go.” This is…",["future","past","present perfect"],0],["Which has a past form?",["sang","sing","will sing"],0]]),
+EP("Degrees of comparison",/\bcomparatives?\b|\bsuperlatives?\b|comparison|degrees? of/i,
+[["P4",[2],"Comparing with -er and -est. Q: tall, taller, ___."],["P5",[1],"more and most with long adjectives; as … as."],["P6",[1],"Irregular comparisons: good, better, best."]],
+`**Adjectives** can be used to compare. The three degrees are the **positive**, **comparative** and **superlative**.`,
+`- **Positive** (one thing): tall.
+- **Comparative** (two things): taller than.
+- **Superlative** (three or more): the tallest.
+- Short adjectives add **er / est**: small, smaller, smallest.
+- Long adjectives use **more / most**: beautiful, more beautiful, most beautiful.
+- Adjectives ending in y change to **ier / iest**: happy, happier, happiest.
+- **Irregular:** good, better, best; bad, worse, worst; much or many, more, most; little, less, least; far, farther (further), farthest (furthest).
+- **as … as** shows equal: “Ben is as tall as Ali.”`,
+`- Comparing people, animals, places and things.`,
+`Use er for two things and est for the top one of many.`,
+`- Lake Victoria is bigger than Lake Kyoga.
+- Amina is the cleverest girl in P5.
+- This is the most interesting book.`,
+`## Common mistakes
+- “more taller” or “most smallest”.
+- Using the superlative for only two things.`,
+[["Comparative of “big”?",["bigger","biggest","more big"],0],["Superlative of “good”?",["goodest","best","better"],1],["Comparative of “beautiful”?",["beautifuler","more beautiful","most beautiful"],1]]),
+EP("Adjectives",/adjectives?|describing words?|order of adjectives/i,
+[["P4",[1],"Adjectives of quality, size and colour. Q: Pick the adjective: a red apple."],["P5",[1],"Adjectives of number and quantity."],["P6",[2],"Possessive and demonstrative adjectives."],["P7",[1],"Order of adjectives and compound adjectives."]],
+`An **adjective** is a word that describes a noun or a pronoun.`,
+`- **Quality:** kind, brave, sweet. **Size:** big, tiny. **Colour:** red, green.
+- **Number:** three, many. **Quantity:** some, much, little.
+- **Demonstrative:** this, that, these, those.
+- **Possessive:** my, your, his, her, our, their.
+- **Order** (opinion, size, age, colour, material): “a lovely small old brown wooden box”.
+- An adjective goes before the noun (a **tall** tree) or after is, am, are (The tree is **tall**).`,
+`- Descriptions, stories and compositions.`,
+`Adjectives tell more about a noun: which, what kind and how many.`,
+`- The **hungry** child ate **three** bananas.
+- Those **old** shoes are **mine**.`,
+`## Common mistakes
+- Using an adverb for an adjective: “She is a good-looking girl”.`,
+[["Which word is an adjective? “a sweet mango”",["sweet","mango","a"],0],["“Many pupils came.” “Many” shows…",["number","colour","size"],0],["Pick the adjective in “The tall man smiled.”",["tall","smiled","man"],0]]),
+EP("Adverbs",/adverbs?|adverbial/i,
+[["P4",[2],"Adverbs of manner: quickly, slowly. Q: She sings (sweet/sweetly)."],["P5",[2],"Adverbs of time, place and frequency."],["P6",[1],"Adverbs of degree; irregular adverbs: well, hard, fast."]],
+`An **adverb** tells more about a verb, an adjective or another adverb. It tells **how, when, where** or **how often**.`,
+`- **Manner (how):** quickly, slowly, carefully. Many end in **ly**: quick → quickly.
+- **Time (when):** now, yesterday, soon.
+- **Place (where):** here, there, outside.
+- **Frequency (how often):** always, often, never, sometimes.
+- **Degree:** very, quite, too, extremely.
+- Irregular: **well** (for good), **fast**, **hard**, **late**: “He runs fast.”`,
+`- Writing clear and lively sentences.`,
+`Adjectives describe nouns; adverbs describe actions.`,
+`- He ran quickly.
+- We play outside.
+- She is very kind.`,
+`## Common mistakes
+- “He speaks good.” (He speaks well.)
+- “Drive careful.” (carefully)`,
+[["“She walks ___.”",["slow","slowly","slowness"],1],["“He plays football ___.” (how often)",["often","quick","there"],0],["“He speaks English ___.”",["good","well","goodly"],1]]),
+EP("Prepositions",/prepositions?/i,
+[["P4",[1],"Prepositions of place: in, on, under, behind. Q: The cat is ___ the table."],["P5",[2],"Prepositions of time: at, on, in, before, after."],["P6",[2],"Movement and dependent prepositions: afraid of, good at."]],
+`A **preposition** shows how a noun or pronoun is related to another word, such as place, time or direction.`,
+`- **Place:** in, on, at, under, behind, between, among, beside, opposite, above, below, near.
+- **Time:** at (at 8 o’clock), on (on Monday), in (in July), before, after, during, since, for.
+- **Movement:** to, into, across, through, along, towards, from.
+- **Dependent:** good at, afraid of, interested in, fond of, different from, depend on, listen to.
+- **between** is for two; **among** is for three or more.`,
+`- Telling where, when and which way.`,
+`Prepositions are small words like in, on, under that join things in a sentence.`,
+`- The book is on the desk.
+- School starts at 8:00.
+- He jumped into the river.
+- She is afraid of snakes.`,
+`## Common mistakes
+- “Different than” (different from).
+- “In Monday” (on Monday).`,
+[["“The books are ___ the bag.” (inside)",["in","at","by"],0],["“I was born ___ 2012.”",["on","in","at"],1],["“She is good ___ drawing.”",["at","on","to"],0]]),
+EP("Conjunctions",/conjunctions?|linking words?|joining words?|connectives?/i,
+[["P4",[2],"and, but, or, so, because. Q: I was tired ___ I slept."],["P5",[2],"although, if, unless, when, while."],["P6",[3],"both … and, either … or, neither … nor, not only … but also."]],
+`A **conjunction** joins words, phrases or sentences.`,
+`- **Addition:** and. **Choice:** or. **Contrast:** but, although, though, yet, however.
+- **Reason:** because, since, as. **Result:** so, therefore.
+- **Condition:** if, unless. **Time:** when, while, before, after, until.
+- **Pairs:** both … and, either … or, neither … nor, not only … but also.
+- Join two sentences: “It rained. We stayed indoors.” → “It rained, so we stayed indoors.”`,
+`- Joining ideas in compositions.
+- Making writing flow.`,
+`Conjunctions are joining words.`,
+`- I like tea but I do not like coffee.
+- Although it was late, he kept reading.
+- Neither Ben nor Amina came.`,
+`## Common mistakes
+- “Although … but” in one sentence.
+- Starting every sentence with “and”.`,
+[["“I was hungry ___ I ate.”",["so","but","or"],0],["“___ it rained, we played.” (contrast)",["Although","Because","So"],0],["“Neither Ben ___ Amina came.”",["nor","or","and"],0]]),
+EP("Articles and determiners",/articles?\b|determiners?|a and an|much and many|few and little/i,
+[["P4",[1],"a, an, the. Q: ___ elephant is big."],["P5",[2],"some, any, much, many; few, a few, little, a little."],["P6",[1],"each, every, enough, several."]],
+`**Articles** are a, an and the. **Determiners** such as some, any, much, many go before nouns.`,
+`- Use **a** before a consonant sound (a book) and **an** before a vowel sound (an egg, an hour).
+- Use **the** for a particular thing already known: “Pass me the pen.”
+- **many** with countable nouns (many books); **much** with uncountable (much water).
+- **few / a few** with countable nouns; **little / a little** with uncountable nouns.
+- **some** in positive sentences; **any** in questions and negatives.
+- Also: each, every, enough, several, all, both.`,
+`- Correct sentences in speech and writing.`,
+`A and an are for one thing; the is for a special thing.`,
+`- an orange, a pencil, the sun.
+- How much sugar is left?
+- I have a few coins.`,
+`## Common mistakes
+- “a apple” (an apple).
+- “many water” (much water).`,
+[["“___ umbrella”",["a","an","the"],1],["“How ___ salt do you need?”",["many","much","few"],1],["“I do not have ___ money.”",["any","some","many"],0]]),
+EP("Question forms and question tags",/question tags?|tag questions?|wh[- ]?questions?|question words?|asking questions/i,
+[["P4",[2],"Question words: who, what, where, when, why, how. Q: ___ is your name?"],["P5",[3],"Yes/no questions with do, does, did."],["P6",[2],"Question tags: You are coming, aren’t you?"]],
+`A **question** asks for information. A **question tag** is a short question added to a sentence.`,
+`- **Question words:** who (person), what (thing), where (place), when (time), why (reason), how (way), whose (owner), which (choice).
+- **Yes/no questions:** start with is, are, do, does, did, can, will: “Do you play netball?”
+- **Question tags:** positive sentence → negative tag; negative sentence → positive tag.
+- “You are coming, **aren’t you**?” “He can’t swim, **can he**?” “She went, **didn’t she**?”
+- End questions with a **question mark**.`,
+`- Conversation, interviews and tests.`,
+`Question words ask who, what, where, when, why and how.`,
+`- Where do you live?
+- It is hot, isn’t it?
+- They did not come, did they?`,
+`## Common mistakes
+- Forgetting the question mark.
+- Using the wrong tag.`,
+[["“___ is your teacher?” (a person)",["Who","Where","When"],0],["“She is clever, ___?”",["isn’t she","is she","does she"],0],["“You do not like fish, ___?”",["do you","don’t you","did you"],0]]),
+EP("Direct and indirect speech",/direct speech|indirect speech|reported speech|direct and indirect|reported statements?/i,
+[["P5",[3],"Direct speech with inverted commas."],["P6",[2],"Reported speech: statements."],["P7",[1],"Reported questions and commands."]],
+`**Direct speech** gives the exact words spoken, in inverted commas. **Indirect (reported) speech** tells what was said without quoting.`,
+`- Direct: Ben said, “I am tired.”
+- Indirect: Ben said that he was tired.
+- Remove the inverted commas and add **that**.
+- Change the pronouns: I → he or she; we → they; my → his or her.
+- Move the tense back: am/is → was; are → were; will → would; can → could; do → did; has/have → had.
+- Change time and place words: now → then; today → that day; tomorrow → the next day; yesterday → the day before; here → there; this → that.
+- **Questions:** “Where do you live?” → She asked me where I lived. (asked if / whether for yes-no questions)
+- **Commands:** “Sit down.” → He told me to sit down.`,
+`- Reporting news and conversations.`,
+`Reported speech tells what someone said without using their exact words.`,
+`- “I will come tomorrow,” said Amina. → Amina said that she would come the next day.
+- “Do you like tea?” he asked. → He asked if I liked tea.`,
+`## Common mistakes
+- Keeping the inverted commas in indirect speech.
+- Forgetting to change the tense.`,
+[["“I am happy,” she said. → She said she ___ happy.",["is","was","will be"],1],["“Open the door,” he told me. → He told me ___ open the door.",["to","that","if"],0],["“Today” becomes…",["that day","now","tomorrow"],0]]),
+EP("Active and passive voice",/active and passive|passive voice|\bpassive\b|active voice/i,
+[["P6",[2],"Passive voice in the simple present and simple past."],["P7",[1],"Passive with other tenses; use of by."]],
+`In the **active voice** the subject does the action. In the **passive voice** the subject receives the action.`,
+`- Active: The boy kicked the ball.
+- Passive: The ball **was kicked** by the boy.
+- Steps: 1. Make the object the new subject. 2. Use **be** in the same tense + **past participle**. 3. Add **by** + the doer (if needed).
+- Present: Mum cooks food. → Food **is cooked** by Mum.
+- Past: Ben broke the cup. → The cup **was broken** by Ben.
+- Future: Ann will clean the room. → The room **will be cleaned** by Ann.`,
+`- Reports, notices and formal writing.`,
+`Active: who does it. Passive: what happens to it.`,
+`- Active: Farmers grow maize. Passive: Maize is grown by farmers.
+- Active: The teacher praised us. Passive: We were praised by the teacher.`,
+`## Common mistakes
+- Using the base verb instead of the past participle.`,
+[["Passive of “Ben wrote the letter.”",["The letter was written by Ben.","The letter wrote Ben.","Ben was written the letter."],0],["Passive uses be + …",["past participle","base verb","verb-ing"],0],["“The cake was eaten.” This is…",["passive","active","future"],0]]),
+EP("Conditional sentences",/conditional|if clauses?|\bunless\b/i,
+[["P6",[3],"If sentences with the present and will. Q: If it rains, we ___ stay home."],["P7",[1],"If + past, would; unless; if + past perfect."]],
+`A **conditional sentence** has an **if** part (the condition) and a result.`,
+`- **Real (likely):** if + present, will + base verb: “If it rains, we will stay inside.”
+- **Unreal (unlikely):** if + past, would + base verb: “If I were rich, I would build a school.”
+- **Past (did not happen):** if + past perfect, would have + past participle: “If I had studied, I would have passed.”
+- **unless** means “if … not”: “Unless you hurry, you will be late.”
+- Use a comma when the **if** part comes first.`,
+`- Giving warnings, plans and advice.`,
+`If shows what happens when something is true or if something changes.`,
+`- If you heat ice, it melts.
+- If I find money, I will take it to the teacher.
+- Unless you study, you will fail.`,
+`## Common mistakes
+- “If it will rain, we will stay.” (If it rains)`,
+[["“If it rains, we ___ stay home.”",["will","would","did"],0],["“Unless” means…",["if not","because","although"],0],["“If I were a bird, I ___ fly.”",["will","would","do"],1]]),
+EP("Phrases and clauses",/phrases?|clauses?|relative clause|subordinate/i,
+[["P6",[3],"What is a phrase? Noun and verb phrases."],["P7",[1],"Main and subordinate clauses; relative clauses."]],
+`A **phrase** is a group of words without a subject and verb together. A **clause** has a subject and a verb.`,
+`- Phrase: “in the garden”, “a very tall man”.
+- **Main clause** makes sense alone: “The boy ran.”
+- **Subordinate clause** cannot stand alone: “because he was late”, “who lives next door”.
+- **Relative clause** starts with who, which, whose or that: “The girl who sang won.”
+- A sentence with one clause is **simple**; with two main clauses is **compound**; with a main and subordinate clause is **complex**.`,
+`- Building longer, better sentences.`,
+`A clause has a doer and an action. A phrase does not.`,
+`- Phrase: after the lesson.
+- Clause: When the bell rang, we went home.`,
+`## Common mistakes
+- Writing a subordinate clause alone as a sentence.`,
+[["“in the box” is a…",["phrase","clause","verb"],0],["“Because he was ill” is a…",["subordinate clause","main clause","noun"],0],["Which clause stands alone?",["The boy ran.","because it rained","who sings"],0]]),
+EP("Punctuation and capital letters",/punctuat|capital letters?|full stops?|\bcommas?\b|question marks?|exclamation marks?|apostrophes?|quotation marks?|inverted commas|\bcolons?\b|semicolons?|hyphens?/i,
+[["P4",[1],"Capital letters, full stops and question marks."],["P4",[3],"Commas in lists; exclamation marks."],["P5",[2],"Apostrophes and inverted commas."],["P6",[3],"Colons, hyphens and dashes."]],
+`**Punctuation marks** make writing clear. **Capital letters** start sentences and names.`,
+`- **Capital letter:** at the start of a sentence; for names, places, days, months, titles (Mr, Dr); for the word I.
+- **Full stop (.)** ends a statement. **Question mark (?)** ends a question. **Exclamation mark (!)** shows surprise or strong feeling.
+- **Comma (,)** separates items in a list and follows words like “However”.
+- **Apostrophe (’):** for belonging (Ben’s book) and short forms (don’t = do not).
+- **Inverted commas (“ ”)** go around spoken words.
+- **Colon (:)** introduces a list.`,
+`- Every piece of writing and every test.`,
+`Marks tell the reader where to stop, ask or pause.`,
+`- On Monday, Ben visited Mbale.
+- Amina asked, “Where are you going?”
+- I bought mangoes, bananas and pineapples.`,
+`## Common mistakes
+- No capital letter for names.
+- “Its” and “it’s” mixed up (it’s = it is).`,
+[["Which sentence is correct?",["i live in kampala.","I live in Kampala.","i live in Kampala."],1],["A question ends with a…",["full stop","question mark","comma"],1],["Short form of “do not”?",["don’t","do’nt","dont’"],0]]),
+EP("Sentences",/\bsentences?\b|jumbled|exclamations?\b/i,
+[["P4",[1],"Statements, questions, commands and exclamations."],["P4",[3],"Subject and predicate; arranging jumbled words."],["P5",[3],"Simple and compound sentences."],["P6",[2],"Complex sentences."]],
+`A **sentence** is a group of words that makes complete sense. It starts with a capital letter and ends with a full stop, question mark or exclamation mark.`,
+`- **Statement** gives information: “The sun is hot.”
+- **Question** asks: “Is it hot?”
+- **Command** orders or requests: “Close the door.”
+- **Exclamation** shows feeling: “What a lovely day!”
+- Every sentence has a **subject** (who or what) and a **predicate** (what is said about it).
+- **Simple:** one clause. **Compound:** two clauses joined by and, but, or, so. **Complex:** a main and subordinate clause.
+- **Jumbled words:** find the subject first, then the verb, then the rest: “school went to Amina” → Amina went to school.`,
+`- All speaking and writing.`,
+`A sentence tells a full thought.`,
+`- Statement: I like mangoes.
+- Command: Sit down.
+- Compound: I was tired, so I slept.`,
+`## Common mistakes
+- Writing half sentences.`,
+[["“What a big cow!” is an…",["exclamation","command","question"],0],["“Wash your hands.” is a…",["command","statement","question"],1],["Arrange: “is she clever very”",["She is very clever.","Is clever she very.","Very is she clever."],0]]),
+EP("Parts of speech",/parts? of speech|word classes/i,
+[["P5",[1],"The eight parts of speech."],["P6",[1],"Identifying parts of speech in sentences."]],
+`The **parts of speech** are the kinds of words in English: noun, pronoun, verb, adjective, adverb, preposition, conjunction and interjection.`,
+`- **Noun:** names (girl, Kampala).
+- **Pronoun:** replaces a noun (she, they).
+- **Verb:** action or being (run, is).
+- **Adjective:** describes a noun (red).
+- **Adverb:** describes a verb (quickly).
+- **Preposition:** shows place or time (in, at).
+- **Conjunction:** joins (and, but).
+- **Interjection:** a sudden feeling (Oh! Wow!).`,
+`- Grammar lessons and exams.`,
+`Every word in a sentence has a job. The parts of speech name those jobs.`,
+`- “Wow! The brave boy ran quickly to the river.” Wow = interjection; brave = adjective; boy = noun; ran = verb; quickly = adverb; to = preposition.`,
+`## Common mistakes
+- Judging a word without looking at how it is used.`,
+[["“Quickly” is an…",["adverb","adjective","noun"],0],["“Wow!” is an…",["interjection","verb","pronoun"],0],["“and” is a…",["conjunction","preposition","noun"],0]]),
+EP("Synonyms and antonyms",/synonyms?|antonyms?|opposites?|similar in meaning|same meaning/i,
+[["P4",[1],"Opposites: hot – cold, big – small."],["P5",[2],"Synonyms: big – large, begin – start."],["P6",[1],"Antonyms with prefixes: kind – unkind."],["P7",[2],"Synonyms and antonyms in passages."]],
+`**Synonyms** are words with nearly the same meaning. **Antonyms** (opposites) are words with opposite meanings.`,
+`- Synonyms: big – large; begin – start; happy – glad; quick – fast; clever – intelligent; look – see; buy – purchase; tired – weary.
+- Antonyms: hot – cold; up – down; early – late; rich – poor; strong – weak; brave – cowardly; empty – full; always – never; arrive – depart.
+- Some antonyms come from **prefixes**: kind – unkind; possible – impossible; agree – disagree.
+- Choose the word that fits the sentence best.`,
+`- Making writing less repetitive.
+- Vocabulary and comprehension tests.`,
+`Synonyms mean the same. Antonyms mean the opposite.`,
+`- Synonym of “huge”: enormous.
+- Antonym of “increase”: decrease.
+- Antonym of “generous”: mean or selfish.`,
+`## Common mistakes
+- Choosing a word with a different meaning.`,
+[["Synonym of “large”?",["big","tiny","thin"],0],["Antonym of “early”?",["late","soon","first"],0],["Antonym of “honest”?",["dishonest","kind","clever"],0]],"How to use it","Where it is used",1),
+EP("Homophones and homonyms",/homophones?|homonyms?|homographs?/i,
+[["P5",[1],"Homophones: write – right, see – sea."],["P6",[1],"More homophones; homonyms."],["P7",[2],"Homophones and homonyms in sentences."]],
+`**Homophones** sound the same but have different spellings and meanings. **Homonyms** are spelled the same but have different meanings.`,
+`- Homophones: their – there – they’re; to – too – two; write – right; know – no; see – sea; hear – here; buy – by – bye; new – knew; flour – flower; meat – meet; pair – pear; week – weak; sun – son; tail – tale; whole – hole; piece – peace; wear – where; hair – hare; dear – deer; one – won; ate – eight.
+- Homonyms: **bank** (of a river, for money), **bat** (animal, cricket), **left** (direction, went away), **bark** (tree, dog), **match** (game, fire stick).
+- Use the sentence to decide which word fits.`,
+`- Spelling tests and clear writing.`,
+`Some different words sound alike. Check the meaning in the sentence.`,
+`- I will meet you to eat some meat.
+- The dog’s tail wagged as it heard the tale.`,
+`## Common mistakes
+- Using “there” for “their”.`,
+[["“___ going to school.”",["Their","There","They’re"],2],["Homophone of “sea”?",["see","say","sew"],0],["“Meet” and “meat” are…",["homophones","synonyms","antonyms"],0]]),
+EP("Prefixes, suffixes and word building",/prefix|suffix|word building|compound words?|word families|root words?/i,
+[["P4",[2],"Prefixes un-, re-, dis-. Q: Make the opposite of “happy”."],["P5",[2],"Suffixes -ful, -less, -ness, -er."],["P6",[1],"Compound words; word families."],["P7",[2],"Prefixes and suffixes in new words."]],
+`A **prefix** is added to the start of a word. A **suffix** is added to the end. Both change the meaning or type of word.`,
+`- **Prefixes:** un- (unhappy), re- (rewrite), dis- (disagree), mis- (misspell), im-/in-/ir-/il- (impossible, incorrect, irregular, illegal), pre- (preview), non- (nonsense), over- (overeat), under- (underline).
+- **Suffixes:** -ful (helpful), -less (careless), -ness (kindness), -ment (enjoyment), -er/-or (teacher, actor), -ist (artist), -able (comfortable), -ly (slowly), -tion (action).
+- **Compound words** join two words: sun + flower = sunflower; foot + ball = football.
+- A **word family** shares a root: act, actor, action, active.`,
+`- Growing vocabulary and spelling.`,
+`Add a little piece at the front or the end to make a new word.`,
+`- unhappy, rebuild, careful, kindness, notebook, classroom.`,
+`## Common mistakes
+- Changing the root spelling wrongly: happy + ness = happiness (y becomes i).`,
+[["Opposite of “happy” with a prefix?",["unhappy","rehappy","misshappy"],0],["“Careless” has the suffix…",["-less","care","-ful"],0],["“Sunflower” is a…",["compound word","prefix","verb"],0]]),
+EP("Spelling rules",/spelling|dictation|i before e|silent letters?/i,
+[["P4",[1],"Spelling of common words; dictation."],["P5",[2],"Doubling letters; dropping the final e."],["P6",[2],"i before e; silent letters; commonly misspelled words."],["P7",[1],"Spelling revision and dictation."]],
+`**Spelling rules** help us write words correctly.`,
+`- **i before e, except after c:** believe, field; but receive, ceiling.
+- **Drop the final e** before a suffix starting with a vowel: make → making; hope → hoping.
+- **Double the last letter** in short words before ing, ed: run → running; sit → sitting; stop → stopped.
+- **y → i** before a suffix: happy → happily; carry → carried.
+- **Silent letters:** knife (k), write (w), island (s), lamb (b), hour (h).
+- **Often misspelled:** because, beautiful, friend, necessary, separate, library, government, February, Wednesday, tomorrow, address, believe.
+- Practise by **look, say, cover, write, check**.`,
+`- Dictation, composition and all writing.`,
+`Learn the patterns and practise tricky words.`,
+`- running, hoping, babies, receive, knife.`,
+`## Common mistakes
+- “recieve” (receive), “freind” (friend), “wich” (which).`,
+[["Correct spelling?",["recieve","receive","receeve"],1],["Spelling of “hope” + “ing”?",["hopeing","hoping","hopping"],1],["Which has a silent k?",["knife","kite","kind"],0]]),
+EP("Occupations and workplaces",/occupations?|people and their work|workplaces?|\bjobs?\b/i,
+[["P4",[2],"People and their work: doctor, farmer, teacher."],["P5",[1],"Workplaces and tools of occupations."],["P6",[3],"Occupations in sentences and passages."]],
+`An **occupation** is the work a person does. A **workplace** is where they do it.`,
+`- teacher → school; doctor or nurse → hospital or clinic; farmer → farm or garden; carpenter → workshop; tailor → tailor’s shop; mechanic → garage; pilot → aeroplane, airport; fisherman → lake; baker → bakery; barber or hairdresser → salon; builder → building site; judge → court; police officer → police station; vet → animal clinic; cashier → bank; pastor or priest → church; imam → mosque; shopkeeper → shop.
+- Tools: carpenter → saw, hammer; farmer → hoe, panga; tailor → needle, tape measure; nurse → thermometer.`,
+`- Vocabulary and comprehension; career talks.`,
+`Every job has a name, a place and tools.`,
+`- A mechanic repairs vehicles in a garage.
+- A tailor sews clothes.`,
+`## Common mistakes
+- Mixing up the doctor’s and nurse’s duties.`,
+[["A person who treats sick animals?",["vet","tailor","baker"],0],["Where does a carpenter work?",["workshop","court","bank"],0],["A judge works in a…",["court","school","garage"],0]],"How to use it","Where it is used",1),
+EP("Words often confused",/confused words|words often confused|often confused|commonly confused|affect and effect|accept and except|advice and advise|its and it'?s|lie and lay|borrow and lend|fewer and less|than and then/i,
+[["P6",[1],"borrow/lend, say/tell, bring/take."],["P7",[1],"affect/effect, accept/except, advice/advise, fewer/less."]],
+`Some pairs of words are easy to mix up. Learn the difference.`,
+`- **borrow** (take for a time) / **lend** (give for a time).
+- **say** (words) / **tell** (someone): “She said hello.” “She told me.”
+- **bring** (to here) / **take** (away from here).
+- **advice** (noun) / **advise** (verb).
+- **accept** (receive) / **except** (leave out).
+- **affect** (verb: change) / **effect** (noun: result).
+- **fewer** (countable) / **less** (uncountable).
+- **its** (belongs to it) / **it’s** (it is).
+- **than** (compare) / **then** (next).
+- **lose** (not win, misplace) / **loose** (not tight).`,
+`- Correct writing in tests and letters.`,
+`These words look or sound alike but are used differently.`,
+`- Please lend me your pen; I will borrow it.
+- Take your bag to school and bring it home.
+- It’s a dog wagging its tail.`,
+`## Common mistakes
+- “Borrow me your book.” (lend)`,
+[["“Please ___ me your ruler.”",["lend","borrow","say"],0],["“I will ___ the gift.”",["accept","except","expect"],0],["“There are ___ pupils today.”",["fewer","less","lessen"],0]],"How to use it","Where it is used",1),
+EP("Idioms and proverbs",/idioms?|proverbs?/i,
+[["P5",[3],"Common proverbs. Q: Complete: A stitch in time saves ___."],["P6",[2],"Idioms and their meanings."],["P7",[1],"Proverbs and idioms in sentences and compositions."]],
+`An **idiom** is a group of words with a special meaning. A **proverb** is a short, wise saying.`,
+`- **Proverbs:** Practice makes perfect. Honesty is the best policy. A stitch in time saves nine. Slow and steady wins the race. Haste makes waste. United we stand, divided we fall. Birds of a feather flock together. Look before you leap. Too many cooks spoil the broth. Actions speak louder than words. All that glitters is not gold. Better late than never. The early bird catches the worm.
+- **Idioms:** a piece of cake (very easy); break the ice (start talking); spill the beans (tell a secret); under the weather (a bit ill); once in a blue moon (very rarely); pull someone’s leg (joke); cost an arm and a leg (very expensive).
+- Do not read idioms word for word; learn the meaning.`,
+`- Compositions and speeches.
+- Oral lessons and tests.`,
+`An idiom does not mean what its words say. A proverb gives advice.`,
+`- The test was a piece of cake.
+- Haste makes waste, so check your work.`,
+`## Common mistakes
+- Changing a word in the proverb.`,
+[["“A piece of cake” means…",["very easy","a sweet","a small party"],0],["“Honesty is the best ___.”",["policy","game","food"],0],["“Spill the beans” means…",["tell a secret","cook","drop food"],0]]),
+EP("Figures of speech",/figures? of speech|simile|metaphor|personification|hyperbole|onomatopoeia|alliteration/i,
+[["P6",[2],"Simile and metaphor. Q: Is “as brave as a lion” a simile or metaphor?"],["P7",[1],"Personification, hyperbole, onomatopoeia and alliteration."]],
+`**Figures of speech** are ways of using words to make writing lively.`,
+`- **Simile:** compares using **like** or **as**: “as brave as a lion”.
+- **Metaphor:** says one thing **is** another: “Time is money.”
+- **Personification:** gives human actions to things: “The wind whispered.”
+- **Hyperbole:** big exaggeration: “I’m so hungry I could eat a cow.”
+- **Onomatopoeia:** words that sound like the noise: buzz, bang, splash.
+- **Alliteration:** repeated first sounds: “Peter Piper picked.”`,
+`- Poems, stories and compositions.`,
+`These are special ways of saying things to make pictures in the reader’s mind.`,
+`- She is as quick as a hare. (simile)
+- The classroom was a zoo. (metaphor)
+- The clock sang the hour. (personification)`,
+`## Common mistakes
+- Calling a metaphor a simile.`,
+[["“as cold as ice” is a…",["simile","metaphor","hyperbole"],0],["“The sun smiled.” is…",["personification","simile","alliteration"],0],["“Buzz” is…",["onomatopoeia","simile","metaphor"],0]]),
+EP("Comprehension",/comprehension|reading passage|skimming|scanning|inference|main idea|read and answer/i,
+[["P4",[1],"Read short passages and answer simple questions."],["P5",[2],"Questions on meaning, vocabulary and the main idea."],["P6",[2],"Inference and answers in full sentences."],["P7",[1],"Longer passages, poems and notices."]],
+`**Comprehension** means reading a passage and understanding it well enough to answer questions.`,
+`- Read the passage **twice**. Read the title.
+- Read the questions, then find the answers in the passage.
+- **Literal** questions: the answer is stated. **Inference** questions: you work it out from clues.
+- For **vocabulary** questions, read the sentence around the word.
+- Answer in **full sentences**, using words from the passage.
+- Spell correctly and **check** your answers.`,
+`- English tests and all subjects.`,
+`Read carefully, find proof in the passage, then write your answer.`,
+`- Q: Who went to the market? A: Amina went to the market.`,
+`## Common mistakes
+- Copying a whole paragraph.
+- Not reading the question carefully.`,
+[["Best first step in comprehension?",["Read the passage carefully","Skip to the questions only","Guess"],0],["Answers should be…",["full sentences with evidence","one letter","long stories"],0],["An inference question needs…",["clues from the passage","a dictionary only","luck"],0]]),
+EP("Cloze passages and gap filling",/cloze|gap fill|fill in the (gaps?|blanks?)|missing words?/i,
+[["P5",[3],"Fill gaps in a short passage."],["P6",[2],"Choose the correct word to fit the passage."],["P7",[1],"Cloze tests with grammar words."]],
+`A **cloze test** is a passage with words missing. You must fill each gap with a word that fits.`,
+`- Read the **whole passage** first.
+- For each gap, think about the **word type** needed (noun, verb, preposition).
+- Check the **tense** and whether the word is singular or plural.
+- Read the sentence again with your word. Does it make sense?
+- Fill the easiest gaps first.`,
+`- English tests.`,
+`Put the right word in each empty space so the story makes sense.`,
+`- Amina ___ (go) to the market. She bought ___ mangoes.`,
+`## Common mistakes
+- Not checking the tense.`,
+[["“She ___ to school yesterday.”",["went","goes","going"],0],["First step in a cloze test?",["Read the whole passage","Guess a word","Skip it"],0],["“We bought ___ egg.”",["an","a","the"],0]]),
+EP("Composition and paragraphs",/compositions?|essays?|narrative|descriptive writing|story writing|write a story|paragraphs?|topic sentence|guided composition|creative writing/i,
+[["P4",[1],"Write simple sentences and a short paragraph."],["P5",[2],"Guided composition and story writing."],["P6",[2],"Narrative and descriptive compositions."],["P7",[1],"Writing long compositions with a clear ending."]],
+`A **composition** is a piece of writing on a topic. It is made of **paragraphs**.`,
+`- **Plan:** write the title and main ideas.
+- **Beginning:** introduce the people, place and time.
+- **Middle:** tell what happens, in order.
+- **Ending:** tell how it finishes (and the lesson).
+- Each **paragraph** has one main idea, starting with a **topic sentence**.
+- Use **past tense** for stories; use time words (first, then, later, finally).
+- **Descriptive writing** uses adjectives and the five senses.
+- Check your spelling, punctuation and tenses.`,
+`- English tests and everyday writing.`,
+`Plan, write the beginning, middle and end, then check.`,
+`- Title: A Day at the Market.`,
+`## Facts
+- A paragraph starts on a new line with a space (indent).
+## Common mistakes
+- Writing without a plan.`,
+[["A composition has a beginning, a middle and an…",["ending","address","title only"],0],["Each paragraph should have one…",["main idea","title","address"],0],["Stories usually use the…",["past tense","future tense","no tense"],0]],"How to write it","Where it is used",1),
+EP("Letter writing",/letter writing|friendly letters?|formal letters?|official letters?|application letters?|write a letter|salutation|yours (faithfully|sincerely)/i,
+[["P4",[3],"Friendly letter: address, date, greeting, body, closing."],["P5",[3],"Friendly letters and thank-you letters."],["P6",[2],"Formal letters: requests."],["P7",[1],"Application letters and official letters."]],
+`A **letter** is a written message to a person. Letters can be **friendly (informal)** or **formal (official)**.`,
+`- **Friendly letter:** 1. Your address (top right). 2. Date. 3. Greeting: Dear Aunt Mary,. 4. Body in paragraphs. 5. Closing: Yours lovingly, / Your friend. 6. Your name.
+- **Formal letter:** 1. Your address and date. 2. The receiver’s title and address. 3. Greeting: Dear Sir, / Dear Madam,. 4. Subject line (underlined): APPLICATION FOR A PLACE. 5. Body. 6. Closing: **Yours faithfully,** (when you start with Sir/Madam) or **Yours sincerely,** (when you know the name). 7. Your name and signature.
+- Use polite, clear, correct language. In formal letters, do not use short forms.
+- Example address: P.O. Box 123, Kampala.`,
+`- Letters to relatives, friends, head teachers and offices.`,
+`Follow the layout: address, date, greeting, body, closing and name.`,
+`- Dear Ben, I hope you are well. Yours lovingly, Amina.
+- Dear Sir, APPLICATION FOR A BURSARY … Yours faithfully, Ann Nakato.`,
+`## Common mistakes
+- Using “Yours faithfully” with a named person.
+- Forgetting the date or address.`,
+[["A formal letter starting “Dear Sir” ends with…",["Yours faithfully","Yours lovingly","Your friend"],0],["A friendly letter has your ___ at the top right.",["address","subject","stamp"],0],["What goes in a subject line?",["The topic of the letter","The date","Your signature"],0]],"How to write it","Where it is used"),
+EP("Notices, posters and invitations",/notices?\b|posters?|advertisements?|adverts?|invitations?|telephone messages?|memo|announcements?/i,
+[["P5",[2],"Simple notices and invitations."],["P6",[2],"Posters, advertisements and messages."],["P7",[1],"Notices, invitations and announcements with all details."]],
+`A **notice** or **poster** gives public information. An **invitation** asks someone to an event.`,
+`- **Notice:** heading (NOTICE), what is happening, **date, time, place**, who should come, who issued it (name and title), date issued.
+- **Poster / advertisement:** a catchy heading, short and clear words, the main message, contact details.
+- **Invitation:** who invites, who is invited, what the event is, date, time, place, RSVP (reply).
+- **Message:** to, from, date, short message.
+- Keep it short; use capital letters for the heading.`,
+`- School, church, markets and offices.`,
+`Give the information needed in as few clear words as you can.`,
+`- NOTICE: SPORTS DAY. All pupils. Saturday 10th March at 9:00 a.m. on the school field. Head Teacher.`,
+`## Common mistakes
+- Forgetting the date, time or place.`,
+[["A notice must tell the…",["date, time and place","favourite colour","weather only"],0],["RSVP means…",["please reply","party time","read slowly"],0],["Which is short and catchy?",["A poster","A long essay","A textbook"],0]],"How to write it","Where it is used",1),
+EP("Summary writing",/summary writing|summaris|summariz|précis|precis|main points?/i,
+[["P6",[3],"Pick the main points from a short passage."],["P7",[2],"Write a summary in your own words."]],
+`A **summary** is a short version of a passage that gives the main points.`,
+`- Read the passage **twice**.
+- **Underline** the main ideas.
+- Write the ideas in your **own words** in short sentences.
+- Leave out examples and extra details.
+- Keep the **original order**.
+- Check the **word limit**.`,
+`- Reports, notes and exams.`,
+`A summary tells the big ideas in fewer words.`,
+`- Long text about a flood → Summary: Heavy rain caused a flood that destroyed homes. People moved to safer places.`,
+`## Common mistakes
+- Copying sentences word for word.`,
+[["A summary should be…",["short and in your own words","longer than the passage","copied exactly"],0],["Leave out…",["extra details","main points","the topic"],0],["First step?",["Read the passage carefully","Write the ending","Guess the title"],0]],"How to write it","Where it is used",1),
+EP("Dictionary skills",/dictionary|alphabetical order|guide words?|headword/i,
+[["P4",[1],"Alphabetical order of letters and words."],["P5",[1],"Using a dictionary; guide words."],["P6",[3],"Meanings, parts of speech and pronunciation in a dictionary."]],
+`A **dictionary** lists words in **alphabetical order** with their meanings.`,
+`- Put words in order using the first letter; if the same, use the second letter: ant, apple, bat.
+- **Guide words** at the top of a page show the first and last word on that page.
+- An entry gives the **meaning**, **part of speech**, **pronunciation** and an **example sentence**.
+- Look up the **base word** (for “running” look for “run”).`,
+`- Finding meanings and correct spelling.`,
+`A dictionary helps you find the meaning and spelling of a word quickly.`,
+`- Alphabetical order: ball, cat, dog.
+- Guide words “bat – bell”: “bed” is on that page.`,
+`## Common mistakes
+- Using only the first letter to order words.`,
+[["Which is in alphabetical order?",["ant, bat, cat","cat, ant, bat","bat, ant, cat"],0],["Guide words show…",["first and last word on the page","the meaning","the spelling mistakes"],0],["Look up “running” under…",["run","runner","ran"],0]]),
+EP("Oral English, poems and riddles",/oral english|listening|speaking skills?|pronunciation|poems?|poetry|riddles?|tongue twisters?|rhymes?|rhyming|public speaking|greetings/i,
+[["P4",[1],"Greetings, polite words and listening."],["P5",[2],"Riddles, tongue twisters and poems; pronunciation."],["P6",[3],"Telephone talk, directions and short speeches."],["P7",[2],"Debates, interviews, poems and stress in words."]],
+`**Oral English** is speaking and listening. It includes greetings, conversations, poems, riddles and speeches.`,
+`- **Listen** carefully and look at the speaker.
+- Speak **clearly**, not too fast, in full sentences.
+- Use polite words: please, thank you, excuse me, sorry.
+- **Greetings:** Good morning. How are you? I am fine, thank you.
+- **Directions:** go straight, turn left, turn right, opposite, next to.
+- **Telephone:** Hello, this is Ben. May I speak to …? Thank you, goodbye.
+- **Poems** use rhyme and rhythm. **Riddles** are puzzles: “What has hands but cannot clap?” (a clock).
+- **Tongue twister:** “She sells seashells.”
+- **Stress** a word by saying one part louder: TEACHer.`,
+`- School, home, church and public places.`,
+`Speak clearly, listen well and be polite.`,
+`- Riddle: I have a face but no eyes. (a clock)
+- Rhyme: cat, hat, bat.`,
+`## Common mistakes
+- Speaking too fast or too softly.`,
+[["A polite way to ask is…",["May I please have a pen?","Give me a pen!","Pen now"],0],["Words that rhyme: cat and…",["hat","dog","sun"],0],["A tongue twister is…",["hard to say quickly","a long poem","a letter"],0]],"How to use it","Where it is used",1),
+];
+["Sentences","Phrases and clauses","Gender","Singular and plural","Adjectives","Prepositions"].forEach(n=>{const t=ENGP.find(x=>x.n==n);if(t)t.nd=1});
+
 /* ===== PRIMARY MATHEMATICS: class lines, syllabus lookup and step-by-step solvers ===== */
 const TERMTXT=a=>a.length==3?"All terms":a.length==1?"Term "+a[0]:"Terms "+a.join(" and ");
 const clRange=T=>{const c=[...new Set((T.cl||[]).map(x=>x[0]))].sort();return c.length?(c.length==1?PCN[c[0]]:PCN[c[0]]+" to "+PCN[c[c.length-1]]):""};
 const clLine=T=>T&&T.cl?"**Class:** "+clRange(T)+"\n":"";
 const clSec=T=>T&&T.cl?"\n## Where it is taught\n"+T.cl.map(x=>"- **"+PCN[x[0]]+", "+TERMTXT(x[1])+":** "+x[2]).join("\n")+"\n":"";
 const MSTART=["What topics are in Primary 4?","Explain place value","Solve 345 + 278","What is 3/4 + 1/8?"];
-const startsFor=()=>D.sub=="Mathematics"&&lvKey()=="PLE"?MSTART:(STARTS[D.sub]||gen(D.sub));
+const ESTART=["What topics are in Primary 4?","What is a noun?","Explain the past tense","How do I write a letter?"];
+const startsFor=()=>D.sub=="Mathematics"&&lvKey()=="PLE"?MSTART:D.sub=="English"&&lvKey()=="PLE"?ESTART:(STARTS[D.sub]||gen(D.sub));
 const pn=n=>String(n).replace(/\B(?=(\d{3})+(?!\d))/g," ");
 const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
 const PL=["ones","tens","hundreds","thousands","ten thousands","hundred thousands","millions","ten millions","hundred millions","billions"];
@@ -1500,19 +2262,23 @@ const nfix=x=>String(Number(x.toFixed(6)));
 const pf=x=>Number.isInteger(x)?pn(x):nfix(x);
 function syllabusReply(q){
  if(lvKey()!="PLE")return null;
- if(!(D.sub=="Mathematics"||/\bmath(s|ematics)?\b/i.test(q)))return null;
+ const isM=D.sub=="Mathematics"||/\bmath(s|ematics)?\b/i.test(q),isE=!/\bmath(s|ematics)?\b/i.test(q)&&(D.sub=="English"||/\benglish\b/i.test(q));
+ if(!isM&&!isE)return null;
  if(!/(topics?|syllabus|scheme|learn|taught|teach|curriculum|content|covers?|\bterm\b)/i.test(q))return null;
+ const LST=isE?ENGP:MATHP,SN=isE?"English":"Mathematics",CK=isE?["P4","P5","P6","P7"]:Object.keys(PCN);
  const m=q.match(/\b(?:p|primary|class|grade)\s*-?\s*([1-7])\b/i);
  const tm=q.match(/term\s*(1|2|3|one|two|three|i{1,3})\b/i);
  const tn=tm?({one:1,two:2,three:3,i:1,ii:2,iii:3}[tm[1].toLowerCase()]||+tm[1]):0;
  if(!m){
   if(!/(syllabus|all topics|all classes|every class|scheme)/i.test(q))return null;
-  let o="# Primary Mathematics syllabus (P1 to P7)\nTopics by class. Ask “What topics are in Primary 4?” for the full list by term.\n";
-  for(const c of Object.keys(PCN)){o+="## "+PCN[c]+"\n"+MATHP.filter(t=>t.cl.some(x=>x[0]==c)).map(t=>t.n).join(", ")+"\n"}
+  let o="# Primary "+SN+" syllabus ("+(isE?"P4 to P7":"P1 to P7")+")\nTopics by class. Ask “What topics are in Primary 4?” for the full list by term.\n";
+  for(const c of CK){o+="## "+PCN[c]+"\n"+LST.filter(t=>t.cl.some(x=>x[0]==c)).map(t=>t.n).join(", ")+"\n"}
   return{t:o}}
- const c="P"+m[1];let o="# "+PCN[c]+" Mathematics"+(tn?", Term "+tn:"")+"\n";
+ const c="P"+m[1];
+ if(isE&&!CK.includes(c))return{t:"# "+PCN[c]+" English\nThe English topics in this app start from Primary 4. Ask “What topics are in Primary 4?” (or P5, P6, P7) to see them by term."};
+ let o="# "+PCN[c]+" "+SN+(tn?", Term "+tn:"")+"\n";
  for(const T of tn?[tn]:[1,2,3]){
-  const L=[];MATHP.forEach(t=>t.cl.forEach(x=>{if(x[0]==c&&x[1].includes(T))L.push("- **"+t.n+":** "+x[2])}));
+  const L=[];LST.forEach(t=>t.cl.forEach(x=>{if(x[0]==c&&x[1].includes(T))L.push("- **"+t.n+":** "+x[2])}));
   o+="## Term "+T+"\n"+(L.length?L.join("\n"):"- Revision of the work done so far.")+"\n"}
  o+="Ask me about any topic to get its definition, steps, examples and a quiz.";
  return{t:o}}
@@ -1668,7 +2434,7 @@ function mathWork(q){
  return{t:wBuild({w}),w}}
 
 TOP0.forEach(t=>{if(t.n=='Pythagoras theorem')t.L=['UCE','UACE']});
-const TOP=[...MATHP,...SCI,...TOP0];
+const TOP=[...MATHP,...ENGP,...SCI,...TOP0];
 const SCIRE=new RegExp(SCI.map(t=>t.re.source).join("|"),"i");
 function heads(T){if(T&&T.a)return[T.a,T.b];const s=D.sub;
  if(/Science|Biology|Chemistry|Physics|Agriculture|Nutrition/.test(s))return["How it works","Where it happens and why it matters"];
@@ -1678,7 +2444,7 @@ function heads(T){if(T&&T.a)return[T.a,T.b];const s=D.sub;
  if(/Religio|Divinity|Islamic/.test(s))return["What it teaches","How it is lived out"];
  if(/English|Literature|Literacy|Kiswahili|Luganda|French|German|Arabic|Latin|Chinese|Language|General Paper/.test(s))return["How to use it","Where it is used"];
  return["How it works","Where it applies"]}
-function topicOf(q){const s=q.toLowerCase(),lv=lvKey();return TOP.find(t=>t.re.test(s)&&(!t.S||D.sub=="General"||t.S.includes(D.sub))&&(!t.L||t.L.includes(lv)))||null}
+function topicOf(q){const s=q.toLowerCase(),lv=lvKey();return TOP.find(t=>t.re.test(s)&&(!t.S||D.sub=="General"||t.S.includes(D.sub))&&(D.sub!="General"||!t.nd)&&(!t.L||t.L.includes(lv)))||null}
 function cleanQ(q){return q.replace(/[?.!]+$/,"").replace(/^(what\s+(is|are|was|were)|define|explain|describe|tell me about|how (do|does|can) (i|we|you)|why (is|are|do|does))\s+(an?\s+|the\s+)?/i,"").trim().slice(0,60)||q.slice(0,60)}
 function qText(t,z){return "# Quiz: "+t+"\nQuestion "+(z.n+1)+" of "+z.list.length+"\n"+z.list[z.n][0]}
 function faithOf(q){return/\b(islam\w*|muslim\w*|quran|allah|prophet muhammad|hadith|mosque|ramadan|salah|zakat)\b/i.test(q)?"Islamic":/\b(christian\w*|bible|jesus|christ|church|god the father|gospel|apostles?|easter|christmas|baptism)\b/i.test(q)?"Christian":null}
@@ -1689,8 +2455,10 @@ function mockBase(q,mode){
  if(mode=="Give an example")return{t:"# Examples of "+nm.toLowerCase()+"\n"+clLine(T)+(T?T.e:"- Example 1: a simple case of "+b+".\n- Example 2: a case from daily life.\n- Example 3: a case from an exam question.")};
  if(mode=="More detail")return{t:"# "+nm+", in more detail\n"+clLine(T)+"## Definition\n"+(T?T.d:b+" is a topic in "+s+". State its exact meaning first.")+"\n## "+H[0]+"\n"+(T?T.h:"- Understand what is being asked.\n- Write what you know.\n- Apply the rule step by step.\n- Check your answer.")+"\n## "+H[1]+"\n"+(T?T.w:"- In classwork and exams in "+s+".\n- In daily life where this idea applies.")+"\n"+(T?T.m:"## Common mistakes\n- Skipping steps.\n- Mixing up similar terms.")+"\n## Examples\n"+(T?T.e:"- A simple example from "+s+".")+clSec(T)};
  if(mode=="Quiz me"){const list=T?T.q:[["Which is the best first step when working on "+k+"?",["Guess the answer","Understand the question","Skip to the end"],1],["What should you do after getting an answer?",["Check it","Ignore it","Hide it"],0]],z={list,n:0,score:0,t:nm};return{t:qText(nm,z),quiz:["q",z.list[0][1],z.list[0][2]],qz:z}}
+ if(!mode&&!T&&!/Religio|Divinity|Islamic/.test(D.sub)){const P_=L=="PLE",TL=D.sub=="Science"&&P_?SCI.map(t=>"- "+t.n):D.sub=="Mathematics"&&P_?MATHP.map(t=>"- "+t.n+" ("+clRange(t)+")"):D.sub=="English"&&P_?ENGP.map(t=>"- "+t.n+" ("+clRange(t)+")"):null;
+  return{hon:1,t:"# "+cap(k)+"\nI do not have a full lesson on **"+k+"** in "+s+" yet. Your question has been saved so the teacher can add it.\n"+(TL?"## "+D.sub+" topics you can ask about\n"+TL.join("\n")+(D.sub=="Science"?"":"\nYou can also ask: What topics are in Primary 4?"):"## Try asking\n"+startsFor().map(x=>"- "+x).join("\n"))}}
  const lvl=L=="PLE"?"":L=="UACE"?"\n## Exam approach\nNote the command word (explain, analyse, evaluate) and structure your answer to match.":"\n## Exam tip\nShow your working and use the correct terms for full marks.";
- return{t:"# "+nm+"\n"+clLine(T)+"## 1. Definition\n"+(T?T.d:b+" is a topic in "+s+". Its exact meaning is given here in one clear sentence.")+"\n## 2. "+H[0]+"\n"+(T?T.h:"- Understand what is being asked.\n- Write down what you know.\n- Apply the rule step by step.\n- Check your answer.")+"\n## 3. "+H[1]+"\n"+(T?T.w:"- In classwork and exams in "+s+".\n- In daily life where this idea applies.")+clSec(T)+lvl+(D.sub=="Science"&&lvKey()=="PLE"&&!T?"\n## Science topics you can ask about\n"+SCI.map(t=>"- "+t.n).join("\n"):"")+(D.sub=="Mathematics"&&lvKey()=="PLE"&&!T?"\n## Mathematics topics you can ask about\n"+MATHP.map(t=>"- "+t.n+" ("+clRange(t)+")").join("\n")+"\nYou can also ask: What topics are in Primary 4?":"")+(/Religio|Divinity|Islamic/.test(D.sub)&&!F?"\n## Note\nAdd Christian or Islamic to your question to get the answer for your faith.":"")}}
+ return{t:"# "+nm+"\n"+clLine(T)+"## 1. Definition\n"+(T?T.d:b+" is a topic in "+s+". Its exact meaning is given here in one clear sentence.")+"\n## 2. "+H[0]+"\n"+(T?T.h:"- Understand what is being asked.\n- Write down what you know.\n- Apply the rule step by step.\n- Check your answer.")+"\n## 3. "+H[1]+"\n"+(T?T.w:"- In classwork and exams in "+s+".\n- In daily life where this idea applies.")+clSec(T)+lvl+(D.sub=="Science"&&lvKey()=="PLE"&&!T?"\n## Science topics you can ask about\n"+SCI.map(t=>"- "+t.n).join("\n"):"")+(D.sub=="Mathematics"&&lvKey()=="PLE"&&!T?"\n## Mathematics topics you can ask about\n"+MATHP.map(t=>"- "+t.n+" ("+clRange(t)+")").join("\n")+"\nYou can also ask: What topics are in Primary 4?":"")+(D.sub=="English"&&lvKey()=="PLE"&&!T?"\n## English topics you can ask about\n"+ENGP.map(t=>"- "+t.n+" ("+clRange(t)+")").join("\n")+"\nYou can also ask: What topics are in Primary 4?":"")+(/Religio|Divinity|Islamic/.test(D.sub)&&!F?"\n## Note\nAdd Christian or Islamic to your question to get the answer for your faith.":"")}}
 
 /* ===== ANSWER STYLE BY PLAN + SUPABASE (direct) =====
  Free and Basic: only the exact thing asked. Standard: that thing plus a simple explanation.
@@ -1745,20 +2513,38 @@ function tiered(q){const T=topicOf(q);if(!T||!T.d)return null;
  if(T.q&&T.q.length){const z=T.q[v%T.q.length];t+="\n## Quick check\n"+z[0]+"\n"+z[1].map((o,i)=>"- "+"ABC"[i]+". "+o).join("\n")+"\n**Answer:** "+z[1][z[2]]}
  t+=L=="PLE"?"":L=="UACE"?"\n## Exam approach\nNote the command word (explain, analyse, evaluate) and structure your answer to match.":"\n## Exam tip\nShow your working and use the correct terms for full marks.";
  return{t}}
+/* greetings and small talk: answered first, never treated as a school topic */
+function smallTalk(q){
+ const t=String(q).toLowerCase().replace(/[^a-z' ]/g," ").replace(/\s+/g," ").trim();if(!t||t.length>40)return null;
+ const nm=D.pname?" "+D.pname:"",tips=()=>"\n"+startsFor().map(x=>"- "+x).join("\n");
+ if(/^(hi|hello|hallo|hey|hey there|hi there|hello there|howdy|greetings|good (morning|afternoon|evening|day)|mambo|oli otya|habari|jambo)( (tr )?(david|teacher|sir))?$/.test(t)||/^(hi|hello|hey)( (tr )?david)?( how are you)?$/.test(t))
+  return{t:"Hello"+nm+"! I am Ask Tr. David, your study helper. What would you like to learn today? You can ask me one of these:"+tips()};
+ if(/^(how are you|how are you doing|how is it going|how do you do|are you fine|are you okay|what s up|whats up|sup)( today)?$/.test(t))
+  return{t:"I am fine, thank you"+nm+". I am ready to help you with your studies. What would you like to learn?"+tips()};
+ if(/^(thanks|thank you|thank you very much|thanks a lot|thanks so much|asante|asante sana|webale|webale nnyo|ok thanks|okay thanks|ok thank you)$/.test(t))
+  return{t:"You are welcome"+nm+"! Ask me another question any time."};
+ if(/^(bye|goodbye|good bye|see you|see you later|good night|ok bye)$/.test(t))
+  return{t:"Goodbye"+nm+"! Keep studying and come back when you have a question."};
+ if(/^(ok|okay|alright|fine|good|nice|great|cool|yes|yeah|no)$/.test(t))
+  return{t:"Alright. What would you like to ask next?"+tips()};
+ if(/^(who are you|what are you|what is your name|what s your name|your name|what can you do|how can you help me|can you help me|help|help me)$/.test(t))
+  return{t:"I am **Ask Tr. David**, a study helper for learners in Uganda. I can explain topics, show worked steps, give examples and quiz you. Try one of these:"+tips()};
+ return null}
 function mock(q,mode){
  if(mode)return mockBase(q,mode);
+ const ST=smallTalk(q);if(ST)return ST;
  const W=work(q)||mathWork(q);if(W)return W;
  const t=tiered(q);if(t)return t;
- const f=mockBase(q),pl=planName();f.un=1;
- if(pl!="Premium"){const i=f.t.search(/\n## (Science|Mathematics) topics you can ask about|\n## Note\n/),tail=i>=0?f.t.slice(i):"";f.t=f.t.split(pl=="Standard"?"\n## 3.":"\n## 2.")[0]+tail}
+ const f=mockBase(q),pl=planName();f.un=1;if(f.hon)return f;
+ if(pl!="Premium"){const i=f.t.search(/\n## (Science|Mathematics|English) topics you can ask about|\n## Note\n/),tail=i>=0?f.t.slice(i):"";f.t=f.t.split(pl=="Standard"?"\n## 3.":"\n## 2.")[0]+tail}
  return f}
 /* owner-written answers from Supabase (find_answer), chosen by plan */
 const MODEMAP={"Explain simpler":"simpler","Give an example":"example","More detail":"detail"};
 async function dbAnswer(q,mode){
  if(mode&&!MODEMAP[mode])return null;
- if(!mode&&(work(q)||mathWork(q)))return null;
+ if(!mode&&(smallTalk(q)||work(q)||mathWork(q)))return null;
  const pl=planName(),I=qIntent(q),narrow=pl=="Free"||pl=="Basic"||((I.only||I.defw)&&!I.full);
- const get=m=>sbCall("rpc/find_answer",{method:"POST",body:JSON.stringify({p_question:String(q).slice(0,300),p_level:D.lvl,p_subject:D.sub,p_mode:m,p_threshold:0.35})},3000).then(r=>Array.isArray(r)&&r[0]?r[0]:null).catch(()=>null);
+ const get=m=>sbCall("rpc/find_answer",{method:"POST",body:JSON.stringify({p_question:String(q).slice(0,300),p_level:D.lvl,p_subject:(D.sub=="General"?(detectSub(q)||"General"):D.sub),p_mode:m,p_threshold:0.55})},3000).then(r=>Array.isArray(r)&&r[0]?r[0]:null).catch(()=>null);
  const txt=r=>/^\s*#/.test(r.body_md)?r.body_md:"# "+r.title+"\n"+r.body_md;
  let r=null,t="";
  if(mode){r=await get(MODEMAP[mode]);if(r)t=txt(r)}
@@ -1815,7 +2601,7 @@ function plans(fs){
 function stopS(){if(stream==null)return;clearInterval(stream);stream=null;if(sm){if(sm.w)sm.t=wBuild(sm);delete sm.stream;useW(sm.t)}sm=null;$("stat").textContent="Anything about your studies";$("send").innerHTML=SEND;save();render()}
 let AN=0;
 function ask(q,mode){
- if(stream!=null)return;if(capped())return limitMsg();const ch=D.chats.find(c=>c.id==D.cur);if(ch.title=="New chat"||ch.title=="Chat")ch.title=q.slice(0,32);
+ if(stream!=null)return;D.sub=routeSub(q);if(capped())return limitMsg();const ch=D.chats.find(c=>c.id==D.cur);if(ch.title=="New chat"||ch.title=="Chat")ch.title=q.slice(0,32);
  const now=Date.now();stamps=stamps.filter(t=>now-t<6e4);
  const err=x=>{D.msgs.push({s:"i",err:1,t:x,q,mode,ts:Date.now()});save();render()};
  if(!navigator.onLine)return err("No internet connection. Check your network and try again.");

@@ -70,7 +70,7 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 .day{align-self:center;background:var(--in);color:var(--sub);font-size:12px;padding:4px 12px;border-radius:10px;margin:8px 0}
 #editing{display:none;background:var(--bar);padding:8px 16px;font-size:13px;color:var(--green);border-top:1px solid var(--line)}
 #cmp{display:flex;gap:4px;align-items:center;padding:6px 16px;background:var(--bar)}#iw{flex:1;min-width:0;display:flex;align-items:center;background:var(--wall);border-radius:24px;padding:3px 7px 3px 8px;gap:2px}
-#ps{display:flex;justify-content:space-between;align-items:center;padding:0 26px 6px;background:var(--bar);font-size:11px;color:var(--sub)}#psl,#psr{border:1px solid var(--line);background:var(--bg);font:inherit;color:inherit;display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:16px}#psl{cursor:pointer}#psl i{width:8px;height:8px;border-radius:50%;display:inline-block}#psl b{color:var(--text);font-weight:600}
+#ps{display:flex;justify-content:space-between;align-items:center;padding:0 26px 6px;background:var(--bar);font-size:11px;color:var(--sub)}#psl,#psr{border:1px solid var(--line);background:var(--bg);font:inherit;color:inherit;display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:16px}#psl{cursor:pointer}#psr{cursor:pointer}#psr b{color:var(--text);font-weight:600}#psr .pic{display:inline-flex;width:15px;height:15px}#psr .pic svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}#psr .pic.fill svg{fill:currentColor}#psl i{width:8px;height:8px;border-radius:50%;display:inline-block}#psl b{color:var(--text);font-weight:600}
 #cmp .ic{padding:4px;flex-shrink:0}#cmp .ic svg{width:22px;height:22px}
 #inp{flex:1;min-width:0;width:100%;border:0;border-radius:20px;padding:9px 6px 9px 6px;font-size:15px;background:transparent;color:var(--text);font:inherit;outline:0}
 #send{width:38px;height:38px;flex-shrink:0;border:0;border-radius:50%;background:var(--green);color:#fff;display:grid;place-items:center;cursor:pointer}
@@ -512,7 +512,7 @@ $("sx").onclick=closeSearch;$("sq").oninput=()=>{q=$("sq").value.trim().toLowerC
 $("more").onclick=e=>{const a=e.target.dataset.a;if(!a)return;$("more").style.display="none";
  if(a=="s"){$("srch").style.display="flex";$("sq").focus()}
  if(a=="cc"){if(D.msgs.length){toTrash(D.msgs.slice());D.msgs.length=0;stopEdit();save();render()}}
- if(a=="g")settings();if(a=="n")newChat();if(a=="h")history();if(a=="b")saved()};
+ if(a=="g")settings();if(a=="n")newChat();if(a=="h")chatHistory();if(a=="b")saved()};
 $("editing").onclick=stopEdit;$("send").onclick=()=>stream!=null?stopS():send();$("inp").onkeydown=e=>{if(e.key=="Enter")send()};
 let tm,sx,sy;
 $("msgs").addEventListener("pointerdown",e=>{const b=e.target.closest(".b.o");if(!b)return;sx=e.clientX;sy=e.clientY;tm=setTimeout(()=>sheet(+b.dataset.i),500)});
@@ -2673,7 +2673,7 @@ async function aiAnswer(q,FUx){
   if(!r.ok)return null;
   const j=await r.json();
   if(j.status=="busy")return{busy:1};
-  if(j.status=="found"&&j.kind=="answer"&&j.answer&&j.answer.body_md){const a=j.answer;return{t:modelFromMd(/^\s*#/.test(a.body_md)?a.body_md:"# "+a.title+"\n"+a.body_md),aid:a.answer_id,fmt:1}}
+  if(j.status=="found"&&j.kind=="answer"&&j.answer&&j.answer.body_md){const a=j.answer;return{t:modelFromMd(/^\s*#/.test(a.body_md)?a.body_md:"# "+a.title+"\n"+a.body_md),aid:a.answer_id,fmt:1,lv:a.level||null}}
   const t=(j.status=="created"||(j.status=="found"&&j.kind=="topic"))?j.topic:null;
   if(!t||!t.name||!t.definition)return null;
   const dr=j.status=="created"||j.draft===true;
@@ -2700,10 +2700,10 @@ function sendFb(m){try{
 
 function bub(m,i,last){
  if(m.note)return `<div class="b i ai" data-i="${i}"><div class="md">${md(m.t)}</div>${m.up?`<div class="chips"><button data-act="plans" data-i="${i}">See plans</button></div>`:""}<small>${hm(m.ts)}</small></div>`;
- if(m.lim)return `<div class="b i ai" data-i="${i}"><div style="display:flex;gap:10px;align-items:flex-start"><span style="flex:none;width:34px;height:34px;border-radius:50%;background:rgba(245,158,11,.16);color:#d97706;display:grid;place-items:center"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></span><div style="font-weight:700;font-size:16px;line-height:1.3;color:#d97706;padding-top:1px">${LIM1}</div></div>${rtime()?`<div style="display:flex;gap:8px;align-items:center;margin-top:10px;color:var(--sub);font-size:14px"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#2f80ed" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Your free plan resets at <b style="color:#2f80ed">${rtime()}</b></span></div>`:""}<button data-act="plans" data-i="${i}" style="display:block;width:100%;margin-top:12px;padding:12px 14px;border:0;border-radius:22px;background:var(--green);color:#fff;font:inherit;font-weight:700;cursor:pointer;text-align:center">${LIM2}</button>${isOwner()?`<div class="chips"><button data-act="activate" data-i="${i}" style="color:#8b5cf6;border-color:#8b5cf6;font-weight:600">Activate plan</button></div>`:""}<small>${hm(m.ts)}</small></div>`;
+ if(m.lim)return `<div class="b i ai" data-i="${i}"><div style="display:flex;gap:10px;align-items:flex-start"><span style="flex:none;width:34px;height:34px;border-radius:50%;background:rgba(245,158,11,.16);color:#d97706;display:grid;place-items:center"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></span><div style="font-weight:700;font-size:16px;line-height:1.3;color:#d97706;padding-top:1px">${LIM1}</div></div>${rtime()?`<div style="display:flex;gap:8px;align-items:center;margin-top:10px;color:var(--sub);font-size:14px"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#2f80ed" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Your free plan resets at <b style="color:#2f80ed">${rtime()}</b></span></div>`:""}<button data-act="plans" data-i="${i}" style="display:block;width:100%;margin-top:12px;padding:12px 14px;border:0;border-radius:22px;background:var(--green);color:#fff;font:inherit;font-weight:700;cursor:pointer;text-align:center">${LIM2}</button><small>${hm(m.ts)}</small></div>`;
  if(m.err)return `<div class="b i err" data-i="${i}">${esc(m.t)}<div class="act"><button data-act="retry" data-i="${i}">Retry</button></div></div>`;
  const A=[["copy","Copy"],["bm",m.bm?"Saved":"Save",m.bm],["up","Helpful",m.fb==1],["dn","Not helpful",m.fb==-1],["share","Share"]];
- let h=`<div class="b i ai" data-i="${i}">${m.ai&&isOwner()?'<div class="aitag">AI generated, not yet checked · only you see this</div>':""}${m.mdl?`<div class="mdltag">${esc(m.mdl)}</div>`:""}<div class="md">${md(m.t)}</div>`;
+ let h=`<div class="b i ai" data-i="${i}">${m.mdl?`<div class="mdltag">${esc(m.mdl)}</div>`:""}<div class="md">${md(m.t)}</div>`;
  if(m.quiz){h+=m.quiz[1].map((o,k)=>`<button class="opt ${m.pick!=null?(k==m.quiz[2]?"ok":k==m.pick?"bad":""):""}" data-act="pick" data-i="${i}" data-k="${k}">${esc(o)}</button>`).join("")+(m.pick!=null?`<p>${m.pick==m.quiz[2]?"Correct, well done.":"Not quite. The correct answer is highlighted."}</p>`+(m.qz?(m.qz.n<m.qz.list.length-1?`<div class="chips"><button data-act="nq" data-i="${i}">Next question</button></div>`:`<p><b>Quiz finished: ${m.qz.score} out of ${m.qz.list.length}.</b></p>`):""):"")}
  let act="";
  if(!m.stream){act=`<div class="act out">${A.map(a=>`<button class="${a[2]?"on":""}" data-act="${a[0]}" data-i="${i}" aria-label="${a[1]}" title="${a[1]}">${AI[a[0]]}</button>`).join("")}${last?`<button data-act="regen" data-i="${i}" aria-label="Regenerate" title="Regenerate">${AI.regen}</button>`:""}</div>`;
@@ -2931,8 +2931,8 @@ async function styleAnswer(t,q){
  Two lists, both only for the owner account (the database refuses everyone else):
  1. New questions: questions the app could not answer, so Gemini answered them. Learners already got the answer (no label for them).
  2. Style rewrites: a model's rewrite of a saved answer (Teacher, Tutor, ...).
- For each one the owner sees what the learner asked, then approves (kept for good), edits, or rejects (never shown again). */
-const SVLBL={draft:"Waiting",approved:"Approved",published:"Approved",rejected:"Rejected"};
+ For each one the owner sees what the learner asked, then approves (kept for good), edits, or rejects (a rejected item is deleted for good). */
+const SVLBL={draft:"Waiting",approved:"Approved",published:"Approved"};
 let SVK="q",SVT="draft",SVL=[],SVC={};
 const svRpc=(fn,a)=>fetch(SBU+"rpc/"+fn,{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify(a)}).then(r=>r.json());
 const svName=k=>(MODELS[k]?MODELS[k].n:k),svOk=()=>SVK=="q"?"published":"approved";
@@ -2941,14 +2941,14 @@ const svBtn=(on,l,a,v)=>`<button ${a}="${v}" style="flex:1;padding:10px 4px;bord
 async function voiceRoom(kind,st){
  if(!isOwner())return;if(kind)SVK=kind;if(st)SVT=st;
  showP("Learner answers",'<div style="padding:22px 18px;color:var(--sub)">Loading…</div>',SVBACK);
- const want=SVT=="draft"?"draft":SVT=="rejected"?"rejected":svOk();
+ const want=SVT=="draft"?"draft":svOk();
  let j=null;try{j=await svRpc(SVK=="q"?"topic_review_list":"style_review_list",{p_t:tokNow(),p_status:want})}catch(e){}
  if(!j||!j.ok){$("pbody").innerHTML='<div class="pbn" style="margin:14px 18px;line-height:1.5">'+(j&&j.err=="not allowed"?"This room is only for the owner account.":j&&j.err=="login"?"Please log in again.":"Could not load. Check your connection and try again.")+'</div>';return}
  SVL=j.items||[];SVC=j.counts||{};
  const cn=s=>(SVC[s=="approved"?svOk():s]||0);
  let h=`<div style="padding:12px 18px;color:var(--sub);line-height:1.5">Only you see this room. Learners get their answers straight away, with no label. Here you see what they asked and decide what is kept for good.</div>
  <div style="display:flex;gap:6px;padding:4px 18px 8px">${svBtn(SVK=="q","New questions","data-kind","q")}${svBtn(SVK=="r","Style rewrites","data-kind","r")}</div>
- <div style="display:flex;gap:6px;padding:4px 18px 12px">${["draft","approved","rejected"].map(s=>svBtn(s==SVT,SVLBL[s]+" "+cn(s),"data-tab",s)).join("")}</div>`;
+ <div style="display:flex;gap:6px;padding:4px 18px 12px">${["draft","approved"].map(s=>svBtn(s==SVT,SVLBL[s]+" "+cn(s),"data-tab",s)).join("")}</div>`;
  if(!SVL.length)h+=`<div style="padding:18px;color:var(--sub);line-height:1.5">${SVT=="draft"?(SVK=="q"?"No new questions are waiting.":"No rewrites are waiting. They appear here after a learner (or you) asks a question with a model selected."):"Nothing here yet."}</div>`;
  SVL.forEach((x,i)=>{const q=SVK=="q"?x.source_question:x.question;h+=`<div class="row" data-it="${i}"><div><b>${esc(q?"“"+q+"”":(x.title||x.name||"Untitled"))}</b><small>${SVK=="q"?esc(x.name||"")+" · "+esc(x.level_code||"")+" · "+esc(x.subject_name||""):esc(x.title||"")+" · "+esc(svName(x.model))+" · "+esc(x.level)+" · "+esc(x.plan||"Free")+" plan"} · ${new Date(x.created_at).toLocaleDateString()}</small></div></div>`});
  showP("Learner answers",h,SVBACK,e=>{
@@ -2964,7 +2964,7 @@ function voiceItem(i,showOrig){
  ${T?"":`<div style="padding:0 18px 4px;color:var(--sub);font-size:13px">Edit the rewrite if needed (first line must start with #):</div>
  <textarea id="svt" style="display:block;width:calc(100% - 36px);margin:6px 18px;min-height:190px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit;font-size:14px;line-height:1.5;box-sizing:border-box">${esc(cur)}</textarea>`}
  <div id="svm" style="padding:2px 18px;min-height:20px;color:var(--sub)"></div>
- <div style="display:flex;gap:8px;flex-wrap:wrap;padding:6px 18px 10px">${bt("ok","Approve (keep for good)","#00a884")}${bt("no","Reject","#ff453a")}${x.status!="draft"?bt("dr","Move back to waiting","#6b7280"):""}</div>
+ <div style="display:flex;gap:8px;flex-wrap:wrap;padding:6px 18px 10px">${bt("ok","Approve (keep for good)","#00a884")}${bt("no","Reject (delete)","#ff453a")}${x.status!="draft"?bt("dr","Move back to waiting","#6b7280"):""}</div>
  ${T?"":`<div style="display:flex;gap:8px;flex-wrap:wrap;padding:0 18px 28px">${bt("rg","Write it again","#8b5cf6")}</div>`}`,()=>voiceRoom(),e=>{
   const v=e.target.closest("[data-v]");if(v){const ta=$("svt");if(ta)x.final_md=ta.value.trim()||x.final_md;voiceItem(i,v.dataset.v=="o");return}
   const b=e.target.closest("[data-a]");if(!b)return;const a=b.dataset.a,ta=$("svt"),m=$("svm"),txt=(ta?ta.value:"").trim();
@@ -2981,7 +2981,13 @@ function voiceItem(i,showOrig){
    fetch(STU,{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({text:x.source_md,model:x.model,level:x.level,plan:x.plan||"Free",depth:MODELS[x.model].r+(PBONUS[x.plan||"Free"]||0),t:tokNow(),regen:true,q:x.question||""})}).then(r=>r.json()).then(j=>{
     if(j&&j.status=="ok"){voiceRoom(null,"draft")}else{b.disabled=false;m.textContent=j&&j.status=="busy"?"Gemini is busy. Try again in a minute.":"Could not write it again. The old text is kept."}}).catch(()=>{b.disabled=false;m.textContent="Could not reach the server. The old text is kept."})}})}
 
-function updPlan(){const k=modelName(),M=MODELS[k],l=document.getElementById("psl"),r=document.getElementById("psr");if(l)l.innerHTML='<i style="background:'+GCOL[M.g]+'"></i><b>'+M.n+'</b>';if(r)r.textContent="Version "+M.v}
+/* PLAN BADGE (bottom right): shows the plan the admin has set for this account, with its own icon. The learner cannot change it. */
+const PICOL={Free:"#6b7c85",Basic:"#2f80ed",Standard:"#00a884",Premium:"#e6a700"},
+PIC={Free:'<svg viewBox="0 0 24 24"><path d="M5 19c0-8 5-13 14-14 0 9-5 14-14 14z"/><path d="M5 19l7-7"/></svg>',
+Basic:'<svg viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>',
+Standard:'<svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg>',
+Premium:'<svg viewBox="0 0 24 24"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/></svg>'};
+function updPlan(){const k=modelName(),M=MODELS[k],l=document.getElementById("psl"),r=document.getElementById("psr");if(l)l.innerHTML='<i style="background:'+GCOL[M.g]+'"></i><b>'+M.n+'</b>';if(r){const pn=planName();r.innerHTML='<span class="pic'+(pn=="Premium"?" fill":"")+'" style="color:'+(PICOL[pn]||"#6b7c85")+'">'+(PIC[pn]||PIC.Free)+'</span><b>'+pn+'</b>';r.setAttribute("aria-label","Your plan: "+pn)}}
 /* PLAN LOCK: the plan is kept in the database (app_users.plan, default Free) and copied here after login.
  Nobody can switch it from the app except the owner account (username DAVID, checked in the database).
  Other accounts stay on Free until you mark their paid plan (admin page to be built). */
@@ -3002,12 +3008,11 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden)evLog("ope
 addEventListener("appinstalled",()=>evLog("install"));
 setTimeout(syncPlan,1500);setInterval(syncPlan,30000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)syncPlan()});
 /* TEMPORARY (testing only): Activate plan lets the tester pick any plan. REMOVE when the app is fully developed; a confirmed payment must set the plan instead. */
-function activatePlan(){if(!isOwner()){uiAlert("Plans are activated after payment.");return}const cur=planName();showP("Activate plan",'<div style="padding:12px 18px;color:var(--sub);line-height:1.4">Testing only. Pick any plan to try it. This will be removed when the app is fully developed.</div>'+PLANS4.map(x=>`<div class="row" data-pl="${x}"><span style="width:10px;height:10px;border-radius:50%;background:${PCOL[x]};flex:none;margin-right:12px"></span><div><b>${x}</b>${x==cur?'<small>Your current plan</small>':""}</div></div>`).join(""),closeP,e=>{const x=e.target.closest("[data-pl]")?.dataset.pl;if(!x)return;if(!isOwner()){closeP();return}try{localStorage.setItem(PK(),x)}catch(er){}setPlanServer(x);
- if(x=="Free")FQW({v:2,cap:newCap(),used:0,left:null,seen:Date.now()});{const rm=a=>{for(let i=a.length;i--;)if(a[i].lim)a.splice(i,1)};rm(D.msgs);D.chats.forEach(c=>rm(c.msgs));save();render()}updPlan();closeP();uiAlert(x+" plan activated.")})}
+function activatePlan(){uiAlert("Your plan is set by the admin after payment.")}
 /* TESTING SWITCH: the chip at the bottom opens the model picker. While the app is being built the owner account also sees Change plan (Free, Basic, Standard, Premium)
  there, so every model can be tried on every plan. TO GO BACK TO THE REAL SUBSCRIPTION: set PLAN_TEST_MODE to false. The Change plan row then disappears. */
-const PLAN_TEST_MODE=true;
-document.getElementById("psl").onclick=()=>modelPicker();
+const PLAN_TEST_MODE=false;
+document.getElementById("psl").onclick=()=>modelPicker();document.getElementById("psr").onclick=()=>plans(1);
 function limitMsg(){D.msgs.push({s:"i",lim:1,t:"**"+LIM+"**",ts:Date.now()});save();render()}
 function freeReset(){FQW({v:2,cap:newCap(),used:0,left:null,seen:Date.now()});const rm=a=>{for(let i=a.length;i--;)if(a[i].lim)a.splice(i,1)};rm(D.msgs);D.chats.forEach(c=>rm(c.msgs));D.msgs.push({s:"i",note:1,t:"Your free plan has been reset. You can continue asking.",ts:Date.now()});save();render();const h=document.getElementById("plh");if(h)h.innerHTML='<b>Free plan</b><div style="color:var(--sub);margin-top:3px">Your free words have been reset.</div>'}
 let _pn=performance.now();
@@ -3279,7 +3284,7 @@ const _send=send;send=function(){if(on)stop();return _send.apply(this,arguments)
 })();
 function sw(id){D.cur=id;const ch=D.chats.find(c=>c.id==id);D.msgs=ch.msgs;if(ch.sub&&subsList().includes(ch.sub))D.sub=ch.sub;stopS();stopEdit();q="";$("sq").value="";$("srch").style.display="none";save();render();closeP()}
 function newChat(){const c={id:Date.now(),title:"New chat",sub:D.sub,lv:lvKey(),msgs:[]};D.chats.unshift(c);sw(c.id)}
-function history(){showP("Chat history",`<div class="row" data-a="new"><div><b>New chat</b></div></div><div style="padding:10px 14px"><input id="hq" class="fld" placeholder="Search chats"></div><div id="hl"></div>`,closeP,e=>{
+function chatHistory(){showP("Chat history",`<div class="row" data-a="new"><div><b>New chat</b></div></div><div style="padding:10px 14px"><input id="hq" class="fld" placeholder="Search chats"></div><div id="hl"></div>`,closeP,e=>{
  const r=e.target.closest(".row");if(!r)return;const id=+r.dataset.id,a=e.target.dataset.a||r.dataset.a,c=D.chats.find(x=>x.id==id);
  if(a=="new")return newChat();
  if(lp){lp=0;return}
@@ -3293,7 +3298,7 @@ function chatSheet(id){const c=D.chats.find(x=>x.id==id),s=$("sheet");
  s.innerHTML='<div data-a="r">Rename</div><div class="dl" data-a="d">Delete</div><div class="x" data-a="x">Cancel</div>';$("scrim").style.display="flex";
  s.onclick=e=>{const a=e.target.dataset.a;if(!a)return;$("scrim").style.display="none";
   if(a=="r"){uiPrompt("Rename chat",c.title,n=>{if(n&&n.trim()){c.title=n.trim();save();hlist()}})}
-  if(a=="d")uiConfirm("Delete this chat?",()=>{D.chats=D.chats.filter(x=>x.id!=id);if(!D.chats.length)D.chats=[{id:Date.now(),title:"New chat",msgs:[]}];if(D.cur==id){sw(D.chats[0].id);history()}else{save();hlist()}},"Delete")}}
+  if(a=="d")uiConfirm("Delete this chat?",()=>{D.chats=D.chats.filter(x=>x.id!=id);if(!D.chats.length)D.chats=[{id:Date.now(),title:"New chat",msgs:[]}];if(D.cur==id){sw(D.chats[0].id);chatHistory()}else{save();hlist()}},"Delete")}}
 function saved(){const L=[];D.chats.forEach(c=>c.msgs.forEach(m=>{if(m.bm)L.push(m)}));showP("Saved answers",L.length?L.map(m=>`<div class="row" style="display:block"><b>${esc(m.q||"Answer")}</b><div class="md">${md(m.t)}</div></div>`).join(""):'<div class="empty">No saved answers yet</div>',closeP)}
 const op=(a,v)=>a.map(x=>`<option ${x==v?"selected":""}>${x}</option>`).join("");
 const LVS=[["PLE","Primary"],["UCE","O-Level"],["UACE","A-Level"]];
@@ -3716,6 +3721,10 @@ const HANDOFF={
  "log": [
   [
    "2026-10-30",
+   "The owner account (username DAVID) now works exactly like a learner in the learner app. The plan is set only by the admin (Admin > Users > pick the account > Plan) and is copied to the app within 30 seconds or when the app is opened; nobody can pick a plan in the learner app any more (Change plan, Activate plan and the testing switch are removed). Plan limits, locked models and the Free word limit apply to David like any learner. The AI generated, not yet checked tag no longer shows in the chat; it only exists in Admin > Review. The app always opens as the learner app; the switch to Admin is in Settings > Learner profile > Update account and only the DAVID account sees it. The bottom right button that said Version 1.0 now shows the plan with an icon (Free leaf, Basic star, Standard shield, Premium gold crown) and opens the plans screen when tapped. Not yet tried on a real phone."
+  ],
+  [
+   "2026-10-30",
    "Chat memory, second version: the app now understands many more short follow-ups by what they ask for (more detail, why, how/steps, where used, formula, definition, example, simple, summary, mistakes, compare, exam tips, tricks to remember, quiz, I do not understand, explain again) and by pointer words like it, this, that, them, its. A new question with its own topic still changes the topic. Repeating the same request now changes the way it is answered (for example more details, then an example, then steps, uses, mistakes, a quiz); I do not understand rotates simple words, definition, example, steps, uses. Teaching answers end with a check question such as Understood? and replies like yes, no, not really, thanks, what are we talking about and what next are answered on the same topic. Many more small talk lines (praise, sorry, wait, jokes, who made you, I am tired, exams worry and others) never change the topic. All plan limits still apply through the existing gates. When the saved answers have nothing for a follow-up, the question goes to Gemini together with the follow-up kind, the topic and the previous answer (the ai_answer function must be updated to read the follow field). Follow-ups are not logged as unanswered questions. Tested with a script on about 50 sample sentences; not yet tried on a real phone."
   ],
   [
@@ -3728,7 +3737,7 @@ const HANDOFF={
   ],
   [
    "2026-10-30",
-   "Learner answers and model style, owner-approved: when a question has no saved answer, ai_answer (Gemini) writes it and saves it as a draft topic; ai_style (source ai_style/index.ts) rewrites an answer in the chosen model's own writing style (summary, analysis, wording) and saves it too. Learners get both AT ONCE with no approval wait and NO label (the AI generated label is now shown to the owner account only). The owner opens Settings > Learner answers (owner only, enforced in the database by topic_review_list, topic_review_set, style_review_list, style_review_set) to see what learners asked, then approves (kept for good), edits, or rejects (never shown again). Unapproved rewrites are reused for 7 days, then written again. This room is about the model's writing style and new questions; it has nothing to do with the microphone, and speaking to the app never needs approval. Only the owner can ask for a rewrite to be written again. Approved rewrites are kept on phones for 12 hours. Functions are deployed to the Nova School Manager project",
+   "Learner answers and model style, owner-approved: when a question has no saved answer, ai_answer (Gemini) writes it and saves it as a draft topic; ai_style (source ai_style/index.ts) rewrites an answer in the chosen model's own writing style (summary, analysis, wording) and saves it too. Learners get both AT ONCE with no approval wait and NO label (the AI generated label is now shown to the owner account only). The owner opens Settings > Learner answers (owner only, enforced in the database by topic_review_list, topic_review_set, style_review_list, style_review_set) to see what learners asked, then approves (kept for good), edits, or rejects (a rejected item is deleted for good). Unapproved rewrites are reused for 7 days, then written again. This room is about the model's writing style and new questions; it has nothing to do with the microphone, and speaking to the app never needs approval. Only the owner can ask for a rewrite to be written again. Approved rewrites are kept on phones for 12 hours. Functions are deployed to the Nova School Manager project",
   ],
   [
    "2026-10-30",
@@ -3878,7 +3887,8 @@ function handoff(){if(!isOwner())return;
 /* device back button: closes the top-most open layer; at the root, 3 quick presses exit */
 (function(){
  const open=id=>getComputedStyle($(id)).display!="none";
- const any=()=>["dlgx","scrim","more","panel","srch","editing"].some(open);
+ const authSub=()=>open("auth")&&window.__authScr&&window.__authScr!="login";
+ const any=()=>["dlgx","scrim","more","panel","adm","srch","editing"].some(open)||!!$("mpop")||authSub();
  let pushed=false,skip=0,last=0,stage=0,toastEl=null,dlg=null,tt=0;
  const push=()=>{try{history.pushState({chat:1},"")}catch(e){}};
  push(); /* guard entry so back at the root can be intercepted */
@@ -3923,8 +3933,11 @@ function handoff(){if(!isOwner())return;
    pushed=false;
    if(open("dlgx")){dlgCancel&&dlgCancel();if(open("dlgx"))$("dlgx").style.display="none"}
    else if(open("scrim"))$("scrim").style.display="none";
+   else if($("mpop"))$("mpop").remove();
    else if(open("more"))$("more").style.display="none";
    else if(open("panel")){const b=$("pb");b&&b.onclick?b.onclick():closeP()}
+   else if(open("adm")){const r=$("adm").querySelector("[data-b]");if(r)r.click();else if(typeof ADMTAB!="undefined"&&ADMTAB!="home")admGo("home");else admClose()}
+   else if(authSub())window.__authGo("login");
    else if(open("srch"))closeSearch();
    else if(open("editing"))stopEdit();
    sync();
@@ -3934,7 +3947,9 @@ function handoff(){if(!isOwner())return;
  /* tapping anywhere cancels the exit prompt */
  document.addEventListener("pointerdown",e=>{if(stage>0&&!(dlg&&e.target.id=="xok"))hideAll()},true);
  const mo=new MutationObserver(sync);
- ["dlgx","scrim","more","panel","srch","editing"].forEach(id=>mo.observe($(id),{attributes:true,attributeFilter:["style"]}));
+ ["dlgx","scrim","more","panel","adm","srch","editing"].forEach(id=>mo.observe($(id),{attributes:true,attributeFilter:["style"]}));
+ mo.observe(document.body,{childList:true}); /* catches the message pop-up opening/closing */
+ window.__backSync=sync;
 })();
 </script><div id="auth"><div class="ab"><div style="text-align:center;padding:calc(26px + env(safe-area-inset-top,0px)) 0 6px"><div class="av" id="alogo" style="margin:0 auto 8px;width:64px;height:64px"></div><b style="font-size:20px">Ask Tr. David</b><div class="t" id="ah">Loading…</div></div><div id="af"></div></div></div>
 <script>
@@ -3986,14 +4001,14 @@ function form(el,items,btn,go,extra,pre){
   if(r&&!r.ok){const u=items.find(x=>x[1]=="username"),p=items.find(x=>x[1]=="phone");if(r.suggest&&u)fb(u[0],r);else if(/already exist/i.test(r.err||"")&&p)fb(p[0],r);else er(r.err||"Try again.")}}}
 const L=(s,t)=>`<div class="al" data-go="${s}">${t}</div>`,BK='<div class="bk" data-go="login">Back to login</div>',AR=(a,b)=>`<div class="ar">${a}${b}</div>`;
 function done(r,rm){if(r.ok){T=r.token;ME=r.me;const S=rm===false?SS:LS;LS.removeItem("ask_tok");LS.removeItem("ask_me");SS.removeItem("ask_tok");SS.removeItem("ask_me");S.setItem("ask_tok",T);S.setItem("ask_me",JSON.stringify(ME));enter()}return r}
-function scr(n){const f=$("af"),h=t=>$("ah").textContent=t;$("auth").style.display="block";
+function scr(n){const f=$("af"),h=t=>$("ah").textContent=t;$("auth").style.display="block";window.__authScr=n;window.__authGo=scr;try{window.__backSync&&window.__backSync()}catch(e){}
  const FG=(w,id)=>async v=>{const r=await rpc("acct_forgot",{p_what:w,p_user:v.u,p_phone:v.p,p_secret:v.s,p_new:v.n});if(r.ok){scr("login");er((w=="pin"?"Pin":"Password")+" updated. Please login.",1)}return r};
  if(n=="login"){h("Login");form(f,[["i","login","Names / Username"],["p","cpw","Password"]],"Login",async v=>done(await rpc("acct_login",{p_id:v.i,p_pass:v.p}),v.rm),AR(L("fp","Forgot password"),L("create","Create account")),'<label class="rm"><input type="checkbox" id="rm" checked>Remember login</label>')}
  if(n=="create"){h("Create account");form(f,[["n","names","Names"],["u","username","Username"],["p","phone","Phone"],["k","cls","Class"],["w","password","Password"],["c","pin","Pin"]],"Create account",async v=>{const r=await rpc("acct_create",{p_names:v.n,p_user:v.u,p_phone:v.p,p_pass:v.w,p_pin:v.c});if(r.ok){try{LS.setItem("ask_cls_"+((r.me&&r.me.username)||v.u),v.k)}catch(e){}}return done(r)},L("login","I already have an account: Login"))}
  if(n=="fp"){h("Forgot password");form(f,[["u","uname","Username"],["p","phoneo","Phone"],["s","cpin","Pin"],["n","password","New password"]],"Reset password",FG("password"),AR(L("fn","Forgot pin"),L("ct","Forgot password and pin"))+BK)}
  if(n=="fn"){h("Forgot pin");form(f,[["u","uname","Username"],["p","phoneo","Phone"],["s","cpw","Password"],["n","pin","New pin"]],"Reset pin",FG("pin"),L("ct","Forgot password and pin")+BK)}
  if(n=="ct"){h("Contact us");f.innerHTML='<div class="fw" style="line-height:1.5">If you forgot both your password and your pin, contact us and we will help you recover your account.</div>'+(CONTACT?`<a class="btn" style="text-align:center;text-decoration:none" href="tel:${CONTACT}">Call ${CONTACT}</a>`:"")+BK;f.onclick=e=>{if(e.target.dataset.go)scr(e.target.dataset.go)};f.oninput=null;f.onfocusin=null}}
-function enter(){$("auth").style.display="none";if(ME){D.pname=GNm();const c=LS.getItem("ask_cls_"+ME.username);if(c&&CLASSES.includes(c))applyCls(c);else D.cls="";save()}render();link();evLog("open");if(ME&&!D.cls)clsPick();if(ME&&ME.username==="DAVID"){if(LS.getItem("ask_mode_DAVID")==="admin")admOpen()}else admHide()}
+function enter(){$("auth").style.display="none";window.__authScr="";try{window.__backSync&&window.__backSync()}catch(e){}if(ME){D.pname=GNm();const c=LS.getItem("ask_cls_"+ME.username);if(c&&CLASSES.includes(c))applyCls(c);else D.cls="";save()}render();link();evLog("open");if(ME&&!D.cls)clsPick();admHide();try{updPlan()}catch(e){}}
 function out(){admHide();rpc("acct_logout",{p_t:T});T="";ME=null;LS.removeItem("ask_tok");LS.removeItem("ask_me");SS.removeItem("ask_tok");SS.removeItem("ask_me");closeP();scr("login")}
 const UI={names:[["n","names","New names"],["a","cpw","Confirm password"]],username:[["n","username","New username"],["a","cpw","Confirm password"]],phone:[["n","phone","New phone"],["a","cpw","Confirm password"]],password:[["n","password","New password"],["a","uname","Confirm username"],["b","cpw","Old password"],["c","cpin","Pin"]],pin:[["n","pin","New pin"],["a","uname","Confirm username"],["b","cpw","Password"],["c","cpin","Old pin"]]};
 function upd(w){showP("Update "+w,'<div id="ff"></div>',account);form($("ff"),UI[w],"Save",async v=>{const r=await rpc("acct_change",{p_t:T,p_what:w,p_new:v.n,p_a:v.a,p_b:v.b||"",p_c:v.c||""});if(r.relogin){out();return r}if(r.ok){ME=r.me;stg().setItem("ask_me",JSON.stringify(ME));account();uiAlert("Updated.")}return r})}

@@ -2995,14 +2995,14 @@ const annTitle=a=>(a.kind=="update"?"Update: ":"")+a.title;
 function annBanner(a){try{$("annt").textContent=annTitle(a);$("annb").textContent=a.body||"";$("ann").style.display="flex";clearTimeout(annT);if(+a.duration_seconds>0)annT=setTimeout(hideAnn,a.duration_seconds*1000)}catch(e){}}
 async function devAlert(a){
  if(!D.notif||!("Notification"in window)||Notification.permission!="granted")return;
- const o={body:(annTitle(a)+"\n"+String(a.body||"")).slice(0,240),tag:"ann-"+a.id,badge:"./badge-96.png",data:{id:a.id}};
+ const o={body:(String(a.title||"")+"\n"+String(a.body||"")).slice(0,240),tag:"ann-"+a.id,icon:"./blank-96.png",badge:"./badge-96.png",data:{id:a.id}};
  try{if(PUSHREG){await PUSHREG.showNotification("Ask Tr. David",o);return}}catch(e){}
  try{const n=new Notification("Ask Tr. David",o);n.onclick=()=>{window.focus();n.close();try{notifs(true)}catch(e){}}}catch(e){}}
 let PUSH_SYNCED=0;
 async function annSync(){
  if(ANN_BUSY||!(window.AK&&AK.me()))return;ANN_BUSY=1;
  if(!PUSH_SYNCED&&D.notif){PUSH_SYNCED=1;pushOn()}
- try{const L=await svRpc("ann_list",{});if(!Array.isArray(L))return;
+ try{const L=await svRpc("ann_list",{p_t:tokNow()});if(!Array.isArray(L))return;
   const first=!D.annInit;let added=0;
   L.slice().reverse().forEach(a=>{if(D.annSeen[a.id])return;D.annSeen[a.id]=1;added++;
    const ts=new Date(a.created_at).getTime(),fresh=!first||Date.now()-ts<2*864e5;
@@ -3033,19 +3033,22 @@ async function pushOff(){try{
  const ep=sub.endpoint;await sub.unsubscribe();await svRpc("push_drop",{p_endpoint:ep})}catch(e){}}
 try{navigator.serviceWorker&&navigator.serviceWorker.addEventListener("message",e=>{if(!e.data)return;if(e.data.openWN){try{notifs(true)}catch(x){}}if(e.data.resub&&D.notif){PUSH_SYNCED=1;pushOn()}if(e.data.annSync)annSync()})}catch(e){}
 /* admin: Post tab */
-let ANK="announcement",ANT="",ANB="";
-async function admNews(){const s=ADMSEQ,b=$("abody");b.innerHTML=admLd();const j=await admCall("admin_ann_list");if(s!==ADMSEQ)return;
+let ANK="announcement",ANT="",ANB="",ANTO="",ADMUS=[];
+async function admNews(){const s=ADMSEQ,b=$("abody");b.innerHTML=admLd();const [j,uj]=await Promise.all([admCall("admin_ann_list"),admCall("admin_user_list")]);if(s!==ADMSEQ)return;ADMUS=uj&&uj.ok?uj.items:[];
  if(!j.ok){b.innerHTML=admFail(j,1);b.onclick=e=>{if(e.target.closest("[data-r]"))admNews()};return}
  admNewsDraw(j,"")}
 function admNewsDraw(j,msg){const b=$("abody");
  b.innerHTML=`<div class="asec">Post to What's new</div>
  <div style="display:flex;gap:6px;padding:4px 18px 8px">${svBtn(ANK=="announcement","Announcement","data-k","announcement")}${svBtn(ANK=="update","Update","data-k","update")}</div>
+ <div style="padding:0 18px 4px;color:var(--sub);font-size:13px">Send to</div>
+ <select class="ain" id="anto"><option value="">Everyone</option>${ADMUS.map(u=>`<option value="${esc(u.id)}"${u.id==ANTO?" selected":""}>${esc(u.names||u.username)} (${esc(u.username)})${admN(u.devices)?"":" · no phone alerts"}</option>`).join("")}</select>
  <input class="ain" id="ant" maxlength="100" placeholder="Title" autocomplete="off" value="${esc(ANT)}">
  <textarea class="ain" id="anb" maxlength="1000" placeholder="Message (optional)" style="min-height:110px;resize:vertical">${esc(ANB)}</textarea>
  <div id="anm" style="padding:2px 18px;min-height:20px;color:var(--sub)">${esc(msg)}</div>
- <div style="display:flex;gap:8px;padding:6px 18px 6px">${abt("send","Send to everyone","#00a884")}</div>
- <div style="padding:2px 18px 10px;color:var(--sub);font-size:13px;line-height:1.45">Everyone sees it in What's new and as a banner when they open the app. ${admN(j.devices)} phone${admN(j.devices)==1?"":"s"} will also get a phone alert, because Away alerts is on there.</div>
- <div class="asec">Posted</div>`+(j.items.length?j.items.map((x,i)=>`<div class="row" style="display:block"><b>${esc(x.title)}</b> <small style="color:var(--sub)">${x.kind=="update"?"Update":"Announcement"} · ${admDate(x.created_at)}</small>${x.body?`<div style="margin-top:2px;color:var(--sub)">${esc(x.body)}</div>`:""}<button data-del="${i}" style="margin-top:6px;border:0;background:none;color:#ff453a;font:inherit;font-weight:600;padding:4px 0;cursor:pointer">Delete</button></div>`).join(""):'<div style="padding:12px 18px;color:var(--sub)">Nothing posted yet.</div>');
+ <div style="display:flex;gap:8px;padding:6px 18px 6px">${abt("send",ANTO?"Send to "+esc(admUN(ANTO)):"Send to everyone","#00a884")}</div>
+ <div style="padding:2px 18px 10px;color:var(--sub);font-size:13px;line-height:1.45">${ANTO?`Only ${esc(admUN(ANTO))} sees it, in What's new and as a banner when they open the app. ${admN((ADMUS.find(u=>u.id==ANTO)||{}).devices)} of their phone${admN((ADMUS.find(u=>u.id==ANTO)||{}).devices)==1?"":"s"} will also get a phone alert, if Away alerts is on there.`:`Everyone sees it in What's new and as a banner when they open the app. ${admN(j.devices)} phone${admN(j.devices)==1?"":"s"} will also get a phone alert, because Away alerts is on there.`}</div>
+ <div class="asec">Posted</div>`+(j.items.length?j.items.map((x,i)=>`<div class="row" style="display:block"><b>${esc(x.title)}</b> <small style="color:var(--sub)">${x.kind=="update"?"Update":"Announcement"} · ${admDate(x.created_at)}${x.to_user?" · to "+esc(x.to_name||"one user"):""}</small>${x.body?`<div style="margin-top:2px;color:var(--sub)">${esc(x.body)}</div>`:""}<button data-del="${i}" style="margin-top:6px;border:0;background:none;color:#ff453a;font:inherit;font-weight:600;padding:4px 0;cursor:pointer">Delete</button></div>`).join(""):'<div style="padding:12px 18px;color:var(--sub)">Nothing posted yet.</div>');
+ b.onchange=e=>{if(e.target.id=="anto"){ANT=$("ant").value;ANB=$("anb").value;ANTO=e.target.value;admNewsDraw(j,"")}};
  b.onclick=async e=>{
   const k=e.target.closest("[data-k]");if(k){ANT=$("ant").value;ANB=$("anb").value;ANK=k.dataset.k;admNewsDraw(j,"");return}
   const d=e.target.closest("[data-del]");if(d){const x=j.items[+d.dataset.del];if(!x)return;uiConfirm("Delete this post?",async()=>{const r=await admCall("admin_ann_delete",{p_id:x.id});if(r.ok){const n=await admCall("admin_ann_list");if(n.ok)admNewsDraw(n,"Deleted.");else admNews()}else uiAlert("Could not delete. Try again.")},"Delete");return}
@@ -3053,12 +3056,12 @@ function admNewsDraw(j,msg){const b=$("abody");
   const t=$("ant").value.trim(),m=$("anb").value.trim(),st=$("anm");ANT=t;ANB=m;
   if(t.length<3){st.textContent="Write a title (at least 3 letters).";return}
   sb.disabled=true;st.textContent="Sending…";
-  const r=await admCall("admin_ann_post",{p_title:t,p_body:m,p_kind:ANK,p_duration:0});
-  if(!r.ok){sb.disabled=false;st.textContent=r.err=="bad title"?"The title must be 3 to 100 letters.":"Could not send. Try again.";return}
-  let note="Posted. Everyone will see it in What's new.";
+  const r=await admCall("admin_ann_post",{p_title:t,p_body:m,p_kind:ANK,p_duration:0,p_to:ANTO||null});
+  if(!r.ok){sb.disabled=false;st.textContent=r.err=="bad title"?"The title must be 3 to 100 letters.":r.err=="bad user"?"That user was not found. Pick again.":"Could not send. Try again.";return}
+  const toN=ANTO?admUN(ANTO):"";let note=ANTO?"Posted. "+toN+" will see it in What's new.":"Posted. Everyone will see it in What's new.";
   try{const pr=await fetch(SBU.replace("/rest/v1/","/functions/v1/")+"ann_push",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({t:tokNow(),id:r.id})}).then(z=>z.json());
-   if(pr&&pr.ok)note="Posted. Phone alerts sent to "+admN(pr.sent)+" phone"+(admN(pr.sent)==1?"":"s")+".";else note="Posted. Phone alerts could not be sent (people still see it in What's new)."}catch(er){note="Posted. Phone alerts could not be sent (people still see it in What's new)."}
-  ANT="";ANB="";annSync();
+   if(pr&&pr.ok)note=ANTO&&!admN(pr.sent)?"Posted to "+toN+". None of their phones has alerts on yet, so they will see it when they open the app.":"Posted. Phone alerts sent to "+admN(pr.sent)+" phone"+(admN(pr.sent)==1?"":"s")+".";else note="Posted. Phone alerts could not be sent (people still see it in What's new)."}catch(er){note="Posted. Phone alerts could not be sent (people still see it in What's new)."}
+  ANT="";ANB="";ANTO="";annSync();
   const n=await admCall("admin_ann_list");if(n.ok)admNewsDraw(n,note);else admNews()}}
 
 /* PLAN BADGE (bottom right): shows the plan the admin has set for this account, with its own icon. The learner cannot change it. */
@@ -3418,7 +3421,7 @@ const admMsg=j=>j&&j.err=="not allowed"?"This panel is only for the owner accoun
 const admFail=(j,retry)=>'<div class="pbn" style="margin:14px 18px;line-height:1.5">'+admMsg(j)+'</div>'+(retry?'<div class="row" data-r="1"><div>Try again</div></div>':"");
 const admLd=()=>'<div style="padding:22px 18px;color:var(--sub)">Loading…</div>';
 const admDate=d=>{try{return new Date(d).toLocaleDateString()}catch(e){return""}};
-const admN=x=>Number(x)||0;
+const admN=x=>Number(x)||0;const admUN=id=>{const u=ADMUS.find(x=>x.id==id);return u?(u.names||u.username):"this user"};
 const abt=(a,l,c)=>`<button data-a="${a}" style="flex:1;min-width:30%;padding:12px 8px;border:0;border-radius:22px;font:inherit;font-weight:700;cursor:pointer;color:#fff;background:${c}">${l}</button>`;
 const SVBACK=()=>{closeP();try{if(ADMON)admGo(ADMTAB)}catch(e){}};
 function admCopy(x,msg){const fb=()=>{const ta=document.createElement("textarea");ta.value=x;document.body.appendChild(ta);ta.select();try{document.execCommand("copy")}catch(_){}ta.remove();uiAlert(msg)};

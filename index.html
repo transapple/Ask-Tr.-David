@@ -128,6 +128,22 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 .pay{margin:12px 18px;padding:16px;border-radius:0;text-align:center;background:rgba(255,204,0,.18);border:1px solid rgba(230,175,0,.6)}.pay .pl{font-size:13px;color:var(--sub);text-transform:uppercase;letter-spacing:.5px}.pay .pcode{font-size:32px;font-weight:800;letter-spacing:3px;margin:4px 0}.pay .pid{font-size:15px}.pcp{margin-top:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:16px;padding:6px 16px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
 .stp{display:flex;gap:12px;margin:12px 18px;align-items:flex-start}.stp i{flex:none;width:28px;height:28px;border-radius:4px;background:var(--green);color:#fff;font-style:normal;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:14px}.stp div{padding-top:3px;line-height:1.45}
 .sh{cursor:pointer;color:var(--green);font-weight:600}.pw{position:relative}.pw .fld{padding-right:46px}.eye{position:absolute;right:4px;top:0;bottom:0;width:42px;border:0;background:none;color:var(--sub);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}.eye svg{width:22px;height:22px;pointer-events:none}.rm{display:flex;align-items:center;gap:10px;padding:8px 18px;font-size:14px;color:var(--text);cursor:pointer}.rm input{width:18px;height:18px;accent-color:var(--green);margin:0}.bk{display:block;width:fit-content;margin:12px auto;padding:8px 16px;text-align:center;border-radius:24px;background:rgba(0,168,132,.12);background:color-mix(in srgb,var(--green) 14%,transparent);color:var(--green);font-weight:600;font-size:14px;cursor:pointer}.ar{display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px 12px;padding:0 18px}.ar .al{padding:9px 0}.al{padding:9px 18px;color:var(--green);cursor:pointer;font-size:14px}
+
+/* input box differs from the chat body; blue send button; listening wave */
+#iw{background:#e8eef7;border:1px solid #cdd8ea}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) #iw{background:#2a3942;border-color:#3b4a54}}
+:root[data-theme="dark"] #iw{background:#2a3942;border-color:#3b4a54}
+:root[data-theme="light"] #iw{background:#e8eef7;border-color:#cdd8ea}
+#send{background:#1a73e8;color:#fff}#send:active{background:#1560c7}
+#wave{display:none;align-items:center;justify-content:center;gap:3px;height:30px;padding:0 6px;flex:1;min-width:0;overflow:hidden}
+#iw.rec #inp{display:none}
+#live{display:none;background:var(--bar);color:var(--text);padding:10px 18px 4px;font-size:16px;line-height:1.4;max-height:110px;overflow-y:auto;white-space:pre-wrap;word-wrap:break-word;-webkit-user-select:text;user-select:text}
+#live.on{display:block}#live.empty{color:var(--sub)}
+#iw.rec #wave{display:flex}
+#wave i{display:block;width:3px;height:26px;border-radius:2px;background:#1a73e8;transform:scaleY(.15);transform-origin:center;will-change:transform}
+#mic.on{background:#1a73e8;border-color:#1a73e8;color:#fff;animation:micp 1.6s ease-out infinite}
+@keyframes micp{0%{box-shadow:0 0 0 0 rgba(26,115,232,.5)}100%{box-shadow:0 0 0 12px rgba(26,115,232,0)}}
+@media(prefers-reduced-motion:reduce){#mic.on{animation:none}}
 </style></head><body>
 <button id="pwaInstallBtn" title="Install App" style="display:none;position:fixed;right:18px;bottom:calc(120px + env(safe-area-inset-bottom));z-index:999;width:52px;height:52px;border-radius:50%;background:#0000b9;color:#fff;border:none;box-shadow:0 6px 18px rgba(0,0,185,.4);align-items:center;justify-content:center;cursor:pointer;">
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -277,7 +293,8 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 <div id="msgs"></div>
 <button id="jump" aria-label="Scroll to latest"><svg viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></svg></button>
 <div id="editing">Editing message. Tap here to cancel.</div>
-<div id="cmp"><div id="iw"><button class="ic" id="mic" aria-label="Voice question"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg></button><input id="inp" placeholder="Ask questions, make research" autocomplete="off"><button id="send" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button></div></div>
+<div id="live" aria-live="polite"></div>
+<div id="cmp"><div id="iw"><button class="ic" id="mic" aria-label="Voice question"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg></button><div id="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><input id="inp" placeholder="Ask questions, make research" autocomplete="off"><button id="send" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button></div></div>
 <div id="ps"><button id="psl" type="button" aria-label="Your plan"></button><span id="psr"></span></div>
 </div>
 <div id="dlgx" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);place-items:center;z-index:120;padding:20px"><div style="background:var(--sheet,#fff);color:var(--text,#111);border-radius:14px;padding:20px;width:100%;max-width:320px;box-shadow:0 4px 18px rgba(0,0,0,.3)"><div id="dlgm" style="font-size:16px;line-height:1.4;margin-bottom:14px;white-space:pre-wrap"></div><input id="dlgi" autocomplete="off" style="display:none;width:100%;box-sizing:border-box;margin-bottom:14px;padding:10px;font-size:16px;border:1px solid var(--line,#ccc);border-radius:8px;background:var(--wall,#fff);color:inherit"><div style="display:flex;justify-content:flex-end;gap:8px"><button id="dlgc" style="background:none;border:0;padding:8px 14px;font-size:15px;color:inherit;cursor:pointer">Cancel</button><button id="dlgo" style="background:var(--green,#00a884);color:#fff;border:0;border-radius:8px;padding:8px 18px;font-size:15px;cursor:pointer">OK</button></div></div></div>
@@ -311,7 +328,7 @@ user:'<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 
 const CH='<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>';
 let D={name:"Alex",msgs:[],trash:[],acc:"#00a884"};
 try{const x=JSON.parse(localStorage.getItem("chat_single2"));if(x&&(x.chats||x.msgs)){D=x;if(!D.msgs)D.msgs=[]}}catch(e){}
-D.trash=D.trash||[];if(!D.annSeen)D.annSeen={};if(!D.notes)D.notes=[{t:"Welcome",b:"Answers that arrive while you are away will show up here.",ts:Date.now(),r:0}];D.acc=D.acc||"#00a884";
+D.trash=D.trash||[];if(!D.annSeen)D.annSeen={};/* What's new is OFF until it is connected to the database (see Project handoff). Nothing is added to the list while WN_ON is false. */const WN_ON=false;if(!D.notes||!WN_ON)D.notes=[];D.acc=D.acc||"#00a884";
 const save=()=>{try{localStorage.setItem("chat_single2",JSON.stringify(D,function(k,v){return(this===D&&k=="msgs")||k=="img"?undefined:v}))}catch(e){}};
 const hm=t=>new Date(t).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
 const dl=t=>{const d=new Date(t);return d.toDateString()==new Date().toDateString()?"Today":d.toLocaleDateString()};
@@ -375,7 +392,7 @@ function settings(){
  <div class="row" data-a="nt"><span class="ri">${IC.bell}</span><div>Away alerts<small>${D.notif?"On":"Off"}: phone alert when an answer is ready</small></div></div>
  <div class="row" data-a="ex"><span class="ri">${IC.dl}</span><div>Export chat<small>Download as a text file</small></div></div>
  <div class="row" data-a="tr"><span class="ri">${IC.bin}</span><div>Trash<small>${D.trash.length} message${D.trash.length==1?"":"s"}</small></div></div>
- <div class="row" data-a="pl"><span class="ri">${IC.star}</span><div>Free plan and upgrade<small>${FQ().used.toLocaleString()} words used</small></div></div>
+ <div class="row" data-a="pl"><span class="ri">${IC.star}</span><div>Upgrade plan<small>See the plans and how to pay</small></div></div>
  <div class="row" data-a="up"><span class="ri">${IC.refresh}</span><div>Update app<small>Reload to get the latest version</small></div></div>
  <div class="row" data-a="ho"><span class="ri">${IC.doc}</span><div>Project handoff<small>${hoCount()[0]} done, ${hoCount()[1]-hoCount()[0]} remaining</small></div></div>`,closeP,e=>{
   const a=e.target.closest(".row")?.dataset.a;
@@ -409,14 +426,14 @@ function updateApp(){
 function updateBadge(){$("bdg").style.display=D.notes.some(x=>!x.r)?"block":"none"}
 function notify(t,b){
  if(!document.hidden)return;
- D.notes.unshift({t,b,ts:Date.now(),r:0});D.notes=D.notes.slice(0,50);save();updateBadge();
+ if(WN_ON){D.notes.unshift({t,b,ts:Date.now(),r:0});D.notes=D.notes.slice(0,50);save();updateBadge()}
  if(D.notif&&"Notification"in window&&Notification.permission=="granted"){try{const n=new Notification(t,{body:b});n.onclick=()=>{window.focus();n.close()}}catch(e){}}}
 let annT=0;
 function hideAnn(){clearTimeout(annT);$("ann").style.display="none"}
 /* called when the admin panel sends an announcement: {id,title,body,duration (seconds, 0 = until hidden)} */
 function showAnn(a){
  if(!a||!a.title)return;if(a.id!=null){if(D.annSeen[a.id])return;D.annSeen[a.id]=1}
- D.notes.unshift({t:a.title,b:a.body||"",ts:Date.now(),r:0});D.notes=D.notes.slice(0,50);save();updateBadge();
+ if(WN_ON){D.notes.unshift({t:a.title,b:a.body||"",ts:Date.now(),r:0});D.notes=D.notes.slice(0,50);save();updateBadge()}
  $("annt").textContent=a.title;$("annb").textContent=a.body||"";$("ann").style.display="flex";
  clearTimeout(annT);if(+a.duration>0)annT=setTimeout(hideAnn,a.duration*1000)}
 window.receiveAnnouncement=showAnn;
@@ -2448,13 +2465,21 @@ function topicOf(q){const s=q.toLowerCase(),lv=lvKey();return TOP.find(t=>t.re.t
 function cleanQ(q){return q.replace(/[?.!]+$/,"").replace(/^(what\s+(is|are|was|were)|define|explain|describe|tell me about|how (do|does|can) (i|we|you)|why (is|are|do|does))\s+(an?\s+|the\s+)?/i,"").trim().slice(0,60)||q.slice(0,60)}
 function qText(t,z){return "# Quiz: "+t+"\nQuestion "+(z.n+1)+" of "+z.list.length+"\n"+z.list[z.n][0]}
 function faithOf(q){return/\b(islam\w*|muslim\w*|quran|allah|prophet muhammad|hadith|mosque|ramadan|salah|zakat)\b/i.test(q)?"Islamic":/\b(christian\w*|bible|jesus|christ|church|god the father|gospel|apostles?|easter|christmas|baptism)\b/i.test(q)?"Christian":null}
+let QLAST="";
+function quizAns(q){
+ const bare=isBare(q);let T=null;
+ if(bare){const pool=TOP.filter(t=>t.q&&t.q.length&&(!t.L||t.L.includes(lvKey()))&&(D.sub=="General"||!t.S||t.S.includes(D.sub))),alt=pool.filter(t=>t.n!=QLAST),src=alt.length?alt:pool;T=src[Math.floor(Math.random()*src.length)]||null}
+ else T=topicOf(q);
+ if(!T){const k=cleanQ(q);return bare?{t:"# Quiz\nI do not have a quiz ready for this level and subject yet."}:{t:"# Quiz: "+cap(k)+"\nI do not have a quiz on **"+k+"** yet. Say **quiz me** and I will pick a topic for you."}}
+ QLAST=T.n;const list=T.q.slice().sort(()=>Math.random()-.5),z={list,n:0,score:0,t:T.n};
+ return{t:qText(T.n,z),quiz:["q",list[0][1],list[0][2]],qz:z}}
 function mockBase(q,mode){
  if(!mode){const W=work(q)||mathWork(q);if(W)return W}
  const T=topicOf(q),H=heads(T),k=cleanQ(q),F=/Religio|Divinity|Islamic/.test(D.sub)?faithOf(q):null,s=F?F+" "+D.sub:D.sub,L=lvKey(),nm=(T?T.n:k.charAt(0).toUpperCase()+k.slice(1))+(F?" ("+F+")":""),b="**"+k+"**";
  if(mode=="Explain simpler")return{t:"# "+nm+", simpler\n"+clLine(T)+(T?T.s:"Think of "+b+" as a small idea in "+s+".\n- Break it into small parts.\n- Learn one part at a time.\n- Say it back in your own words.")};
  if(mode=="Give an example")return{t:"# Examples of "+nm.toLowerCase()+"\n"+clLine(T)+(T?T.e:"- Example 1: a simple case of "+b+".\n- Example 2: a case from daily life.\n- Example 3: a case from an exam question.")};
  if(mode=="More detail")return{t:"# "+nm+", in more detail\n"+clLine(T)+"## Definition\n"+(T?T.d:b+" is a topic in "+s+". State its exact meaning first.")+"\n## "+H[0]+"\n"+(T?T.h:"- Understand what is being asked.\n- Write what you know.\n- Apply the rule step by step.\n- Check your answer.")+"\n## "+H[1]+"\n"+(T?T.w:"- In classwork and exams in "+s+".\n- In daily life where this idea applies.")+"\n"+(T?T.m:"## Common mistakes\n- Skipping steps.\n- Mixing up similar terms.")+"\n## Examples\n"+(T?T.e:"- A simple example from "+s+".")+clSec(T)};
- if(mode=="Quiz me"){const list=T?T.q:[["Which is the best first step when working on "+k+"?",["Guess the answer","Understand the question","Skip to the end"],1],["What should you do after getting an answer?",["Check it","Ignore it","Hide it"],0]],z={list,n:0,score:0,t:nm};return{t:qText(nm,z),quiz:["q",z.list[0][1],z.list[0][2]],qz:z}}
+ if(mode=="Quiz me")return quizAns(q);
  if(!mode&&!T&&!/Religio|Divinity|Islamic/.test(D.sub)){const P_=L=="PLE",TL=D.sub=="Science"&&P_?SCI.map(t=>"- "+t.n):D.sub=="Mathematics"&&P_?MATHP.map(t=>"- "+t.n+" ("+clRange(t)+")"):D.sub=="English"&&P_?ENGP.map(t=>"- "+t.n+" ("+clRange(t)+")"):null;
   return{hon:1,t:"# "+cap(k)+"\nI do not have a full lesson on **"+k+"** in "+s+" yet. Your question has been saved so the teacher can add it.\n"+(TL?"## "+D.sub+" topics you can ask about\n"+TL.join("\n")+(D.sub=="Science"?"":"\nYou can also ask: What topics are in Primary 4?"):"## Try asking\n"+startsFor().map(x=>"- "+x).join("\n"))}}
  const lvl=L=="PLE"?"":L=="UACE"?"\n## Exam approach\nNote the command word (explain, analyse, evaluate) and structure your answer to match.":"\n## Exam tip\nShow your working and use the correct terms for full marks.";
@@ -2556,7 +2581,7 @@ function logUn(q){try{q=String(q).trim().slice(0,300);if(q.length<3)return;fetch
 function sendFb(m){try{if(m.aid&&m.fb)fetch(SBU+"rpc/submit_feedback",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_answer_id:m.aid,p_vote:m.fb})}).catch(()=>{})}catch(e){}}
 
 function bub(m,i,last){
- if(m.note)return `<div class="b i ai" data-i="${i}"><div class="md">${md(m.t)}</div><small>${hm(m.ts)}</small></div>`;
+ if(m.note)return `<div class="b i ai" data-i="${i}"><div class="md">${md(m.t)}</div>${m.up?`<div class="chips"><button data-act="plans" data-i="${i}">See plans</button></div>`:""}<small>${hm(m.ts)}</small></div>`;
  if(m.lim)return `<div class="b i ai" data-i="${i}"><div style="display:flex;gap:10px;align-items:flex-start"><span style="flex:none;width:34px;height:34px;border-radius:50%;background:rgba(245,158,11,.16);color:#d97706;display:grid;place-items:center"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></span><div style="font-weight:700;font-size:16px;line-height:1.3;color:#d97706;padding-top:1px">${LIM1}</div></div>${rtime()?`<div style="display:flex;gap:8px;align-items:center;margin-top:10px;color:var(--sub);font-size:14px"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#2f80ed" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Your free plan resets at <b style="color:#2f80ed">${rtime()}</b></span></div>`:""}<button data-act="plans" data-i="${i}" style="display:block;width:100%;margin-top:12px;padding:12px 14px;border:0;border-radius:22px;background:var(--green);color:#fff;font:inherit;font-weight:700;cursor:pointer;text-align:center">${LIM2}</button><div class="chips"><button data-act="activate" data-i="${i}" style="color:#8b5cf6;border-color:#8b5cf6;font-weight:600">Activate plan</button></div><small>${hm(m.ts)}</small></div>`;
  if(m.err)return `<div class="b i err" data-i="${i}">${esc(m.t)}<div class="act"><button data-act="retry" data-i="${i}">Retry</button></div></div>`;
  const A=[["copy","Copy"],["bm",m.bm?"Saved":"Save",m.bm],["up","Helpful",m.fb==1],["dn","Not helpful",m.fb==-1],["share","Share"]];
@@ -2564,7 +2589,7 @@ function bub(m,i,last){
  if(m.quiz){h+=m.quiz[1].map((o,k)=>`<button class="opt ${m.pick!=null?(k==m.quiz[2]?"ok":k==m.pick?"bad":""):""}" data-act="pick" data-i="${i}" data-k="${k}">${esc(o)}</button>`).join("")+(m.pick!=null?`<p>${m.pick==m.quiz[2]?"Correct, well done.":"Not quite. The correct answer is highlighted."}</p>`+(m.qz?(m.qz.n<m.qz.list.length-1?`<div class="chips"><button data-act="nq" data-i="${i}">Next question</button></div>`:`<p><b>Quiz finished: ${m.qz.score} out of ${m.qz.list.length}.</b></p>`):""):"")}
  let act="";
  if(!m.stream){act=`<div class="act out">${A.map(a=>`<button class="${a[2]?"on":""}" data-act="${a[0]}" data-i="${i}" aria-label="${a[1]}" title="${a[1]}">${AI[a[0]]}</button>`).join("")}${last?`<button data-act="regen" data-i="${i}" aria-label="Regenerate" title="Regenerate">${AI.regen}</button>`:""}</div>`;
-  if(last)h+=(m.w&&m.w.shown<m.w.parts.length)?wBtns(m,i):`<div class="chips">${["Explain simpler","Give an example","More detail","Quiz me"].map(c=>`<button data-chip="${c}">${c}</button>`).join("")}</div>`}
+  if(last&&m.w&&m.w.shown<m.w.parts.length)h+=wBtns(m,i)}
  return h+`<small>${hm(m.ts)}</small></div>${act}`}
 /* ===== FREE PLAN: random word limit (2000 to 3000) per account, kept on this phone ===== */
 const LIM1="You have hit the maximum limit of the free plan.",LIM2="Upgrade to enjoy Unlimitedly.",LIM=LIM1+" "+LIM2,
@@ -2593,15 +2618,51 @@ setInterval(()=>{const n=performance.now(),d=n-_pn;_pn=n;if(!(window.AK&&AK.me()
 function plans(fs){
  const q=FQ(),P=[["Basic","500","2,800","9,000","Fastest for quick answers","#2f80ed"],["Standard","750","4,550","16,500","For complex revision and every assignment","#00a884"],["Premium","1,100","6,650","24,000","For your toughest challenges, research and examinations preparation","#8b5cf6"]],
  ST=['Tap the button at the bottom. It dials <b>*165*3*06124096#</b> with the merchant code already in it.','Enter the <b>amount</b> of your plan.','Choose <b>Mobile Money</b> as the mode of payment.','Confirm the ID name is <b>Alfred</b>.','Enter your <b>PIN</b> to confirm.'];
- showP("Upgrade plans",(q.used>=q.cap?`<div class="pbn" id="plh">${LIM1}${rtime()?`<div style="font-weight:400;margin-top:5px">Your free plan resets at <b>${rtime()}</b></div>`:""}<div style="margin-top:5px">${LIM2}</div></div>`:`<div class="pbn ok" id="plh">Free plan · ${q.used.toLocaleString()} words used.<br>Upgrade to enjoy Unlimitedly.</div>`)+`<div class="sec">UPGRADE PLANS</div>`+
+ showP("Upgrade plans",(q.used>=q.cap?`<div class="pbn" id="plh">${LIM1}${rtime()?`<div style="font-weight:400;margin-top:5px">Your free plan resets at <b>${rtime()}</b></div>`:""}<div style="margin-top:5px">${LIM2}</div></div>`:`<div class="pbn ok" id="plh">${planName()} plan<br>Upgrade to enjoy Unlimitedly.</div>`)+`<div class="sec">UPGRADE PLANS</div>`+
  P.map((x,k)=>`<div class="pc" style="--a:${x[5]}"><div class="pch"><i>${k+1}</i><b>${x[0]}</b></div><div class="ptag">${x[4]}</div><div class="pst"><div><b>${x[1]}</b><span>Daily</span></div><div><b>${x[2]}</b><span>Weekly</span></div><div><b>${x[3]}</b><span>Monthly</span></div></div></div>`).join("")+
  `<div class="sec">PAYMENT METHOD</div><div class="pay"><div class="pl">MTN Mobile Money · Merchant Code</div><div class="pcode">06124096</div><div class="pid">ID: <b>Alfred</b></div><button class="pcp" data-cp="06124096">Copy code</button></div>`+
  `<div class="sec">HOW TO PAY</div>`+ST.map((t,k)=>`<div class="stp"><i>${k+1}</i><div>${t}</div></div>`).join("")+
  `<a class="btn" style="text-align:center;text-decoration:none;margin-bottom:28px" href="tel:*165*3*06124096%23">Dial *165*3*06124096#</a>`,fs?settings:closeP,e=>{const c=e.target.closest("[data-cp]");if(c){const t=c.dataset.cp,ok=()=>{c.textContent="Copied"};if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(ok,ok);else ok()}})}
 function stopS(){if(stream==null)return;clearInterval(stream);stream=null;if(sm){if(sm.w)sm.t=wBuild(sm);delete sm.stream;useW(sm.t)}sm=null;$("stat").textContent="Anything about your studies";$("send").innerHTML=SEND;save();render()}
+/* ===== TYPED REQUESTS BY PLAN (there are no quick-action buttons) =====
+ Free: direct answer only. Basic: adds quizzes. Standard: adds explain simpler and examples.
+ Premium: everything, and answers are detailed by default. A request above the plan shows an upgrade note. */
+const PRANK={Free:0,Basic:1,Standard:2,Premium:3},GATE={quiz:["Quizzes","Basic"],simpler:["Simpler explanations","Standard"],example:["Examples","Standard"],detail:["Detailed answers","Premium"]};
+const RX_QZ=/\b(quiz|quizzes|quizz|test me|examine me)\b/,RX_SI=/\b(simpler|simply|more simply|in (a )?(very )?(simple|easy) (words|terms|language|way)|make it (simple|easy|easier)|easier to understand|eli5)\b/,RX_DE=/\b(more details?|in details?|in more details?|in full details?|full details?|detailed|elaborate|in depth)\b/,RX_EX=/\b(examples?|for instance|illustrate|illustration)\b/,RX_EXPL=/\b(explain|what is|what are|define|describe|tell me about|how does|how do|why)\b/;
+function reqQ(q){return String(q).replace(/[?!]+/g," ")
+ .replace(/\b(can|could|would|will) you( please)?\b/gi," ").replace(/\bplease\b/gi," ")
+ .replace(/\bi (want|need|would like)( you)?( to)?\b/gi," ").replace(/\b(give|show|tell|ask)( me)?\b/gi," ")
+ .replace(/\b(more simply|simpler|simply)\b/gi," ").replace(/\bin (a )?(very )?(simple|easy) (words|terms|language|way)\b/gi," ")
+ .replace(/\bmake it (simple|easy|easier)\b|\beasier to understand\b/gi," ")
+ .replace(/\b(in )?(more |full )?details?\b|\bdetailed\b|\belaborate\b|\bin depth\b/gi," ")
+ .replace(/\b((an?|some|another|one)\s+)?examples?( (of|on|about|for))?\b/gi," ").replace(/\bfor instance\b/gi," ")
+ .replace(/\b(an?\s+)?quiz(zes)?( me)?( (on|about|for))?\b/gi," ").replace(/\btest me( (on|about))?\b/gi," ").replace(/\bexamine me( (on|about))?\b/gi," ")
+ .replace(/^\s*(explain|describe)\b/i," ").replace(/\s+/g," ").trim()}
+function isBare(q){return reqQ(q).replace(/\b(it|this|that|again|me|one|more|the|an?|now|topic|topics|any|random|something|on|about|of|for|in|to|explain|describe|and|with|also)\b/gi,"").replace(/[^a-z0-9]/gi,"")===""}
+function lastBase(){for(let i=D.msgs.length;i--;){const x=D.msgs[i];if(x.s=="i"&&x.q&&!x.err&&!x.note&&!x.lim&&!smallTalk(x.q))return x.q}return null}
+function planGate(q){
+ const pl=planName(),rk=PRANK[pl],s=" "+String(q).toLowerCase().replace(/[^a-z0-9'\s]/g," ").replace(/\s+/g," ")+" ",h=r=>r.test(s);
+ const kind=h(RX_QZ)?"quiz":h(RX_SI)?"simpler":h(RX_DE)?"detail":h(RX_EX)?"example":null;
+ if(!kind)return null;
+ const bare=isBare(q),cl=reqQ(q),G={kind,bare};
+ if(rk<PRANK[GATE[kind][1]]){G.block=1;G.note=GATE[kind][0]+" are available on the "+GATE[kind][1]+" plan and above. You are on the "+pl+" plan.";G.q=cl;G.mode=null;return G}
+ if(kind=="detail")return null;
+ if(kind=="example"&&h(RX_EXPL))return null;
+ G.mode=kind=="quiz"?"Quiz me":kind=="simpler"?"Explain simpler":"Give an example";
+ if(kind=="quiz"){G.q=bare?"Quiz me":cl;return G}
+ if(bare){const b=lastBase();if(!b)G.noBase=1;G.q=b}else G.q=cl;
+ return G}
 let AN=0;
 function ask(q,mode){
- if(stream!=null)return;D.sub=routeSub(q);if(capped())return limitMsg();const ch=D.chats.find(c=>c.id==D.cur);if(ch.title=="New chat"||ch.title=="Chat")ch.title=q.slice(0,32);
+ if(stream!=null)return;let gn=null;
+ if(!mode){const G=planGate(q);if(G){
+  const nt=(t,up)=>{D.msgs.push({s:"i",note:1,up:up?1:0,t,ts:Date.now()});save();render()};
+  if(capped())return limitMsg();
+  if(G.noBase)return nt("Ask me a question first, then I can do that for it.",0);
+  if(G.block&&(G.bare||G.kind=="quiz"))return nt(G.note,1);
+  if(G.block)gn=G.note;
+  q=G.q;mode=G.mode||null}}
+ D.sub=routeSub(q);if(capped())return limitMsg();const ch=D.chats.find(c=>c.id==D.cur);if(ch.title=="New chat"||ch.title=="Chat")ch.title=q.slice(0,32);
  const now=Date.now();stamps=stamps.filter(t=>now-t<6e4);
  const err=x=>{D.msgs.push({s:"i",err:1,t:x,q,mode,ts:Date.now()});save();render()};
  if(!navigator.onLine)return err("No internet connection. Check your network and try again.");
@@ -2612,9 +2673,9 @@ function ask(q,mode){
   if(stream==null||tok!=AN)return;
   if(!f)f=mock(q,mode);if(f.un&&!mode)logUn(q);
   const m={s:"i",t:"",ts:Date.now(),q,mode,stream:1},w=f.t.split(/(?<=\s)/);if(f.quiz)m.quiz=f.quiz;if(f.qz)m.qz=f.qz;if(f.w)m.w=f.w;if(f.aid)m.aid=f.aid;
-  D.msgs.push(m);sm=m;let k=0;stream=setInterval(()=>{m.t+=w[k++]||"";if(k>=w.length){stopS();notify("Answer ready",'Your answer about "'+(q||"your question").slice(0,40)+'" is ready.');if(capped())limitMsg()}else render()},35)},600)}
+  D.msgs.push(m);sm=m;let k=0;stream=setInterval(()=>{m.t+=w[k++]||"";if(k>=w.length){stopS();notify("Answer ready",'Your answer about "'+(q||"your question").slice(0,40)+'" is ready.');if(gn){D.msgs.push({s:"i",note:1,up:1,t:gn,ts:Date.now()});save();render()}if(capped())limitMsg()}else render()},35)},600)}
 $("msgs").addEventListener("click",e=>{
- const c=e.target.closest("[data-chip]");if(c){if(stream!=null)return;const q0=(()=>{for(let i=D.msgs.length;i--;){const x=D.msgs[i];if(x.s=="o"&&!x.chip)return x.t}return"this topic"})();D.msgs.push({s:"o",t:c.dataset.chip,chip:1,ts:Date.now(),st:2});save();render();ask(q0,c.dataset.chip);return}
+
  const st=e.target.closest("[data-st]");if(st){$("inp").value=st.dataset.st;send();return}
  const b=e.target.closest("[data-act]");if(!b)return;const i=+b.dataset.i,m=D.msgs[i],a=b.dataset.act;if(a=="plans"){plans();return}if(a=="activate"){activatePlan();return}
  if(a=="copy"){navigator.clipboard&&navigator.clipboard.writeText(m.t.replace(/[#*`|]/g,""));return}
@@ -2638,11 +2699,24 @@ if(!R){mic.onclick=()=>uiAlert("Voice input is not supported in this browser. Tr
 const L={en:"en-US",sw:"sw-KE"},NAME={en:"English",sw:"Kiswahili"},PH=inp.placeholder;
 const lang=()=>{try{return localStorage.getItem("ask_vlang")=="sw"?"sw":"en"}catch(e){return"en"}};
 let rec=null,on=false,base="",fin="",cur="",last=0;
-const paint=()=>{inp.value=[base,fin,cur].filter(Boolean).join(" ");try{inp.scrollLeft=inp.scrollWidth;inp.dispatchEvent(new Event("input"))}catch(e){}};
-function stop(){on=false;try{rec&&rec.stop()}catch(e){}cur="";paint();mic.classList.remove("on");inp.placeholder=PH}
+const iw=$("iw"),bars=[].slice.call(document.querySelectorAll("#wave i")),hs=bars.map(()=>.15),RM=!!(window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches);
+let lvl=0,raf=0,talk=false;
+const bump=v=>{lvl=Math.max(lvl,v)};
+function frame(ts){
+ if(!on){raf=0;return}
+ const t=ts/1000;lvl*=.94;if(lvl<.02)lvl=0;if(talk)lvl=Math.max(lvl,.3+.25*Math.random());
+ bars.forEach((b,i)=>{const w=.5+.5*Math.sin(t*(5+i*.7)+i*1.3),w2=.5+.5*Math.sin(t*(3.1+i*.45)+i*2.1),tg=.2+.12*w2+lvl*(.2+.55*w);
+  hs[i]+=(tg-hs[i])*.35;b.style.transform="scaleY("+Math.min(1,Math.max(.1,hs[i])).toFixed(3)+")"});
+ raf=requestAnimationFrame(frame)}
+function waveOn(){iw.classList.add("rec");if(RM)bars.forEach(b=>b.style.transform="scaleY(.5)");else if(!raf)raf=requestAnimationFrame(frame)}
+function waveOff(){iw.classList.remove("rec");lvl=0;talk=false;if(raf){cancelAnimationFrame(raf);raf=0}bars.forEach((b,i)=>{hs[i]=.15;b.style.transform="scaleY(.15)"})}
+const lv=$("live");
+const paint=()=>{const tx=[base,fin,cur].filter(Boolean).join(" ");if(on){lv.classList.toggle("empty",!tx);lv.textContent=tx||"Listening in "+NAME[lang()]+"…";lv.scrollTop=1e9;return}inp.value=tx;try{inp.scrollLeft=inp.scrollWidth;inp.dispatchEvent(new Event("input"))}catch(e){}};
+function stop(){on=false;try{rec&&rec.stop()}catch(e){}if(cur){fin+=(fin?" ":"")+cur}cur="";lv.classList.remove("on");paint();mic.classList.remove("on");waveOff();inp.placeholder=PH}
 function run(){
  rec=new R();rec.lang=L[lang()];rec.continuous=false;rec.interimResults=true;rec.maxAlternatives=1;
- rec.onresult=e=>{last=Date.now();let it="";for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i],t=r[0].transcript.trim();if(r.isFinal){if(t)fin+=(fin?" ":"")+t}else it+=r[0].transcript}cur=it;paint()};
+ rec.onspeechstart=()=>{talk=true;bump(.8)};rec.onspeechend=()=>{talk=false};rec.onsoundstart=()=>bump(.5);
+ rec.onresult=e=>{last=Date.now();bump(.9);let it="";for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i],t=r[0].transcript.trim();if(r.isFinal){if(t)fin+=(fin?" ":"")+t}else it+=r[0].transcript}cur=it;paint()};
  rec.onerror=e=>{
   if(e.error=="not-allowed"||e.error=="service-not-allowed"){stop();uiAlert("Please allow microphone access for this app in your phone settings.")}
   else if(e.error=="network"){stop();uiAlert("Voice needs an internet connection.")}
@@ -2652,7 +2726,7 @@ function run(){
 function start(){
  if(stream!=null)return;
  base=inp.value.trim();fin="";cur="";last=Date.now();on=true;
- mic.classList.add("on");inp.placeholder="Listening in "+NAME[lang()]+"…";run()}
+ mic.classList.add("on");waveOn();lv.classList.add("on");paint();run()}
 mic.onclick=()=>on?stop():start();
 document.addEventListener("visibilitychange",()=>{if(document.hidden&&on)stop()});
 const _send=send;send=function(){if(on)stop();return _send.apply(this,arguments)};
@@ -2916,10 +2990,14 @@ const HANDOFF={
    "Answer styles and Supabase",
    [
     ["Answer style by plan: Free and Basic exact question only, Standard plus simple explanation, Premium full breakdown or meaning only when asked",1],
+    ["Quick-action buttons (Explain simpler, Give an example, More detail, Quiz me) removed on every plan. The learner types the request instead. Free: direct answer only. Basic: adds quizzes. Standard: adds explain simpler and examples. Premium: adds detailed answers by default. A request above the plan gets an upgrade note with a See plans button (planGate in the script). Quiz me with no topic picks a random topic; quiz on a named topic uses that topic.",1],
     ["Read published topics from Supabase and look up find_answer, log unanswered questions, send feedback votes",1],
     ["Publish the 60 draft Mathematics answers after teacher review (all still drafts, so learners cannot see them)",0],
     ["Add topics for subjects other than Primary Mathematics and Science: questions with no topic get a placeholder answer and are logged as unanswered",0],
-    ["Try on a real phone; Free and Basic limits are not checked on the server",0]
+    ["Try on a real phone; Free and Basic limits are not checked on the server",0],
+    ["Try the typed requests by plan on a real phone (explain simpler, example, quiz on each plan)",0],
+    ["Try the listening wave on a real phone (it reacts to speech start and to words as they arrive; it does not read the microphone volume)",0],
+    ["Connect What's new to the database. It is switched off for now: WN_ON is false in the script, the list stays empty and nothing is added to it. Turn it on and load the announcements from Supabase.",0]
    ]
   ],
   [
@@ -2961,6 +3039,10 @@ const HANDOFF={
   ]
  ],
  "log": [
+  [
+   "2026-10-30",
+   "Changes asked by the owner: the typing box now has its own colour (different from the chat body) and the send button is blue. Quick-action buttons removed on all plans; plan rules now apply to typed requests (Free direct answer only; Basic adds quizzes; Standard adds explain simpler and examples; Premium adds detailed answers by default; Quiz me with no topic is random, with a topic it uses that topic; a request above the plan shows an upgrade note). Settings row is now Upgrade plan and the word count is hidden everywhere, including the plans screen. What's new is switched off (WN_ON false) until it reads from the database. The microphone shows a moving wave while listening. Tested: the request detection and plan rules in a script test. Not yet tried on a real phone."
+  ],
   [
    "2026-10-30",
    "Answers now follow the plan. Free and Basic: only the exact thing asked (what is photosynthesis gives the meaning only; how does it work gives only the steps). Standard: the thing asked plus a short simple explanation. Premium: a full breakdown (meaning, steps, why it matters, simple words, examples, common mistakes, quick check with answer, exam tip) with no follow-up questions; if the learner says only, just, or asks to define or give the meaning, Premium gives the meaning alone, and words like everything, in detail or describe bring the full breakdown back. The question is read for what it asks (meaning, how, why, example, mistakes, simple). Regenerate gives a different but correct wording and order. Supabase: published topics are read straight from the topics table (cached, replace local topics of the same name, new ones are added), find_answer is tried first by plan (Free, Basic: answer; Standard: answer plus simpler; Premium: detail, else answer), unanswered questions go to log_unanswered, votes go to submit_feedback for Supabase answers. If Supabase is slow or down the app answers from its own topics. Tested in a headless browser only. sw.js CACHE name must be changed so phones pick this up."

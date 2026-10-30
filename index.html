@@ -2642,7 +2642,7 @@ function mock(q,mode){
  PLE learners: Primary 1 to 7. UCE learners: Senior 4 down to Primary 1. UACE learners: Senior 6 down to Primary 1. */
 const LRANK={PLE:0,UCE:1,UACE:2},LNAME={PLE:"primary",UCE:"O-Level (UCE)",UACE:"A-Level (UACE)"};
 const clName=c=>{c=String(c||"").trim();let m=/^P(\d)$/i.exec(c);if(m)return"Primary "+m[1];m=/^S(\d)$/i.exec(c);if(m)return"Senior "+m[1];return c};
-function levelNote(lv,cls){if(!lv||!(lv in LRANK))return"";const me=LRANK[lvKey()],it=LRANK[lv];if(it===me)return"";const c=cls?clName(cls):"";
+function levelNote(lv,cls){return"";/* research is free: no above/below-level notes for anyone */if(!lv||!(lv in LRANK))return"";const me=LRANK[lvKey()],it=LRANK[lv];if(it===me)return"";const c=cls?clName(cls):"";
  if(it>me)return"This topic is "+LNAME[lv]+" work and is not in your class topics"+(c?" (it is usually taught in "+c+")":"")+". You can read it for research, but focus on your own class topics first.";
  return"This is "+LNAME[lv]+" work"+(c?", taught in "+c:"")+". It is good for revision, but it is below your current level."}
 function topicOfAny(q){const s=q.toLowerCase(),kw=kwOK(q);return TOP.find(t=>t.re.test(s)&&kw&&t.ai==null&&(D.sub!="General"||!t.nd))||null}
@@ -2713,7 +2713,7 @@ function bub(m,i,last){
  let act="";
  if(!m.stream){act=`<div class="act out">${A.map(a=>`<button class="${a[2]?"on":""}" data-act="${a[0]}" data-i="${i}" aria-label="${a[1]}" title="${a[1]}">${AI[a[0]]}</button>`).join("")}${last?`<button data-act="regen" data-i="${i}" aria-label="Regenerate" title="Regenerate">${AI.regen}</button>`:""}</div>`;
   if(last&&m.w&&m.w.shown<m.w.parts.length)h+=wBtns(m,i)}
- return h+(m.lvn?`<div class="lvn">${esc(m.lvn)}</div>`:"")+`<small>${hm(m.ts)}</small></div>${act}`}
+ return h+`<small>${hm(m.ts)}</small></div>${act}`}
 /* ===== FREE PLAN: random word limit (2000 to 3000) per account, kept on this phone ===== */
 const LIM1="You have hit the maximum limit of the free plan.",LIM2="Upgrade to enjoy Unlimitedly.",LIM=LIM1+" "+LIM2,
 FQK=()=>"ask_free_"+((window.AK&&AK.me()&&AK.me().username)||""),
@@ -2815,13 +2815,13 @@ examiner:(N,d,c)=>{const T=c.T,P=c.P,A=[],mcq=d>=4?N.quiz:[];let scen=null;
  A.push({q:c.cw[0]+" what is meant by "+T+".",a:N.d||P[0]||"-",m:2});
  const n=Math.min(3,Math.max(1,P.length));A.push({q:c.cw[1]+" "+n+" important point"+(n>1?"s":"")+" about "+T+".",a:ul(take(P,n))||"-",m:n});
  if(d>=2){const u=N.uses.length?N.uses:N.ex;A.push({q:"Give two uses or examples of "+T+".",a:ul(take(u,2))||"-",m:2})}
- if(d>=3)scen={q:"**Scenario:** "+(N.ex[0]?"A learner in Uganda notices this: "+N.ex[0].replace(/[.]+$/,"")+".":"A school in Uganda is studying "+T+".")+" Use what you know about "+T+" to explain what is happening and why.",a:ul(take(P,3))+"\n- Link each point to the situation in the scenario.",m:6};
+ if(d>=3)scen={q:"**Item:** "+(N.ex[0]?"A community in Uganda is facing problems linked to "+T+". "+N.ex[0].replace(/[.]+$/,"")+".":"A community in Uganda is facing problems linked to "+T+".")+" The local leaders have called a meeting and want advice on the way forward.\n**Task A:** Prepare a short speech for the meeting that points out the main problems or causes linked to "+T+". (3 marks)\n**Task B:** Advise the people on what they can do to deal with the problem. Use details from the item. (3 marks)",a:"**Task A:** "+ul(take(P,3))+"\n**Task B:** "+(ul(take(P.slice(3).concat(P),3))||"-")+"\n- Marks are given for using details from the item in both tasks.",m:6};
  const tot=A.reduce((x,y)=>x+y.m,0)+(scen?scen.m:0)+mcq.length;
  let o="# Exam practice: "+T+(N.cl?"\n"+N.cl:"")+"\n**Time:** "+Math.round(tot*1.5)+" minutes · **Total:** "+tot+" marks";
  o+="\n## Section A: Short questions\n"+A.map((x,i)=>(i+1)+". "+x.q+" ("+x.m+" marks)").join("\n");
- if(scen)o+="\n## Section B: Scenario question\n"+(A.length+1)+". "+scen.q+" ("+scen.m+" marks)";
+ if(scen)o+="\n## Section B: Scenario question\n"+(A.length+1)+". "+scen.q;
  if(mcq.length)o+="\n## Section C: Multiple choice\n"+mcq.map((z,i)=>(i+1)+". "+quizq(z,false)).join("\n");
- o+="\n## Marking guide\n"+A.map((x,i)=>"**Q"+(i+1)+".** "+x.a).join("\n")+(scen?"\n**Q"+(A.length+1)+".** "+scen.a:"")+(mcq.length?"\n**Section C:** "+mcq.map((z,i)=>(i+1)+" "+"ABC"[z[2]]).join(", "):"");
+ o+="\n## Marking guide\n"+A.map((x,i)=>"**Q"+(i+1)+".** "+x.a).join("\n")+(scen?"\n**Q"+(A.length+1)+".**\n"+scen.a:"")+(mcq.length?"\n**Section C:** "+mcq.map((z,i)=>(i+1)+" "+"ABC"[z[2]]).join(", "):"");
  if(d>=3)o+=sec("Examiner's tips",ul(["Read the command word first: "+c.cw.join(", ")+".","One mark is one clear point. Match the number of points to the marks.","In a scenario question, use details from the situation in your answer."]));
  if(d>=4)o+=sec("How the marks are given",ul(["Definition questions: one mark for each correct point","Explain questions: a point plus its reason earns the marks","Scenario questions: marks for using the details given","Clear working and correct terms protect your marks"]));
  return o},

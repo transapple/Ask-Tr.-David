@@ -298,6 +298,7 @@ up:'<svg viewBox="0 0 24 24"><path d="M7 11v9H3v-9zM7 11l4-8a2 2 0 012 2v4h6a2 2
 dn:'<svg viewBox="0 0 24 24"><g transform="rotate(180 12 12)"><path d="M7 11v9H3v-9zM7 11l4-8a2 2 0 012 2v4h6a2 2 0 012 2.3l-1.3 6.5A2 2 0 0117.7 20H7"/></g></svg>',
 regen:'<svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 11-2.5-5.8M20 4v5h-5"/></svg>'};
 const IC={
+refresh:'<svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 00-14.9-3M4 5v4h4M4 13a8 8 0 0014.9 3M20 19v-4h-4"/></svg>',
 doc:'<svg viewBox="0 0 24 24"><path d="M7 3h8l4 4v14H7zM15 3v4h4M10 12h6M10 16h6"/></svg>',
 star:'<svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/></svg>',
 bell:'<svg viewBox="0 0 24 24"><path d="M6 9a6 6 0 1112 0c0 6 2 7 2 7H4s2-1 2-7M10 20a2 2 0 004 0"/></svg>',
@@ -376,12 +377,36 @@ function settings(){
  <div class="row" data-a="ex"><span class="ri">${IC.dl}</span><div>Export chat<small>Download as a text file</small></div></div>
  <div class="row" data-a="tr"><span class="ri">${IC.bin}</span><div>Trash<small>${D.trash.length} message${D.trash.length==1?"":"s"}</small></div></div>
  <div class="row" data-a="pl"><span class="ri">${IC.star}</span><div>Free plan and upgrade<small>${FQ().used.toLocaleString()} words used</small></div></div>
+ <div class="row" data-a="up"><span class="ri">${IC.refresh}</span><div>Update app<small>Reload to get the latest version</small></div></div>
  <div class="row" data-a="ho"><span class="ri">${IC.doc}</span><div>Project handoff<small>${hoCount()[0]} done, ${hoCount()[1]-hoCount()[0]} remaining</small></div></div>`,closeP,e=>{
   const a=e.target.closest(".row")?.dataset.a;
   if(a=="th"){D.theme=isDark()?"light":"dark";applyTheme();save();settings()}
-  if(a=="ct")chatTheme();if(a=="nt")toggleNotif();if(a=="wn")notifs();if(a=="ho")handoff();if(a=="pl")plans(1);if(a=="pf")profile();if(a=="ak")AK.open();if(a=="ac")access();if(a=="vl")voiceLang();
+  if(a=="ct")chatTheme();if(a=="nt")toggleNotif();if(a=="wn")notifs();if(a=="ho")handoff();if(a=="pl")plans(1);if(a=="pf")profile();if(a=="ak")AK.open();if(a=="ac")access();if(a=="vl")voiceLang();if(a=="up")updateApp();
   if(a=="ex"){const t=D.msgs.map(m=>"["+new Date(m.ts).toLocaleString()+"] "+(m.s=="o"?"You":D.name)+": "+m.t).join("\n");const u=URL.createObjectURL(new Blob([t||"No messages"],{type:"text/plain"}));const l=document.createElement("a");l.href=u;l.download="chat-history.txt";l.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
   if(a=="tr"){sel.clear();trash()}})}
+function updateApp(){
+ const url="https://asktrdavid.vercel.app/";
+ showP("Update app",`<div style="padding:16px 18px;line-height:1.45;color:var(--sub)">If a new version was published, tap Update now. The app reloads and loads the newest files. Your chat and account stay on this phone.</div>
+ <div class="sec">App link</div>
+ <div class="row" data-u="open"><span class="ri">${IC.doc}</span><div>${url.replace(/^https:\/\//,"").replace(/\/$/,"")}<small>Tap to open the app link</small></div></div>
+ <div class="row" data-u="copy"><span class="ri">${IC.dl}</span><div>Copy link<small>Share or paste it anywhere</small></div></div>
+ <button class="btn" data-u="go" id="updgo">Update now</button>
+ <div class="t" id="updmsg" style="padding:4px 18px;text-align:center;min-height:20px"></div>`,settings,e=>{
+  const r=e.target.closest("[data-u]");if(!r)return;const k=r.dataset.u,m=$("updmsg");
+  if(k=="open"){window.open(url,"_blank","noopener")}
+  if(k=="copy"){const ok=()=>{m.textContent="Link copied"};if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(url).then(ok,ok);else ok()}
+  if(k=="go"){
+   r.disabled=true;m.textContent="Updating...";
+   const done=()=>{
+    const local=/^(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(location.hostname);
+    if(location.protocol=="https:"&&!local)location.replace(location.origin+location.pathname+"?u="+Date.now());
+    else if(location.protocol=="file:")location.reload();
+    else location.replace(url+"?u="+Date.now());
+   };
+   const wipe=[];
+   try{if("serviceWorker"in navigator)wipe.push(navigator.serviceWorker.getRegistrations().then(a=>Promise.all(a.map(x=>x.unregister()))))}catch(x){}
+   try{if(window.caches)wipe.push(caches.keys().then(a=>Promise.all(a.map(x=>caches.delete(x)))))}catch(x){}
+   Promise.all(wipe).then(done,done);setTimeout(done,2500)}})}
 function updateBadge(){$("bdg").style.display=D.notes.some(x=>!x.r)?"block":"none"}
 function notify(t,b){
  if(!document.hidden)return;

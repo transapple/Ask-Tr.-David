@@ -64,6 +64,8 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 .b.i{align-self:flex-start;background:var(--in);border-bottom-left-radius:4px}
 .b small{float:right;margin:7px 0 0 10px;font-size:11px;color:var(--sub);display:inline-flex;align-items:center;gap:3px}
 .b small svg{width:16px;height:16px;stroke-width:2.4}.rd{color:var(--tick)}
+.mdltag{margin:0 0 6px;font-size:11px;font-weight:700;letter-spacing:.2px;color:var(--sub)}
+.lvn{margin:8px 0 2px;padding:7px 10px;border-left:3px solid #2f80ed;border-radius:4px;background:rgba(47,128,237,.10);color:var(--sub);font-size:13px;line-height:1.4}
 .aitag{display:inline-block;margin:0 0 6px;padding:2px 8px;border-radius:6px;background:rgba(245,158,11,.16);color:#b45309;font-size:11px;font-weight:700}
 .day{align-self:center;background:var(--in);color:var(--sub);font-size:12px;padding:4px 12px;border-radius:10px;margin:8px 0}
 #editing{display:none;background:var(--bar);padding:8px 16px;font-size:13px;color:var(--green);border-top:1px solid var(--line)}
@@ -89,6 +91,20 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 #mpop .mpr{display:flex;align-items:center;gap:16px;padding:15px 18px;font-size:18px;cursor:pointer}
 #mpop .mpr+.mpr{border-top:1px solid var(--line)}#mpop .mpr:active{background:var(--line)}
 #panel{position:fixed;inset:0;margin:0 auto;max-width:800px;background:var(--bg);display:none;flex-direction:column;z-index:7}
+#adm{position:fixed;inset:0;margin:0 auto;max-width:800px;background:var(--bg);color:var(--text);display:none;flex-direction:column;z-index:6}
+#adm .ah{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:calc(10px + env(safe-area-inset-top,0px)) 14px 10px;background:var(--bar);border-bottom:1px solid var(--line)}
+#adm .ah b{font-size:18px;display:block}#adm .ah small{color:var(--sub);font-size:12px}
+#adm .ah button{border:0;border-radius:18px;padding:9px 14px;font:inherit;font-size:14px;font-weight:600;background:var(--green);color:#fff;cursor:pointer}
+#abody{flex:1;overflow-y:auto;padding-bottom:12px}
+#adm .an{display:flex;border-top:1px solid var(--line);background:var(--bar);padding-bottom:env(safe-area-inset-bottom,0px)}
+#adm .an button{flex:1;border:0;background:none;color:var(--sub);font:inherit;font-size:13px;font-weight:600;padding:13px 2px;cursor:pointer;border-top:3px solid transparent}
+#adm .an button.on{color:var(--green);border-top-color:var(--green)}
+.ag{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 14px}
+.ac{background:var(--sheet);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.ac b{display:block;font-size:26px;line-height:1.15}.ac span{color:var(--sub);font-size:13px}.ac small{display:block;color:var(--sub);font-size:12px;margin-top:3px}
+.asec{padding:14px 18px 6px;font-size:12px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.04em}
+.ain{display:block;width:calc(100% - 28px);margin:10px 14px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--text);font:inherit;box-sizing:border-box}
+.apl{display:inline-block;border-radius:10px;padding:2px 9px;font-size:12px;font-weight:700;color:#fff;white-space:nowrap}
 #pbody{flex:1;overflow-y:auto}
 .row{display:flex;align-items:center;gap:14px;padding:15px 18px;border-bottom:1px solid var(--line);cursor:pointer}
 .row:active{background:var(--wall)}.row small{display:block;color:var(--sub);font-size:13px}.row.danger{color:#ff453a}
@@ -305,6 +321,7 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 </div>
 <div id="dlgx" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);place-items:center;z-index:120;padding:20px"><div style="background:var(--sheet,#fff);color:var(--text,#111);border-radius:14px;padding:20px;width:100%;max-width:320px;box-shadow:0 4px 18px rgba(0,0,0,.3)"><div id="dlgm" style="font-size:16px;line-height:1.4;margin-bottom:14px;white-space:pre-wrap"></div><input id="dlgi" autocomplete="off" style="display:none;width:100%;box-sizing:border-box;margin-bottom:14px;padding:10px;font-size:16px;border:1px solid var(--line,#ccc);border-radius:8px;background:var(--wall,#fff);color:inherit"><div style="display:flex;justify-content:flex-end;gap:8px"><button id="dlgc" style="background:none;border:0;padding:8px 14px;font-size:15px;color:inherit;cursor:pointer">Cancel</button><button id="dlgo" style="background:var(--green,#00a884);color:#fff;border:0;border-radius:8px;padding:8px 18px;font-size:15px;cursor:pointer">OK</button></div></div></div>
 <div id="more"><div data-a="n">New chat</div><div data-a="h">Chat history</div><div data-a="b">Saved answers</div><div data-a="s">Search chat</div><div data-a="cc" style="color:#e03131">Clear chat</div><div data-a="g">Settings</div></div>
+<div id="adm" aria-label="Admin panel"></div>
 <div id="panel"></div>
 <div id="scrim"><div id="sheet"></div></div>
 <script>
@@ -412,12 +429,13 @@ function settings(){
  <div class="row" data-a="nt"><span class="ri">${IC.bell}</span><div>Away alerts<small>${D.notif?"On":"Off"}: phone alert when an answer is ready</small></div></div>
  <div class="row" data-a="ex"><span class="ri">${IC.dl}</span><div>Export chat<small>Download as a text file</small></div></div>
  <div class="row" data-a="tr"><span class="ri">${IC.bin}</span><div>Trash<small>${D.trash.length} message${D.trash.length==1?"":"s"}</small></div></div>
+ <div class="row" data-a="md"><span class="ri">${IC.star}</span><div>AI models<small>Which model is best for lessons, exams and research</small></div></div>
  <div class="row" data-a="pl"><span class="ri">${IC.star}</span><div>Upgrade plan<small>See the plans and how to pay</small></div></div>
  <div class="row" data-a="up"><span class="ri">${IC.refresh}</span><div>Update app<small>Reload to get the latest version</small></div></div>
- <div class="row" data-a="ho"><span class="ri">${IC.doc}</span><div>Project handoff<small>${hoCount()[0]} done, ${hoCount()[1]-hoCount()[0]} remaining</small></div></div>`,closeP,e=>{
+`,closeP,e=>{
   const a=e.target.closest(".row")?.dataset.a;
   if(a=="th"){D.theme=isDark()?"light":"dark";applyTheme();save();settings()}
-  if(a=="ct")chatTheme();if(a=="nt")toggleNotif();if(a=="wn")notifs();if(a=="ho")handoff();if(a=="pl")plans(1);if(a=="pf")profile();if(a=="ak")AK.open();if(a=="ac")access();if(a=="vl")voiceLang();if(a=="up")updateApp();
+  if(a=="ct")chatTheme();if(a=="nt")toggleNotif();if(a=="wn")notifs();if(a=="ho"&&isOwner())handoff();if(a=="sv"&&isOwner())voiceRoom("q","draft");if(a=="md")modelsGuide();if(a=="pl")plans(1);if(a=="pf")profile();if(a=="ak")AK.open();if(a=="ac")access();if(a=="vl")voiceLang();if(a=="up")updateApp();
   if(a=="ex"){const t=D.msgs.map(m=>"["+new Date(m.ts).toLocaleString()+"] "+(m.s=="o"?"You":D.name)+": "+m.t).join("\n");const u=URL.createObjectURL(new Blob([t||"No messages"],{type:"text/plain"}));const l=document.createElement("a");l.href=u;l.download="chat-history.txt";l.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
   if(a=="tr"){sel.clear();trash()}})}
 function updateApp(){
@@ -2520,7 +2538,7 @@ const SBU="https://pjdtlpnlvumpefxjmjpv.supabase.co/rest/v1/",SBK="sb_publishabl
 const sbCall=(path,opt,ms)=>{const c=new AbortController(),t=setTimeout(()=>c.abort(),ms||4000);return fetch(SBU+path,Object.assign({signal:c.signal},opt,{headers:Object.assign({apikey:SBK,"Content-Type":"application/json"},(opt||{}).headers)})).then(r=>{clearTimeout(t);return r.ok?r.json():Promise.reject(r.status)})};
 function dbTopic(r){let re;try{re=new RegExp(r.pattern,"i")}catch(e){return null}
  const cl=(r.topic_classes||[]).slice().sort((a,b)=>a.sort_order-b.sort_order).map(c=>[c.class_code,c.terms,c.note]);
- return{n:r.name,re,cl:cl.length?cl:undefined,d:r.definition||"",h:r.steps||"",w:r.uses||"",s:r.simple||"",e:r.examples||"",m:r.more||"",q:Array.isArray(r.quiz)?r.quiz:[],a:r.label_steps||"How to work it out",b:r.label_uses||"Where it is used",nd:r.detect===false?1:0,S:[r.subject_name],L:[r.level_code],db:1}}
+ return{n:r.name,re,cl:cl.length?cl:undefined,d:r.definition||"",h:r.steps||"",w:r.uses||"",s:r.simple||"",e:r.examples||"",m:r.more||"",q:Array.isArray(r.quiz)?r.quiz:[],a:r.label_steps||"How to work it out",b:r.label_uses||"Where it is used",nd:r.detect===false?1:0,S:[r.subject_name],L:[r.level_code],db:1,sl:r.syllabus_level||null,cls:r.class_label||null}}
 function putTopics(rows){let n=0;rows.forEach(r=>{const T=dbTopic(r);if(!T)return;const i=TOP.findIndex(t=>t.n==T.n&&String(t.S)==String(T.S)&&String(t.L)==String(T.L));if(i>=0)TOP[i]=T;else TOP.push(T);n++});return n}
 function loadTopics(){try{const c=JSON.parse(localStorage.getItem(TKEY)||"null");if(Array.isArray(c)&&c.length)putTopics(c)}catch(e){}
  return sbCall("topics?select=*,topic_classes(class_code,terms,note,sort_order)&status=eq.published&order=sort_order",{},6000).then(rows=>{if(Array.isArray(rows)&&rows.length){putTopics(rows);try{localStorage.setItem(TKEY,JSON.stringify(rows))}catch(e){}}}).catch(()=>{})}
@@ -2546,7 +2564,8 @@ function part(T,f,H){
  if(f=="simple"&&T.s)return["In simple words",T.s];
  return[null,T.d]}
 let VN=Math.floor(Math.random()*1000);
-function tiered(q,T0){const T=T0||topicOf(q);if(!T||!T.d)return null;
+function tiered(q,T0){const T=T0||topicOf(q);if(!T||!T.d)return null;return{t:modelText(normT(T)),fmt:1}}
+function tieredOld(q,T0){const T=T0||topicOf(q);if(!T||!T.d)return null;
  const pl=planName(),I=qIntent(q),H=heads(T),v=VN++,pk=a=>a[v%a.length],L=lvKey(),onlyReq=(I.only||I.defw)&&!I.full,
   narrow=pl=="Free"||pl=="Basic"||onlyReq,sec=(h,b)=>b?"\n## "+h+"\n"+b:"";
  const[hd,body]=part(T,I.f,H),one="# "+T.n+"\n"+(hd?"## "+hd+"\n":"")+body;
@@ -2582,6 +2601,29 @@ function smallTalk(q){
   return{t:"Alright. What would you like to ask next?"+tips()};
  if(/^(who are you|what are you|what is your name|what s your name|your name|what can you do|how can you help me|can you help me|help|help me)$/.test(t))
   return{t:"I am **Ask Tr. David**, a study helper for learners in Uganda. I can explain topics, show worked steps, give examples and quiz you. Try one of these:"+tips()};
+
+ const nmx=nm;
+ if(/^(thank you|thanks|thank u) (tr )?(david|teacher|sir)$/.test(t))return{t:"You are welcome"+nm+"! Ask me another question any time."};
+ if(/^(you are|u are|you re|youre|ur) (good|great|smart|clever|nice|kind|the best|amazing|wonderful|helpful)( teacher| tr david)?$/.test(t))return{t:"Thank you"+nm+"! I am happy to help. Keep asking and keep learning."};
+ if(/^(wow|amazing|awesome|excellent|brilliant|super|fantastic|well done|good job|great job|nice one|good one|nice work|bravo)$/.test(t))return{t:"Thank you"+nm+"! I am glad it helps. What shall we learn next?"};
+ if(/^(sorry|i am sorry|i m sorry|my bad|pardon me|excuse me)$/.test(t))return{t:"No problem"+nm+". Go ahead and ask."};
+ if(/^(wait|hold on|one moment|just a moment|wait a minute|give me a minute|let me think|hm+|eh+|uhm+|um+|oh+|ah+|aha|oh i see|is it|is that so|seriously|haha+|lol|hehe+|ok then|okay then)$/.test(t))return{t:"Take your time"+nm+". I am here when you are ready."};
+ if(/^(are you there|hello are you there|can you hear me|do you hear me|you there)$/.test(t))return{t:"Yes, I am here"+nm+". Ask me anything about your studies."};
+ if(/^(who (made|created|built|developed|designed|programmed) you|who is your (creator|maker|owner)|who owns you)$/.test(t))return{t:"I was built for the Ask Tr. David study app, to help learners in Uganda with their studies. How can I help you today?"};
+ if(/^(where are you from|where do you live|how old are you|are you (a )?(robot|human|real|person|ai|machine|computer|teacher|boy|girl|man|woman))$/.test(t))return{t:"I am Ask Tr. David, a study helper in this app, not a person. I am always ready to help you learn. What shall we study?"};
+ if(/^(i love you|i like you|i like this app|i love this app|this app is (good|great|nice|useful|helpful)|i like it)$/.test(t))return{t:"Thank you"+nm+"! I am glad you like it. Keep studying hard."};
+ if(/^(i am|i m|im|i'm) (tired|sleepy|bored|hungry)$/.test(t))return{t:"Take a short rest, drink some water, then come back refreshed"+nm+". Even ten minutes of study a day helps."};
+ if(/^(i am|i m|im|i'm) (fine|good|well|okay|ok|great|happy)( thanks| thank you)?$|^(doing|am) (fine|well|good)$|^fine (thanks|thank you)$/.test(t))return{t:"That is nice to hear"+nm+". What would you like to study?"};
+ if(/^(i am|i m|im|i'm|am) (ready|back|here)( to learn)?$|^(let us|lets|let s) (start|begin|go)$|^(start|begin|go ahead|ready)$/.test(t))return{t:"Good! Ask me a question or pick one of these:"+tips()};
+ if(/^(i will (come back|be back)|be back later|later|see you (tomorrow|soon)|talk later|talk to you later|take care|stay well)$/.test(t))return{t:"Goodbye"+nm+"! Keep studying and come back when you have a question."};
+ if(/^(i (want|would like) to (learn|study)|teach me|help me study|help me learn|i need help|i need your help|please help|can you teach me)$/.test(t))return{t:"Of course"+nm+"! Tell me the topic or question, for example one of these:"+tips()};
+ if(/^(motivate me|encourage me|i am (worried|scared|afraid|nervous)|i m (worried|scared|afraid|nervous)|i have (an )?(exams?|tests?)( tomorrow)?|exams are near)$/.test(t))return{t:"You can do it"+nm+"! Study a little every day, ask questions when you are stuck, and rest well. I am here to help. What shall we revise?"};
+ if(/^(good luck|best of luck|all the best)$/.test(t))return{t:"Thank you! I wish you success in your studies too."};
+ if(/^(stop|cancel|never mind|nevermind|forget it|leave it|skip)$/.test(t))return{t:"Alright"+nm+". Ask me whenever you are ready."};
+ if(/^(what time is it|what is the time|what is the date|what is today|what day is it)$/.test(t))return{t:"I cannot see the time or date from here, please check your phone. Let us use your time well to study!"};
+ if(/^(tell me a joke|say a joke|joke|make me laugh|something funny)$/.test(t))return{t:"Why did the student eat his homework? Because the teacher said it was a piece of cake! Now, what would you like to study?"};
+ if(/^(i do not know|i don t know|dont know|i have no idea)$/.test(t))return{t:"That is okay"+nm+". Tell me what you are studying and I will help you step by step."};
+ if(/^(how was your day|how is your day|how is school|how are you today)$/.test(t))return{t:"My day is going well, thank you"+nm+". How can I help you with your studies?"};
  return null}
 function mock(q,mode){
  if(mode)return mockBase(q,mode);
@@ -2591,6 +2633,21 @@ function mock(q,mode){
  const f=mockBase(q),pl=planName();f.un=1;if(f.hon)return f;
  if(pl!="Premium"){const i=f.t.search(/\n## (Science|Mathematics|English) topics you can ask about|\n## Note\n/),tail=i>=0?f.t.slice(i):"";f.t=f.t.split(pl=="Standard"?"\n## 3.":"\n## 2.")[0]+tail}
  return f}
+/* ===== CLASS LEVEL: a learner may ask anything, but is told when a topic is above or below their level =====
+ PLE learners: Primary 1 to 7. UCE learners: Senior 4 down to Primary 1. UACE learners: Senior 6 down to Primary 1. */
+const LRANK={PLE:0,UCE:1,UACE:2},LNAME={PLE:"primary",UCE:"O-Level (UCE)",UACE:"A-Level (UACE)"};
+const clName=c=>{c=String(c||"").trim();let m=/^P(\d)$/i.exec(c);if(m)return"Primary "+m[1];m=/^S(\d)$/i.exec(c);if(m)return"Senior "+m[1];return c};
+function levelNote(lv,cls){if(!lv||!(lv in LRANK))return"";const me=LRANK[lvKey()],it=LRANK[lv];if(it===me)return"";const c=cls?clName(cls):"";
+ if(it>me)return"This topic is "+LNAME[lv]+" work and is not in your class topics"+(c?" (it is usually taught in "+c+")":"")+". You can read it for research, but focus on your own class topics first.";
+ return"This is "+LNAME[lv]+" work"+(c?", taught in "+c:"")+". It is good for revision, but it is below your current level."}
+function topicOfAny(q){const s=q.toLowerCase(),kw=kwOK(q);return TOP.find(t=>t.re.test(s)&&kw&&t.ai==null&&(D.sub!="General"||!t.nd))||null}
+async function crossLevel(q){
+ const T=topicOfAny(q);
+ if(T){const f=tiered(q,T);if(f){f.lv=T.sl||(T.L&&T.L[0])||null;f.cls=T.cl&&T.cl[0]?T.cl[0][0]:(T.cls||null);return f}}
+ const me=LRANK[lvKey()],order=["PLE","UCE","UACE"].filter(x=>x!==lvKey()).sort((a,b)=>{const la=LRANK[a]<me,lb=LRANK[b]<me;if(la!==lb)return la?-1:1;return la?LRANK[b]-LRANK[a]:LRANK[a]-LRANK[b]});
+ const rs=await Promise.all(order.map(l=>sbCall("rpc/find_answer",{method:"POST",body:JSON.stringify({p_question:String(q).slice(0,300),p_level:l,p_subject:null,p_mode:"answer",p_threshold:0.6})},3000).then(r=>Array.isArray(r)&&r[0]?{r:r[0],l}:null).catch(()=>null)));
+ const h=rs.find(x=>x);if(!h)return null;
+ return{t:modelFromMd(/^\s*#/.test(h.r.body_md)?h.r.body_md:"# "+h.r.title+"\n"+h.r.body_md),aid:h.r.answer_id,lv:h.l,fmt:1}}
 /* owner-written answers from Supabase (find_answer), chosen by plan */
 const MODEMAP={"Explain simpler":"simpler","Give an example":"example","More detail":"detail"};
 async function dbAnswer(q,mode){
@@ -2604,27 +2661,27 @@ async function dbAnswer(q,mode){
  else if(narrow){r=await get("answer");if(r)t=txt(r)}
  else if(pl=="Standard"){const[a,s]=await Promise.all([get("answer"),get("simpler")]);r=a||s;if(a&&s)t=txt(a)+"\n## In simple words\n"+s.body_md;else if(r)t=txt(r)}
  else{const[d,a]=await Promise.all([get("detail"),get("answer")]);r=d||a;if(r)t=txt(r)}
- return r?{t,aid:r.answer_id}:null}
+ return r?{t:mode?t:modelFromMd(t),aid:r.answer_id,fmt:mode?0:1}:null}
 /* NEW QUESTIONS: ask the ai_answer Edge Function. Gemini writes the answer once and it is saved as a draft in Supabase.
  The reply is built by tiered() so it follows the learner's plan; draft answers get the "AI generated, not yet checked" label. */
 const AIU=SBU.replace("/rest/v1/","/functions/v1/")+"ai_answer",escRe=x=>x.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
-async function aiAnswer(q){
+async function aiAnswer(q,FUx){
  const c=new AbortController(),tm=setTimeout(()=>c.abort(),25000);
  try{
   const sub=D.sub=="General"?(detectSub(q)||"General"):D.sub;
-  const r=await fetch(AIU,{method:"POST",signal:c.signal,headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({question:String(q).slice(0,300),level:D.lvl,subject:sub,plan:planName()})});
+  const r=await fetch(AIU,{method:"POST",signal:c.signal,headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({question:String(q).slice(0,300),level:D.lvl,subject:sub,plan:planName(),follow:FUx&&!FUx.local?{kind:FUx.kind,topic:FUx.topic,step:FUx.step||0,instruction:FUx.hint||"",previous:lastAnsText()}:undefined})});
   if(!r.ok)return null;
   const j=await r.json();
   if(j.status=="busy")return{busy:1};
-  if(j.status=="found"&&j.kind=="answer"&&j.answer&&j.answer.body_md){const a=j.answer;return{t:/^\s*#/.test(a.body_md)?a.body_md:"# "+a.title+"\n"+a.body_md,aid:a.answer_id}}
+  if(j.status=="found"&&j.kind=="answer"&&j.answer&&j.answer.body_md){const a=j.answer;return{t:modelFromMd(/^\s*#/.test(a.body_md)?a.body_md:"# "+a.title+"\n"+a.body_md),aid:a.answer_id,fmt:1}}
   const t=(j.status=="created"||(j.status=="found"&&j.kind=="topic"))?j.topic:null;
   if(!t||!t.name||!t.definition)return null;
   const dr=j.status=="created"||j.draft===true;
-  const T={n:String(t.name),re:new RegExp(escRe(String(q).trim().toLowerCase())),d:t.definition,h:t.steps||"",w:t.uses||"",s:t.simple||"",e:t.examples||"",m:t.more||"",q:Array.isArray(t.quiz)?t.quiz:[],a:t.label_steps||"How to work it out",b:t.label_uses||"Where it is used",nd:0,S:[sub],L:[D.lvl],ai:dr?1:0,tid:t.id||null};
+  const T={n:String(t.name),re:new RegExp(escRe(String(q).trim().toLowerCase())),d:t.definition,h:t.steps||"",w:t.uses||"",s:t.simple||"",e:t.examples||"",m:t.more||"",q:Array.isArray(t.quiz)?t.quiz:[],a:t.label_steps||"How to work it out",b:t.label_uses||"Where it is used",nd:0,S:[sub],L:[D.lvl],ai:dr?1:0,tid:t.id||null,sl:t.syllabus_level||null,cls:t.class_label||null};
   const f=tiered(q,T);if(!f)return null;
   /* keep it for this session so "explain simpler", "give an example" and "quiz me" work on it */
-  TOP.push(T);const ax=TOP.filter(x=>x.ai!=null&&x.re&&x.db==null);if(ax.length>30)TOP.splice(TOP.indexOf(ax[0]),1);
-  if(dr)f.ai=1;if(T.tid)f.tid=T.tid;
+  if(!FUx)TOP.push(T);const ax=TOP.filter(x=>x.ai!=null&&x.re&&x.db==null);if(ax.length>30)TOP.splice(TOP.indexOf(ax[0]),1);
+  if(dr)f.ai=1;if(T.tid)f.tid=T.tid;if(T.sl){f.lv=T.sl;f.cls=T.cls}
   return f
  }catch(e){return null}finally{clearTimeout(tm)}}
 function logUn(q){try{q=String(q).trim().slice(0,300);if(q.length<3)return;fetch(SBU+"rpc/log_unanswered",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_question:q,p_level:D.lvl,p_subject:D.sub})}).catch(()=>{})}catch(e){}}
@@ -2646,12 +2703,12 @@ function bub(m,i,last){
  if(m.lim)return `<div class="b i ai" data-i="${i}"><div style="display:flex;gap:10px;align-items:flex-start"><span style="flex:none;width:34px;height:34px;border-radius:50%;background:rgba(245,158,11,.16);color:#d97706;display:grid;place-items:center"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></span><div style="font-weight:700;font-size:16px;line-height:1.3;color:#d97706;padding-top:1px">${LIM1}</div></div>${rtime()?`<div style="display:flex;gap:8px;align-items:center;margin-top:10px;color:var(--sub);font-size:14px"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#2f80ed" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Your free plan resets at <b style="color:#2f80ed">${rtime()}</b></span></div>`:""}<button data-act="plans" data-i="${i}" style="display:block;width:100%;margin-top:12px;padding:12px 14px;border:0;border-radius:22px;background:var(--green);color:#fff;font:inherit;font-weight:700;cursor:pointer;text-align:center">${LIM2}</button>${isOwner()?`<div class="chips"><button data-act="activate" data-i="${i}" style="color:#8b5cf6;border-color:#8b5cf6;font-weight:600">Activate plan</button></div>`:""}<small>${hm(m.ts)}</small></div>`;
  if(m.err)return `<div class="b i err" data-i="${i}">${esc(m.t)}<div class="act"><button data-act="retry" data-i="${i}">Retry</button></div></div>`;
  const A=[["copy","Copy"],["bm",m.bm?"Saved":"Save",m.bm],["up","Helpful",m.fb==1],["dn","Not helpful",m.fb==-1],["share","Share"]];
- let h=`<div class="b i ai" data-i="${i}">${m.ai?'<div class="aitag">AI generated, not yet checked</div>':""}<div class="md">${md(m.t)}</div>`;
+ let h=`<div class="b i ai" data-i="${i}">${m.ai&&isOwner()?'<div class="aitag">AI generated, not yet checked · only you see this</div>':""}${m.mdl?`<div class="mdltag">${esc(m.mdl)}</div>`:""}<div class="md">${md(m.t)}</div>`;
  if(m.quiz){h+=m.quiz[1].map((o,k)=>`<button class="opt ${m.pick!=null?(k==m.quiz[2]?"ok":k==m.pick?"bad":""):""}" data-act="pick" data-i="${i}" data-k="${k}">${esc(o)}</button>`).join("")+(m.pick!=null?`<p>${m.pick==m.quiz[2]?"Correct, well done.":"Not quite. The correct answer is highlighted."}</p>`+(m.qz?(m.qz.n<m.qz.list.length-1?`<div class="chips"><button data-act="nq" data-i="${i}">Next question</button></div>`:`<p><b>Quiz finished: ${m.qz.score} out of ${m.qz.list.length}.</b></p>`):""):"")}
  let act="";
  if(!m.stream){act=`<div class="act out">${A.map(a=>`<button class="${a[2]?"on":""}" data-act="${a[0]}" data-i="${i}" aria-label="${a[1]}" title="${a[1]}">${AI[a[0]]}</button>`).join("")}${last?`<button data-act="regen" data-i="${i}" aria-label="Regenerate" title="Regenerate">${AI.regen}</button>`:""}</div>`;
   if(last&&m.w&&m.w.shown<m.w.parts.length)h+=wBtns(m,i)}
- return h+`<small>${hm(m.ts)}</small></div>${act}`}
+ return h+(m.lvn?`<div class="lvn">${esc(m.lvn)}</div>`:"")+`<small>${hm(m.ts)}</small></div>${act}`}
 /* ===== FREE PLAN: random word limit (2000 to 3000) per account, kept on this phone ===== */
 const LIM1="You have hit the maximum limit of the free plan.",LIM2="Upgrade to enjoy Unlimitedly.",LIM=LIM1+" "+LIM2,
 FQK=()=>"ask_free_"+((window.AK&&AK.me()&&AK.me().username)||""),
@@ -2666,7 +2723,265 @@ function rtime(){const q=FQ();if(q.left==null)return"";if(!q.at){q.at=Date.now()
 const PLANS4=["Free","Basic","Standard","Premium"],PCOL={Free:"#6b7c85",Basic:"#2f80ed",Standard:"#00a884",Premium:"#8b5cf6"},PVER={Free:"1.0",Basic:"1.0",Standard:"1.0",Premium:"1.0"},
 PK=()=>"ask_planv2_"+((window.AK&&AK.me()&&AK.me().username)||"");
 function planName(){try{const p=localStorage.getItem(PK());return PLANS4.includes(p)?p:"Free"}catch(e){return"Free"}}
-function updPlan(){const p=planName(),l=document.getElementById("psl"),r=document.getElementById("psr");if(l)l.innerHTML='<i style="background:'+PCOL[p]+'"></i><b>'+p+' plan</b>';if(r)r.textContent="Version "+PVER[p]}
+/* ===== TRANSAPPLE EDUCATION AI v1.0: TEN MODELS =====
+ Free: Teacher, Examiner. Basic: + Tutor, Instructor. Standard: + Lecturer, Researcher. Premium: + Professor, Mentor, Librarian, Philosopher.
+ Every model has its own answer format. Depth = the model's rank in its group + the plan bonus, so inside one plan the higher model gives more
+ (Professor > Lecturer > Tutor > Teacher, Mentor > Instructor > Examiner) and the same model gives more on a higher plan.
+ To improve a model later: edit its format in FM below and raise its version v (the version shows at the bottom of the chat). */
+const MODELS={
+ teacher:{n:"Teacher",g:"Teaching & Lessons",r:1,p:"Free",v:"1.0",d:"Explains lessons and teaches concepts"},
+ tutor:{n:"Tutor",g:"Teaching & Lessons",r:2,p:"Basic",v:"1.0",d:"Personal help with difficult topics"},
+ lecturer:{n:"Lecturer",g:"Teaching & Lessons",r:3,p:"Standard",v:"1.0",d:"Detailed instruction in academic subjects"},
+ professor:{n:"Professor",g:"Teaching & Lessons",r:4,p:"Premium",v:"1.0",d:"Advanced learning and complex topics"},
+ examiner:{n:"Examiner",g:"Examinations & Revision",r:1,p:"Free",v:"1.0",d:"Exam questions, scenarios and marking guides"},
+ instructor:{n:"Instructor",g:"Examinations & Revision",r:2,p:"Basic",v:"1.0",d:"Guided exercises and revision"},
+ mentor:{n:"Mentor",g:"Examinations & Revision",r:3,p:"Premium",v:"1.0",d:"Study guidance and exam preparation advice"},
+ researcher:{n:"Researcher",g:"Research & Academic Writing",r:1,p:"Standard",v:"1.0",d:"Research questions, evidence and write-up"},
+ librarian:{n:"Librarian",g:"Research & Academic Writing",r:2,p:"Premium",v:"1.0",d:"Finds and organises learning resources"},
+ philosopher:{n:"Philosopher",g:"Research & Academic Writing",r:3,p:"Premium",v:"1.0",d:"Deep thinking, reasoning and analysis"}};
+const MGROUPS=["Teaching & Lessons","Examinations & Revision","Research & Academic Writing"],GCOL={"Teaching & Lessons":"#00a884","Examinations & Revision":"#2f80ed","Research & Academic Writing":"#8b5cf6"},
+PORD={Free:0,Basic:1,Standard:2,Premium:3},PBONUS={Free:0,Basic:1,Standard:2,Premium:3},
+MK=()=>"ask_model_"+((window.AK&&AK.me()&&AK.me().username)||"");
+function modelName(){let k="teacher";try{k=localStorage.getItem(MK())||"teacher"}catch(e){}const m=MODELS[k];return(!m||PORD[m.p]>PORD[planName()])?"teacher":k}
+const modelDepth=k=>MODELS[k].r+PBONUS[planName()];
+const bl=t=>String(t||"").split("\n").map(x=>x.replace(/^\s*[-*]\s+/,"").trim()).filter(x=>x&&!/^#/.test(x));
+const take=(a,n)=>a.slice(0,Math.max(0,n)),ul=a=>a.map(x=>"- "+x).join("\n"),nl=a=>a.map((x,i)=>(i+1)+". "+x).join("\n"),
+sec=(h,b)=>b&&String(b).trim()?"\n## "+h+"\n"+b:"",
+quizq=(z,show)=>z[0]+"\n"+z[1].map((o,i)=>"- "+"ABC"[i]+". "+o).join("\n")+(show?"\n**Answer:** "+"ABC"[z[2]]+". "+z[1][z[2]]:"");
+function normT(T){const H=heads(T);return{n:T.n,d:T.d||"",pts:bl(T.h),uses:bl(T.w),simple:T.s||"",ex:bl(T.e),mis:bl(String(T.m||"").replace(/^##.*$/gm,"")),quiz:T.q||[],cl:clLine(T).trim(),h0:H[0],h1:H[1]}}
+function normMd(md){const L=String(md).split("\n");let n="";const rest=[];L.forEach(l=>{if(!n&&/^#\s+/.test(l))n=l.replace(/^#\s+/,"").trim();else rest.push(l)});
+ const body=rest.join("\n").trim();let def="";for(const l of rest){const t=l.trim();if(t&&!/^#/.test(t)&&!/^[-*]\s/.test(t)){def=t.replace(/\*\*/g,"");break}}
+ const S={};let cur="";rest.forEach(l=>{const m=/^##\s+(.*)/.exec(l);if(m){cur=m[1].toLowerCase();S[cur]=[]}else if(cur)S[cur].push(l)});
+ const pick=re=>{const k=Object.keys(S).find(x=>re.test(x));return k?S[k].join("\n"):""};
+ return{n:n||"This topic",d:def,pts:bl(rest.join("\n")).slice(0,12),uses:bl(pick(/use|where|appl/)),simple:bl(pick(/simple|easy|think/)).join(" "),ex:bl(pick(/example/)),mis:bl(pick(/mistake|tip/)),quiz:[],cl:"",body,h0:"How it works",h1:"Where it is used"}}
+function keyTerms(N){const s=[N.d].concat(N.pts),o=[];s.forEach(x=>{(String(x).match(/\*\*(.+?)\*\*/g)||[]).forEach(b=>{b=b.replace(/\*/g,"");if(!o.includes(b))o.push(b)})});
+ if(!o.length)N.n.split(/\s+/).filter(w=>w.length>3).forEach(w=>o.push(w));return o.slice(0,8)}
+const FM={
+teacher:(N,d,c)=>{let o=c.head;
+ o+=sec("Lesson objectives","By the end of this lesson you will be able to:\n"+ul(["explain what "+c.T+" is","describe "+(N.h0||"how it works").toLowerCase()].concat(d>=3?["give examples from daily life"]:[]).concat(d>=4?["answer a quick check question on it"]:[])));
+ if(!N.body)o+=sec("Introduction",N.d);
+ o+=sec("The lesson",N.body||ul(take(c.P,2+d)));
+ if(d>=2)o+=sec("Example",ul(take(N.ex,d>=3?3:1)));
+ if(d>=3&&!N.body)o+=sec(N.h1||"Where it is used",ul(take(N.uses,3)));
+ if(d>=4&&N.quiz[0])o+=sec("Quick check",quizq(N.quiz[0],true));
+ return o+sec("Summary",N.simple||N.d)},
+tutor:(N,d,c)=>{let o=c.head;
+ o+=sec("Start here",N.simple||N.d);
+ o+=sec("Step by step",N.body||nl(take(c.P,3+d)));
+ if(N.ex.length)o+=sec("Worked example",ul(take(N.ex,d>=4?2:1)));
+ if(d>=4&&N.mis.length)o+=sec("Where learners often go wrong",ul(take(N.mis,3)));
+ if(N.quiz[0])o+=sec("Try it yourself",quizq(N.quiz[0],false)+"\n\n**Check:** "+N.quiz[0][1][N.quiz[0][2]]);
+ if(d>=5)o+=sec("Practise with me",nl(["Say the meaning of "+c.T+" in your own words.","Give one example from your home or school.","Tell me which step felt hard and I will go through it again."]));
+ o+=sec("Next step","Tell me which part is still unclear and I will explain it a different way, or ask me for one more example of "+c.T+".");
+ if(d>=5)o+=sec("Study tip","Explain "+c.T+" aloud in your own words. If you get stuck, that is the part to read again.");
+ return o},
+lecturer:(N,d,c)=>{let o=c.head;
+ o+=sec("Overview",N.d);
+ o+=sec("Learning outcomes",ul(["Define "+c.T+" using the correct terms","Explain how and why it works","Apply it to a new situation"].concat(d>=6?["Judge its importance and its limits"]:[])));
+ o+=sec("Key terms",ul(take(keyTerms(N),d+1)));
+ o+=sec("Detailed explanation",N.body||nl(take(c.P,4+d)));
+ o+=sec(N.h1||"Applications",ul(take(N.uses,d)));
+ o+=sec("Worked examples",ul(take(N.ex,d-1)));
+ o+=sec("Common misconceptions",ul(take(N.mis,d-2)));
+ if(d>=6&&N.ex[0])o+=sec("Case study","Study this situation: "+N.ex[0].replace(/[.]+$/,"")+".\nAsk yourself:\n"+nl(["What is happening?","Which ideas about "+c.T+" explain it?","What would change if one condition were different?"]));
+ o+=sec("Discussion questions",nl(["Why is "+c.T+" important in real life?","How does "+c.T+" connect to other topics you have studied?","What would happen if the main idea of "+c.T+" were ignored?"].concat(d>=6?["Which part of "+c.T+" is hardest to understand, and why?","How would you teach "+c.T+" to a younger learner?"]:[])));
+ if(d>=6&&N.quiz.length)o+=sec("Test yourself",N.quiz.map(z=>quizq(z,true)).join("\n\n"));
+ o+=sec("Exam approach",c.L=="PLE"?"Learn the definition and two examples. Write short, clear answers.":"Note the command word ("+c.cw.join(", ")+") and match your answer to it. Use the correct terms for full marks.");
+ return o+sec("Summary",N.simple||N.d)},
+professor:(N,d,c)=>{let o=c.head;
+ o+=sec("Overview",N.d);
+ o+=sec("What you will master",ul(["The central idea of "+c.T+" and the terms that describe it","The reasoning and evidence behind it","How to apply it, question it and extend it"]));
+ o+=sec("Key terms",ul(take(keyTerms(N),d+1)));
+ o+=sec("Core ideas",N.body||nl(take(c.P,4+d)));
+ o+=sec("Critical analysis",nl(["What assumptions does "+c.T+" depend on?","Where might it not hold, and why?","What evidence would strengthen or weaken the main claim?","How would you test it in a Ugandan setting?","What is the strongest objection, and how would you answer it?"]));
+ o+=sec("Advanced applications",ul(take(N.uses,d)));
+ o+=sec("Examples to analyse",ul(take(N.ex,d))+"\nFor each one say: what is the claim, what is the evidence, and what is left out?");
+ if(N.ex[0])o+=sec("Case analysis","Take this case: "+N.ex[0].replace(/[.]+$/,"")+".\n"+nl(["Describe what is happening using the correct terms.","Explain it with the main ideas of "+c.T+".","Identify one thing the case cannot tell us.","Suggest how you would find out more."]));
+ o+=sec("Compare and contrast","Choose a related topic and build a table with three columns: what is the same, what is different, and when each applies. Then state which idea explains more and why.");
+ o+=sec("Connections to other topics","Link "+c.T+" to related topics in your subject and in other subjects. Ask how a change in one part affects the others.");
+ o+=sec("Debates and open questions",ul(["Which part of "+c.T+" do experts still discuss or refine?","Which parts depend on the situation or the place?","Which common statements about "+c.T+" are simplified?"]));
+ if(N.mis.length)o+=sec("Misconceptions to correct",ul(take(N.mis,4)));
+ o+=sec("Research questions",nl(["How does "+c.T+" differ between communities or regions?","What data would you collect to study "+c.T+"?","What problem could a better understanding of "+c.T+" help to solve?"]));
+ if(N.quiz.length)o+=sec("Test your mastery",N.quiz.map(z=>quizq(z,true)).join("\n\n"));
+ o+=sec("Model answer structure","Point: state the idea clearly.\nEvidence: support it with a fact or example.\nExplanation: show why it matters.\nLimit: say where it may not apply.\nConclusion: answer the question asked.");
+ o+=sec("Exam-level guidance","Use command words such as "+c.cw.join(", ")+". Give a point, support it with evidence or an example, then explain why it matters.");
+ return o+sec("Summary",N.simple||N.d)},
+examiner:(N,d,c)=>{const T=c.T,P=c.P,A=[],mcq=d>=4?N.quiz:[];let scen=null;
+ A.push({q:c.cw[0]+" what is meant by "+T+".",a:N.d||P[0]||"-",m:2});
+ const n=Math.min(3,Math.max(1,P.length));A.push({q:c.cw[1]+" "+n+" important point"+(n>1?"s":"")+" about "+T+".",a:ul(take(P,n))||"-",m:n});
+ if(d>=2){const u=N.uses.length?N.uses:N.ex;A.push({q:"Give two uses or examples of "+T+".",a:ul(take(u,2))||"-",m:2})}
+ if(d>=3)scen={q:"**Scenario:** "+(N.ex[0]?"A learner in Uganda notices this: "+N.ex[0].replace(/[.]+$/,"")+".":"A school in Uganda is studying "+T+".")+" Use what you know about "+T+" to explain what is happening and why.",a:ul(take(P,3))+"\n- Link each point to the situation in the scenario.",m:6};
+ const tot=A.reduce((x,y)=>x+y.m,0)+(scen?scen.m:0)+mcq.length;
+ let o="# Exam practice: "+T+(N.cl?"\n"+N.cl:"")+"\n**Time:** "+Math.round(tot*1.5)+" minutes · **Total:** "+tot+" marks";
+ o+="\n## Section A: Short questions\n"+A.map((x,i)=>(i+1)+". "+x.q+" ("+x.m+" marks)").join("\n");
+ if(scen)o+="\n## Section B: Scenario question\n"+(A.length+1)+". "+scen.q+" ("+scen.m+" marks)";
+ if(mcq.length)o+="\n## Section C: Multiple choice\n"+mcq.map((z,i)=>(i+1)+". "+quizq(z,false)).join("\n");
+ o+="\n## Marking guide\n"+A.map((x,i)=>"**Q"+(i+1)+".** "+x.a).join("\n")+(scen?"\n**Q"+(A.length+1)+".** "+scen.a:"")+(mcq.length?"\n**Section C:** "+mcq.map((z,i)=>(i+1)+" "+"ABC"[z[2]]).join(", "):"");
+ if(d>=3)o+=sec("Examiner's tips",ul(["Read the command word first: "+c.cw.join(", ")+".","One mark is one clear point. Match the number of points to the marks.","In a scenario question, use details from the situation in your answer."]));
+ if(d>=4)o+=sec("How the marks are given",ul(["Definition questions: one mark for each correct point","Explain questions: a point plus its reason earns the marks","Scenario questions: marks for using the details given","Clear working and correct terms protect your marks"]));
+ return o},
+instructor:(N,d,c)=>{const T=c.T,P=c.P;let o="# Revision exercise: "+T+(N.cl?"\n"+N.cl:"");
+ o+=sec("Revise first",ul(take(P,3+d)));
+ o+=sec("Guided exercise","Follow these steps and write your answers in your book:\n"+nl(["Write the meaning of "+T+" in your own words. (Hint: "+(N.d||"look at the first point above")+")","List the main points you can remember without looking.","Match each point to an example from your home, school or village.","Check your list against the points above and correct it."].concat(d>=5?["Cover the notes and explain "+T+" aloud for one minute.","Write one question an examiner could ask, and answer it."]:[])));
+ const qs=["Explain "+T+" in your own words."].concat(N.quiz.map(z=>quizq(z,false)));
+ o+=sec("Practice questions",nl(take(qs,2+d)));
+ o+=sec("Check your answers",ul(["Q1: "+(N.d||"see the revise first points")].concat(N.quiz.map((z,i)=>"Q"+(i+2)+": "+"ABC"[z[2]]+". "+z[1][z[2]]))));
+ if(d>=5)o+=sec("Step-by-step model answer","Question: "+c.cw[0]+" "+T+".\n"+nl(["Read the command word and underline it.","Write the main point in one clear sentence.","Add a reason or an example.","Check that the number of points matches the marks."]));
+ if(d>=5)o+=sec("Mini test (10 minutes)",nl(["Define "+T+". (2 marks)",c.cw[1]+" two points about "+T+". (4 marks)","Give an example of "+T+". (2 marks)","Write one sentence that links "+T+" to daily life. (2 marks)"])+"\nMark yourself out of 10, then revise the parts where you lost marks.");
+ if(d>=4)o+=sec("Revision checklist",ul(["I can define "+T,"I can list the main points","I can give an example","I can answer a past paper question on it"].map(x=>"[ ] "+x)));
+ if(d>=4&&N.mis.length)o+=sec("Common mistakes",ul(take(N.mis,3)));
+ return o},
+mentor:(N,d,c)=>{const T=c.T,P=c.P,ac=take(P,5).map(x=>(x.replace(/[^A-Za-z]/g,"")[0]||"").toUpperCase()).join("");let o="# Study and exam guidance: "+T+(N.cl?"\n"+N.cl:"");
+ o+=sec("Where you stand","Before you revise, rate yourself on "+T+": confident, unsure or lost. Spend most of your time on the parts that are unsure or lost, not on what you already know.");
+ o+=sec("What examiners look for",ul(["A clear meaning of "+T,"Correct terms used in the right place","Points supported by an example","A neat, organised answer that matches the command word ("+c.cw.join(", ")+")","An answer that stays on the question asked"]));
+ o+=sec("Command words explained",ul(c.cw.map(w=>"**"+w+"**: "+(w=="State"||w=="Give"?"write the answer briefly, no explanation needed":w=="Explain"||w=="Describe"?"give the point and the reason or detail":w=="Analyse"?"break it into parts and show how they connect":w=="Evaluate"?"weigh the good and bad points and reach a judgement":"answer exactly as asked"))));
+ o+=sec("Key points to know",ul(take(P,6)));
+ o+=sec("Your revision plan",nl(["Day 1: Read the main points and write the meaning of "+T+" from memory.","Day 2: Do practice questions and mark them yourself.","Day 3: Teach "+T+" to a friend, then test yourself.","Day 4: Practise past paper questions with a timer.","Day 5: Quick review and rest well."]));
+ o+=sec("Remember it",ul(["Turn the main points into one short sentence."].concat(ac.length>=3?["Memory letters from the first words of the main points: **"+ac+"**"]:[]).concat(["Draw a small mind map of "+T+" with one branch for each point.","Say the main points aloud while walking."])));
+ o+=sec("Mock exam questions",nl(["State what is meant by "+T+". (2 marks)",c.cw[1]+" two important points about "+T+". (4 marks)"].concat(N.ex[0]?["Use this situation to explain "+T+": "+N.ex[0].replace(/[.]+$/,"")+". (6 marks)"]:[])));
+ o+=sec("How to answer them",ul(["Q1: write the meaning in one sentence"+(N.d?". For example: "+N.d:""),"Q2: two clear points, each with a reason","Q3: use the details in the situation, then link them to the main points"]));
+ o+=sec("Exam technique",ul(["Spend about one and a half minutes for each mark.","Underline the command word and the topic.","Answer the easy questions first, then return to the hard ones.","Leave two minutes at the end to check your answers.","If you are stuck, write what you know: partial answers earn marks."]));
+ o+=sec("Mistakes to avoid",ul((N.mis.length?take(N.mis,4):["Writing everything you know instead of what the question asks","Forgetting examples","Running out of time"])));
+ if(N.quiz.length)o+=sec("Test yourself now",N.quiz.map(z=>quizq(z,true)).join("\n\n"));
+ o+=sec("The night before","Read your short notes once, pack your pencils, ruler and calculator, and sleep early. Do not start new topics.");
+ return o+sec("Keep going","Steady daily practice beats last-minute reading. You can do this.")},
+researcher:(N,d,c)=>{const T=c.T,P=c.P;let o="# Research brief: "+T;
+ o+=sec("Research questions",nl(["What is "+T+"?","How does "+T+" work or happen?","What is its effect on people or the environment in Uganda?"].concat(d>=4?["What evidence supports or challenges what is said about "+T+"?"]:[])));
+ o+=sec("Background",N.d);
+ o+=sec("What is already known",ul(take(P,2+d))+"\n\nCheck these facts in your textbook or another trusted source before you use them.");
+ o+=sec("Methods you can use",ul(take(["Library study: read textbooks, past papers and reports","Observation: watch and record what happens","Interview: ask a teacher, farmer, health worker or elder","Survey: ask the same questions to many people"],d+1)));
+ o+=sec("Evidence to look for",ul(["Facts and figures from a trusted source","Examples from your own area","Different views on "+T]));
+ o+=sec("Gaps and next questions",ul(["What is still not clear about "+T+"?","What could you measure or observe to find out?"]));
+ if(d>=4)o+=sec("Check your sources",ul(["Is the source written by someone who knows the subject?","Does a second source agree?","Is the information recent enough?"]));
+ return o+sec("Writing it up",nl(["Introduction","Background","Methods","Findings","Discussion","Conclusion","References"]))},
+librarian:(N,d,c)=>{const T=c.T,lvn=c.L=="PLE"?"primary":c.L=="UCE"?"O-Level":"A-Level";let o="# Learning resources: "+T;
+ o+=sec("Search words",ul([T].concat(keyTerms(N).filter(x=>x.toLowerCase()!=T.toLowerCase()))));
+ o+=sec("Where to look",ul(["School library: "+lvn+" textbooks for your subject","UNEB past papers and marking guides","The NCDC syllabus and teacher guides for your class","Newspaper education pages and educational radio programmes","Your subject teacher, who can recommend good books"]));
+ o+=sec("Types of source and what each is good for",ul(["Textbook: clear explanations and definitions","Past papers: what examiners really ask","Teacher notes: the syllabus in simple words","Reports and journals: evidence and figures for research","Interviews: local knowledge you cannot find in books"]));
+ o+=sec("Reading order",nl(["Start with a simple textbook explanation of "+T,"Read your class notes","Try past paper questions","Read a more advanced source if you are doing research"]));
+ o+=sec("Judge each source",ul(["Who wrote it, and are they an expert?","When was it published? Newer is better for facts that change.","Does it give evidence or only opinion?","Does a second source say the same?"]));
+ o+=sec("Note-taking template","For every source write:\n"+ul(["Source: author, year, title","Main idea in one sentence","Three useful facts","One quotation or example, with page number","How it helps my question on "+T]));
+ o+=sec("Reading plan for one week",nl(["Day 1: Gather three sources on "+T,"Day 2: Read the simplest and take notes","Day 3: Read the second and compare it with the first","Day 4: Read the third and mark where they disagree","Day 5: Write a one-page summary in your own words"]));
+ o+=sec("Organise your notes",ul(["One page for each topic","Write the main idea, key terms and one example","Make a mind map to link topics","Keep a list of every source you use"]));
+ o+=sec("Avoid plagiarism","Write ideas in your own words and always say where they came from. If you copy exact words, put them in quotation marks and name the source.");
+ return o+sec("Writing your reference list","For each source write: Author, year, title, publisher.\nExample layout: Surname, Initial. (Year). *Title of book*. City: Publisher.\n\nI cannot check that a particular book exists, so confirm every source in the library before you list it.")},
+philosopher:(N,d,c)=>{const T=c.T,P=c.P;let o="# Thinking it through: "+T;
+ o+=sec("The question","What do we really mean by "+T+", and why does it matter?");
+ {const kt=take(keyTerms(N),d);o+=sec("Clarify the terms",kt.length?ul(kt)+"\nAsk of each term: could it mean more than one thing?":"Ask of each key word: could it mean more than one thing?")}
+ o+=sec("The main claim",N.d);
+ o+=sec("Reasoning chain",nl(take(P,3+d))+"\nCheck that each step follows from the one before it.");
+ o+=sec("Reasons to agree",ul(take(P,3)));
+ o+=sec("Questions that challenge it",ul(["What assumption does "+T+" depend on?","Is there a case where it does not hold?","Who might disagree, and what would they say?","What would change if the opposite were true?","Is the claim true everywhere, or only in some places and times?"]));
+ o+=sec("Objections and replies",nl(["Objection: the idea is too simple. Reply: say which details it leaves out and whether they change the conclusion.","Objection: the evidence is only from one place. Reply: say what evidence from Uganda would add.","Objection: it is only a definition, not a fact. Reply: show what it predicts that can be checked."]));
+ o+=sec("Thought experiment","Imagine "+T+" did not exist or worked in the opposite way. What would change first? What would stay the same? What does that tell you about its real importance?");
+ if(N.ex[0])o+=sec("Test it with a situation",take(N.ex,2).map(x=>"Think about this: "+x+"\nDoes the main claim still hold here? Why?").join("\n\n"));
+ o+=sec("Traps in reasoning",ul(["Mixing up cause and coincidence","Using one example as if it proves everything","Accepting a claim because many people believe it","Ignoring the evidence that does not fit"]));
+ o+=sec("Values and consequences","Who gains and who loses when we apply "+T+"? Is it fair, and how would you decide?");
+ o+=sec("Write your own position",nl(["State your claim in one sentence.","Give your strongest reason.","Support it with evidence or an example.","State the best objection to your claim.","Answer that objection."]));
+ return o+sec("Think further",nl(["How would you explain "+T+" to someone who disagrees?","What is the strongest point you found, and what is the weakest?","What would you like to find out next?"]))}};
+function modelText(N){const k=modelName(),d=modelDepth(k),L=lvKey(),P=N.pts.length?N.pts:(N.d?[N.d]:[]),
+ cw=L=="PLE"?["State","Give"]:L=="UCE"?["State","Explain","Describe"]:["Explain","Analyse","Evaluate"],
+ c={T:N.n,P,L,cw,head:"# "+N.n+(N.cl?"\n"+N.cl:"")};cw.length<2&&cw.push("Explain");
+ try{return FM[k](N,d,c)}catch(e){return FM.teacher(N,1,c)}}
+const modelFromMd=t=>modelText(normMd(t));
+function modelPicker(){const cur=modelName(),pl=planName();
+ let h='<div style="padding:10px 18px;color:var(--sub);line-height:1.4">Your plan: <b>'+pl+'</b>. Pick the model that answers you. Higher models and higher plans give fuller answers.</div>';
+ if(PLAN_TEST_MODE&&isOwner())h+='<div class="row" data-chg="1"><div><b>Change plan (testing)</b><small>Only the owner account sees this</small></div></div>';
+ MGROUPS.forEach(g=>{h+='<div class="sec">'+g.toUpperCase()+'</div>';Object.keys(MODELS).filter(k=>MODELS[k].g==g).sort((a,b)=>PORD[MODELS[a].p]-PORD[MODELS[b].p]||MODELS[a].r-MODELS[b].r).forEach(k=>{const M=MODELS[k],ok=PORD[M.p]<=PORD[pl];
+  h+='<div class="row" data-m="'+k+'"><span style="width:10px;height:10px;border-radius:50%;background:'+GCOL[g]+';flex:none;margin-right:12px;opacity:'+(ok?1:.35)+'"></span><div><b>'+M.n+' '+M.v+'</b>'+(k==cur?' (in use)':'')+'<small>'+M.d+(ok?'':' · Locked: '+M.p+' plan')+'</small></div></div>'})});
+ showP("Choose model",h,closeP,e=>{if(e.target.closest("[data-chg]")){closeP();activatePlan();return}
+  const r=e.target.closest("[data-m]");if(!r)return;const k=r.dataset.m,M=MODELS[k];
+  if(PORD[M.p]>PORD[planName()]){closeP();plans();return}
+  try{localStorage.setItem(MK(),k)}catch(x){}updPlan();closeP()})}
+
+const MGUIDE={"Teaching & Lessons":["Use these when you want to learn a topic, follow a lesson or understand a concept.","Teacher explains simply. Tutor helps with hard topics. Lecturer gives detailed academic teaching. Professor goes deepest, for advanced and complex topics."],
+"Examinations & Revision":["Use these when you are revising or getting ready for exams.","Examiner gives exam-style questions and marking guides. Instructor guides you through exercises. Mentor gives study and exam-preparation advice and answers the most."],
+"Research & Academic Writing":["Use these for research, projects and academic writing.","Researcher helps with research questions, evidence and write-up. Librarian finds and organises resources. Philosopher does deep reasoning and analysis."]};
+function modelsGuide(){const pl=planName(),ord=k=>[PORD[MODELS[k].p],MODELS[k].r];
+ const need=g=>Object.keys(MODELS).filter(k=>MODELS[k].g==g).sort((a,b)=>PORD[MODELS[a].p]-PORD[MODELS[b].p]||MODELS[a].r-MODELS[b].r);
+ let h='<div style="padding:10px 18px;color:var(--sub);line-height:1.5">Ask Tr. David uses <b>TransApple Education AI v1.0</b>. Each model answers in its own way. Pick one from the model button above the chat. You are on the <b>'+pl+'</b> plan. Higher models, and higher plans, give fuller answers.</div>';
+ MGROUPS.forEach(g=>{h+='<div class="sec">'+g.toUpperCase()+'</div><div style="padding:4px 18px 8px;color:var(--sub);line-height:1.5">'+MGUIDE[g][0]+'<br>'+MGUIDE[g][1]+'</div>';
+  need(g).forEach(k=>{const M=MODELS[k],ok=PORD[M.p]<=PORD[pl];
+   h+='<div class="row" style="cursor:default"><span style="width:10px;height:10px;border-radius:50%;background:'+GCOL[g]+';flex:none;margin-right:12px;opacity:'+(ok?1:.35)+'"></span><div><b>'+M.n+' '+M.v+'</b> · '+(ok?'<span style="color:#00a884">Available on your plan</span>':'Needs '+M.p+' plan')+'<small>'+M.d+'</small></div></div>'})});
+ h+='<div class="pbn" style="margin:14px 18px;line-height:1.5"><b>Want research and writing?</b><br>Researcher starts on Standard. Librarian and Philosopher are on Premium, with Professor and Mentor. Subscribe to unlock them.</div>';
+ h+='<div style="padding:0 18px 24px"><button class="pcp" data-up="1" style="width:100%">See plans and subscribe</button></div>';
+ showP("AI models",h,settings,e=>{if(e.target.closest("[data-up]"))plans(1)})}
+
+/* MODEL STYLE: the stored answer is one text for everyone. The ai_style function rewrites it in the chosen model's own writing style
+ (how it summarises, analyses and describes). This has nothing to do with the microphone.
+ FLOW: a learner asks -> if a rewrite is saved it is used; if not, Gemini writes it right then, it is saved and the learner gets it at once.
+ No approval wait and NO label for learners. The owner (DAVID) sees every saved rewrite and every new Gemini-answered question, with what the
+ learner asked, in Settings > Learner answers, and approves, edits or rejects them. Approved = kept for good. If the function is missing, busy
+ or slow, the learner simply gets the normal answer. */
+const STU=SBU.replace("/rest/v1/","/functions/v1/")+"ai_style",hsh=t=>{let h=5381;for(let i=0;i<t.length;i++)h=(h*33^t.charCodeAt(i))>>>0;return h.toString(36)};
+const svNo={};
+async function styleAnswer(t,q){
+ const k=modelName(),pl=planName(),L=lvKey(),ck="ask_sty3_"+k+"_"+pl+"_"+L+"_"+hsh(t)+"_"+t.length;
+ /* approved copies are kept on the phone for 12 hours */
+ try{const c=JSON.parse(localStorage.getItem(ck)||"null");if(c&&c.md&&Date.now()-c.at<432e5)return{md:c.md,st:"approved"}}catch(e){}
+ if(svNo[ck]&&Date.now()-svNo[ck]<6e5)return null;
+ const ct=new AbortController(),tm=setTimeout(()=>ct.abort(),9000);
+ try{const r=await fetch(STU,{method:"POST",signal:ct.signal,headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({text:t,model:k,level:L,plan:pl,depth:modelDepth(k),q:String(q||"").slice(0,200)})});
+  if(!r.ok)return null;const j=await r.json();
+  if(j.status=="ok"&&j.md){const st=j.state=="draft"?"draft":"approved";if(st=="approved"){try{localStorage.setItem(ck,JSON.stringify({md:j.md,at:Date.now()}))}catch(e){}}return{md:j.md,st}}
+  if(j.status=="no_answer"&&j.reason=="rejected")svNo[ck]=Date.now();
+ }catch(e){}finally{clearTimeout(tm)}
+ return null}
+/* ===== LEARNER ANSWERS ROOM (owner only: Settings > Learner answers) =====
+ Two lists, both only for the owner account (the database refuses everyone else):
+ 1. New questions: questions the app could not answer, so Gemini answered them. Learners already got the answer (no label for them).
+ 2. Style rewrites: a model's rewrite of a saved answer (Teacher, Tutor, ...).
+ For each one the owner sees what the learner asked, then approves (kept for good), edits, or rejects (never shown again). */
+const SVLBL={draft:"Waiting",approved:"Approved",published:"Approved",rejected:"Rejected"};
+let SVK="q",SVT="draft",SVL=[],SVC={};
+const svRpc=(fn,a)=>fetch(SBU+"rpc/"+fn,{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify(a)}).then(r=>r.json());
+const svName=k=>(MODELS[k]?MODELS[k].n:k),svOk=()=>SVK=="q"?"published":"approved";
+const svTopic=x=>"# "+x.name+"\n"+x.definition+"\n\n## How it works\n"+x.steps+"\n\n## Where it is used\n"+x.uses+"\n\n## In simple words\n"+x.simple+"\n\n## Examples\n"+x.examples+"\n\n## Mistakes and tips\n"+x.more;
+const svBtn=(on,l,a,v)=>`<button ${a}="${v}" style="flex:1;padding:10px 4px;border:0;border-radius:18px;font:inherit;font-weight:600;cursor:pointer;background:${on?"var(--green)":"var(--wall)"};color:${on?"#fff":"var(--text)"}">${l}</button>`;
+async function voiceRoom(kind,st){
+ if(!isOwner())return;if(kind)SVK=kind;if(st)SVT=st;
+ showP("Learner answers",'<div style="padding:22px 18px;color:var(--sub)">Loading…</div>',SVBACK);
+ const want=SVT=="draft"?"draft":SVT=="rejected"?"rejected":svOk();
+ let j=null;try{j=await svRpc(SVK=="q"?"topic_review_list":"style_review_list",{p_t:tokNow(),p_status:want})}catch(e){}
+ if(!j||!j.ok){$("pbody").innerHTML='<div class="pbn" style="margin:14px 18px;line-height:1.5">'+(j&&j.err=="not allowed"?"This room is only for the owner account.":j&&j.err=="login"?"Please log in again.":"Could not load. Check your connection and try again.")+'</div>';return}
+ SVL=j.items||[];SVC=j.counts||{};
+ const cn=s=>(SVC[s=="approved"?svOk():s]||0);
+ let h=`<div style="padding:12px 18px;color:var(--sub);line-height:1.5">Only you see this room. Learners get their answers straight away, with no label. Here you see what they asked and decide what is kept for good.</div>
+ <div style="display:flex;gap:6px;padding:4px 18px 8px">${svBtn(SVK=="q","New questions","data-kind","q")}${svBtn(SVK=="r","Style rewrites","data-kind","r")}</div>
+ <div style="display:flex;gap:6px;padding:4px 18px 12px">${["draft","approved","rejected"].map(s=>svBtn(s==SVT,SVLBL[s]+" "+cn(s),"data-tab",s)).join("")}</div>`;
+ if(!SVL.length)h+=`<div style="padding:18px;color:var(--sub);line-height:1.5">${SVT=="draft"?(SVK=="q"?"No new questions are waiting.":"No rewrites are waiting. They appear here after a learner (or you) asks a question with a model selected."):"Nothing here yet."}</div>`;
+ SVL.forEach((x,i)=>{const q=SVK=="q"?x.source_question:x.question;h+=`<div class="row" data-it="${i}"><div><b>${esc(q?"“"+q+"”":(x.title||x.name||"Untitled"))}</b><small>${SVK=="q"?esc(x.name||"")+" · "+esc(x.level_code||"")+" · "+esc(x.subject_name||""):esc(x.title||"")+" · "+esc(svName(x.model))+" · "+esc(x.level)+" · "+esc(x.plan||"Free")+" plan"} · ${new Date(x.created_at).toLocaleDateString()}</small></div></div>`});
+ showP("Learner answers",h,SVBACK,e=>{
+  const k=e.target.closest("[data-kind]");if(k){voiceRoom(k.dataset.kind);return}
+  const t=e.target.closest("[data-tab]");if(t){voiceRoom(null,t.dataset.tab);return}
+  const r=e.target.closest("[data-it]");if(r)voiceItem(+r.dataset.it)})}
+function voiceItem(i,showOrig){
+ const x=SVL[i];if(!x)return;const T=SVK=="q",cur=T?svTopic(x):(x.final_md||x.styled_md),shown=showOrig?x.source_md:cur,q=T?x.source_question:x.question;
+ const bt=(a,l,c)=>`<button data-a="${a}" style="flex:1;min-width:30%;padding:12px 8px;border:0;border-radius:22px;font:inherit;font-weight:700;cursor:pointer;color:#fff;background:${c}">${l}</button>`;
+ showP(esc(x.title||x.name||"Answer"),`<div style="padding:12px 18px 4px;color:var(--sub);line-height:1.5">Learner asked: <b style="color:var(--text)">${q?esc(q):"not recorded"}</b><br>${T?esc(x.level_code||"")+" · "+esc(x.subject_name||""):esc(svName(x.model))+" · "+esc(x.level)+" · "+esc(x.plan||"Free")+" plan"} · <b>${SVLBL[x.status]||x.status}</b></div>
+ ${T?"":`<div style="display:flex;gap:6px;padding:8px 18px">${svBtn(!showOrig,"Rewrite","data-v","n")}${svBtn(!!showOrig,"Original answer","data-v","o")}</div>`}
+ <div class="md" style="padding:8px 18px 12px;line-height:1.55">${md(shown)}</div>
+ ${T?"":`<div style="padding:0 18px 4px;color:var(--sub);font-size:13px">Edit the rewrite if needed (first line must start with #):</div>
+ <textarea id="svt" style="display:block;width:calc(100% - 36px);margin:6px 18px;min-height:190px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit;font-size:14px;line-height:1.5;box-sizing:border-box">${esc(cur)}</textarea>`}
+ <div id="svm" style="padding:2px 18px;min-height:20px;color:var(--sub)"></div>
+ <div style="display:flex;gap:8px;flex-wrap:wrap;padding:6px 18px 10px">${bt("ok","Approve (keep for good)","#00a884")}${bt("no","Reject","#ff453a")}${x.status!="draft"?bt("dr","Move back to waiting","#6b7280"):""}</div>
+ ${T?"":`<div style="display:flex;gap:8px;flex-wrap:wrap;padding:0 18px 28px">${bt("rg","Write it again","#8b5cf6")}</div>`}`,()=>voiceRoom(),e=>{
+  const v=e.target.closest("[data-v]");if(v){const ta=$("svt");if(ta)x.final_md=ta.value.trim()||x.final_md;voiceItem(i,v.dataset.v=="o");return}
+  const b=e.target.closest("[data-a]");if(!b)return;const a=b.dataset.a,ta=$("svt"),m=$("svm"),txt=(ta?ta.value:"").trim();
+  const done=async(st,fin)=>{m.textContent="Saving…";let j=null;
+   try{j=T?await svRpc("topic_review_set",{p_t:tokNow(),p_id:x.id,p_status:st}):await svRpc("style_review_set",{p_t:tokNow(),p_id:x.id,p_status:st,p_final:fin})}catch(er){}
+   if(j&&j.ok){try{Object.keys(localStorage).forEach(k=>{if(k.indexOf("ask_sty3_")==0)localStorage.removeItem(k)})}catch(er){}for(const k in svNo)delete svNo[k];
+    if(T&&st=="published")try{TOP.forEach(t=>{if(t.tid==x.id)t.ai=0})}catch(er){}
+    voiceRoom()}
+   else m.textContent=j&&j.err=="bad text"?"The text must start with # and be between 20 and 8000 characters.":"Could not save. Try again."};
+  if(a=="ok")done(T?"published":"approved",!T&&txt&&txt!=x.styled_md?txt:null);
+  else if(a=="no")done("rejected",null);
+  else if(a=="dr")done("draft",null);
+  else if(a=="rg"&&!T){m.textContent="Writing it again… this can take up to 20 seconds.";b.disabled=true;
+   fetch(STU,{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({text:x.source_md,model:x.model,level:x.level,plan:x.plan||"Free",depth:MODELS[x.model].r+(PBONUS[x.plan||"Free"]||0),t:tokNow(),regen:true,q:x.question||""})}).then(r=>r.json()).then(j=>{
+    if(j&&j.status=="ok"){voiceRoom(null,"draft")}else{b.disabled=false;m.textContent=j&&j.status=="busy"?"Gemini is busy. Try again in a minute.":"Could not write it again. The old text is kept."}}).catch(()=>{b.disabled=false;m.textContent="Could not reach the server. The old text is kept."})}})}
+
+function updPlan(){const k=modelName(),M=MODELS[k],l=document.getElementById("psl"),r=document.getElementById("psr");if(l)l.innerHTML='<i style="background:'+GCOL[M.g]+'"></i><b>'+M.n+'</b>';if(r)r.textContent="Version "+M.v}
 /* PLAN LOCK: the plan is kept in the database (app_users.plan, default Free) and copied here after login.
  Nobody can switch it from the app except the owner account (username DAVID, checked in the database).
  Other accounts stay on Free until you mark their paid plan (admin page to be built). */
@@ -2678,21 +2993,28 @@ function syncPlan(){const t=tokNow();if(!t)return;
   try{localStorage.setItem(PK(),j.plan)}catch(e){}
   if(was!==j.plan){updPlan();render()}}).catch(()=>{})}
 function setPlanServer(x){fetch(SBU+"rpc/set_my_plan",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_t:tokNow(),p_plan:x})}).then(r=>r.json()).then(j=>{if(!j||!j.ok)syncPlan()}).catch(()=>{})}
+/* Installs and usage: one anonymous device id per phone. log_app_event counts an install once per device and an open at most once per 30 minutes. */
+function devId(){try{let d=localStorage.getItem("ask_dev");if(!d||d.length<8){d=Array.from(crypto.getRandomValues(new Uint8Array(12))).map(x=>x.toString(16).padStart(2,"0")).join("");localStorage.setItem("ask_dev",d)}return d}catch(e){return""}}
+function evLog(kind){const d=devId();if(!d)return;try{fetch(SBU+"rpc/log_app_event",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_kind:kind,p_device:d,p_t:tokNow()})}).catch(()=>{})}catch(e){}}
+const standaloneNow=()=>{try{return matchMedia("(display-mode: standalone)").matches||matchMedia("(display-mode: fullscreen)").matches||matchMedia("(display-mode: minimal-ui)").matches||navigator.standalone===true}catch(e){return false}};
+setTimeout(()=>{evLog("open");if(standaloneNow())evLog("install")},2500);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)evLog("open")});
+addEventListener("appinstalled",()=>evLog("install"));
 setTimeout(syncPlan,1500);setInterval(syncPlan,30000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)syncPlan()});
 /* TEMPORARY (testing only): Activate plan lets the tester pick any plan. REMOVE when the app is fully developed; a confirmed payment must set the plan instead. */
 function activatePlan(){if(!isOwner()){uiAlert("Plans are activated after payment.");return}const cur=planName();showP("Activate plan",'<div style="padding:12px 18px;color:var(--sub);line-height:1.4">Testing only. Pick any plan to try it. This will be removed when the app is fully developed.</div>'+PLANS4.map(x=>`<div class="row" data-pl="${x}"><span style="width:10px;height:10px;border-radius:50%;background:${PCOL[x]};flex:none;margin-right:12px"></span><div><b>${x}</b>${x==cur?'<small>Your current plan</small>':""}</div></div>`).join(""),closeP,e=>{const x=e.target.closest("[data-pl]")?.dataset.pl;if(!x)return;if(!isOwner()){closeP();return}try{localStorage.setItem(PK(),x)}catch(er){}setPlanServer(x);
  if(x=="Free")FQW({v:2,cap:newCap(),used:0,left:null,seen:Date.now()});{const rm=a=>{for(let i=a.length;i--;)if(a[i].lim)a.splice(i,1)};rm(D.msgs);D.chats.forEach(c=>rm(c.msgs));save();render()}updPlan();closeP();uiAlert(x+" plan activated.")})}
-/* TESTING SWITCH: while the app is being built, tapping the plan button at the bottom opens the plan changer (Free, Basic, Standard, Premium)
- so answers can be tried on every plan. TO GO BACK TO THE REAL SUBSCRIPTION: set PLAN_TEST_MODE to false. The button then opens the real Upgrade plans screen again. */
+/* TESTING SWITCH: the chip at the bottom opens the model picker. While the app is being built the owner account also sees Change plan (Free, Basic, Standard, Premium)
+ there, so every model can be tried on every plan. TO GO BACK TO THE REAL SUBSCRIPTION: set PLAN_TEST_MODE to false. The Change plan row then disappears. */
 const PLAN_TEST_MODE=true;
-document.getElementById("psl").onclick=()=>PLAN_TEST_MODE&&isOwner()?activatePlan():plans();
+document.getElementById("psl").onclick=()=>modelPicker();
 function limitMsg(){D.msgs.push({s:"i",lim:1,t:"**"+LIM+"**",ts:Date.now()});save();render()}
 function freeReset(){FQW({v:2,cap:newCap(),used:0,left:null,seen:Date.now()});const rm=a=>{for(let i=a.length;i--;)if(a[i].lim)a.splice(i,1)};rm(D.msgs);D.chats.forEach(c=>rm(c.msgs));D.msgs.push({s:"i",note:1,t:"Your free plan has been reset. You can continue asking.",ts:Date.now()});save();render();const h=document.getElementById("plh");if(h)h.innerHTML='<b>Free plan</b><div style="color:var(--sub);margin-top:3px">Your free words have been reset.</div>'}
 let _pn=performance.now();
 setInterval(()=>{const n=performance.now(),d=n-_pn;_pn=n;if(!(window.AK&&AK.me()))return;const q=FQ();if(q.left==null){if(q.used>=q.cap)capped();return}
  const w=Date.now()-q.seen;q.left-=(w>3000?w:d);q.seen=Date.now();if(q.left<=0){freeReset();return}FQW(q)},1000);
 function plans(fs){
- const q=FQ(),P=[["Basic","500","2,800","9,000","Fastest for quick answers","#2f80ed"],["Standard","750","4,550","16,500","For complex revision and every assignment","#00a884"],["Premium","1,100","6,650","24,000","For your toughest challenges, research and examinations preparation","#8b5cf6"]],
+ const q=FQ(),P=[["Basic","500","2,800","9,000","Adds Tutor and Instructor, and a stronger Examiner and Teacher","#2f80ed"],["Standard","750","4,550","16,500","Adds Lecturer and Researcher; Teacher, Tutor, Instructor and Examiner answer deeper","#00a884"],["Premium","1,100","6,650","24,000","Adds Professor, Mentor, Librarian and Philosopher; every model answers at its fullest","#8b5cf6"]],
  ST=['Tap the button at the bottom. It dials <b>*165*3*06124096#</b> with the merchant code already in it.','Enter the <b>amount</b> of your plan.','Choose <b>Mobile Money</b> as the mode of payment.','Confirm the ID name is <b>Alfred</b>.','Enter your <b>PIN</b> to confirm.'];
  showP("Upgrade plans",(q.used>=q.cap?`<div class="pbn" id="plh">${LIM1}${rtime()?`<div style="font-weight:400;margin-top:5px">Your free plan resets at <b>${rtime()}</b></div>`:""}<div style="margin-top:5px">${LIM2}</div></div>`:`<div class="pbn ok" id="plh">${planName()} plan<br>Upgrade to enjoy Unlimitedly.</div>`)+`<div class="sec">UPGRADE PLANS</div>`+
  P.map((x,k)=>`<div class="pc" style="--a:${x[5]}"><div class="pch"><i>${k+1}</i><b>${x[0]}</b></div><div class="ptag">${x[4]}</div><div class="pst"><div><b>${x[1]}</b><span>Daily</span></div><div><b>${x[2]}</b><span>Weekly</span></div><div><b>${x[3]}</b><span>Monthly</span></div></div></div>`).join("")+
@@ -2715,7 +3037,7 @@ function reqQ(q){return String(q).replace(/[?!]+/g," ")
  .replace(/\b(an?\s+)?quiz(zes)?( me)?( (on|about|for))?\b/gi," ").replace(/\btest me( (on|about))?\b/gi," ").replace(/\bexamine me( (on|about))?\b/gi," ")
  .replace(/^\s*(explain|describe)\b/i," ").replace(/\s+/g," ").trim()}
 function isBare(q){return reqQ(q).replace(/\b(it|this|that|again|me|one|more|the|an?|now|topic|topics|any|random|something|on|about|of|for|in|to|explain|describe|and|with|also)\b/gi,"").replace(/[^a-z0-9]/gi,"")===""}
-function lastBase(){for(let i=D.msgs.length;i--;){const x=D.msgs[i];if(x.s=="i"&&x.q&&!x.err&&!x.note&&!x.lim&&!smallTalk(x.q))return x.q}return null}
+function lastBase(){const c=ctxGet();if(c&&c.tq)return c.tq;for(let i=D.msgs.length;i--;){const x=D.msgs[i];if(x.s=="i"&&x.q&&!x.err&&!x.note&&!x.lim&&!smallTalk(x.q))return x.q}return null}
 function planGate(q){
  const pl=planName(),rk=PRANK[pl],s=" "+String(q).toLowerCase().replace(/[^a-z0-9'\s]/g," ").replace(/\s+/g," ")+" ",h=r=>r.test(s);
  const kind=h(RX_QZ)?"quiz":h(RX_SI)?"simpler":h(RX_DE)?"detail":h(RX_EX)?"example":null;
@@ -2728,10 +3050,94 @@ function planGate(q){
  if(kind=="quiz"){G.q=bare?"Quiz me":cl;return G}
  if(bare){const b=lastBase();if(!b)G.noBase=1;G.q=b}else G.q=cl;
  return G}
+/* ===== CHAT MEMORY: while a chat is open, follow-ups stay on the topic being discussed and each repeat changes the way it is answered.
+ The topic (tq), subject (tsub), follow-up kind (fk) and check question (chk) are kept on each answer inside the chat, so a new chat,
+ Clear chat or reopening the app (which opens a new chat) starts with no topic. A real new question sets a new topic. ===== */
+function ctxGet(){for(let i=D.msgs.length;i--;){const x=D.msgs[i];if(x.s=="i"&&x.tq&&!x.err&&!x.note&&!x.lim)return{tq:x.tq,sub:x.tsub||null,chk:!!x.chk}}return null}
+function ctxNorm(q){let t=String(q).toLowerCase().replace(/[\u2018\u2019`]/g,"'");
+ [["what's","what is"],["that's","that is"],["it's","it is"],["how's","how is"],["where's","where is"],["why's","why is"],["don't","do not"],["doesn't","does not"],["didn't","did not"],["can't","can not"],["cannot","can not"],["couldn't","could not"],["won't","will not"],["isn't","is not"],["i'm","i am"],["i'd","i would"],["i'll","i will"],["let's","let us"],["dont","do not"],["doesnt","does not"],["didnt","did not"],["cant","can not"],["whats","what is"],["im","i am"]].forEach(x=>{t=t.replace(new RegExp("\\b"+x[0].replace("'","'")+"\\b","g"),x[1])});
+ t=t.replace(/[^a-z0-9' ]/g," ").replace(/'/g,"").replace(/\s+/g," ").trim();
+ for(let i=0;i<4;i++)t=t.replace(/^(ok|okay|and|so|then|now|please|kindly|hey|hi|hello|but|also|well|hmm|oh|sir|teacher|david|tr david|just|actually|alright|wait)\s+/,"").replace(/^(can|could|would|will) you( please| kindly)?\s+/,"").replace(/^(i want|i need|i would like|i wish|i would love)( you)?( to)?\s+/,"").replace(/^(let us|let me)\s+/,"");
+ return t.replace(/\s+(please|thanks|thank you|for me|sir|teacher|david|tr david|now|ok|okay)$/,"").trim()}
+const FU_STOP=new Set("a an the of to me us you your i my we our is are am was were do does did can could would will shall should may might must so very more further some any about on in for with and also just now again please really bit little its it that this them these those they one ones way ways thing things what how why where when which who sir teacher david tr ok okay hey hi but then there here at as be been by from if or not no than too up out into over know learn see hear tell show give say talk speak explain describe teach help get go make take put find look need want like love understand mean means common main usual typical".split(" "));
+const FU_R=/\b(it|this|that|its|them|these|those|they)\b/;
+/* what the learner is asking for, from the words used. First match wins. */
+const FU_K=[
+ ["quiz",/\b(quiz|test me|examine me|practice|practise|exercises?|drill|homework|assignment|problems?|sums?|ask me)\b/],
+ ["example",/\b(examples?|samples?|instances?|for instance|illustrat\w*|demonstrat\w*|show me one|scenarios?|worked)\b/],
+ ["summary",/\b(summar\w*|recap|key points?|main points?|highlights?|in short|in brief|nutshell|briefly|few words|one line|shorter|short notes?|short)\b/],
+ ["simple",/\b(simple|simply|simpler|easy|easier|easily|eli5|kids?|child|children|baby|basic|basics|plain|layman|quick|quickly)\b/],
+ ["formula",/\b(formulas?|formulae|equations?|expressions?|rules?|laws?|theorems?|principles?|identity|identities|symbols?|notation|calculat\w*|compute|computing)\b/],
+ ["mistakes",/\b(mistakes?|errors?|wrong|pitfalls?|traps?|misconceptions?|avoid|careful|confused with)\b/],
+ ["compare",/\b(differences?|different from|compare|compared|comparison|versus|vs|similar|same as|related|relationship|connection|linked to|link to)\b/],
+ ["exam",/\b(exam|exams|examination|test|tests|paper|papers|past papers?|marks?|marking|revise|revision|prepare|preparing|score|pass|ple|uce|uace)\b/],
+ ["remember",/\b(remember|memori[sz]e|memory|tricks?|tips?|shortcuts?|mnemonics?|hacks?)\b/],
+ ["how",/\b(how|steps?|procedures?|process|methods?|solve|solving|workings?|work out|approach|technique|algorithm|stages?|walk me through|guide me|instructions?)\b/],
+ ["why",/\b(why|reasons?|causes?|purpose|importance|important|matter|matters|needed|benefits?|advantages?|significance|point of)\b/],
+ ["uses",/\b(uses?|used|using|applications?|applied|apply|where|real life|everyday|daily life|in life|practical|relevance|relevant|good for|what for|employ\w*|utili[sz]\w*)\b/],
+ ["understand",/\b((do not|did not|does not|can not|could not|still do not|still not|not) (understand|get|follow|catch|see|know|clear|sure)|not clear|unclear|confus\w*|lost|too (hard|difficult|complicated|long)|hard|difficult|complicated|make (it )?(clear|clearer|sense)|no idea|what do you mean|what does (it|that|this) mean|again|better|clearly|slowly|another way|different way|differently|repeat|once more|one more time|re ?explain|come again|pardon|break (it )?down|break it up|step by step)\b/],
+ ["define",/\b(what is|what are|what was|meaning|means?|define|definition|stand for|who is|who are|called|name)\b/],
+ ["more",/\b(more|further|elaborate|expand|deeper|deep|depth|details?|detailed|go on|continue|carry on|keep going|proceed|next|else|and then|all|everything|full|complete|longer|rest|info|information|points?|ideas?|facts?|notes?|extra|additional|another|other)\b/]];
+const FU_ALL=FU_K.map(x=>new RegExp(x[1].source,"g"));
+/* each repeat of the same request uses the next way of answering: [template, minimum plan rank, show even if the plan is lower (so the upgrade note appears)] */
+const FU_V={
+ more:[["{p} in more details",0,1],["give an example of {p}",2,1],["how {p} works and its steps",0,0],["uses of {p} and where it is used",0,0],["{p} common mistakes",0,0],["quiz me on {p}",1,1]],
+ why:[["why is {p} important",0,0],["uses of {p} and where it is used",0,0],["{p} benefits and importance in daily life",0,0]],
+ how:[["how {p} works and its steps",0,0],["give an example of {p}",2,1],["{p} common mistakes",0,0]],
+ uses:[["uses of {p} and where it is used",0,0],["give an example of {p}",2,1],["why is {p} important",0,0]],
+ understand:[["explain {p} in simple words",2,0],["what is {p}",0,0],["give an example of {p}",2,0],["how {p} works and its steps",0,0],["uses of {p} and where it is used",0,0]],
+ formula:[["{p} formula and rules",0,0],["give an example of {p}",2,1],["how {p} works and its steps",0,0]],
+ define:[["what is {p}",0,0],["explain {p} in simple words",2,1],["give an example of {p}",2,1]],
+ example:[["give an example of {p}",2,1],["give another example of {p}",2,1],["give a real life example of {p}",2,1]],
+ simple:[["explain {p} in simple words",2,1]],
+ summary:[["summary of {p}",0,0]],
+ mistakes:[["{p} common mistakes",0,0]],
+ compare:[["difference between {p} and similar topics",0,0]],
+ exam:[["{p} exam tips and common exam questions",0,0]],
+ remember:[["tips to remember {p}",0,0]],
+ quiz:[["quiz me on {p}",1,1]]};
+const FU_CU=["Did you understand? If not, tell me and I will explain it another way.","Is it clear now? Say \"understood\", or tell me which part is still confusing.","Understood? If something is still hard, say \"I do not understand\" and I will try a different way.","Does that make sense now? I can explain it again in another way if you want."];
+const FU_CM=["Is that clear? You can ask for more details, an example, or say \"quiz me\".","Would you like even more, or shall I give you an example?","Do you want the formula, an example, or a quiz on this?","Shall we go deeper, or do you want to try a quiz on this?"];
+const FU_HINT={more:"Give more detail than before, with new points not already covered.",why:"Give the reasons and the importance, in simple words.",how:"Give the procedure as numbered steps with a worked example.",uses:"Show the areas and real situations where it is used, with Ugandan examples.",understand:"The learner did not understand. Explain in a different, simpler way than before, with an everyday Ugandan example, then ask if it is understood.",formula:"Give the formula or rules clearly, with what each symbol means and one worked example.",define:"Give a clear definition.",example:"Give a new example, different from earlier ones.",simple:"Explain in very simple words.",summary:"Give a short summary of the key points.",mistakes:"List the common mistakes learners make and how to avoid them.",compare:"Compare it with similar topics and show the differences.",exam:"Give exam tips and the kind of questions asked.",remember:"Give tricks to remember it.",quiz:"Ask quiz questions.",custom:"Answer the follow-up about the same topic."};
+function ctxFollow(q){
+ const c=ctxGet();if(!c||!c.tq)return null;
+ const t=ctxNorm(q);if(!t||t.length>80||/\d/.test(t))return null;
+ const p=cleanQ(c.tq);if(!p)return null;
+ const nm=D.pname?" "+D.pname:"",pk=(a,n)=>a[n%a.length],nn=D.msgs.length,rank=PRANK[planName()]||0;
+ const L=x=>({local:x,q:String(q),kind:"local",sub:c.sub,topic:p});
+ if(/\b(what are we (discussing|talking about|doing|studying|learning)|what is the topic|which topic|what topic|what were we (discussing|talking about)|where are we|where were we|what did we (discuss|talk about|learn|do)|remind me|what have we (done|learnt|learned|covered)|summari[sz]e (our|this) (chat|talk|conversation|discussion|lesson))\b/.test(t))
+  return L("We are talking about **"+p+"**. You can say: \"more details\", \"why\", \"how do I solve it\", \"where is it used\", \"formula\", \"give an example\" or \"quiz me\". To start a new topic, just ask a new question.");
+ if(/^(thanks|thank you|thank you very much|thanks a lot)$/.test(t))return L("You are welcome"+nm+"! Shall we continue with **"+p+"**, or do you have another question?");
+ if(/^(yes|yeah|yep|yup|ok|okay|sure|alright|fine|good|nice|great|cool|perfect|wow|i see|i understand|i understood|understood|got it|i got it|i get it|now i understand|now i get it|that is clear|it is clear|clear|clear now|makes sense|that makes sense|i am good|all good|i am fine|thanks|thank you|thank you very much|thanks a lot|good one|nice one|well done|great job|you are good|you are great|you are smart|yes please|please do|of course|why not)$/.test(t))
+  return L(pk(["Great"+nm+"! Shall we go further with **"+p+"**? You can ask for an example, the formula, or say \"quiz me\".","Well done"+nm+"! Do you want to try a quiz on **"+p+"**, or learn something new?","Good"+nm+". Would you like more about **"+p+"**, or shall we move to another topic?"],nn));
+ if(/\b(next topic|what next|what comes next|what is next|another topic|something else|different topic|new topic|related topics?|similar topics?|what should i (learn|study|read)( next)?)\b/.test(t))
+  return L("When you are ready you can ask about a related topic, or pick one of these:\n"+startsFor().map(x=>"- "+x).join("\n"));
+ let kind=null;
+ if(/^(no|nope|not really|not yet|a little|little bit|not sure|partly|not quite|not at all|still confused|still lost|i am still confused|i am still lost|no i do not understand|i still do not understand|i do not think so)$/.test(t))kind="understand";
+ if(!kind&&smallTalk(q))return null;
+ /* "what is <word>" with no pointer back is a new question unless the word is a follow-up word like formula or purpose */
+ if(/^(what is|what are|who is|who are|define)\b/.test(t)&&!FU_R.test(t)&&!/\b(formulas?|definition|meaning|purpose|importance|uses?|steps?|reasons?|examples?|mistakes?|procedure|process|method|summary)\b/.test(t))return null;
+ if(kind)void 0;
+ else for(const k of FU_K)if(k[1].test(t)){kind=k[0];break}
+ /* is the whole request only about the topic being discussed? words that are not stop words or request words would be a new topic */
+ let r=t;FU_ALL.forEach(x=>{r=r.replace(x," ")});
+ const left=r.split(" ").filter(w=>w&&!FU_STOP.has(w)),hasR=FU_R.test(t);
+ if(!left.length){
+  if(!kind){if(!hasR)return null;kind=/\b(explain|describe|teach|break)\b/.test(t)?"understand":"more"}
+  const V=FU_V[kind]||FU_V.more,el=V.filter(v=>rank>=v[1]||v[2]),cnt=D.msgs.filter(x=>x.s=="i"&&x.tq===c.tq&&x.fk===kind).length,v=el[cnt%el.length]||V[0];
+  const cu=kind=="understand"||kind=="simple"||kind=="define";
+  return{q:v[0].replace("{p}",p),kind,sub:c.sub,topic:p,step:cnt,hint:FU_HINT[kind],chkk:kind=="quiz"?null:pk(cu?FU_CU:FU_CM,cnt+nn)}}
+ /* a short question that points back with "it", "this", "that" but also adds something: keep the topic, replace the pointer */
+ if(hasR&&t.split(" ").length<=10&&/^(what|how|why|where|when|who|which|can|could|does|do|is|are|give|show|tell|explain|describe|solve|use|write|list)\b/.test(t)){
+  let own=null;try{own=topicOf(t)}catch(e){}if(own||smallTalk(q))return null;
+  return{q:t.replace(/\bits\b/,p+"'s").replace(/\b(it|this|that|them|these|those|they)\b/,p),kind:"custom",sub:c.sub,topic:p,step:0,hint:FU_HINT.custom}}
+ return null}
+function lastAnsText(){for(let i=D.msgs.length;i--;){const x=D.msgs[i];if(x.s=="i"&&x.t&&!x.err&&!x.note&&!x.lim)return String(x.t).slice(0,700)}return""}
 let AN=0;
 function ask(q,mode){
- if(stream!=null)return;let gn=null;
- if(!mode){const G=planGate(q);if(G){
+ if(stream!=null)return;let gn=null,FU=null,bareG=false;
+ if(!mode){FU=ctxFollow(q);if(FU&&!FU.local)q=FU.q}
+ if(!mode){const G=planGate(q);if(G){bareG=!!G.bare;
   const nt=(t,up)=>{D.msgs.push({s:"i",note:1,up:up?1:0,t,ts:Date.now()});save();render()};
   if(capped())return limitMsg();
   if(G.noBase)return nt("Ask me a question first, then I can do that for it.",0);
@@ -2739,22 +3145,28 @@ function ask(q,mode){
   if(G.block)gn=G.note;
   q=G.q;mode=G.mode||null}}
  D.sub=routeSub(q);if(capped())return limitMsg();const ch=D.chats.find(c=>c.id==D.cur);if(ch.title=="New chat"||ch.title=="Chat")ch.title=q.slice(0,32);
+ if(FU&&FU.sub&&D.sub=="General"&&subsList().includes(FU.sub))D.sub=FU.sub;
+ const CTX=(FU||bareG||mode||smallTalk(q))?ctxGet():{tq:String(q).slice(0,120),sub:D.sub};
  const now=Date.now();stamps=stamps.filter(t=>now-t<6e4);
  const err=x=>{D.msgs.push({s:"i",err:1,t:x,q,mode,ts:Date.now()});save();render()};
  if(!navigator.onLine)return err("No internet connection. Check your network and try again.");
  if(stamps.length>=8)return err("Too many requests. Please wait a minute and try again.");
  stamps.push(now);sm=null;const tok=++AN;
  $("stat").textContent="typing…";$("send").innerHTML=STOP;
- stream=setTimeout(async()=>{let f=null;try{f=await Promise.race([dbAnswer(q,mode),new Promise(r=>setTimeout(()=>r(null),3200))])}catch(e){}
+ stream=setTimeout(async()=>{let f=FU&&FU.local?{t:FU.local}:null;if(!f)try{f=await Promise.race([dbAnswer(q,mode),new Promise(r=>setTimeout(()=>r(null),3200))])}catch(e){}
   if(stream==null||tok!=AN)return;
   if(!f)f=mock(q,mode);
-  if(f.un&&!mode){const a=await aiAnswer(q);if(stream==null||tok!=AN)return;
+  if(f.un&&!mode){let x=null;try{x=await crossLevel(q)}catch(e){}if(stream==null||tok!=AN)return;if(x)f=x}
+  if(f.un&&!mode){const a=await aiAnswer(q,FU);if(stream==null||tok!=AN)return;
    if(a&&a.busy){logUn(q);stopS();return err("Many learners are asking right now. Please try again in a little while.")}
    if(a&&a.t)f=a}
-  if(f.un&&!mode)logUn(q);
+  if(f.un&&!mode&&!FU)logUn(q);
+  if(f.fmt&&!f.un&&!mode){const st=await styleAnswer(f.t,q);if(stream==null||tok!=AN)return;if(st)f.t=st.md}
   if(!f.ai&&!f.un){const Tm=topicOf(q);if(Tm&&Tm.ai)f.ai=1}
   if(f.ai&&!f.tid){const Tm=topicOf(q);if(Tm&&Tm.tid)f.tid=Tm.tid}
-  const m={s:"i",t:"",ts:Date.now(),q,mode,stream:1},w=f.t.split(/(?<=\s)/);if(f.quiz)m.quiz=f.quiz;if(f.qz)m.qz=f.qz;if(f.w)m.w=f.w;if(f.aid)m.aid=f.aid;if(f.ai)m.ai=1;if(f.tid)m.tid=f.tid;
+  if(!f.lv&&!f.un){const Tm=topicOf(q);if(Tm&&Tm.sl){f.lv=Tm.sl;f.cls=Tm.cls}}
+  let chk=0;if(FU&&FU.chkk&&f&&f.t&&!f.un&&!f.w&&!f.quiz&&!f.qz&&!FU.local){f.t+="\n\n"+FU.chkk;chk=1}
+  const m={s:"i",t:"",ts:Date.now(),q,mode,stream:1,fk:FU&&FU.kind||undefined,chk:chk||undefined,tq:CTX&&CTX.tq||undefined,tsub:CTX&&(CTX.sub||D.sub)||undefined},w=f.t.split(/(?<=\s)/);if(f.quiz)m.quiz=f.quiz;if(f.qz)m.qz=f.qz;if(f.w)m.w=f.w;if(f.aid)m.aid=f.aid;if(f.ai)m.ai=1;if(f.tid)m.tid=f.tid;if(f.fmt){const M=MODELS[modelName()];m.mdl=M.n+" "+M.v}{const ln=levelNote(f.lv,f.cls);if(ln)m.lvn=ln}
   D.msgs.push(m);sm=m;let k=0;stream=setInterval(()=>{m.t+=w[k++]||"";if(k>=w.length){stopS();notify("Answer ready",'Your answer about "'+(q||"your question").slice(0,40)+'" is ready.');if(gn){D.msgs.push({s:"i",note:1,up:1,t:gn,ts:Date.now()});save();render()}if(capped())limitMsg()}else render()},35)},600)}
 $("msgs").addEventListener("click",e=>{
 
@@ -2817,11 +3229,13 @@ UACE:{"General Paper":["How do I write a good essay for General Paper?","What is
 "Technical Drawing":["What is orthographic projection?","How do I draw an isometric view?","Explain the types of lines used in drawings","What is a sectional view?","How do I use drawing instruments?"],
 "Food and Nutrition":["What are the functions of proteins?","Explain food preservation methods","What is a balanced diet?","Explain deficiency diseases","How do I plan a meal?"]}};
 const HQC={};
-function homeQs(){const lv=lvKey(),bank=HOMEQ[lv]||HOMEQ.PLE,key=lv+"|"+D.sub;if(HQC[key])return HQC[key];
+function homeQs(){const lv=lvKey(),levels=lv=="UACE"?["UACE","UCE","PLE"]:lv=="UCE"?["UCE","PLE"]:["PLE"],key=lv+"|"+D.sub;if(HQC[key])return HQC[key];
  const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
- let out=[];
- if(D.sub&&D.sub!=="General"&&bank[D.sub])out=shuf(bank[D.sub]).slice(0,3);
- else out=shuf(Object.keys(bank)).slice(0,3).map(k=>bank[k][Math.floor(Math.random()*bank[k].length)]);
+ const by={};levels.forEach(l=>{const b=HOMEQ[l]||{};Object.keys(b).forEach(k=>{(by[k]=by[k]||[]).push(...b[k])})});
+ const pick=k=>by[k][Math.floor(Math.random()*by[k].length)];
+ let out;
+ if(D.sub&&D.sub!=="General"&&by[D.sub])out=shuf(by[D.sub]).slice(0,3);
+ else out=shuf(Object.keys(by)).slice(0,3).map(pick);
  return HQC[key]=out}
 function greetNow(){const h=new Date().getHours();return h<12?"Good morning":h<17?"Good afternoon":"Good evening"}
 function empty(){return`<div class="empty"><b style="font-size:1.25em">${greetNow()}${D.pname?", "+esc(D.pname):""}. What do you want to learn?</b><p style="margin:6px 0 12px">${esc(D.cls||lvKey())} · Pick a question or type your own.</p>${homeQs().map(x=>`<button class="st" data-st="${esc(x)}">${esc(x)}</button>`).join("")}</div>`}
@@ -2901,6 +3315,128 @@ function voiceLang(){const k=(()=>{try{return localStorage.getItem("ask_vlang")=
 applyTheme();render();updateBadge();$("msgs").addEventListener("scroll",()=>{const m=$("msgs");$("jump").style.display=m.scrollHeight-m.scrollTop-m.clientHeight>250?"grid":"none"});
 $("jump").onclick=()=>$("msgs").scrollTo({top:1e9,behavior:"smooth"});
 
+/* ===== ADMIN PANEL (owner only) =====
+ One app, two modes for the owner account DAVID. Switch: Settings > Learner profile > Update account > Switch to Admin panel.
+ Every admin database function checks the login token again (username DAVID with the owner phone), so other accounts are refused even if they find this code. */
+const ADMT=[["home","Home"],["users","Users"],["asked","Asked"],["review","Review"],["ai","AI"]];
+let ADMON=false,ADMTAB="home",ADMSEQ=0,ADMUQ="",ADMUL=[],ADMAS="open",ADMAL=[],ADMPL=[];
+const admCall=async(fn,a)=>{try{const j=await svRpc(fn,Object.assign({p_t:tokNow()},a||{}));return j&&typeof j.ok=="boolean"?j:{ok:false,err:"fail"}}catch(e){return{ok:false,err:"net"}}};
+const admMsg=j=>j&&j.err=="not allowed"?"This panel is only for the owner account.":j&&j.err=="net"?"No internet. Check your connection and try again.":"Could not load. Try again.";
+const admFail=(j,retry)=>'<div class="pbn" style="margin:14px 18px;line-height:1.5">'+admMsg(j)+'</div>'+(retry?'<div class="row" data-r="1"><div>Try again</div></div>':"");
+const admLd=()=>'<div style="padding:22px 18px;color:var(--sub)">Loading…</div>';
+const admDate=d=>{try{return new Date(d).toLocaleDateString()}catch(e){return""}};
+const admN=x=>Number(x)||0;
+const abt=(a,l,c)=>`<button data-a="${a}" style="flex:1;min-width:30%;padding:12px 8px;border:0;border-radius:22px;font:inherit;font-weight:700;cursor:pointer;color:#fff;background:${c}">${l}</button>`;
+const SVBACK=()=>{closeP();try{if(ADMON)admGo(ADMTAB)}catch(e){}};
+function admCopy(x,msg){const fb=()=>{const ta=document.createElement("textarea");ta.value=x;document.body.appendChild(ta);ta.select();try{document.execCommand("copy")}catch(_){}ta.remove();uiAlert(msg)};
+ if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(x).then(()=>uiAlert(msg),fb);else fb()}
+function admHide(){ADMON=false;const a=$("adm");if(a)a.style.display="none"}
+function admClose(){admHide();try{localStorage.setItem("ask_mode_DAVID","user")}catch(e){}closeP()}
+function admOpen(){if(!isOwner())return;ADMON=true;try{localStorage.setItem("ask_mode_DAVID","admin")}catch(e){}
+ const a=$("adm");a.style.display="flex";
+ a.innerHTML=`<header class="ah"><div><b>Admin panel</b><small>Ask Tr. David · only you see this</small></div><button id="ax">Learner app</button></header><div id="abody"></div><nav class="an">${ADMT.map(t=>`<button data-t="${t[0]}">${t[1]}</button>`).join("")}</nav>`;
+ a.onclick=e=>{if(e.target.id=="ax"){admClose();return}const t=e.target.closest(".an button");if(t)admGo(t.dataset.t)};
+ admGo(ADMTAB)}
+function admGo(t){ADMTAB=t;ADMSEQ++;document.querySelectorAll("#adm .an button").forEach(b=>b.classList.toggle("on",b.dataset.t==t));
+ ({home:admHome,users:admUsers,asked:()=>admAsked(),review:admReview,ai:admAi})[t]()}
+
+/* HOME */
+async function admHome(){const s=ADMSEQ,b=$("abody");b.innerHTML=admLd();const j=await admCall("admin_stats");if(s!==ADMSEQ)return;
+ if(!j.ok){b.innerHTML=admFail(j,1);b.onclick=e=>{if(e.target.closest("[data-r]"))admHome()};return}
+ const P=j.plans||{},n=admN,C=(l,v,sub)=>`<div class="ac"><span>${l}</span><b>${n(v)}</b><small>${sub}</small></div>`;
+ b.innerHTML=`<div class="ag">${C("Learners",j.users_total,"+"+n(j.users_new_7d)+" this week")}${C("Signed in",j.logged_in_now,"accounts with a live login")}${C("Installs",j.installs_total,"+"+n(j.installs_7d)+" this week")}${C("Using today",j.devices_today,n(j.devices_7d)+" devices, "+n(j.accounts_7d)+" accounts this week")}</div>
+ <div style="padding:0 18px 4px;color:var(--sub);font-size:12px;line-height:1.4">Installs and usage are counted from this version of the app onward.</div>
+ <div class="asec">Plans</div><div style="display:flex;flex-wrap:wrap;gap:8px;padding:6px 18px 10px">${PLANS4.map(p=>`<span class="apl" style="background:${PCOL[p]}">${p} ${n(P[p])}</span>`).join("")}</div>
+ <div class="asec">Waiting for you</div>
+ <div class="row" data-g="asked"><div><b>${n(j.unanswered_open)}</b> questions not understood<small>Asked ${n(j.asked_unanswered)} times in total. Tap to teach the system</small></div></div>
+ <div class="row" data-g="rq"><div><b>${n(j.topics_waiting)}</b> AI answers to check<small>${n(j.topics_published)} approved so far</small></div></div>
+ <div class="row" data-g="rr"><div><b>${n(j.styles_waiting)}</b> model rewrites to check<small>${n(j.styles_approved)} approved so far</small></div></div>
+ <div class="asec">Library</div>
+ <div class="row" style="cursor:default"><div><b>${n(j.questions_total)}</b> questions, <b>${n(j.answers_published)}</b> answers published<small>AI requests in the last 24 hours: ${n(j.gemini_today)}</small></div></div>
+ <div class="asec">Project</div>
+ <div class="row" data-g="ho"><div>Project handoff<small>Notes and files for the next Claude. Only you see this</small></div></div>
+ <div class="row" data-g="rf"><div>Refresh</div></div>`;
+ b.onclick=e=>{const g=e.target.closest("[data-g]")?.dataset.g;if(!g)return;if(g=="asked")admGo("asked");else if(g=="rq")voiceRoom("q","draft");else if(g=="rr")voiceRoom("r","draft");else if(g=="ho")handoff();else if(g=="rf")admHome()}}
+
+/* USERS: find by username or phone, change plan */
+function admUsers(){const s=ADMSEQ,b=$("abody");
+ b.innerHTML=`<input class="ain" id="auq" placeholder="Search username, phone or name" value="${esc(ADMUQ)}" autocomplete="off" autocapitalize="off"><div id="aul">${admLd()}</div>`;
+ let tm=0,tk=0;
+ const run=async()=>{const my=++tk,q=$("auq")?$("auq").value.trim():"";ADMUQ=q;const j=await admCall("admin_find_users",{p_q:q});if(my!==tk||s!==ADMSEQ)return;const L=$("aul");if(!L)return;
+  if(!j.ok){L.innerHTML=admFail(j);return}
+  ADMUL=j.items||[];
+  L.innerHTML=(ADMUL.length?"":'<div style="padding:18px;color:var(--sub)">No accounts found.</div>')+ADMUL.map((u,i)=>`<div class="row" data-u="${i}"><div style="flex:1;min-width:0"><b>${esc(u.names)}</b><small>${esc(u.username)} · ${esc(u.phone)}</small></div><span class="apl" style="background:${PCOL[u.plan]||"#888"}">${esc(u.plan)}</span></div>`).join("")};
+ $("auq").oninput=()=>{clearTimeout(tm);tm=setTimeout(run,350)};
+ b.onclick=e=>{const r=e.target.closest("[data-u]");if(r)admUser(ADMUL[+r.dataset.u])};
+ run()}
+function admUser(u){if(!u)return;ADMSEQ++;const b=$("abody");
+ const set=p=>uiConfirm("Change "+u.username+" to the "+p+" plan?",async()=>{const j=await admCall("admin_set_plan",{p_user:u.id,p_plan:p});
+  if(j.ok){u.plan=p;if(u.username==="DAVID")syncPlan();admUser(u);const m=$("aum");if(m)m.textContent="Plan changed to "+p+"."}
+  else uiAlert(j.err=="bad plan"||j.err=="no such account"?"Could not change the plan ("+j.err+").":admMsg(j))},"Change plan");
+ b.innerHTML=`<div class="row" data-b="1"><div>‹ Back to users</div></div><div style="padding:12px 18px;line-height:1.6"><b style="font-size:18px">${esc(u.names)}</b><br>${esc(u.username)} · ${esc(u.phone)}<br><small style="color:var(--sub)">Joined ${admDate(u.created_at)}</small></div><div class="asec">Plan</div>`
+  +PLANS4.map(p=>`<div class="row" data-p="${p}"><span style="width:10px;height:10px;border-radius:50%;background:${PCOL[p]};flex:none"></span><div><b>${p}</b>${p==u.plan?"<small>Current plan</small>":""}</div></div>`).join("")
+  +'<div id="aum" style="padding:10px 18px;color:var(--green);font-weight:600;min-height:20px"></div>';
+ b.onclick=e=>{if(e.target.closest("[data-b]")){ADMSEQ++;admUsers();return}const p=e.target.closest("[data-p]")?.dataset.p;if(p&&p!=u.plan)set(p)}}
+
+/* ASKED: questions the app did not understand */
+async function admAsked(st){if(st)ADMAS=st;const s=ADMSEQ,b=$("abody");b.innerHTML=admLd();const j=await admCall("admin_unanswered_list",{p_status:ADMAS});if(s!==ADMSEQ)return;
+ if(!j.ok){b.innerHTML=admFail(j,1);b.onclick=e=>{if(e.target.closest("[data-r]"))admAsked()};return}
+ ADMAL=j.items||[];const C=j.counts||{},L={open:"Open",answered:"Linked",dismissed:"Dismissed"};
+ b.innerHTML=`<div style="padding:12px 18px 4px;color:var(--sub);line-height:1.5">Questions learners asked that the app could not match. Link each one to a question that already has an answer, so the next learner who asks it that way gets the answer.</div><div style="display:flex;gap:6px;padding:8px 18px 12px">${["open","answered","dismissed"].map(k=>svBtn(k==ADMAS,L[k]+" "+(C[k]||0),"data-s",k)).join("")}</div>`
+  +(ADMAL.length?"":'<div style="padding:18px;color:var(--sub)">Nothing here.</div>')
+  +ADMAL.map((x,i)=>`<div class="row" data-i="${i}"><div><b>${esc(x.question_text)}</b><small>Asked ${admN(x.times_asked)} time${x.times_asked==1?"":"s"} · ${esc(x.level_code)} · ${esc(x.subject_name||"General")} · ${admDate(x.last_asked_at)}${x.linked_title?" · linked to “"+esc(x.linked_title)+"”":""}</small></div></div>`).join("");
+ b.onclick=e=>{const k=e.target.closest("[data-s]");if(k)return admAsked(k.dataset.s);const r=e.target.closest("[data-i]");if(r)admAskOne(ADMAL[+r.dataset.i])}}
+function admAskOne(x){if(!x)return;const s=++ADMSEQ,b=$("abody");let R=[];
+ b.innerHTML=`<div class="row" data-b="1"><div>‹ Back to questions</div></div><div style="padding:12px 18px;line-height:1.5"><b style="font-size:17px">${esc(x.question_text)}</b><br><small style="color:var(--sub)">Asked ${admN(x.times_asked)} times · ${esc(x.level_code)} · ${esc(x.subject_name||"General")}</small></div>`
+  +(x.status=="open"?`<div class="asec">Link to a question that has an answer</div><input class="ain" id="aqs" value="${esc(x.question_text)}" autocomplete="off"><div id="aql"></div>`:"")
+  +`<div id="aqm" style="padding:6px 18px;color:var(--green);font-weight:600;min-height:18px"></div><div style="display:flex;gap:8px;flex-wrap:wrap;padding:6px 18px 24px">${x.status=="open"?abt("ds","Dismiss","#6b7280"):abt("op","Move back to open","#6b7280")}</div>`;
+ let tk=0,tm=0;
+ const run=async()=>{const my=++tk,q=$("aqs")?$("aqs").value.trim():"";const j=await admCall("admin_questions_search",{p_q:q});if(my!==tk||s!==ADMSEQ)return;const L=$("aql");if(!L)return;
+  if(!j.ok){L.innerHTML=admFail(j);return}R=j.items||[];
+  L.innerHTML=R.length?R.map((r,i)=>`<div class="row" data-q="${i}"><div><b>${esc(r.title)}</b><small>${esc(r.subject_name||"")} · ${admN(r.phrasings)} other way${r.phrasings==1?"":"s"} of asking</small></div></div>`).join(""):'<div style="padding:10px 18px;color:var(--sub)">No saved question found. Try other words.</div>'};
+ if(x.status=="open"){run();$("aqs").oninput=()=>{clearTimeout(tm);tm=setTimeout(run,350)}}
+ const setSt=async(st,q)=>{const m=$("aqm");if(m)m.textContent="Saving…";const j=await admCall("admin_unanswered_set",{p_id:x.id,p_status:st,p_question:q||null});if(j.ok){ADMSEQ++;admAsked(st=="answered"?"open":st=="dismissed"?"open":"open")}else if(m)m.textContent=j.err=="pick a question"?"Pick a saved question first.":admMsg(j)};
+ b.onclick=e=>{if(e.target.closest("[data-b]")){ADMSEQ++;admAsked();return}
+  const q=e.target.closest("[data-q]");if(q){const r=R[+q.dataset.q];if(r)uiConfirm("Link this question to “"+r.title+"”? Learners who ask it this way will get that answer.",()=>setSt("answered",r.id),"Link");return}
+  const a=e.target.closest("[data-a]")?.dataset.a;if(a=="ds")setSt("dismissed");else if(a=="op")setSt("open")}}
+
+/* REVIEW: the existing Learner answers rooms */
+async function admReview(){const s=ADMSEQ,b=$("abody");b.innerHTML=admLd();const j=await admCall("admin_stats");if(s!==ADMSEQ)return;
+ if(!j.ok){b.innerHTML=admFail(j,1);b.onclick=e=>{if(e.target.closest("[data-r]"))admReview()};return}
+ const n=admN;
+ b.innerHTML=`<div style="padding:12px 18px;color:var(--sub);line-height:1.5">Learners get their answers straight away, with no label. Here you see what they asked and decide what is kept for good: approve, edit or reject.</div>
+ <div class="row" data-k="q"><div><b>${n(j.topics_waiting)}</b> new questions waiting<small>Answers the AI wrote for questions with no saved answer. ${n(j.topics_published)} approved</small></div></div>
+ <div class="row" data-k="r"><div><b>${n(j.styles_waiting)}</b> model rewrites waiting<small>Teacher, Tutor, Lecturer and the other models. ${n(j.styles_approved)} approved</small></div></div>`;
+ b.onclick=e=>{const k=e.target.closest("[data-k]")?.dataset.k;if(k)voiceRoom(k,"draft")}}
+
+/* AI: how each model writes */
+async function admAi(){const s=ADMSEQ,b=$("abody");b.innerHTML=admLd();const j=await admCall("admin_prompts_get");if(s!==ADMSEQ)return;
+ if(!j.ok){b.innerHTML=admFail(j,1);b.onclick=e=>{if(e.target.closest("[data-r]"))admAi()};return}
+ ADMPL=j.items||[];const by={};ADMPL.forEach((x,i)=>{const g=(MODELS[x.model]||{}).g||"Other";(by[g]=by[g]||[]).push(i)});
+ b.innerHTML=`<div style="padding:12px 18px;color:var(--sub);line-height:1.5">Each AI model writes in its own voice. Change the instructions here to improve how a model answers. Learners get the new voice from the next rewrite. To test, ask a question in the Learner app with that model selected, then check Review.</div>`
+  +MGROUPS.concat(Object.keys(by).filter(g=>!MGROUPS.includes(g))).filter(g=>by[g]).map(g=>`<div class="asec">${esc(g)}</div>`+by[g].map(i=>{const x=ADMPL[i],ed=(x.instructions||"").trim()!=(x.default_text||"").trim();return`<div class="row" data-m="${i}"><div><b>${esc((MODELS[x.model]||{}).n||x.model)}</b><small>${ed?"Edited "+admDate(x.updated_at):"Default voice"}</small></div></div>`}).join("")).join("");
+ b.onclick=e=>{const r=e.target.closest("[data-m]");if(r)admPrompt(ADMPL[+r.dataset.m])}}
+function admPrompt(x,msg){if(!x)return;ADMSEQ++;const b=$("abody"),M=MODELS[x.model]||{n:x.model,d:""};
+ b.innerHTML=`<div class="row" data-b="1"><div>‹ Back to models</div></div><div style="padding:10px 18px 0;line-height:1.5"><b style="font-size:18px">${esc(M.n)}</b><br><small style="color:var(--sub)">${esc(M.d||"")}</small></div>
+ <div style="padding:10px 18px 0;color:var(--sub);font-size:13px">How this model writes (40 to 1500 characters). Say who it is, how it structures the answer and how it ends.</div>
+ <textarea id="apt" class="ain" style="min-height:230px;line-height:1.5;font-size:14px">${esc(x.instructions)}</textarea><div id="apc" style="padding:0 18px;color:var(--sub);font-size:12px"></div>
+ <div id="apm" style="padding:8px 18px;min-height:20px;color:var(--green);font-weight:600">${esc(msg||"")}</div>
+ <div style="display:flex;gap:8px;flex-wrap:wrap;padding:4px 18px 10px">${abt("sv","Save","#00a884")}${abt("rs","Back to default","#6b7280")}</div>
+ <details style="padding:0 18px 24px;color:var(--sub);font-size:13px"><summary>Show the default text</summary><div style="margin-top:6px;white-space:pre-wrap">${esc(x.default_text)}</div></details>`;
+ const t=$("apt"),cnt=()=>{$("apc").textContent=t.value.length+" / 1500"};cnt();t.oninput=cnt;
+ b.onclick=e=>{if(e.target.closest("[data-b]")){ADMSEQ++;admAi();return}
+  const a=e.target.closest("[data-a]")?.dataset.a,m=$("apm");if(!a)return;
+  if(a=="sv"){const v=t.value.trim();if(v.length<40||v.length>1500){m.style.color="#e03131";m.textContent="Write between 40 and 1500 characters.";return}
+   m.style.color="var(--green)";m.textContent="Saving…";
+   admCall("admin_prompt_set",{p_model:x.model,p_text:v}).then(j=>{if(j.ok){x.instructions=v;m.textContent="Saved. Learners get this voice from the next rewrite."}else{m.style.color="#e03131";m.textContent=j.err=="bad text"?"Write between 40 and 1500 characters.":admMsg(j)}})}
+  else if(a=="rs")uiConfirm("Go back to the default text for "+M.n+"?",async()=>{const j=await admCall("admin_prompt_reset",{p_model:x.model});if(j.ok){x.instructions=x.default_text;admPrompt(x,"Back to the default voice.")}else uiAlert(admMsg(j))},"Reset")}}
+
+/* PROJECT HANDOFF > Files (owner only, kept in the database, not in this page) */
+async function hoFiles(){const j=await admCall("admin_file_list"),el=$("hof");if(!el)return;
+ if(!j.ok){el.innerHTML='<div style="padding:8px 18px;color:var(--sub)">'+esc(admMsg(j))+'</div>';return}
+ el.innerHTML=(j.items||[]).length?j.items.map(f=>`<div class="row" data-f="${esc(f.name)}"><div>${esc(f.name)}<small>Tap to copy the whole file · ${Math.round(admN(f.size)/102.4)/10} KB${f.note?" · "+esc(f.note):""}</small></div></div>`).join(""):'<div style="padding:8px 18px;color:var(--sub)">No files saved.</div>'}
+async function hoCopyFile(n){const j=await admCall("admin_file_get",{p_name:n});if(!j.ok){uiAlert(admMsg(j));return}admCopy(j.content,"Copied "+n+".")}
+
 /* ===== PROJECT HANDOFF =====
  FOR CLAUDE: whenever you change this app, update the HANDOFF object below.
  Set done to 1 on finished items, add new items, add a line to log, set updated to today.
@@ -2931,6 +3467,10 @@ const HANDOFF={
   [
    "Working notes",
    "The owner uses the Claude mobile app and dictates by voice. Misheard words: shirt or short = chat; clear shirt = clear chat; Superbase = Supabase; the one report = the Report button; three upright dot = the three-dot menu; USCE probably = UACE. When the owner asks a question, answer it and do not start changing things. Ask before anything risky or irreversible. Keep replies short for a phone. Test every change in Playwright (load the file, click, check for script errors). Everything so far was tested in a headless browser only, never on a real phone."
+  ],
+  [
+   "Admin panel and owner files",
+   "One app, two modes for the owner account (username DAVID, checked in the database with the owner phone). The switch is in Settings > Learner profile > Update account. Admin has five tabs: Home (counts), Users (search, change plan), Asked (teach the system new ways of asking), Review (approve AI answers and model rewrites), AI (edit each model's writing instructions). Database functions used: admin_stats, admin_find_users, admin_set_plan, admin_unanswered_list, admin_unanswered_set, admin_questions_search, admin_prompts_get, admin_prompt_set, admin_prompt_reset, topic_review_*, style_review_*, admin_file_list, admin_file_get. Installs and usage come from log_app_event (anonymous device id kept on the phone) and are counted only from this version onward. The Edge Function ai_style (version 4) now reads the model voices from model_prompts and falls back to its built-in text. An edited voice gets its own saved rewrites, so approved rewrites made with the default voice are never lost. The ai_style source is stored in the table owner_files (readable only through admin_file_get by the owner) and is shown under Project handoff > Files. Do not hand the ai_style file to the owner again: it is already deployed."
   ],
   [
    "Update rule (for Claude)",
@@ -3065,24 +3605,18 @@ const HANDOFF={
    ]
   ],
   [
-   "Admin panel (not started)",
+   "Admin panel (built into the app, owner DAVID only)",
    [
-    [
-     "Decide technology: Expo / React Native app or installable PWA",
-     0
-    ],
-    [
-     "Secure login and roles",
-     0
-    ],
-    [
-     "Dashboard: questions asked, unanswered, answered, by level and subject",
-     0
-    ],
-    [
-     "Unanswered queue: write the answer for the right level and publish",
-     0
-    ],
+    ["Built inside the same installable app, not a second app. Owner switches User / Admin from Settings > Learner profile > Update account", 1],
+    ["Secure roles: every admin database function checks the login token for username DAVID with the owner phone. Other accounts never see the switch and the database refuses them", 1],
+    ["Home: learners, signed-in accounts, installs, usage today and this week, plan counts, items waiting", 1],
+    ["Users: search by username, phone or name, then change the plan (Free, Basic, Standard, Premium)", 1],
+    ["Asked: link a question the app did not understand to a saved question, so the learner's words become another way of asking it", 1],
+    ["Review: approve, edit or reject AI-written answers and model rewrites (same rooms as before, now opened from the Admin panel)", 1],
+    ["AI: edit each model's writing instructions (table model_prompts); ai_style reads them", 1],
+    ["Files (only you): ai_style/index.ts is kept in the database and opened from Project handoff", 1],
+    ["Dashboard breakdown by level and subject", 0],
+    ["Unanswered queue: write a brand new answer for the right level and publish", 0],
     [
      "Answer library: create, edit, search, reorder, CSV import, preview",
      0
@@ -3128,6 +3662,10 @@ const HANDOFF={
     ["Approve AI drafts: in Supabase open Table Editor, topics, find the row with ai_generated on and status draft, check the text and quiz, then change status to published. The label disappears once it is published. The admin panel for this is not built yet",0],
     ["Rating AI generated answers: the database function rate_ai_topic checks the login token. The owner account (username DAVID, phone on file) publishes with one thumbs up. Other accounts are counted (one vote each, table topic_feedback) and the answer is published at 10 positive votes (constant needed in the function). When published the label disappears and later related questions find it",1],
     ["Plans are locked: app_users.plan (default Free) is the truth and is copied to the phone after login. Only the owner account DAVID can switch plans (set_my_plan). To give a paying learner a plan, set app_users.plan in Supabase; an admin page for this is still to be built. The free word limit is still counted on the phone, not on the server",0],
+    ["Class levels: PLE learners get Primary 1 to 7, UCE learners Senior 4 down to Primary 1, UACE learners Senior 6 down to Primary 1. A topic above or below the learner's level is still answered, with a blue note under the answer (levelNote, crossLevel in the script). The ai_answer function now also records syllabus_level and class_label for each AI topic. Built-in Science topics do not have a class yet, so their note says primary work without the class",0],
+    ["Home screen questions: three different subjects at or below the learner's level, new every time the app opens (HOMEQ in the script)",1],
+    ["Project handoff is now shown only to the owner account DAVID. Note: the handoff text is still inside index.html, so it is hidden from the screen but not secret. Move it to the database if it must be private",0],
+    ["TransApple Education AI v1.0: ten models. Free: Teacher, Examiner. Basic adds Tutor, Instructor. Standard adds Lecturer, Researcher. Premium adds Professor, Mentor, Librarian, Philosopher. The chip at the bottom opens the model picker and shows the model version. Each model has its own answer format in FM and its depth grows with the model's rank and the plan (MODELS, modelDepth). To improve a model edit its format in FM and raise its v. The formats are built from the topic text, so deeper content (real scenarios, research evidence) needs the AI function to write more fields later. Librarian and Philosopher placed on Premium by assumption",1],
     ["TESTING: the plan button at the bottom opens the plan changer. To return to the real subscription set PLAN_TEST_MODE to false in the script (it then opens the Upgrade plans screen). Also remove activatePlan when payments are live",0],
     ["Publish the 60 draft Mathematics answers after teacher review (all still drafts, so learners cannot see them)",0],
     ["Add topics for subjects other than Primary Mathematics and Science: questions with no topic get a placeholder answer and are logged as unanswered",0],
@@ -3176,6 +3714,30 @@ const HANDOFF={
   ]
  ],
  "log": [
+  [
+   "2026-10-30",
+   "Chat memory, second version: the app now understands many more short follow-ups by what they ask for (more detail, why, how/steps, where used, formula, definition, example, simple, summary, mistakes, compare, exam tips, tricks to remember, quiz, I do not understand, explain again) and by pointer words like it, this, that, them, its. A new question with its own topic still changes the topic. Repeating the same request now changes the way it is answered (for example more details, then an example, then steps, uses, mistakes, a quiz); I do not understand rotates simple words, definition, example, steps, uses. Teaching answers end with a check question such as Understood? and replies like yes, no, not really, thanks, what are we talking about and what next are answered on the same topic. Many more small talk lines (praise, sorry, wait, jokes, who made you, I am tired, exams worry and others) never change the topic. All plan limits still apply through the existing gates. When the saved answers have nothing for a follow-up, the question goes to Gemini together with the follow-up kind, the topic and the previous answer (the ai_answer function must be updated to read the follow field). Follow-ups are not logged as unanswered questions. Tested with a script on about 50 sample sentences; not yet tried on a real phone."
+  ],
+  [
+    "2026-10-30",
+    "Chat memory: while a chat is open, short follow-ups now stay on the topic being discussed. Things like 'more details', 'explain more', 'why?', 'how do I solve it?', 'where is it used?', 'formula', 'I do not understand' and questions with 'it', 'this' or 'that' are tied to the last topic of that chat (for example quadratic equations) instead of being treated as a new question or jumping to another subject. The topic is saved on each answer inside the chat. A new chat, Clear chat, or reopening the app (which opens a new chat) starts with no topic. A real new question changes the topic. Plan limits are unchanged. Logic tested with a script on typical follow-ups; not yet tried on a real phone."
+  ],
+  [
+   "2026-10-30",
+   "Admin panel built into the app for the owner account only. Switch between User and Admin in Settings > Learner profile > Update account. Admin: Home counts (learners, installs, usage, plans, waiting items), Users (find by username or phone, change plan), Asked (link unanswered questions to saved questions), Review (approve, edit or reject AI answers and model rewrites), AI (edit each model's writing instructions). Settings no longer shows Learner answers or Project handoff; both are inside Admin. Install and open events are now sent to the database. ai_style updated to version 4 so edited model instructions are used. ai_style source saved in the database and shown only to the owner under Project handoff > Files."
+  ],
+  [
+   "2026-10-30",
+   "Learner answers and model style, owner-approved: when a question has no saved answer, ai_answer (Gemini) writes it and saves it as a draft topic; ai_style (source ai_style/index.ts) rewrites an answer in the chosen model's own writing style (summary, analysis, wording) and saves it too. Learners get both AT ONCE with no approval wait and NO label (the AI generated label is now shown to the owner account only). The owner opens Settings > Learner answers (owner only, enforced in the database by topic_review_list, topic_review_set, style_review_list, style_review_set) to see what learners asked, then approves (kept for good), edits, or rejects (never shown again). Unapproved rewrites are reused for 7 days, then written again. This room is about the model's writing style and new questions; it has nothing to do with the microphone, and speaking to the app never needs approval. Only the owner can ask for a rewrite to be written again. Approved rewrites are kept on phones for 12 hours. Functions are deployed to the Nova School Manager project",
+  ],
+  [
+   "2026-10-30",
+   "Improved how every model answers: each model now has its own specialist sections, and answers grow with both the model rank (Teacher < Tutor < Lecturer < Professor; Examiner < Instructor < Mentor; Researcher < Librarian < Philosopher) and the plan. Higher models add things the lower ones do not (case studies, objections and replies, mock exam questions, model answers, reading plans). Checked by measuring answer size for every model on every plan.",
+  ],
+  [
+   "2026-10-30",
+   "Added Settings > AI models: a guide readable on every plan (Free, Basic, Standard, Premium) that explains which model suits lessons, exams and research, shows which are available on the learner's plan, and nudges them to subscribe (research and writing needs Standard or Premium). The model picker is now ordered by plan then rank within each group."
+  ],
   [
    "2026-10-30",
    "The app now always opens on a new, empty chat instead of the last chat. Earlier chats are not deleted: they stay in Chat history. If an empty chat for the same subject and level already exists it is reused, so empty chats do not pile up when the app is opened several times. Tested in a headless browser with a saved chat, a reload with nothing done, a reload after using the new chat, an existing empty chat, an empty chat of another level and a fresh install. Not yet tried on a real phone."
@@ -3302,17 +3864,17 @@ function hoCount(){let d=0,t=0;HANDOFF.tasks.forEach(g=>g[1].forEach(i=>{t++;if(
 function hoText(){const[d,t]=hoCount();let o="ASK TR. DAVID: PROJECT HANDOFF (updated "+HANDOFF.updated+")\n"+d+" of "+t+" items done\n\n";
  HANDOFF.about.forEach(a=>o+=a[0].toUpperCase()+"\n"+a[1]+"\n\n");
  HANDOFF.tasks.forEach(g=>{o+=g[0].toUpperCase()+"\n"+g[1].map(i=>(i[1]?"[done] ":"[remaining] ")+i[0]).join("\n")+"\n\n"});
- o+="LOG\n"+HANDOFF.log.map(l=>l[0]+": "+l[1]).join("\n");return o}
-function handoff(){
+ o+="FILES (kept in the database, only the owner can open them): ai_style/index.ts. Open Admin > Home > Project handoff > Files and tap the file to copy it.\n\n";o+="LOG\n"+HANDOFF.log.map(l=>l[0]+": "+l[1]).join("\n");return o}
+function handoff(){if(!isOwner())return;
  const[d,t]=hoCount(),pct=Math.round(d/t*100);
  const body=`<div style="padding:12px 18px"><b>${d} of ${t} done</b> <span style="color:var(--sub)">(${pct}%)</span><div style="height:8px;border-radius:4px;background:var(--wall);margin:8px 0"><div style="height:8px;border-radius:4px;background:var(--green);width:${pct}%"></div></div><small style="color:var(--sub)">Updated ${esc(HANDOFF.updated)}</small></div>
- <div class="row" data-a="cp"><div>Copy full handoff as text<small>Paste it to another Claude to continue</small></div></div>`+
+ <div class="row" data-a="cp"><div>Copy full handoff as text<small>Paste it to another Claude to continue</small></div></div>`+'<div class="sec">Files (only you see these)</div><div id="hof"><div style="padding:8px 18px;color:var(--sub)">Loading…</div></div>'+
  HANDOFF.tasks.map(g=>`<div class="sec">${esc(g[0])} (${g[1].filter(i=>i[1]).length}/${g[1].length})</div>`+g[1].map(i=>`<div class="row" style="display:block"><span style="color:${i[1]?"var(--green)":"var(--sub)"};font-weight:700">${i[1]?"&#10003;":"&#9675;"}</span> <span style="${i[1]?"":"font-weight:600"}">${esc(i[0])}</span></div>`).join("")).join("")+
  '<div class="sec">About</div>'+HANDOFF.about.map(a=>`<div style="padding:8px 18px"><b>${esc(a[0])}</b><div style="margin-top:3px;color:var(--sub);white-space:pre-wrap">${esc(a[1])}</div></div>`).join("")+
  '<div class="sec">Log</div>'+HANDOFF.log.map(l=>`<div style="padding:8px 18px"><small style="color:var(--sub)">${esc(l[0])}</small><div>${esc(l[1])}</div></div>`).join("");
- showP("Project handoff",body,settings,e=>{if(e.target.closest("[data-a=cp]")){const x=hoText();
+ showP("Project handoff",body,SVBACK,e=>{const ff=e.target.closest("[data-f]");if(ff){hoCopyFile(ff.dataset.f);return}if(e.target.closest("[data-a=cp]")){const x=hoText();
   const fb=()=>{const ta=document.createElement("textarea");ta.value=x;document.body.appendChild(ta);ta.select();try{document.execCommand("copy")}catch(_){}ta.remove();uiAlert("Handoff copied.")};
-  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(x).then(()=>uiAlert("Handoff copied."),fb);else fb()}})}
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(x).then(()=>uiAlert("Handoff copied."),fb);else fb()}});hoFiles()}
 /* device back button: closes the top-most open layer; at the root, 3 quick presses exit */
 (function(){
  const open=id=>getComputedStyle($(id)).display!="none";
@@ -3431,11 +3993,11 @@ function scr(n){const f=$("af"),h=t=>$("ah").textContent=t;$("auth").style.displ
  if(n=="fp"){h("Forgot password");form(f,[["u","uname","Username"],["p","phoneo","Phone"],["s","cpin","Pin"],["n","password","New password"]],"Reset password",FG("password"),AR(L("fn","Forgot pin"),L("ct","Forgot password and pin"))+BK)}
  if(n=="fn"){h("Forgot pin");form(f,[["u","uname","Username"],["p","phoneo","Phone"],["s","cpw","Password"],["n","pin","New pin"]],"Reset pin",FG("pin"),L("ct","Forgot password and pin")+BK)}
  if(n=="ct"){h("Contact us");f.innerHTML='<div class="fw" style="line-height:1.5">If you forgot both your password and your pin, contact us and we will help you recover your account.</div>'+(CONTACT?`<a class="btn" style="text-align:center;text-decoration:none" href="tel:${CONTACT}">Call ${CONTACT}</a>`:"")+BK;f.onclick=e=>{if(e.target.dataset.go)scr(e.target.dataset.go)};f.oninput=null;f.onfocusin=null}}
-function enter(){$("auth").style.display="none";if(ME){D.pname=GNm();const c=LS.getItem("ask_cls_"+ME.username);if(c&&CLASSES.includes(c))applyCls(c);else D.cls="";save()}render();link();if(ME&&!D.cls)clsPick()}
-function out(){rpc("acct_logout",{p_t:T});T="";ME=null;LS.removeItem("ask_tok");LS.removeItem("ask_me");SS.removeItem("ask_tok");SS.removeItem("ask_me");closeP();scr("login")}
+function enter(){$("auth").style.display="none";if(ME){D.pname=GNm();const c=LS.getItem("ask_cls_"+ME.username);if(c&&CLASSES.includes(c))applyCls(c);else D.cls="";save()}render();link();evLog("open");if(ME&&!D.cls)clsPick();if(ME&&ME.username==="DAVID"){if(LS.getItem("ask_mode_DAVID")==="admin")admOpen()}else admHide()}
+function out(){admHide();rpc("acct_logout",{p_t:T});T="";ME=null;LS.removeItem("ask_tok");LS.removeItem("ask_me");SS.removeItem("ask_tok");SS.removeItem("ask_me");closeP();scr("login")}
 const UI={names:[["n","names","New names"],["a","cpw","Confirm password"]],username:[["n","username","New username"],["a","cpw","Confirm password"]],phone:[["n","phone","New phone"],["a","cpw","Confirm password"]],password:[["n","password","New password"],["a","uname","Confirm username"],["b","cpw","Old password"],["c","cpin","Pin"]],pin:[["n","pin","New pin"],["a","uname","Confirm username"],["b","cpw","Password"],["c","cpin","Old pin"]]};
 function upd(w){showP("Update "+w,'<div id="ff"></div>',account);form($("ff"),UI[w],"Save",async v=>{const r=await rpc("acct_change",{p_t:T,p_what:w,p_new:v.n,p_a:v.a,p_b:v.b||"",p_c:v.c||""});if(r.relogin){out();return r}if(r.ok){ME=r.me;stg().setItem("ask_me",JSON.stringify(ME));account();uiAlert("Updated.")}return r})}
-function account(){showP("Update account",`<div class="pcard"><div class="pav">${esc((ME.names||"?").charAt(0).toUpperCase())}</div><div class="pcn">${esc(ME.names)}</div><div class="pcu">${esc(ME.username)} · ${esc(ME.phone)}</div></div>`+[["names","Update names"],["username","Update username"],["phone","Update phone"],["password","Update password"],["pin","Update pin"]].map(x=>`<div class="row" data-w="${x[0]}"><div>${x[1]}</div></div>`).join("")+'<div class="row danger" data-w="out"><div>Log out</div></div>',profile,e=>{const w=e.target.closest(".row")?.dataset.w;if(w=="out")out();else if(w)upd(w)})}
+function account(){showP("Update account",`<div class="pcard"><div class="pav">${esc((ME.names||"?").charAt(0).toUpperCase())}</div><div class="pcn">${esc(ME.names)}</div><div class="pcu">${esc(ME.username)} · ${esc(ME.phone)}</div></div>`+[["names","Update names"],["username","Update username"],["phone","Update phone"],["password","Update password"],["pin","Update pin"]].map(x=>`<div class="row" data-w="${x[0]}"><div>${x[1]}</div></div>`).join("")+(isOwner()?'<div class="row" data-w="adm"><div>Switch to Admin panel<small>Only you see this</small></div></div>':"")+'<div class="row danger" data-w="out"><div>Log out</div></div>',profile,e=>{const w=e.target.closest(".row")?.dataset.w;if(w=="out")out();else if(w=="adm"){closeP();admOpen()}else if(w)upd(w)})}
 const b64=s=>btoa(unescape(encodeURIComponent(s))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""),LV=["PLE","UCE","UACE"];
 async function link(){const m=H.match(/^#([sak])=(.+)$/);H="";if(!m)return;try{history.replaceState(null,"",location.pathname+location.search)}catch(e){}
  try{let p;if(m[1]=="a"){const[l,s]=decodeURIComponent(m[2]).split("~");if(LV.includes(l)){D.lvl=l;fixSub();setSub(subsList().includes(s)?s:D.sub);save()}return}

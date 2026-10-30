@@ -145,6 +145,11 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 .fe{padding:6px 18px;font-size:14px;white-space:pre-wrap}.btn{display:block;margin:10px 18px;width:calc(100% - 36px);padding:13px;border:0;border-radius:24px;background:var(--green);color:#fff;font:inherit;font-weight:600;cursor:pointer}.btn:disabled{opacity:.6}.pcard{text-align:center;padding:22px 18px 12px}.pav{width:72px;height:72px;border-radius:50%;background:var(--green);color:#fff;font-size:30px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 10px}.pcn{font-size:18px;font-weight:700}.pcu{font-size:13px;color:var(--sub);margin-top:2px}.pbn{margin:14px 18px 4px;padding:13px 14px;border-radius:0;border-left-width:6px;background:rgba(255,159,10,.16);border:1px solid rgba(255,159,10,.45);line-height:1.4;font-weight:600}.pbn.ok{background:rgba(0,168,132,.12);border-color:rgba(0,168,132,.4)}
 .pc{margin:14px 18px;border:1px solid var(--a);background:var(--bg);box-shadow:0 2px 6px rgba(0,0,0,.14)}
 .pch{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--a);color:#fff}.pch i{flex:none;width:30px;height:30px;border:2px solid #fff;font-style:normal;font-weight:800;display:flex;align-items:center;justify-content:center}.pch b{font-size:20px;letter-spacing:1px;text-transform:uppercase}
+.pch i svg,.cpi svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.cpn{margin:14px 18px;border-radius:16px;padding:18px 16px;color:#fff;background:linear-gradient(135deg,var(--a),color-mix(in srgb,var(--a) 62%,#000));box-shadow:0 4px 14px rgba(0,0,0,.22)}
+.cpn .cpt{display:flex;align-items:center;gap:14px}.cpi{flex:none;width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center}.cpi svg{width:28px;height:28px}
+.cpn small{display:block;font-size:12px;letter-spacing:1.4px;text-transform:uppercase;opacity:.85}.cpn .cpm{font-size:26px;font-weight:800;line-height:1.15}
+.cpn .cpx{margin-top:12px;font-size:15px;line-height:1.5}.cpn .cpx b{font-weight:800}.cpn .cpl{margin-top:10px;padding:8px 10px;border-radius:10px;background:rgba(0,0,0,.2);font-size:13.5px;line-height:1.45}
 .ptag{padding:10px 14px;font-size:14px;line-height:1.45;border-bottom:1px solid var(--line);background:rgba(128,128,128,.07);background:color-mix(in srgb,var(--a) 9%,transparent)}
 .pst{display:flex}.pst div{flex:1;text-align:center;padding:12px 4px;border-right:1px solid var(--line)}.pst div:last-child{border-right:0}.pst b{display:block;font-size:20px;color:var(--a)}.pst span{font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:.5px}
 .pay{margin:12px 18px;padding:16px;border-radius:0;text-align:center;background:rgba(255,204,0,.18);border:1px solid rgba(230,175,0,.6)}.pay .pl{font-size:13px;color:var(--sub);text-transform:uppercase;letter-spacing:.5px}.pay .pcode{font-size:32px;font-weight:800;letter-spacing:3px;margin:4px 0}.pay .pid{font-size:15px}.pcp{margin-top:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:16px;padding:6px 16px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
@@ -351,7 +356,7 @@ user:'<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 
 const CH='<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>';
 let D={name:"Alex",msgs:[],trash:[],acc:"#00a884"};
 try{const x=JSON.parse(localStorage.getItem("chat_single2"));if(x&&(x.chats||x.msgs)){D=x;if(!D.msgs)D.msgs=[]}}catch(e){}
-D.trash=D.trash||[];if(!D.annSeen)D.annSeen={};/* What's new is OFF until it is connected to the database (see Project handoff). Nothing is added to the list while WN_ON is false. */const WN_ON=false;if(!D.notes||!WN_ON)D.notes=[];D.acc=D.acc||"#00a884";
+D.trash=D.trash||[];if(!D.annSeen)D.annSeen={};/* What's new is OFF until it is connected to the database (see Project handoff). Nothing is added to the list while WN_ON is false. */const WN_ON=true;if(!D.notes||!WN_ON)D.notes=[];D.acc=D.acc||"#00a884";
 const save=()=>{try{localStorage.setItem("chat_single2",JSON.stringify(D,function(k,v){return(this===D&&k=="msgs")||k=="img"?undefined:v}))}catch(e){}};
 const hm=t=>new Date(t).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
 const dl=t=>{const d=new Date(t);return d.toDateString()==new Date().toDateString()?"Today":d.toLocaleDateString()};
@@ -426,7 +431,7 @@ function settings(){
  <div class="row" data-a="th"><span class="ri">${isDark()?IC.sun:IC.moon}</span><div>Switch theme<small>${isDark()?"Dark":"Light"} mode</small></div></div>
  <div class="row" data-a="ct"><span class="ri">${IC.pal}</span><div>Chat theme<small>Choose a color</small></div></div>
  <div class="row" data-a="wn"><span class="ri">${IC.star}</span><div>What's new<small>${D.notes.filter(x=>!x.r).length?D.notes.filter(x=>!x.r).length+" new":"Announcements and updates"}</small></div></div>
- <div class="row" data-a="nt"><span class="ri">${IC.bell}</span><div>Away alerts<small>${D.notif?"On":"Off"}: phone alert when an answer is ready</small></div></div>
+ <div class="row" data-a="nt"><span class="ri">${IC.bell}</span><div>Away alerts<small>${D.notif?"On":"Off"}: phone alert for new announcements and updates</small></div></div>
  <div class="row" data-a="ex"><span class="ri">${IC.dl}</span><div>Export chat<small>Download as a text file</small></div></div>
  <div class="row" data-a="tr"><span class="ri">${IC.bin}</span><div>Trash<small>${D.trash.length} message${D.trash.length==1?"":"s"}</small></div></div>
  <div class="row" data-a="md"><span class="ri">${IC.star}</span><div>AI models<small>Which model is best for lessons, exams and research</small></div></div>
@@ -478,9 +483,9 @@ window.receiveAnnouncement=showAnn;
 $("annx").onclick=hideAnn;
 $("avw").onclick=()=>{$("more").style.display="none";notifs(true)};
 function toggleNotif(){
- if(D.notif){D.notif=false;save();settings();return}
+ if(D.notif){D.notif=false;save();settings();pushOff();return}
  if(!("Notification"in window)){uiAlert("This browser does not support notifications.");return}
- const fin=p=>{if(p=="granted"){D.notif=true;save();settings()}else uiAlert("Notifications are blocked. Turn them on in your browser settings.")};
+ const fin=p=>{if(p=="granted"){D.notif=true;save();settings();pushOn()}else uiAlert("Notifications are blocked. Turn them on in your browser settings.")};
  if(Notification.permission=="granted")fin("granted");else if(Notification.permission=="denied")fin("denied");else Notification.requestPermission().then(fin)}
 function notifs(direct){
  const L=D.notes,body=L.length?'<div class="row danger" data-a="nclr"><div>Clear all</div></div>'+L.map(n=>`<div class="row" style="display:block"><b>${n.r?"":'<span style="color:#ff453a">&#9679; </span>'}${esc(n.t)}</b><div style="margin-top:2px">${esc(n.b||"")}</div><small>${dl(n.ts)}, ${hm(n.ts)}</small></div>`).join(""):'<div class="empty">Nothing new</div>';
@@ -2981,6 +2986,81 @@ function voiceItem(i,showOrig){
    fetch(STU,{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({text:x.source_md,model:x.model,level:x.level,plan:x.plan||"Free",depth:MODELS[x.model].r+(PBONUS[x.plan||"Free"]||0),t:tokNow(),regen:true,q:x.question||""})}).then(r=>r.json()).then(j=>{
     if(j&&j.status=="ok"){voiceRoom(null,"draft")}else{b.disabled=false;m.textContent=j&&j.status=="busy"?"Gemini is busy. Try again in a minute.":"Could not write it again. The old text is kept."}}).catch(()=>{b.disabled=false;m.textContent="Could not reach the server. The old text is kept."})}})}
 
+
+/* ===== ANNOUNCEMENTS AND UPDATES: What's new + Away alerts (phone alerts) =====
+ The owner posts in Admin > Post. Everyone sees it in What's new (red dot on the avatar). When Away alerts is ON the phone is alerted:
+ by a real push alert (push-sw.js + ann_push, works when the app is closed) and, as a back-up, by the app itself while it is open in the background. */
+const PUSHSC="./push-sw-scope/";let PUSHREG=null,ANN_BUSY=0;
+const annTitle=a=>(a.kind=="update"?"Update: ":"")+a.title;
+function annBanner(a){try{$("annt").textContent=annTitle(a);$("annb").textContent=a.body||"";$("ann").style.display="flex";clearTimeout(annT);if(+a.duration_seconds>0)annT=setTimeout(hideAnn,a.duration_seconds*1000)}catch(e){}}
+async function devAlert(a){
+ if(!D.notif||!("Notification"in window)||Notification.permission!="granted")return;
+ const o={body:String(a.body||"").slice(0,180),tag:"ann-"+a.id,data:{id:a.id}};
+ try{if(PUSHREG){await PUSHREG.showNotification(annTitle(a),o);return}}catch(e){}
+ try{const n=new Notification(annTitle(a),o);n.onclick=()=>{window.focus();n.close();try{notifs(true)}catch(e){}}}catch(e){}}
+let PUSH_SYNCED=0;
+async function annSync(){
+ if(ANN_BUSY||!(window.AK&&AK.me()))return;ANN_BUSY=1;
+ if(!PUSH_SYNCED&&D.notif){PUSH_SYNCED=1;pushOn()}
+ try{const L=await svRpc("ann_list",{});if(!Array.isArray(L))return;
+  const first=!D.annInit;let added=0;
+  L.slice().reverse().forEach(a=>{if(D.annSeen[a.id])return;D.annSeen[a.id]=1;added++;
+   const ts=new Date(a.created_at).getTime(),fresh=!first||Date.now()-ts<2*864e5;
+   D.notes.unshift({id:a.id,t:annTitle(a),b:a.body||"",ts,r:fresh?0:1});
+   if(!first){if(document.hidden)devAlert(a);else annBanner(a)}});
+  D.annInit=1;if(added){D.notes.sort((x,y)=>y.ts-x.ts);D.notes=D.notes.slice(0,50)}save();updateBadge()}
+ catch(e){}finally{ANN_BUSY=0}}
+setInterval(()=>{if(!document.hidden||D.notif)annSync()},60000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)annSync()});
+const b64u=t=>{const p="=".repeat((4-t.length%4)%4),r=atob((t+p).replace(/-/g,"+").replace(/_/g,"/")),o=new Uint8Array(r.length);for(let i=0;i<r.length;i++)o[i]=r.charCodeAt(i);return o};
+async function pushReg(){
+ if(!("serviceWorker"in navigator)||!("PushManager"in window))return null;
+ /* push now lives inside the main sw.js (one service worker, one registration) */
+ try{await navigator.serviceWorker.register("sw.js",{updateViaCache:"none"})}catch(e){}
+ const reg=await Promise.race([navigator.serviceWorker.ready,new Promise(r=>setTimeout(()=>r(null),8000))]);
+ if(!reg)return null;PUSHREG=reg;return reg}
+async function pushOn(){try{
+ if(!("Notification"in window)||Notification.permission!="granted")return;
+ const reg=await pushReg();if(!reg||!reg.pushManager)return;
+ let sub=await reg.pushManager.getSubscription();
+ if(!sub){const k=await svRpc("push_pub",{});if(typeof k!="string"||k.length<40)return;
+  try{sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(k)})}
+  catch(e){try{const o=await reg.pushManager.getSubscription();if(o)await o.unsubscribe()}catch(x){}sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(k)})}}
+ await svRpc("push_save",{p_sub:sub.toJSON(),p_t:tokNow()})}catch(e){}}
+async function pushOff(){try{
+ const reg=PUSHREG||(await navigator.serviceWorker.getRegistration());if(!reg)return;
+ const sub=await reg.pushManager.getSubscription();if(!sub)return;
+ const ep=sub.endpoint;await sub.unsubscribe();await svRpc("push_drop",{p_endpoint:ep})}catch(e){}}
+try{navigator.serviceWorker&&navigator.serviceWorker.addEventListener("message",e=>{if(!e.data)return;if(e.data.openWN){try{notifs(true)}catch(x){}}if(e.data.resub&&D.notif){PUSH_SYNCED=1;pushOn()}if(e.data.annSync)annSync()})}catch(e){}
+/* admin: Post tab */
+let ANK="announcement",ANT="",ANB="";
+async function admNews(){const s=ADMSEQ,b=$("abody");b.innerHTML=admLd();const j=await admCall("admin_ann_list");if(s!==ADMSEQ)return;
+ if(!j.ok){b.innerHTML=admFail(j,1);b.onclick=e=>{if(e.target.closest("[data-r]"))admNews()};return}
+ admNewsDraw(j,"")}
+function admNewsDraw(j,msg){const b=$("abody");
+ b.innerHTML=`<div class="asec">Post to What's new</div>
+ <div style="display:flex;gap:6px;padding:4px 18px 8px">${svBtn(ANK=="announcement","Announcement","data-k","announcement")}${svBtn(ANK=="update","Update","data-k","update")}</div>
+ <input class="ain" id="ant" maxlength="100" placeholder="Title" autocomplete="off" value="${esc(ANT)}">
+ <textarea class="ain" id="anb" maxlength="1000" placeholder="Message (optional)" style="min-height:110px;resize:vertical">${esc(ANB)}</textarea>
+ <div id="anm" style="padding:2px 18px;min-height:20px;color:var(--sub)">${esc(msg)}</div>
+ <div style="display:flex;gap:8px;padding:6px 18px 6px">${abt("send","Send to everyone","#00a884")}</div>
+ <div style="padding:2px 18px 10px;color:var(--sub);font-size:13px;line-height:1.45">Everyone sees it in What's new and as a banner when they open the app. ${admN(j.devices)} phone${admN(j.devices)==1?"":"s"} will also get a phone alert, because Away alerts is on there.</div>
+ <div class="asec">Posted</div>`+(j.items.length?j.items.map((x,i)=>`<div class="row" style="display:block"><b>${esc(x.title)}</b> <small style="color:var(--sub)">${x.kind=="update"?"Update":"Announcement"} · ${admDate(x.created_at)}</small>${x.body?`<div style="margin-top:2px;color:var(--sub)">${esc(x.body)}</div>`:""}<button data-del="${i}" style="margin-top:6px;border:0;background:none;color:#ff453a;font:inherit;font-weight:600;padding:4px 0;cursor:pointer">Delete</button></div>`).join(""):'<div style="padding:12px 18px;color:var(--sub)">Nothing posted yet.</div>');
+ b.onclick=async e=>{
+  const k=e.target.closest("[data-k]");if(k){ANT=$("ant").value;ANB=$("anb").value;ANK=k.dataset.k;admNewsDraw(j,"");return}
+  const d=e.target.closest("[data-del]");if(d){const x=j.items[+d.dataset.del];if(!x)return;uiConfirm("Delete this post?",async()=>{const r=await admCall("admin_ann_delete",{p_id:x.id});if(r.ok){const n=await admCall("admin_ann_list");if(n.ok)admNewsDraw(n,"Deleted.");else admNews()}else uiAlert("Could not delete. Try again.")},"Delete");return}
+  const sb=e.target.closest("[data-a=send]");if(!sb)return;
+  const t=$("ant").value.trim(),m=$("anb").value.trim(),st=$("anm");ANT=t;ANB=m;
+  if(t.length<3){st.textContent="Write a title (at least 3 letters).";return}
+  sb.disabled=true;st.textContent="Sending…";
+  const r=await admCall("admin_ann_post",{p_title:t,p_body:m,p_kind:ANK,p_duration:0});
+  if(!r.ok){sb.disabled=false;st.textContent=r.err=="bad title"?"The title must be 3 to 100 letters.":"Could not send. Try again.";return}
+  let note="Posted. Everyone will see it in What's new.";
+  try{const pr=await fetch(SBU.replace("/rest/v1/","/functions/v1/")+"ann_push",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({t:tokNow(),id:r.id})}).then(z=>z.json());
+   if(pr&&pr.ok)note="Posted. Phone alerts sent to "+admN(pr.sent)+" phone"+(admN(pr.sent)==1?"":"s")+".";else note="Posted. Phone alerts could not be sent (people still see it in What's new)."}catch(er){note="Posted. Phone alerts could not be sent (people still see it in What's new)."}
+  ANT="";ANB="";annSync();
+  const n=await admCall("admin_ann_list");if(n.ok)admNewsDraw(n,note);else admNews()}}
+
 /* PLAN BADGE (bottom right): shows the plan the admin has set for this account, with its own icon. The learner cannot change it. */
 const PICOL={Free:"#6b7c85",Basic:"#2f80ed",Standard:"#00a884",Premium:"#e6a700"},
 PIC={Free:'<svg viewBox="0 0 24 24"><path d="M5 19c0-8 5-13 14-14 0 9-5 14-14 14z"/><path d="M5 19l7-7"/></svg>',
@@ -3014,15 +3094,23 @@ function activatePlan(){uiAlert("Your plan is set by the admin after payment.")}
 const PLAN_TEST_MODE=false;
 document.getElementById("psl").onclick=()=>modelPicker();document.getElementById("psr").onclick=()=>plans(1);
 function limitMsg(){D.msgs.push({s:"i",lim:1,t:"**"+LIM+"**",ts:Date.now()});save();render()}
-function freeReset(){FQW({v:2,cap:newCap(),used:0,left:null,seen:Date.now()});const rm=a=>{for(let i=a.length;i--;)if(a[i].lim)a.splice(i,1)};rm(D.msgs);D.chats.forEach(c=>rm(c.msgs));D.msgs.push({s:"i",note:1,t:"Your free plan has been reset. You can continue asking.",ts:Date.now()});save();render();const h=document.getElementById("plh");if(h)h.innerHTML='<b>Free plan</b><div style="color:var(--sub);margin-top:3px">Your free words have been reset.</div>'}
+function freeReset(){FQW({v:2,cap:newCap(),used:0,left:null,seen:Date.now()});const rm=a=>{for(let i=a.length;i--;)if(a[i].lim)a.splice(i,1)};rm(D.msgs);D.chats.forEach(c=>rm(c.msgs));D.msgs.push({s:"i",note:1,t:"Your free plan has been reset. You can continue asking.",ts:Date.now()});save();render();const h=document.getElementById("plh");if(h){const l=h.querySelector(".cpl");if(l)l.innerHTML="Your free words have been reset."}}
 let _pn=performance.now();
 setInterval(()=>{const n=performance.now(),d=n-_pn;_pn=n;if(!(window.AK&&AK.me()))return;const q=FQ();if(q.left==null){if(q.used>=q.cap)capped();return}
  const w=Date.now()-q.seen;q.left-=(w>3000?w:d);q.seen=Date.now();if(q.left<=0){freeReset();return}FQW(q)},1000);
+function curPlan(q){const pn=planName(),col=PICOL[pn]||"#6b7c85",capped=pn=="Free"&&q.used>=q.cap;
+ const MSG={Free:"You are on the Free plan. <b>Upgrade to Basic</b> to unlock Tutor, Instructor and quizzes. Go <b>Standard</b> or <b>Premium</b> to enjoy everything.",
+  Basic:"You are on Basic. <b>Upgrade to Standard or Premium</b> to unlock Lecturer, Researcher and more, and enjoy everything.",
+  Standard:"Great choice! You are on Standard. <b>Upgrade to Premium</b> and enjoy everything: Professor, Mentor, Librarian and Philosopher.",
+  Premium:"<b>Full features available.</b> Every model answers at its fullest. Thank you for being a Premium learner. Enjoy learning without limits!"};
+ const lim=capped?`<div class="cpl">${LIM1}${rtime()?`<br>Your free plan resets at <b>${rtime()}</b>`:""}</div>`:"";
+ return `<div class="cpn" id="plh" style="--a:${col}"><div class="cpt"><span class="cpi">${PIC[pn]||PIC.Free}</span><div><small>Your current plan</small><div class="cpm">${pn}</div></div></div><div class="cpx">${MSG[pn]||MSG.Free}</div>${lim}</div>`}
 function plans(fs){
  const q=FQ(),P=[["Basic","500","2,800","9,000","Adds Tutor and Instructor, and a stronger Examiner and Teacher","#2f80ed"],["Standard","750","4,550","16,500","Adds Lecturer and Researcher; Teacher, Tutor, Instructor and Examiner answer deeper","#00a884"],["Premium","1,100","6,650","24,000","Adds Professor, Mentor, Librarian and Philosopher; every model answers at its fullest","#8b5cf6"]],
+ cur=planName(),RK={Free:0,Basic:1,Standard:2,Premium:3},UP=P.filter(x=>RK[x[0]]>RK[cur]||(cur=="Premium"&&x[0]=="Premium")),
  ST=['Tap the button at the bottom. It dials <b>*165*3*06124096#</b> with the merchant code already in it.','Enter the <b>amount</b> of your plan.','Choose <b>Mobile Money</b> as the mode of payment.','Confirm the ID name is <b>Alfred</b>.','Enter your <b>PIN</b> to confirm.'];
- showP("Upgrade plans",(q.used>=q.cap?`<div class="pbn" id="plh">${LIM1}${rtime()?`<div style="font-weight:400;margin-top:5px">Your free plan resets at <b>${rtime()}</b></div>`:""}<div style="margin-top:5px">${LIM2}</div></div>`:`<div class="pbn ok" id="plh">${planName()} plan<br>Upgrade to enjoy Unlimitedly.</div>`)+`<div class="sec">UPGRADE PLANS</div>`+
- P.map((x,k)=>`<div class="pc" style="--a:${x[5]}"><div class="pch"><i>${k+1}</i><b>${x[0]}</b></div><div class="ptag">${x[4]}</div><div class="pst"><div><b>${x[1]}</b><span>Daily</span></div><div><b>${x[2]}</b><span>Weekly</span></div><div><b>${x[3]}</b><span>Monthly</span></div></div></div>`).join("")+
+ showP("Upgrade plans",curPlan(q)+(UP.length?`<div class="sec">${cur=="Premium"?"YOUR PLAN":"UPGRADE PLANS"}</div>`:"")+
+ UP.map(x=>`<div class="pc" style="--a:${x[5]}"><div class="pch"><i>${PIC[x[0]]}</i><b>${x[0]}</b>${x[0]==cur?'<span style="margin-left:auto;font-size:12px;font-weight:700;background:rgba(255,255,255,.25);padding:3px 10px;border-radius:12px">YOUR PLAN</span>':""}</div><div class="ptag">${x[4]}</div><div class="pst"><div><b>${x[1]}</b><span>Daily</span></div><div><b>${x[2]}</b><span>Weekly</span></div><div><b>${x[3]}</b><span>Monthly</span></div></div></div>`).join("")+
  `<div class="sec">PAYMENT METHOD</div><div class="pay"><div class="pl">MTN Mobile Money · Merchant Code</div><div class="pcode">06124096</div><div class="pid">ID: <b>Alfred</b></div><button class="pcp" data-cp="06124096">Copy code</button></div>`+
  `<div class="sec">HOW TO PAY</div>`+ST.map((t,k)=>`<div class="stp"><i>${k+1}</i><div>${t}</div></div>`).join("")+
  `<a class="btn" style="text-align:center;text-decoration:none;margin-bottom:28px" href="tel:*165*3*06124096%23">Dial *165*3*06124096#</a>`,fs?settings:closeP,e=>{const c=e.target.closest("[data-cp]");if(c){const t=c.dataset.cp,ok=()=>{c.textContent="Copied"};if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(ok,ok);else ok()}})}
@@ -3172,7 +3260,7 @@ function ask(q,mode){
   if(!f.lv&&!f.un){const Tm=topicOf(q);if(Tm&&Tm.sl){f.lv=Tm.sl;f.cls=Tm.cls}}
   let chk=0;if(FU&&FU.chkk&&f&&f.t&&!f.un&&!f.w&&!f.quiz&&!f.qz&&!FU.local){f.t+="\n\n"+FU.chkk;chk=1}
   const m={s:"i",t:"",ts:Date.now(),q,mode,stream:1,fk:FU&&FU.kind||undefined,chk:chk||undefined,tq:CTX&&CTX.tq||undefined,tsub:CTX&&(CTX.sub||D.sub)||undefined},w=f.t.split(/(?<=\s)/);if(f.quiz)m.quiz=f.quiz;if(f.qz)m.qz=f.qz;if(f.w)m.w=f.w;if(f.aid)m.aid=f.aid;if(f.ai)m.ai=1;if(f.tid)m.tid=f.tid;if(f.fmt){const M=MODELS[modelName()];m.mdl=M.n+" "+M.v}{const ln=levelNote(f.lv,f.cls);if(ln)m.lvn=ln}
-  D.msgs.push(m);sm=m;let k=0;stream=setInterval(()=>{m.t+=w[k++]||"";if(k>=w.length){stopS();notify("Answer ready",'Your answer about "'+(q||"your question").slice(0,40)+'" is ready.');if(gn){D.msgs.push({s:"i",note:1,up:1,t:gn,ts:Date.now()});save();render()}if(capped())limitMsg()}else render()},35)},600)}
+  D.msgs.push(m);sm=m;let k=0;stream=setInterval(()=>{m.t+=w[k++]||"";if(k>=w.length){stopS();if(gn){D.msgs.push({s:"i",note:1,up:1,t:gn,ts:Date.now()});save();render()}if(capped())limitMsg()}else render()},35)},600)}
 $("msgs").addEventListener("click",e=>{
 
  const st=e.target.closest("[data-st]");if(st){$("inp").value=st.dataset.st;send();return}
@@ -3323,7 +3411,7 @@ $("jump").onclick=()=>$("msgs").scrollTo({top:1e9,behavior:"smooth"});
 /* ===== ADMIN PANEL (owner only) =====
  One app, two modes for the owner account DAVID. Switch: Settings > Learner profile > Update account > Switch to Admin panel.
  Every admin database function checks the login token again (username DAVID with the owner phone), so other accounts are refused even if they find this code. */
-const ADMT=[["home","Home"],["users","Users"],["asked","Asked"],["review","Review"],["ai","AI"]];
+const ADMT=[["home","Home"],["users","Users"],["asked","Asked"],["review","Review"],["ai","AI"],["news","Post"]];
 let ADMON=false,ADMTAB="home",ADMSEQ=0,ADMUQ="",ADMUL=[],ADMAS="open",ADMAL=[],ADMPL=[];
 const admCall=async(fn,a)=>{try{const j=await svRpc(fn,Object.assign({p_t:tokNow()},a||{}));return j&&typeof j.ok=="boolean"?j:{ok:false,err:"fail"}}catch(e){return{ok:false,err:"net"}}};
 const admMsg=j=>j&&j.err=="not allowed"?"This panel is only for the owner account.":j&&j.err=="net"?"No internet. Check your connection and try again.":"Could not load. Try again.";
@@ -3343,7 +3431,7 @@ function admOpen(){if(!isOwner())return;ADMON=true;try{localStorage.setItem("ask
  a.onclick=e=>{if(e.target.id=="ax"){admClose();return}const t=e.target.closest(".an button");if(t)admGo(t.dataset.t)};
  admGo(ADMTAB)}
 function admGo(t){ADMTAB=t;ADMSEQ++;document.querySelectorAll("#adm .an button").forEach(b=>b.classList.toggle("on",b.dataset.t==t));
- ({home:admHome,users:admUsers,asked:()=>admAsked(),review:admReview,ai:admAi})[t]()}
+ ({home:admHome,users:admUsers,asked:()=>admAsked(),review:admReview,ai:admAi,news:admNews})[t]()}
 
 /* HOME */
 async function admHome(){const s=ADMSEQ,b=$("abody");b.innerHTML=admLd();const j=await admCall("admin_stats");if(s!==ADMSEQ)return;
@@ -3920,12 +4008,8 @@ function handoff(){if(!isOwner())return;
  }
  function rootBack(){
   const now=Date.now();
-  if(now-last>2000){hideAll()}
-  last=now;
-  if(stage>=2){exitApp();return}
-  push();
-  if(stage==0)toast("Press back again to exit");
-  else showDlg();
+  if(stage==1&&now-last<=2000){hideAll();exitApp();return}
+  last=now;push();toast("Press back again to exit");
  }
  function onPop(){
   if(skip){skip--;return}
@@ -4008,13 +4092,13 @@ function scr(n){const f=$("af"),h=t=>$("ah").textContent=t;$("auth").style.displ
  if(n=="fp"){h("Forgot password");form(f,[["u","uname","Username"],["p","phoneo","Phone"],["s","cpin","Pin"],["n","password","New password"]],"Reset password",FG("password"),AR(L("fn","Forgot pin"),L("ct","Forgot password and pin"))+BK)}
  if(n=="fn"){h("Forgot pin");form(f,[["u","uname","Username"],["p","phoneo","Phone"],["s","cpw","Password"],["n","pin","New pin"]],"Reset pin",FG("pin"),L("ct","Forgot password and pin")+BK)}
  if(n=="ct"){h("Contact us");f.innerHTML='<div class="fw" style="line-height:1.5">If you forgot both your password and your pin, contact us and we will help you recover your account.</div>'+(CONTACT?`<a class="btn" style="text-align:center;text-decoration:none" href="tel:${CONTACT}">Call ${CONTACT}</a>`:"")+BK;f.onclick=e=>{if(e.target.dataset.go)scr(e.target.dataset.go)};f.oninput=null;f.onfocusin=null}}
-function enter(){$("auth").style.display="none";window.__authScr="";try{window.__backSync&&window.__backSync()}catch(e){}if(ME){D.pname=GNm();const c=LS.getItem("ask_cls_"+ME.username);if(c&&CLASSES.includes(c))applyCls(c);else D.cls="";save()}render();link();evLog("open");if(ME&&!D.cls)clsPick();admHide();try{updPlan()}catch(e){}}
+function enter(){$("auth").style.display="none";window.__authScr="";try{window.__backSync&&window.__backSync()}catch(e){}if(ME){D.pname=GNm();const c=LS.getItem("ask_cls_"+ME.username);if(c&&CLASSES.includes(c))applyCls(c);else D.cls="";save()}render();link();evLog("open");try{annSync();if(D.notif)pushOn()}catch(e){}if(ME&&!D.cls)clsPick();admHide();try{updPlan()}catch(e){}}
 function out(){admHide();rpc("acct_logout",{p_t:T});T="";ME=null;LS.removeItem("ask_tok");LS.removeItem("ask_me");SS.removeItem("ask_tok");SS.removeItem("ask_me");closeP();scr("login")}
 const UI={names:[["n","names","New names"],["a","cpw","Confirm password"]],username:[["n","username","New username"],["a","cpw","Confirm password"]],phone:[["n","phone","New phone"],["a","cpw","Confirm password"]],password:[["n","password","New password"],["a","uname","Confirm username"],["b","cpw","Old password"],["c","cpin","Pin"]],pin:[["n","pin","New pin"],["a","uname","Confirm username"],["b","cpw","Password"],["c","cpin","Old pin"]]};
 function upd(w){showP("Update "+w,'<div id="ff"></div>',account);form($("ff"),UI[w],"Save",async v=>{const r=await rpc("acct_change",{p_t:T,p_what:w,p_new:v.n,p_a:v.a,p_b:v.b||"",p_c:v.c||""});if(r.relogin){out();return r}if(r.ok){ME=r.me;stg().setItem("ask_me",JSON.stringify(ME));account();uiAlert("Updated.")}return r})}
 function account(){showP("Update account",`<div class="pcard"><div class="pav">${esc((ME.names||"?").charAt(0).toUpperCase())}</div><div class="pcn">${esc(ME.names)}</div><div class="pcu">${esc(ME.username)} · ${esc(ME.phone)}</div></div>`+[["names","Update names"],["username","Update username"],["phone","Update phone"],["password","Update password"],["pin","Update pin"]].map(x=>`<div class="row" data-w="${x[0]}"><div>${x[1]}</div></div>`).join("")+(isOwner()?'<div class="row" data-w="adm"><div>Switch to Admin panel<small>Only you see this</small></div></div>':"")+'<div class="row danger" data-w="out"><div>Log out</div></div>',profile,e=>{const w=e.target.closest(".row")?.dataset.w;if(w=="out")out();else if(w=="adm"){closeP();admOpen()}else if(w)upd(w)})}
 const b64=s=>btoa(unescape(encodeURIComponent(s))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""),LV=["PLE","UCE","UACE"];
-async function link(){const m=H.match(/^#([sak])=(.+)$/);H="";if(!m)return;try{history.replaceState(null,"",location.pathname+location.search)}catch(e){}
+async function link(){if(H=="#wn"){H="";try{history.replaceState(null,"",location.pathname+location.search)}catch(e){}try{notifs(true)}catch(e){}return}const m=H.match(/^#([sak])=(.+)$/);H="";if(!m)return;try{history.replaceState(null,"",location.pathname+location.search)}catch(e){}
  try{let p;if(m[1]=="a"){const[l,s]=decodeURIComponent(m[2]).split("~");if(LV.includes(l)){D.lvl=l;fixSub();setSub(subsList().includes(s)?s:D.sub);save()}return}
   if(m[1]=="k"){const r=await rpc("ask_share_get",{p_id:m[2].replace(/[^a-zA-Z0-9]/g,"").slice(0,24)});if(!r.ok){uiAlert(r.err||"This shared answer could not be opened.");return}p={l:r.l,s:r.s,q:r.q,t:r.t}}
   else p=JSON.parse(decodeURIComponent(escape(atob(m[2].replace(/-/g,"+").replace(/_/g,"/")))));

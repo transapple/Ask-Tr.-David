@@ -106,6 +106,37 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 .ain{display:block;width:calc(100% - 28px);margin:10px 14px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--text);font:inherit;box-sizing:border-box}
 .apl{display:inline-block;border-radius:10px;padding:2px 9px;font-size:12px;font-weight:700;color:#fff;white-space:nowrap}
 #pbody{flex:1;overflow-y:auto}
+/* ===== direct chat with admin ===== */
+#adm .an button{font-size:12px;padding:13px 0;position:relative}
+.spn{display:inline-block;min-width:18px;height:18px;line-height:18px;border-radius:9px;background:#ff453a;color:#fff;font-size:11px;font-weight:700;text-align:center;padding:0 5px;box-sizing:border-box;font-style:normal;margin-left:3px}
+.spa{width:42px;height:42px;border-radius:50%;background:var(--green);color:#fff;display:grid;place-items:center;font-weight:700;font-size:18px;flex:none}
+.spp{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.spw,.spth{display:flex;flex-direction:column;height:100%}
+.spm{flex:1;overflow-y:auto;padding:12px 12px 6px;background:var(--wall);display:flex;flex-direction:column;gap:6px}
+.spr{display:flex}.spr.o{justify-content:flex-end}
+.spb{max-width:82%;padding:8px 11px 5px;border-radius:14px;background:var(--in);color:var(--text);white-space:pre-wrap;word-break:break-word;line-height:1.4;box-shadow:0 1px 1px rgba(0,0,0,.08)}
+.spr.o .spb{background:var(--out)}
+.spb small{display:block;text-align:right;color:var(--sub);font-size:11px;margin-top:2px}
+.spt{display:inline-block;font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+.spst{color:#f5a623;font-size:17px;letter-spacing:2px;display:block}
+.spe{margin:auto;text-align:center;color:var(--sub);padding:24px 26px;line-height:1.5}
+.spc{background:var(--bar);border-top:1px solid var(--line);padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px))}
+.spk{display:flex;gap:6px;overflow-x:auto;padding:0 2px 8px}
+.spk button{flex:none;border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:16px;padding:6px 12px;font:inherit;font-size:13px;cursor:pointer}
+.spk button.on{background:var(--green);color:#fff;border-color:var(--green)}
+.sprt{display:none;gap:4px;padding:0 4px 8px;align-items:center;color:var(--sub);font-size:13px}
+.sprt button{border:0;background:none;font-size:28px;line-height:1;color:#c9ced1;cursor:pointer;padding:0 2px}
+.sprt button.on{color:#f5a623}
+.spi{display:flex;gap:8px;align-items:flex-end;padding:8px 10px;background:var(--bar)}
+.spc .spi{padding:0}
+.spi textarea{flex:1;min-width:0;resize:none;max-height:120px;border:1px solid var(--line);border-radius:20px;padding:10px 14px;background:var(--bg);color:var(--text);font:inherit;outline:0;box-sizing:border-box}
+.spi button{flex:none;width:44px;height:44px;border:0;border-radius:50%;background:#1a73e8;color:#fff;display:grid;place-items:center;cursor:pointer}
+.spi button:disabled{opacity:.5}.spi button svg{width:22px;height:22px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.spah{display:flex;gap:8px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--bar)}
+.spah b{display:block}.spah small{display:block;color:var(--sub);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.spbk{border:1px solid var(--line)!important;background:var(--bg)!important;color:var(--text)!important;border-radius:16px;padding:7px 12px!important;font:inherit;font-size:13px!important;font-weight:600;cursor:pointer;flex:none}
+.spbk.dg{color:#ff453a!important}
+
 .row{display:flex;align-items:center;gap:14px;padding:15px 18px;border-bottom:1px solid var(--line);cursor:pointer}
 .row:active{background:var(--wall)}.row small{display:block;color:var(--sub);font-size:13px}.row.danger{color:#ff453a}
 .row input{width:22px;height:22px;accent-color:var(--green);pointer-events:none;flex-shrink:0}
@@ -343,6 +374,7 @@ up:'<svg viewBox="0 0 24 24"><path d="M7 11v9H3v-9zM7 11l4-8a2 2 0 012 2v4h6a2 2
 dn:'<svg viewBox="0 0 24 24"><g transform="rotate(180 12 12)"><path d="M7 11v9H3v-9zM7 11l4-8a2 2 0 012 2v4h6a2 2 0 012 2.3l-1.3 6.5A2 2 0 0117.7 20H7"/></g></svg>',
 regen:'<svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 11-2.5-5.8M20 4v5h-5"/></svg>'};
 const IC={
+chat:'<svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg>',
 refresh:'<svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 00-14.9-3M4 5v4h4M4 13a8 8 0 0014.9 3M20 19v-4h-4"/></svg>',
 doc:'<svg viewBox="0 0 24 24"><path d="M7 3h8l4 4v14H7zM15 3v4h4M10 12h6M10 16h6"/></svg>',
 star:'<svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/></svg>',
@@ -436,13 +468,26 @@ function settings(){
  <div class="row" data-a="tr"><span class="ri">${IC.bin}</span><div>Trash<small>${D.trash.length} message${D.trash.length==1?"":"s"}</small></div></div>
  <div class="row" data-a="md"><span class="ri">${IC.star}</span><div>AI models<small>Which model is best for lessons, exams and research</small></div></div>
  <div class="row" data-a="pl"><span class="ri">${IC.star}</span><div>Upgrade plan<small>See the plans and how to pay</small></div></div>
+ ${isOwner()?"":`<div class="row" data-a="sp"><span class="ri">${IC.chat}</span><div>Contact Tr. David<small>${window.SPU>0?window.SPU+" new repl"+(window.SPU==1?"y":"ies"):"Chat, complaints, feedback and ratings"}</small></div></div>`}
+ <div class="row" data-a="cu"><span class="ri"><svg viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1 1 .4 1.9.7 2.8a2 2 0 01-.5 2.1L8.1 9.9a16 16 0 006 6l1.3-1.3a2 2 0 012.1-.4c.9.3 1.8.6 2.8.7a2 2 0 011.7 2z"/></svg></span><div>Call, WhatsApp or email<small>0788 737 517 · asktrdavid@gmail.com</small></div></div>
+ ${isOwner()?`<div class="row" data-a="wk"><span class="ri">${IC.star}</span><div>Preview rating pop-up<small>See what learners get when you send it (nothing is sent)</small></div></div>`:""}
  <div class="row" data-a="up"><span class="ri">${IC.refresh}</span><div>Update app<small>Reload to get the latest version</small></div></div>
 `,closeP,e=>{
   const a=e.target.closest(".row")?.dataset.a;
   if(a=="th"){D.theme=isDark()?"light":"dark";applyTheme();save();settings()}
-  if(a=="ct")chatTheme();if(a=="nt")toggleNotif();if(a=="wn")notifs();if(a=="ho"&&isOwner())handoff();if(a=="sv"&&isOwner())voiceRoom("q","draft");if(a=="md")modelsGuide();if(a=="pl")plans(1);if(a=="pf")profile();if(a=="ak")AK.open();if(a=="ac")access();if(a=="vl")voiceLang();if(a=="up")updateApp();
+  if(a=="ct")chatTheme();if(a=="nt")toggleNotif();if(a=="wn")notifs();if(a=="ho"&&isOwner())handoff();if(a=="sv"&&isOwner())voiceRoom("q","draft");if(a=="md")modelsGuide();if(a=="pl")plans(1);if(a=="pf")profile();if(a=="ak")AK.open();if(a=="ac")access();if(a=="vl")voiceLang();if(a=="up")updateApp();if(a=="sp")supportOpen();if(a=="cu")contactUs();if(a=="wk")wkShow(1);
   if(a=="ex"){const t=D.msgs.map(m=>"["+new Date(m.ts).toLocaleString()+"] "+(m.s=="o"?"You":D.name)+": "+m.t).join("\n");const u=URL.createObjectURL(new Blob([t||"No messages"],{type:"text/plain"}));const l=document.createElement("a");l.href=u;l.download="chat-history.txt";l.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
   if(a=="tr"){sel.clear();trash()}})}
+const CT={tel:"+256788737517",show:"0788 737 517",wa:"256788737517",mail:"asktrdavid@gmail.com"};
+function contactUs(){
+ const ic=d=>`<span class="ri"><svg viewBox="0 0 24 24">${d}</svg></span>`;
+ showP("Contact us",`<div style="padding:16px 18px 4px;line-height:1.45;color:var(--sub)">Reach Tr. David directly. For anything inside the app, use Contact Tr. David in Settings.</div>
+ <div class="row" data-c="tel">${ic('<path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1 1 .4 1.9.7 2.8a2 2 0 01-.5 2.1L8.1 9.9a16 16 0 006 6l1.3-1.3a2 2 0 012.1-.4c.9.3 1.8.6 2.8.7a2 2 0 011.7 2z"/>')}<div>Call<small>${CT.show}</small></div></div>
+ <div class="row" data-c="wa">${IC.chat}<div>WhatsApp<small>${CT.show}</small></div></div>
+ <div class="row" data-c="mail">${ic('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>')}<div>Email<small>${CT.mail}</small></div></div>`,settings,e=>{
+  const r=e.target.closest("[data-c]");if(!r)return;const k=r.dataset.c;
+  const go=(u,n)=>{const l=document.createElement("a");l.href=u;if(n){l.target="_blank";l.rel="noopener"}document.body.appendChild(l);l.click();l.remove()};
+  if(k=="tel")go("tel:"+CT.tel);if(k=="wa")go("https://wa.me/"+CT.wa,1);if(k=="mail")go("mailto:"+CT.mail)})}
 function updateApp(){
  const url="https://asktrdavid.vercel.app/";
  showP("Update app",`<div style="padding:16px 18px;line-height:1.45;color:var(--sub)">If a new version was published, tap Update now. The app reloads and loads the newest files. Your chat and account stay on this phone.</div>
@@ -466,7 +511,7 @@ function updateApp(){
    try{if("serviceWorker"in navigator)wipe.push(navigator.serviceWorker.getRegistrations().then(a=>Promise.all(a.map(x=>x.unregister()))))}catch(x){}
    try{if(window.caches)wipe.push(caches.keys().then(a=>Promise.all(a.map(x=>caches.delete(x)))))}catch(x){}
    Promise.all(wipe).then(done,done);setTimeout(done,2500)}})}
-function updateBadge(){$("bdg").style.display=D.notes.some(x=>!x.r)?"block":"none"}
+function updateBadge(){$("bdg").style.display=(D.notes.some(x=>!x.r)||window.SPU>0)?"block":"none"}
 function notify(t,b){
  if(!document.hidden)return;
  if(WN_ON){D.notes.unshift({t,b,ts:Date.now(),r:0});D.notes=D.notes.slice(0,50);save();updateBadge()}
@@ -3080,7 +3125,7 @@ tokNow=()=>{try{return localStorage.getItem("ask_tok")||sessionStorage.getItem("
 function syncPlan(){const t=tokNow();if(!t)return;
  fetch(SBU+"rpc/get_my_plan",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_t:t})}).then(r=>r.json()).then(j=>{
   if(!j||!j.ok||!PLANS4.includes(j.plan))return;const was=planName();
-  try{localStorage.setItem(PK(),j.plan)}catch(e){}
+  try{localStorage.setItem(PK(),j.plan);localStorage.setItem(PK()+"_exp",j.expires_at||"")}catch(e){}
   if(was!==j.plan){updPlan();render()}}).catch(()=>{})}
 function setPlanServer(x){fetch(SBU+"rpc/set_my_plan",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_t:tokNow(),p_plan:x})}).then(r=>r.json()).then(j=>{if(!j||!j.ok)syncPlan()}).catch(()=>{})}
 /* Installs and usage: one anonymous device id per phone. log_app_event counts an install once per device and an open at most once per 30 minutes. */
@@ -3108,7 +3153,32 @@ function curPlan(q){const pn=planName(),col=PICOL[pn]||"#6b7c85",capped=pn=="Fre
   Standard:"Great choice! You are on Standard. <b>Upgrade to Premium</b> and enjoy everything: Professor, Mentor, Librarian and Philosopher.",
   Premium:"<b>Full features available.</b> Every model answers at its fullest. Thank you for being a Premium learner. Enjoy learning without limits!"};
  const lim=capped?`<div class="cpl">${LIM1}${rtime()?`<br>Your free plan resets at <b>${rtime()}</b>`:""}</div>`:"";
- return `<div class="cpn" id="plh" style="--a:${col}"><div class="cpt"><span class="cpi">${PIC[pn]||PIC.Free}</span><div><small>Your current plan</small><div class="cpm">${pn}</div></div></div><div class="cpx">${MSG[pn]||MSG.Free}</div>${lim}</div>`}
+ return `<div class="cpn" id="plh" style="--a:${col}"><div class="cpt"><span class="cpi">${PIC[pn]||PIC.Free}</span><div><small>Your current plan</small><div class="cpm">${pn}</div></div></div><div class="cpx">${MSG[pn]||MSG.Free}${expLine()}</div>${lim}</div>`}
+/* ===== PAYMENT PROOF (screenshot upload) + WhatsApp confirmation ===== */
+const WA_NUM="256788737517",WA_TXT="Hello Muzuri, I have made my payment for Ask Tr. David. Please confirm it.";
+let PAYIMG="";
+function PAYPROOF(){return `<div class="sec">AFTER PAYING, SEND YOUR PROOF</div>
+ <div class="pbn" style="line-height:1.5"><b>Important:</b> after you make the payment, first take a <b>screenshot</b> of the payment message. Then pick that screenshot below and submit it. We activate your plan after we confirm it.</div>
+ <div style="margin:12px 18px 0"><label style="display:block;font-size:13px;color:var(--sub);margin-bottom:4px">Plan you paid for</label><select id="pyp" style="width:100%;padding:11px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--text);font:inherit"><option>Basic</option><option>Standard</option><option>Premium</option></select></div>
+ <input type="file" id="pyf" accept="image/*" style="display:none">
+ <button class="btn" id="pyb" type="button" style="background:var(--bg);color:var(--text);border:1px solid var(--line)">Choose screenshot</button>
+ <div id="pyv"></div>
+ <button class="btn" id="pys" type="button" disabled>Submit screenshot</button>
+ <div id="pym" style="margin:0 18px 6px;color:var(--green);font-weight:600;line-height:1.4"></div>
+ <div class="sec">CANNOT SEND A SCREENSHOT?</div>
+ <div style="padding:4px 18px 0;color:var(--sub);line-height:1.5">You can also confirm your payment directly with us on WhatsApp.</div>
+ <a class="btn" style="text-align:center;text-decoration:none;background:#25d366;margin-bottom:28px" href="https://wa.me/${WA_NUM}?text=${encodeURIComponent(WA_TXT)}" target="_blank" rel="noopener">WhatsApp</a>`}
+function payShrink(file){return new Promise((res,rej)=>{const fr=new FileReader();fr.onerror=()=>rej();fr.onload=()=>{const im=new Image();im.onerror=()=>rej();im.onload=()=>{const m=1100,k=Math.min(1,m/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.max(1,Math.round(im.width*k));c.height=Math.max(1,Math.round(im.height*k));c.getContext("2d").drawImage(im,0,0,c.width,c.height);res(c.toDataURL("image/jpeg",.72))};im.src=fr.result};fr.readAsDataURL(file)})}
+function payBind(){const f=$("pyf"),b=$("pyb"),sb=$("pys");if(!f||!b||!sb)return;PAYIMG="";
+ b.onclick=()=>f.click();
+ f.onchange=async()=>{const x=f.files&&f.files[0];if(!x)return;if(!/^image\//.test(x.type)){uiAlert("Please pick the screenshot (an image).");f.value="";return}
+  try{PAYIMG=await payShrink(x);$("pyv").innerHTML='<img alt="Screenshot preview" src="'+PAYIMG+'" style="display:block;max-width:60%;max-height:240px;margin:10px auto;border:1px solid var(--line)">';sb.disabled=false;$("pym").textContent="";b.textContent="Change screenshot"}catch(e){PAYIMG="";sb.disabled=true;uiAlert("Could not read that picture. Try another one.")}};
+ sb.onclick=async()=>{if(!PAYIMG)return;sb.disabled=true;sb.textContent="Sending…";
+  const j=await svRpc("submit_payment_proof",{p_t:tokNow(),p_image:PAYIMG,p_plan:$("pyp").value}).catch(()=>null);
+  sb.textContent="Submit screenshot";
+  if(j&&j.ok){PAYIMG="";$("pyv").innerHTML="";f.value="";b.textContent="Choose screenshot";$("pym").textContent="Screenshot sent. We will confirm your payment and activate your plan."}
+  else{sb.disabled=false;uiAlert(j&&j.err=="too many"?"You have sent many screenshots today. Please contact us on WhatsApp.":j&&j.err=="login"?"Please log in again, then send the screenshot.":"Could not send. Check your internet and try again.")}}}
+function expLine(){try{const pn=planName();if(pn=="Free")return"";const e=localStorage.getItem(PK()+"_exp");if(!e)return"";const d=new Date(e);if(isNaN(d))return"";return `<div style="margin-top:8px;color:var(--sub);font-size:14px">Your plan ends <b>${esc(d.toLocaleString())}</b></div>`}catch(x){return""}}
 function plans(fs){
  const q=FQ(),P=[["Basic","500","2,800","9,000","Adds Tutor and Instructor, and a stronger Examiner and Teacher","#2f80ed"],["Standard","750","4,550","16,500","Adds Lecturer and Researcher; Teacher, Tutor, Instructor and Examiner answer deeper","#00a884"],["Premium","1,100","6,650","24,000","Adds Professor, Mentor, Librarian and Philosopher; every model answers at its fullest","#8b5cf6"]],
  cur=planName(),RK={Free:0,Basic:1,Standard:2,Premium:3},UP=P.filter(x=>RK[x[0]]>RK[cur]||(cur=="Premium"&&x[0]=="Premium")),
@@ -3117,7 +3187,7 @@ function plans(fs){
  UP.map(x=>`<div class="pc" style="--a:${x[5]}"><div class="pch"><i>${PIC[x[0]]}</i><b>${x[0]}</b>${x[0]==cur?'<span style="margin-left:auto;font-size:12px;font-weight:700;background:rgba(255,255,255,.25);padding:3px 10px;border-radius:12px">YOUR PLAN</span>':""}</div><div class="ptag">${x[4]}</div><div class="pst"><div><b>${x[1]}</b><span>Daily</span></div><div><b>${x[2]}</b><span>Weekly</span></div><div><b>${x[3]}</b><span>Monthly</span></div></div></div>`).join("")+
  `<div class="sec">PAYMENT METHOD</div><div class="pay"><div class="pl">MTN Mobile Money · Merchant Code</div><div class="pcode">06124096</div><div class="pid">ID: <b>Alfred</b></div><button class="pcp" data-cp="06124096">Copy code</button></div>`+
  `<div class="sec">HOW TO PAY</div>`+ST.map((t,k)=>`<div class="stp"><i>${k+1}</i><div>${t}</div></div>`).join("")+
- `<a class="btn" style="text-align:center;text-decoration:none;margin-bottom:28px" href="tel:*165*3*06124096%23">Dial *165*3*06124096#</a>`,fs?settings:closeP,e=>{const c=e.target.closest("[data-cp]");if(c){const t=c.dataset.cp,ok=()=>{c.textContent="Copied"};if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(ok,ok);else ok()}})}
+ `<a class="btn" style="text-align:center;text-decoration:none;margin-bottom:28px" href="tel:*165*3*06124096%23">Dial *165*3*06124096#</a>`+PAYPROOF(),fs?settings:closeP,e=>{const c=e.target.closest("[data-cp]");if(c){const t=c.dataset.cp,ok=()=>{c.textContent="Copied"};if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(ok,ok);else ok()}});payBind()}
 function stopS(){if(stream==null)return;clearInterval(stream);stream=null;if(sm){if(sm.w)sm.t=wBuild(sm);delete sm.stream;useW(sm.t)}sm=null;$("stat").textContent="Anything about your studies";$("send").innerHTML=SEND;save();render()}
 /* ===== TYPED REQUESTS BY PLAN (there are no quick-action buttons) =====
  Free: direct answer only. Basic: adds quizzes. Standard: adds explain simpler and examples.
@@ -3415,8 +3485,8 @@ $("jump").onclick=()=>$("msgs").scrollTo({top:1e9,behavior:"smooth"});
 /* ===== ADMIN PANEL (owner only) =====
  One app, two modes for the owner account DAVID. Switch: Settings > Learner profile > Update account > Switch to Admin panel.
  Every admin database function checks the login token again (username DAVID with the owner phone), so other accounts are refused even if they find this code. */
-const ADMT=[["home","Home"],["users","Users"],["asked","Asked"],["review","Review"],["ai","AI"],["news","Post"]];
-let ADMON=false,ADMTAB="home",ADMSEQ=0,ADMUQ="",ADMUL=[],ADMAS="open",ADMAL=[],ADMPL=[];
+const ADMT=[["home","Home"],["inbox","Inbox"],["users","Users"],["asked","Asked"],["review","Review"],["ai","AI"],["news","Post"],["pay","Pay"],["rate","Rate"]];
+let ADMON=false,ADMTAB="home",ADMSEQ=0,ADMUQ="",ADMUL=[],ADMAS="open",ADMAL=[],ADMPL=[],ADMPR=[];
 const admCall=async(fn,a)=>{try{const j=await svRpc(fn,Object.assign({p_t:tokNow()},a||{}));return j&&typeof j.ok=="boolean"?j:{ok:false,err:"fail"}}catch(e){return{ok:false,err:"net"}}};
 const admMsg=j=>j&&j.err=="not allowed"?"This panel is only for the owner account.":j&&j.err=="net"?"No internet. Check your connection and try again.":"Could not load. Try again.";
 const admFail=(j,retry)=>'<div class="pbn" style="margin:14px 18px;line-height:1.5">'+admMsg(j)+'</div>'+(retry?'<div class="row" data-r="1"><div>Try again</div></div>':"");
@@ -3433,9 +3503,9 @@ function admOpen(){if(!isOwner())return;ADMON=true;try{localStorage.setItem("ask
  const a=$("adm");a.style.display="flex";
  a.innerHTML=`<header class="ah"><div><b>Admin panel</b><small>Ask Tr. David · only you see this</small></div><button id="ax">Learner app</button></header><div id="abody"></div><nav class="an">${ADMT.map(t=>`<button data-t="${t[0]}">${t[1]}</button>`).join("")}</nav>`;
  a.onclick=e=>{if(e.target.id=="ax"){admClose();return}const t=e.target.closest(".an button");if(t)admGo(t.dataset.t)};
- admGo(ADMTAB)}
+ admGo(ADMTAB);try{admPollUn()}catch(e){}}
 function admGo(t){ADMTAB=t;ADMSEQ++;document.querySelectorAll("#adm .an button").forEach(b=>b.classList.toggle("on",b.dataset.t==t));
- ({home:admHome,users:admUsers,asked:()=>admAsked(),review:admReview,ai:admAi,news:admNews})[t]()}
+ ({home:admHome,inbox:admInbox,users:admUsers,asked:()=>admAsked(),review:admReview,ai:admAi,news:admNews,pay:admPay,rate:()=>admRate()})[t]()}
 
 /* HOME */
 async function admHome(){const s=ADMSEQ,b=$("abody");b.innerHTML=admLd();const j=await admCall("admin_stats");if(s!==ADMSEQ)return;
@@ -3466,14 +3536,41 @@ function admUsers(){const s=ADMSEQ,b=$("abody");
  $("auq").oninput=()=>{clearTimeout(tm);tm=setTimeout(run,350)};
  b.onclick=e=>{const r=e.target.closest("[data-u]");if(r)admUser(ADMUL[+r.dataset.u])};
  run()}
+const admDur=h=>h%720==0?(h/720==1?"30 days":(h/24)+" days"):h%168==0?(h/168==1?"1 week":(h/168)+" weeks"):h%24==0?(h/24==1?"24 hours (daily)":(h/24)+" days"):h+(h==1?" hour":" hours");
 function admUser(u){if(!u)return;ADMSEQ++;const b=$("abody");
- const set=p=>uiConfirm("Change "+u.username+" to the "+p+" plan?",async()=>{const j=await admCall("admin_set_plan",{p_user:u.id,p_plan:p});
-  if(j.ok){u.plan=p;if(u.username==="DAVID")syncPlan();admUser(u);const m=$("aum");if(m)m.textContent="Plan changed to "+p+"."}
-  else uiAlert(j.err=="bad plan"||j.err=="no such account"?"Could not change the plan ("+j.err+").":admMsg(j))},"Change plan");
+ const apply=async(p,h)=>{const j=await admCall("admin_set_plan_timed",{p_user:u.id,p_plan:p,p_hours:h||null});
+  if(j.ok){u.plan=p;u.plan_expires_at=j.expires_at||null;if(u.username==="DAVID")syncPlan();admUser(u);const m=$("aum");if(m)m.textContent=p=="Free"?"Plan changed to Free.":"Plan set to "+p+(h?" for "+admDur(h)+". It ends by itself.":" with no expiry.")}
+  else uiAlert(j.err=="bad plan"||j.err=="no such account"||j.err=="bad hours"?"Could not change the plan ("+j.err+").":admMsg(j))};
+ const pick=p=>{ADMSEQ++;
+  const D=[["Daily · 24 hours",24],["Weekly · 7 days",168],["30 days",720]];
+  b.innerHTML=`<div class="row" data-b="1"><div>‹ Back</div></div><div style="padding:12px 18px;line-height:1.5"><b style="font-size:18px">${esc(u.names)}</b> · ${p} plan<br><small style="color:var(--sub)">Choose how long it lasts. It expires by itself and the learner goes back to Free.</small></div><div class="asec">Duration</div>`
+   +D.map(d=>`<div class="row" data-h="${d[1]}"><div><b>${d[0]}</b></div></div>`).join("")
+   +`<div class="asec">Specific hours</div><div style="display:flex;gap:8px;padding:6px 18px"><input class="ain" id="ahr" type="number" min="1" max="8760" inputmode="numeric" placeholder="Number of hours" style="flex:1;margin:0"><button data-c="1" style="padding:0 18px;border:0;border-radius:22px;font:inherit;font-weight:700;cursor:pointer;color:#fff;background:${PCOL[p]||"#00a884"}">Set</button></div>`
+   +`<div class="row" data-h="0"><div>No expiry<small>Stays until you change it</small></div></div>`;
+  b.onclick=e=>{if(e.target.closest("[data-b]")){admUser(u);return}
+   const hr=e.target.closest("[data-h]");if(hr){const h=+hr.dataset.h;uiConfirm("Put "+u.username+" on the "+p+" plan"+(h?" for "+admDur(h):" with no expiry")+"?",()=>apply(p,h),"Set plan");return}
+   if(e.target.closest("[data-c]")){const h=parseInt($("ahr").value,10);if(!(h>=1&&h<=8760)){uiAlert("Enter a number of hours from 1 to 8760.");return}uiConfirm("Put "+u.username+" on the "+p+" plan for "+admDur(h)+"?",()=>apply(p,h),"Set plan")}}};
+ const ex=u.plan!="Free"&&u.plan_expires_at?"Ends "+new Date(u.plan_expires_at).toLocaleString():(u.plan!="Free"?"No expiry":"");
  b.innerHTML=`<div class="row" data-b="1"><div>‹ Back to users</div></div><div style="padding:12px 18px;line-height:1.6"><b style="font-size:18px">${esc(u.names)}</b><br>${esc(u.username)} · ${esc(u.phone)}<br><small style="color:var(--sub)">Joined ${admDate(u.created_at)}</small></div><div class="asec">Plan</div>`
-  +PLANS4.map(p=>`<div class="row" data-p="${p}"><span style="width:10px;height:10px;border-radius:50%;background:${PCOL[p]};flex:none"></span><div><b>${p}</b>${p==u.plan?"<small>Current plan</small>":""}</div></div>`).join("")
-  +'<div id="aum" style="padding:10px 18px;color:var(--green);font-weight:600;min-height:20px"></div>';
- b.onclick=e=>{if(e.target.closest("[data-b]")){ADMSEQ++;admUsers();return}const p=e.target.closest("[data-p]")?.dataset.p;if(p&&p!=u.plan)set(p)}}
+  +PLANS4.map(p=>`<div class="row" data-p="${p}"><span style="width:10px;height:10px;border-radius:50%;background:${PCOL[p]};flex:none"></span><div><b>${p}</b>${p==u.plan?"<small>Current plan"+(ex?" · "+ex:"")+"</small>":""}</div></div>`).join("")
+  +'<div style="padding:8px 18px;color:var(--sub);font-size:13px;line-height:1.4">Tap a paid plan to choose how long it lasts. It ends by itself when the time is over.</div><div id="aum" style="padding:6px 18px 10px;color:var(--green);font-weight:600;min-height:20px"></div>';
+ b.onclick=e=>{if(e.target.closest("[data-b]")){ADMSEQ++;admUsers();return}const p=e.target.closest("[data-p]")?.dataset.p;if(!p)return;
+  if(p=="Free"){if(u.plan!="Free")uiConfirm("Change "+u.username+" to the Free plan?",()=>apply("Free",0),"Change plan")}else pick(p)}}
+
+/* PAY: payment screenshots sent by learners; delete removes the row from the database */
+async function admPay(){const s=ADMSEQ,b=$("abody");b.innerHTML=admLd();const j=await admCall("admin_proof_list");if(s!==ADMSEQ)return;
+ if(!j.ok){b.innerHTML=admFail(j,1);b.onclick=e=>{if(e.target.closest("[data-r]"))admPay()};return}
+ ADMPR=j.items||[];
+ b.innerHTML=`<div class="asec">Payment screenshots (${ADMPR.length})</div>`+(ADMPR.length?"":'<div style="padding:18px;color:var(--sub);line-height:1.5">No screenshots yet. Learners who pay send them from the Upgrade plans screen.</div>')
+  +ADMPR.map((x,i)=>`<div class="row" data-i="${i}"><div style="flex:1;min-width:0"><b>${esc(x.names||x.username||"Learner")}</b><small>${esc(x.username||"")} · ${esc(x.phone||"")} · ${esc(x.plan_wanted||"")} · ${esc(new Date(x.created_at).toLocaleString())}</small></div></div>`).join("");
+ b.onclick=e=>{const r=e.target.closest("[data-i]");if(r)admPayOne(ADMPR[+r.dataset.i])}}
+async function admPayOne(x){if(!x)return;const s=++ADMSEQ,b=$("abody");b.innerHTML=admLd();const j=await admCall("admin_proof_get",{p_id:x.id});if(s!==ADMSEQ)return;
+ b.innerHTML=`<div class="row" data-b="1"><div>‹ Back to screenshots</div></div><div style="padding:12px 18px;line-height:1.6"><b style="font-size:18px">${esc(x.names||x.username)}</b><br>${esc(x.username||"")} · ${esc(x.phone||"")}<br><small style="color:var(--sub)">Paid for: ${esc(x.plan_wanted||"not stated")} · ${esc(new Date(x.created_at).toLocaleString())}</small></div>`
+  +(j.ok?`<img alt="Payment screenshot" src="${j.image}" style="display:block;width:calc(100% - 36px);margin:6px 18px;border:1px solid var(--line)">`:admFail(j))
+  +`<div style="display:flex;gap:8px;padding:14px 18px 24px">${abt("set","Set plan","#00a884")}${abt("del","Delete","#d64545")}</div>`;
+ b.onclick=async e=>{if(e.target.closest("[data-b]")){admPay();return}const a=e.target.closest("[data-a]")?.dataset.a;
+  if(a=="del")uiConfirm("Delete this screenshot permanently? It is also removed from the database.",async()=>{const r=await admCall("admin_proof_delete",{p_id:x.id});if(r.ok)admPay();else uiAlert(admMsg(r))},"Delete");
+  if(a=="set"){const f=await admCall("admin_find_users",{p_q:x.username||""});const u=f.ok&&(f.items||[]).find(i=>i.id==x.user_id);if(u)admUser(u);else uiAlert("Could not find that account.")}}}
 
 /* ASKED: questions the app did not understand */
 async function admAsked(st){if(st)ADMAS=st;const s=ADMSEQ,b=$("abody");b.innerHTML=admLd();const j=await admCall("admin_unanswered_list",{p_status:ADMAS});if(s!==ADMSEQ)return;
@@ -4095,7 +4192,7 @@ function scr(n){const f=$("af"),h=t=>$("ah").textContent=t;$("auth").style.displ
  if(n=="create"){h("Create account");form(f,[["n","names","Names"],["u","username","Username"],["p","phone","Phone"],["k","cls","Class"],["w","password","Password"],["c","pin","Pin"]],"Create account",async v=>{const r=await rpc("acct_create",{p_names:v.n,p_user:v.u,p_phone:v.p,p_pass:v.w,p_pin:v.c});if(r.ok){try{LS.setItem("ask_cls_"+((r.me&&r.me.username)||v.u),v.k)}catch(e){}}return done(r)},L("login","I already have an account: Login"))}
  if(n=="fp"){h("Forgot password");form(f,[["u","uname","Username"],["p","phoneo","Phone"],["s","cpin","Pin"],["n","password","New password"]],"Reset password",FG("password"),AR(L("fn","Forgot pin"),L("ct","Forgot password and pin"))+BK)}
  if(n=="fn"){h("Forgot pin");form(f,[["u","uname","Username"],["p","phoneo","Phone"],["s","cpw","Password"],["n","pin","New pin"]],"Reset pin",FG("pin"),L("ct","Forgot password and pin")+BK)}
- if(n=="ct"){h("Contact us");f.innerHTML='<div class="fw" style="line-height:1.5">If you forgot both your password and your pin, contact us and we will help you recover your account.</div>'+(CONTACT?`<a class="btn" style="text-align:center;text-decoration:none" href="tel:${CONTACT}">Call ${CONTACT}</a>`:"")+BK;f.onclick=e=>{if(e.target.dataset.go)scr(e.target.dataset.go)};f.oninput=null;f.onfocusin=null}}
+ if(n=="ct"){h("Contact us");f.innerHTML='<div class="fw" style="line-height:1.5">If you forgot both your password and your pin, contact us and we will help you recover your account.</div>'+`<a class="btn" style="text-align:center;text-decoration:none" href="tel:+256788737517">Call 0788 737 517</a><a class="btn" style="text-align:center;text-decoration:none;background:#25d366;margin-top:10px" href="https://wa.me/256788737517" target="_blank" rel="noopener">WhatsApp</a><a class="btn" style="text-align:center;text-decoration:none;background:var(--sub);margin-top:10px" href="mailto:asktrdavid@gmail.com">Email asktrdavid@gmail.com</a>`+BK;f.onclick=e=>{if(e.target.dataset.go)scr(e.target.dataset.go)};f.oninput=null;f.onfocusin=null}}
 function enter(){$("auth").style.display="none";window.__authScr="";try{window.__backSync&&window.__backSync()}catch(e){}if(ME){D.pname=GNm();const c=LS.getItem("ask_cls_"+ME.username);if(c&&CLASSES.includes(c))applyCls(c);else D.cls="";save()}render();link();evLog("open");try{annSync();if(D.notif)pushOn()}catch(e){}if(ME&&!D.cls)clsPick();admHide();try{updPlan()}catch(e){}}
 function out(){admHide();rpc("acct_logout",{p_t:T});T="";ME=null;LS.removeItem("ask_tok");LS.removeItem("ask_me");SS.removeItem("ask_tok");SS.removeItem("ask_me");closeP();scr("login")}
 const UI={names:[["n","names","New names"],["a","cpw","Confirm password"]],username:[["n","username","New username"],["a","cpw","Confirm password"]],phone:[["n","phone","New phone"],["a","cpw","Confirm password"]],password:[["n","password","New password"],["a","uname","Confirm username"],["b","cpw","Old password"],["c","cpin","Pin"]],pin:[["n","pin","New pin"],["a","uname","Confirm username"],["b","cpw","Password"],["c","cpin","Old pin"]]};
@@ -4128,6 +4225,212 @@ $("alogo").style.cssText+=";background:url("+AVATAR+") center/cover";
   try{new MutationObserver(sync).observe(root,{attributes:true,attributeFilter:["class","data-theme","style"]});}catch(e){}
   try{matchMedia("(prefers-color-scheme: dark)").addEventListener("change",sync);}catch(e){}
   window.addEventListener("load",sync);
+})();
+</script>
+
+<script>
+/* ===== DIRECT CHAT: learners <-> admin (uses the support_* and admin_support_* database functions) ===== */
+window.SPU=0;
+const spCall=async(fn,a)=>{try{const j=await svRpc(fn,Object.assign({p_t:tokNow()},a||{}));return j&&typeof j.ok==="boolean"?j:{ok:false,err:"fail"}}catch(e){return{ok:false,err:"net"}}};
+const spE=s=>esc(String(s==null?"":s));
+const spT=d=>{try{const x=new Date(d),t=x.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});return x.toDateString()==new Date().toDateString()?t:x.toLocaleDateString([],{day:"numeric",month:"short"})+" "+t}catch(e){return""}};
+const spStars=n=>"★".repeat(n)+"☆".repeat(5-n);
+const SPKL={message:"Message",question:"Question",complaint:"Complaint",feedback:"Feedback"};
+const SPSEND='<svg viewBox="0 0 24 24"><path d="M3 11l18-8-8 18-2-8z"/></svg>';
+const spBub=(m,mine)=>`<div class="spr ${mine?"o":"i"}"><div class="spb">${m.kind&&m.kind!=="message"&&m.sender==="user"?'<span class="spt">'+(SPKL[m.kind]||(m.kind==="rating"?"Rating":m.kind))+'</span><br>':""}${m.rating?'<span class="spst">'+spStars(+m.rating)+'</span>':""}${m.body?spE(m.body):""}<small>${spT(m.created_at)}</small></div></div>`;
+const spErr=j=>j&&j.err==="net"?"No internet. Check your connection and try again.":j&&j.err==="login"?"Please sign in again.":j&&j.err==="too many"?"You have sent many messages. Please wait a little and try again.":j&&j.err==="empty"?"Write something first.":"Could not send. Try again.";
+const spGrow=t=>{t.style.height="auto";t.style.height=Math.min(t.scrollHeight,120)+"px"};
+const spDown=(el,force)=>{if(force||el.scrollHeight-el.scrollTop-el.clientHeight<140)el.scrollTop=el.scrollHeight};
+
+/* learner screen */
+let SPKIND="message",SPRATE=0,SPLAST="";
+function supportOpen(){
+ SPKIND="message";SPRATE=0;SPLAST="";
+ showP("Contact Tr. David",`<div class="spw"><div id="spm" class="spm"><div class="spe">Loading…</div></div><div class="spc">
+  <div class="spk" id="spk">${Object.keys(SPKL).map(k=>`<button data-k="${k}" class="${k==="message"?"on":""}">${SPKL[k]}</button>`).join("")}</div>
+  <div class="sprt" id="sprt"><span>Rate the app:</span>${[1,2,3,4,5].map(n=>`<button data-r="${n}" aria-label="${n} star">★</button>`).join("")}</div>
+  <div class="spi"><textarea id="spt" rows="1" maxlength="2000" placeholder="Write to Tr. David…"></textarea><button id="sps" aria-label="Send">${SPSEND}</button></div></div></div>`,settings,null);
+ const box=$("pbody");box.style.overflow="hidden";
+ const rate=()=>{document.querySelectorAll("#sprt button").forEach(b=>b.classList.toggle("on",+b.dataset.r<=SPRATE))};
+ $("spk").onclick=e=>{const k=e.target.closest("[data-k]");if(!k)return;SPKIND=k.dataset.k;document.querySelectorAll("#spk button").forEach(b=>b.classList.toggle("on",b===k));$("sprt").style.display=SPKIND==="feedback"?"flex":"none";if(SPKIND!=="feedback"){SPRATE=0;rate()}};
+ $("sprt").onclick=e=>{const r=e.target.closest("[data-r]");if(!r)return;SPRATE=SPRATE===+r.dataset.r?0:+r.dataset.r;rate()};
+ const t=$("spt");t.oninput=()=>spGrow(t);
+ $("sps").onclick=async()=>{
+  const v=t.value.trim(),b=$("sps");
+  if(!v&&!SPRATE){t.focus();return}
+  b.disabled=true;
+  const j=await spCall("support_send",{p_body:v,p_kind:SPKIND,p_rating:SPRATE||null});
+  b.disabled=false;
+  if(!j.ok){uiAlert(spErr(j));return}
+  t.value="";spGrow(t);SPRATE=0;rate();
+  await spLoad(true)};
+ spLoad(true);
+ const iv=setInterval(()=>{if(!$("spm")||!document.getElementById("spt")){clearInterval(iv);return}spLoad(false)},6000)}
+async function spLoad(force){
+ const j=await spCall("support_fetch"),el=$("spm");if(!el)return;
+ try{$("pbody").style.overflow="hidden"}catch(e){}
+ if(!j.ok){if(force)el.innerHTML='<div class="spe">'+spE(j.err==="net"?"No internet. Your messages will show when you are back online.":spErr(j))+'</div>';return}
+ window.SPU=0;updateBadge();
+ const L=j.items||[],sig=L.length+":"+(L.length?L[L.length-1].id:"");
+ if(sig===SPLAST&&!force)return;SPLAST=sig;
+ el.innerHTML=L.length?L.map(m=>spBub(m,m.sender==="user")).join(""):'<div class="spe"><b>Talk to Tr. David directly</b><br>Send a question, complaint, feedback or a rating. Tr. David will reply here.</div>';
+ spDown(el,true)}
+async function spPoll(){
+ try{
+  if(!tokNow())return;
+  const own=isOwner(),j=await spCall(own?"admin_support_unread":"support_unread");
+  if(!j.ok)return;const n=+j.n||0;
+  if(n>window.SPU&&!document.getElementById("spm")){try{annBanner({title:own?"New message from a learner":"New reply from Tr. David",body:own?"Open the Inbox tab in the Admin panel.":"Open Settings > Contact Tr. David.",duration_seconds:8})}catch(e){}}
+  if(document.getElementById("spm")&&!own){window.SPU=0}else window.SPU=n;
+  updateBadge()}catch(e){}}
+setTimeout(spPoll,5000);setInterval(spPoll,45000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)spPoll()});
+
+/* admin: Inbox tab */
+let SPL=[];
+function admInboxBadge(n){const b=document.querySelector('#adm .an button[data-t="inbox"]');if(b)b.innerHTML="Inbox"+(n>0?'<i class="spn">'+n+'</i>':"")}
+async function admPollUn(){if(!ADMON)return;const j=await admCall("admin_support_unread");if(j.ok)admInboxBadge(+j.n||0)}
+setInterval(()=>{try{admPollUn()}catch(e){}},20000);
+async function admInbox(){
+ const s=ADMSEQ,b=$("abody");b.innerHTML=admLd();
+ const j=await admCall("admin_support_threads");if(s!==ADMSEQ)return;
+ if(!j.ok){b.innerHTML=admFail(j,1);b.onclick=e=>{if(e.target.closest("[data-r]"))admInbox()};return}
+ SPL=j.items||[];
+ b.innerHTML=(SPL.length?"":'<div class="spe">No messages yet.<br>When a learner writes from Settings > Contact Tr. David, it appears here and you can reply.</div>')+
+  SPL.map((t,i)=>{const prev=t.last_body?t.last_body:(t.last_rating?spStars(+t.last_rating):"");
+   return `<div class="row" data-th="${i}"><div class="spa">${spE((t.names||t.username||"?").charAt(0).toUpperCase())}</div><div style="flex:1;min-width:0"><b>${spE(t.names||t.username||"Unknown")}</b><small class="spp">${t.last_sender==="admin"?"You: ":""}${spE(prev)}</small></div><div style="text-align:right;flex:none"><small style="font-size:12px">${spT(t.last_at)}</small>${t.unread>0?'<span class="spn">'+t.unread+'</span>':""}</div></div>`}).join("");
+ b.onclick=e=>{const r=e.target.closest("[data-th]");if(r)admThread(SPL[+r.dataset.th])};
+ admInboxBadge(SPL.reduce((a,t)=>a+(+t.unread||0),0))}
+async function admThread(t){
+ if(!t)return;const s=++ADMSEQ,b=$("abody");let last="";
+ b.innerHTML=`<div class="spth"><div class="spah"><button id="spbk" class="spbk">‹ Inbox</button><div style="flex:1;min-width:0"><b>${spE(t.names||t.username||"Learner")}</b><small>${spE(t.username||"")} · ${spE(t.phone||"")} · ${spE(t.plan||"")}</small></div><button id="spdl" class="spbk dg">Delete</button></div><div id="spm" class="spm"><div class="spe">Loading…</div></div><div class="spi"><textarea id="spt" rows="1" maxlength="2000" placeholder="Write a reply…"></textarea><button id="sps" aria-label="Send reply">${SPSEND}</button></div></div>`;
+ b.onclick=null;
+ const back=()=>{ADMSEQ++;admInbox()};
+ $("spbk").onclick=back;
+ $("spdl").onclick=()=>uiConfirm("Delete this whole conversation permanently? The learner will lose it too.",async()=>{const j=await admCall("admin_support_delete",{p_user:t.user_id});if(!j.ok){uiAlert("Could not delete. Try again.");return}back()},"Delete");
+ const el=$("spm"),ta=$("spt");ta.oninput=()=>spGrow(ta);
+ const load=async force=>{
+  const j=await admCall("admin_support_get",{p_user:t.user_id});if(s!==ADMSEQ||!$("spm"))return;
+  if(!j.ok){if(force)el.innerHTML='<div class="spe">'+spE(j.err==="net"?"No internet.":"Could not load. Try again.")+'</div>';return}
+  const L=j.items||[],sig=L.length+":"+(L.length?L[L.length-1].id:"");if(sig===last&&!force)return;const first=!last;last=sig;
+  el.innerHTML=L.length?L.map(m=>spBub(m,m.sender==="admin")).join(""):'<div class="spe">No messages in this conversation.</div>';spDown(el,first||force);admPollUn()};
+ $("sps").onclick=async()=>{const v=ta.value.trim(),sb=$("sps");if(!v){ta.focus();return}sb.disabled=true;
+  const j=await admCall("admin_support_reply",{p_user:t.user_id,p_body:v});sb.disabled=false;
+  if(!j.ok){uiAlert(j.err==="net"?"No internet. Try again.":"Could not send the reply. Try again.");return}
+  ta.value="";spGrow(ta);await load(true)};
+ load(true);
+ const iv=setInterval(()=>{if(s!==ADMSEQ||!$("spm")){clearInterval(iv);return}load(false)},6000)}
+</script>
+
+<script>
+/* ===== REVIEW POP-UP: rating -> feedback -> complaint. Sent by the admin at a time of their choice (Admin panel > Rate). Answers go to the admin Inbox. ===== */
+(function(){
+ const st=document.createElement("style");
+ st.textContent=`.wkm{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);padding:18px;box-sizing:border-box}
+.wkc{width:100%;max-width:420px;max-height:100%;overflow-y:auto;background:var(--sheet);color:var(--text);border-radius:18px;padding:20px 18px 16px;box-shadow:0 10px 40px rgba(0,0,0,.35)}
+.wkc small.wks{display:block;color:var(--sub);font-size:12px;margin-bottom:6px}
+.wkc h3{margin:0 0 4px;font-size:19px}.wkc p{margin:0 0 12px;color:var(--sub);line-height:1.4}
+.wkst{display:flex;justify-content:center;gap:6px;margin:6px 0 12px}
+.wkst button{border:0;background:none;font-size:40px;line-height:1;color:#c9ced1;cursor:pointer;padding:0 2px}.wkst button.on{color:#f5a623}
+.wkc textarea{display:block;width:100%;min-height:96px;resize:vertical;border:1px solid var(--line);border-radius:12px;padding:11px 13px;background:var(--bg);color:var(--text);font:inherit;box-sizing:border-box;outline:0}
+.wke{color:#e03131;font-size:13px;min-height:18px;margin-top:6px}
+.wkb{display:flex;gap:10px;margin-top:8px}
+.wkb button{flex:1;padding:12px;border-radius:24px;font:inherit;font-weight:700;cursor:pointer;border:1px solid var(--line);background:var(--bg);color:var(--text)}
+.wkb button.go{background:var(--green);border-color:var(--green);color:#fff}.wkb button:disabled{opacity:.45}
+.wkt{text-align:center;padding:14px 4px 6px}.wkt b{font-size:19px;display:block;margin-bottom:6px}
+#adm .an button{font-size:11px}
+.rg{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:4px 18px 10px}
+.rg div{background:var(--bar);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.rg b{display:block;font-size:22px;line-height:1.1}.rg span{font-size:12px;color:var(--sub)}
+.rl{display:flex;justify-content:space-between;gap:8px;padding:9px 18px;border-top:1px solid var(--line);font-size:14px}.rl small{color:var(--sub);text-align:right}`;
+ document.head.appendChild(st);
+ const S=[
+  {k:"rating",t:"Rate Ask Tr. David",s:"How is your experience so far? Tap a star.",ph:"Add a short note (optional)",stars:1},
+  {k:"feedback",t:"What would you like us to improve?",s:"Tell us what we can do better.",ph:"Write your feedback…"},
+  {k:"complaint",t:"What are you experiencing?",s:"What challenges are you experiencing while using our services?",ph:"Describe the problem…"}];
+ const rc=(fn,a)=>spCall(fn,a);
+ /* camp = {id, done:{rating,feedback,complaint}}; preview = true sends nothing */
+ window.wkShow=function(preview,camp){
+  if(document.getElementById("wkm"))return;
+  const done=(camp&&camp.done)||{};
+  let i=0;while(i<S.length&&done[S[i].k])i++;
+  if(i>=S.length)return;
+  let r=0,busy=false,sent=0;
+  const o=document.createElement("div");o.id="wkm";o.className="wkm";document.body.appendChild(o);
+  const close=()=>o.remove();
+  const fin=()=>{if(!sent){close();return}o.innerHTML='<div class="wkc"><div class="wkt"><b>Thank you!</b>'+(preview?"Preview finished.":"Your answers reached Tr. David.")+'</div></div>';setTimeout(close,1900)};
+  const draw=()=>{const c=S[i];
+   o.innerHTML=`<div class="wkc" role="dialog" aria-modal="true"><small class="wks">${preview?"Preview · nothing is sent · ":""}${i+1} of 3</small><h3>${c.t}</h3><p>${c.s}</p>
+   ${c.stars?'<div class="wkst">'+[1,2,3,4,5].map(n=>`<button data-n="${n}" aria-label="${n} star${n>1?"s":""}">★</button>`).join("")+'</div>':""}
+   <textarea id="wkt" maxlength="1500" placeholder="${c.ph}"></textarea><div class="wke" id="wke"></div>
+   <div class="wkb"><button data-w="c">Cancel</button><button data-w="s" class="go" id="wks" disabled>Submit</button></div></div>`;
+   r=0;upd()};
+  const upd=()=>{const c=S[i],t=document.getElementById("wkt"),b=document.getElementById("wks");if(!t||!b)return;
+   b.disabled=busy||(c.stars?r<1:!t.value.trim());
+   o.querySelectorAll(".wkst button").forEach(x=>x.classList.toggle("on",+x.dataset.n<=r))};
+  o.oninput=upd;
+  o.onclick=async e=>{
+   const n=e.target.closest("[data-n]");if(n){r=+n.dataset.n;upd();return}
+   const w=e.target.closest("[data-w]");if(!w||busy)return;
+   const c=S[i],t=document.getElementById("wkt"),er=document.getElementById("wke");
+   busy=true;upd();er.textContent="";
+   if(w.dataset.w==="c"){
+    if(!preview)await rc("review_step",{p_id:camp.id,p_step:c.k,p_action:"skipped"});
+    busy=false;i++;if(i>=S.length)fin();else draw();return}
+   if(!preview){const j=await rc("review_step",{p_id:camp.id,p_step:c.k,p_action:"sent",p_body:t.value.trim(),p_rating:c.stars?r:null});
+    if(!j.ok){er.textContent=spErr(j);busy=false;upd();return}}
+   busy=false;sent++;i++;
+   if(i>=S.length)fin();else draw()};
+  if(!preview)rc("review_seen",{p_id:camp.id});
+  draw()};
+ async function wkCheck(){try{
+  if(!tokNow()||isOwner()||ADMON||document.getElementById("wkm"))return;
+  const a=document.activeElement;if(a&&/^(INPUT|TEXTAREA)$/.test(a.tagName))return;
+  const j=await rc("review_pending");
+  if(!j.ok||!j.show||document.getElementById("wkm")||ADMON)return;
+  wkShow(0,{id:j.id,done:j.done})}catch(e){}}
+ setTimeout(wkCheck,5000);setInterval(()=>{if(!document.hidden)wkCheck()},60000);
+ document.addEventListener("visibilitychange",()=>{if(!document.hidden)setTimeout(wkCheck,1200)});
+
+ /* ===== ADMIN: Rate tab ===== */
+ const pc=(a,b)=>b?Math.round(100*a/b)+"%":"0%";
+ const box=(n,l)=>`<div><b>${n}</b><span>${l}</span></div>`;
+ let RUSERS=null,RSHOW=false;
+ window.admRate=async function(){
+  const s=ADMSEQ,b=$("abody");b.innerHTML=admLd();
+  const j=await admCall("admin_review_stats");if(s!==ADMSEQ)return;
+  if(!j.ok){b.innerHTML=admFail(j,1);b.onclick=e=>{if(e.target.closest("[data-r]"))admRate()};return}
+  const L=j.items||[],c=L[0];
+  let h=`<div class="asec">Send rating, feedback and complaint pop-up</div>
+   <div style="padding:2px 18px 8px;color:var(--sub);font-size:13px;line-height:1.5">Pops up on every learner's screen as soon as they open the app (or straight away if they are in it). Three screens one after another: rate, improve, complaint. Learners who are away see it when they come back. Sending again starts a fresh round.</div>
+   <div style="display:flex;gap:8px;padding:4px 18px 8px">${abt("send",c&&c.status=="active"?"Send again":"Send to everyone","#00a884")}${c&&c.status=="active"?abt("close","Stop current","#8696a0"):""}</div>
+   <div style="padding:0 18px 6px"><button data-a="prev" style="border:0;background:none;color:var(--green);font:inherit;font-weight:600;padding:4px 0;cursor:pointer">Preview it on my screen</button></div><div id="rtm" style="padding:0 18px;min-height:18px;color:var(--sub)"></div>`;
+  if(!c)h+='<div style="padding:12px 18px;color:var(--sub)">Nothing sent yet.</div>';
+  else{
+   h+=`<div class="asec">Latest · ${admDate(c.created_at)} ${new Date(c.created_at).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})} · ${c.status=="active"?"Live":"Stopped"}</div>
+   <div class="rg">${box(c.total,"Learners")}${box(c.received,"Received ("+pc(c.received,c.total)+")")}${box(c.seen,"Seen ("+pc(c.seen,c.total)+")")}${box(c.interacted,"Interacted")}
+   ${box(c.ignored,"Ignored (seen, nothing tapped)")}${box(c.total-c.seen,"Not seen yet")}${box(c.finished,"Finished all 3")}${box(c.avg_rating==null?"–":c.avg_rating,"Average stars")}</div>
+   <div class="asec">What they did</div>
+   <div class="rl"><span>★ Rated</span><small>${c.rated} sent · ${c.rating_skipped} cancelled</small></div>
+   <div class="rl"><span>Feedback (improve)</span><small>${c.feedback} sent · ${c.feedback_skipped} cancelled</small></div>
+   <div class="rl"><span>Complaint</span><small>${c.complaint} sent · ${c.complaint_skipped} cancelled</small></div>
+   <div class="rl"><span>Stars given</span><small>${[5,4,3,2,1].map(n=>n+"★ "+c.stars[n-1]).join(" · ")}</small></div>
+   <div style="padding:10px 18px"><button data-a="who" style="border:0;background:none;color:var(--green);font:inherit;font-weight:600;padding:4px 0;cursor:pointer">${RSHOW?"Hide":"Show"} who did what</button></div>`;
+   if(RSHOW){
+    if(!RUSERS||RUSERS.id!==c.id){const u=await admCall("admin_review_users",{p_id:c.id});if(s!==ADMSEQ)return;RUSERS={id:c.id,items:u.ok?u.items:[]}}
+    const f=x=>x=="sent"?"✓":x=="skipped"?"✕":"–";
+    h+=RUSERS.items.map(u=>`<div class="rl"><span>${esc(u.names||u.username)}<br><small style="text-align:left">${u.seen?"Seen":u.received?"Received, not seen":"Not received yet"}</small></span><small>Rate ${f(u.rating)}${u.stars?" "+u.stars+"★":""} · Improve ${f(u.feedback)} · Complaint ${f(u.complaint)}</small></div>`).join("")+'<div style="padding:6px 18px;color:var(--sub);font-size:12px">✓ sent · ✕ cancelled · – nothing yet. Written answers are in the Inbox.</div>'}
+   if(L.length>1)h+='<div class="asec">Earlier</div>'+L.slice(1).map(x=>`<div class="rl"><span>${admDate(x.created_at)}</span><small>${x.received} received · ${x.seen} seen · ${x.rated} rated · ${x.feedback} feedback · ${x.complaint} complaints</small></div>`).join("")}
+  b.innerHTML=h;
+  b.onclick=async e=>{
+   const a=e.target.closest("[data-a]");if(!a)return;const m=$("rtm"),k=a.dataset.a;
+   if(k=="prev"){wkShow(1);return}
+   if(k=="who"){RSHOW=!RSHOW;admRate();return}
+   if(k=="close"){await admCall("admin_review_close",{p_id:c.id});admRate();return}
+   if(k=="send")uiConfirm("Send the pop-up to all learners now?",async()=>{
+    const r=await admCall("admin_review_send");
+    if(!r.ok){uiAlert("Could not send. Try again.");return}
+    RUSERS=null;admRate()},"Send")}};
 })();
 </script>
 </body></html>

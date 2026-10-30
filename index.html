@@ -2620,19 +2620,30 @@ async function aiAnswer(q){
   const t=(j.status=="created"||(j.status=="found"&&j.kind=="topic"))?j.topic:null;
   if(!t||!t.name||!t.definition)return null;
   const dr=j.status=="created"||j.draft===true;
-  const T={n:String(t.name),re:new RegExp(escRe(String(q).trim().toLowerCase())),d:t.definition,h:t.steps||"",w:t.uses||"",s:t.simple||"",e:t.examples||"",m:t.more||"",q:Array.isArray(t.quiz)?t.quiz:[],a:t.label_steps||"How to work it out",b:t.label_uses||"Where it is used",nd:0,S:[sub],L:[D.lvl],ai:dr?1:0};
+  const T={n:String(t.name),re:new RegExp(escRe(String(q).trim().toLowerCase())),d:t.definition,h:t.steps||"",w:t.uses||"",s:t.simple||"",e:t.examples||"",m:t.more||"",q:Array.isArray(t.quiz)?t.quiz:[],a:t.label_steps||"How to work it out",b:t.label_uses||"Where it is used",nd:0,S:[sub],L:[D.lvl],ai:dr?1:0,tid:t.id||null};
   const f=tiered(q,T);if(!f)return null;
   /* keep it for this session so "explain simpler", "give an example" and "quiz me" work on it */
   TOP.push(T);const ax=TOP.filter(x=>x.ai!=null&&x.re&&x.db==null);if(ax.length>30)TOP.splice(TOP.indexOf(ax[0]),1);
-  if(dr)f.ai=1;
+  if(dr)f.ai=1;if(T.tid)f.tid=T.tid;
   return f
  }catch(e){return null}finally{clearTimeout(tm)}}
 function logUn(q){try{q=String(q).trim().slice(0,300);if(q.length<3)return;fetch(SBU+"rpc/log_unanswered",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_question:q,p_level:D.lvl,p_subject:D.sub})}).catch(()=>{})}catch(e){}}
-function sendFb(m){try{if(m.aid&&m.fb)fetch(SBU+"rpc/submit_feedback",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_answer_id:m.aid,p_vote:m.fb})}).catch(()=>{})}catch(e){}}
+/* Rating an "AI generated, not yet checked" answer. Only the owner account (username DAVID, checked in the database) approves with ONE thumbs up.
+ Every other account's thumbs up is counted, and the database approves the answer once 10 different accounts have rated it helpful.
+ When the database says "published" the label goes away and the answer is used for later related questions. */
+function sendFb(m){try{
+ if(m.tid){
+  const tok=localStorage.getItem("ask_tok")||sessionStorage.getItem("ask_tok")||"";
+  fetch(SBU+"rpc/rate_ai_topic",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_topic_id:m.tid,p_vote:m.fb||0,p_t:tok})})
+   .then(r=>r.json()).then(j=>{if(j&&j.ok&&j.status=="published"){
+     m.ai=0;try{TOP.forEach(t=>{if(t.tid==m.tid)t.ai=0})}catch(e){}
+     const fix=a=>(a||[]).forEach(x=>{if(x&&x.tid==m.tid)x.ai=0});fix(D.msgs);(D.chats||[]).forEach(c=>fix(c.msgs));save();render()}}).catch(()=>{});
+  return}
+ if(m.aid&&m.fb)fetch(SBU+"rpc/submit_feedback",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_answer_id:m.aid,p_vote:m.fb})}).catch(()=>{})}catch(e){}}
 
 function bub(m,i,last){
  if(m.note)return `<div class="b i ai" data-i="${i}"><div class="md">${md(m.t)}</div>${m.up?`<div class="chips"><button data-act="plans" data-i="${i}">See plans</button></div>`:""}<small>${hm(m.ts)}</small></div>`;
- if(m.lim)return `<div class="b i ai" data-i="${i}"><div style="display:flex;gap:10px;align-items:flex-start"><span style="flex:none;width:34px;height:34px;border-radius:50%;background:rgba(245,158,11,.16);color:#d97706;display:grid;place-items:center"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></span><div style="font-weight:700;font-size:16px;line-height:1.3;color:#d97706;padding-top:1px">${LIM1}</div></div>${rtime()?`<div style="display:flex;gap:8px;align-items:center;margin-top:10px;color:var(--sub);font-size:14px"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#2f80ed" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Your free plan resets at <b style="color:#2f80ed">${rtime()}</b></span></div>`:""}<button data-act="plans" data-i="${i}" style="display:block;width:100%;margin-top:12px;padding:12px 14px;border:0;border-radius:22px;background:var(--green);color:#fff;font:inherit;font-weight:700;cursor:pointer;text-align:center">${LIM2}</button><div class="chips"><button data-act="activate" data-i="${i}" style="color:#8b5cf6;border-color:#8b5cf6;font-weight:600">Activate plan</button></div><small>${hm(m.ts)}</small></div>`;
+ if(m.lim)return `<div class="b i ai" data-i="${i}"><div style="display:flex;gap:10px;align-items:flex-start"><span style="flex:none;width:34px;height:34px;border-radius:50%;background:rgba(245,158,11,.16);color:#d97706;display:grid;place-items:center"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></span><div style="font-weight:700;font-size:16px;line-height:1.3;color:#d97706;padding-top:1px">${LIM1}</div></div>${rtime()?`<div style="display:flex;gap:8px;align-items:center;margin-top:10px;color:var(--sub);font-size:14px"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#2f80ed" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Your free plan resets at <b style="color:#2f80ed">${rtime()}</b></span></div>`:""}<button data-act="plans" data-i="${i}" style="display:block;width:100%;margin-top:12px;padding:12px 14px;border:0;border-radius:22px;background:var(--green);color:#fff;font:inherit;font-weight:700;cursor:pointer;text-align:center">${LIM2}</button>${isOwner()?`<div class="chips"><button data-act="activate" data-i="${i}" style="color:#8b5cf6;border-color:#8b5cf6;font-weight:600">Activate plan</button></div>`:""}<small>${hm(m.ts)}</small></div>`;
  if(m.err)return `<div class="b i err" data-i="${i}">${esc(m.t)}<div class="act"><button data-act="retry" data-i="${i}">Retry</button></div></div>`;
  const A=[["copy","Copy"],["bm",m.bm?"Saved":"Save",m.bm],["up","Helpful",m.fb==1],["dn","Not helpful",m.fb==-1],["share","Share"]];
  let h=`<div class="b i ai" data-i="${i}">${m.ai?'<div class="aitag">AI generated, not yet checked</div>':""}<div class="md">${md(m.t)}</div>`;
@@ -2653,13 +2664,28 @@ function useW(t){const q=FQ();q.used+=(String(t).match(/\S+/g)||[]).length;FQW(q
 function capped(){if(planName()!="Free")return false;const q=FQ();if(q.used<q.cap)return false;if(q.left==null){q.left=12600000+Math.floor(Math.random()*1800001);q.seen=Date.now();q.at=Date.now()+q.left;FQW(q)}return true}
 function rtime(){const q=FQ();if(q.left==null)return"";if(!q.at){q.at=Date.now()+q.left;FQW(q)}const d=new Date(q.at),t=d.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});return d.toDateString()==new Date().toDateString()?t:t+" tomorrow"}
 const PLANS4=["Free","Basic","Standard","Premium"],PCOL={Free:"#6b7c85",Basic:"#2f80ed",Standard:"#00a884",Premium:"#8b5cf6"},PVER={Free:"1.0",Basic:"1.0",Standard:"1.0",Premium:"1.0"},
-PK=()=>"ask_plan_"+((window.AK&&AK.me()&&AK.me().username)||"");
+PK=()=>"ask_planv2_"+((window.AK&&AK.me()&&AK.me().username)||"");
 function planName(){try{const p=localStorage.getItem(PK());return PLANS4.includes(p)?p:"Free"}catch(e){return"Free"}}
 function updPlan(){const p=planName(),l=document.getElementById("psl"),r=document.getElementById("psr");if(l)l.innerHTML='<i style="background:'+PCOL[p]+'"></i><b>'+p+' plan</b>';if(r)r.textContent="Version "+PVER[p]}
+/* PLAN LOCK: the plan is kept in the database (app_users.plan, default Free) and copied here after login.
+ Nobody can switch it from the app except the owner account (username DAVID, checked in the database).
+ Other accounts stay on Free until you mark their paid plan (admin page to be built). */
+const isOwner=()=>!!(window.AK&&AK.me()&&AK.me().username==="DAVID"),
+tokNow=()=>{try{return localStorage.getItem("ask_tok")||sessionStorage.getItem("ask_tok")||""}catch(e){return""}};
+function syncPlan(){const t=tokNow();if(!t)return;
+ fetch(SBU+"rpc/get_my_plan",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_t:t})}).then(r=>r.json()).then(j=>{
+  if(!j||!j.ok||!PLANS4.includes(j.plan))return;const was=planName();
+  try{localStorage.setItem(PK(),j.plan)}catch(e){}
+  if(was!==j.plan){updPlan();render()}}).catch(()=>{})}
+function setPlanServer(x){fetch(SBU+"rpc/set_my_plan",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_t:tokNow(),p_plan:x})}).then(r=>r.json()).then(j=>{if(!j||!j.ok)syncPlan()}).catch(()=>{})}
+setTimeout(syncPlan,1500);setInterval(syncPlan,30000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)syncPlan()});
 /* TEMPORARY (testing only): Activate plan lets the tester pick any plan. REMOVE when the app is fully developed; a confirmed payment must set the plan instead. */
-function activatePlan(){const cur=planName();showP("Activate plan",'<div style="padding:12px 18px;color:var(--sub);line-height:1.4">Testing only. Pick any plan to try it. This will be removed when the app is fully developed.</div>'+PLANS4.map(x=>`<div class="row" data-pl="${x}"><span style="width:10px;height:10px;border-radius:50%;background:${PCOL[x]};flex:none;margin-right:12px"></span><div><b>${x}</b>${x==cur?'<small>Your current plan</small>':""}</div></div>`).join(""),closeP,e=>{const x=e.target.closest("[data-pl]")?.dataset.pl;if(!x)return;try{localStorage.setItem(PK(),x)}catch(er){}
+function activatePlan(){if(!isOwner()){uiAlert("Plans are activated after payment.");return}const cur=planName();showP("Activate plan",'<div style="padding:12px 18px;color:var(--sub);line-height:1.4">Testing only. Pick any plan to try it. This will be removed when the app is fully developed.</div>'+PLANS4.map(x=>`<div class="row" data-pl="${x}"><span style="width:10px;height:10px;border-radius:50%;background:${PCOL[x]};flex:none;margin-right:12px"></span><div><b>${x}</b>${x==cur?'<small>Your current plan</small>':""}</div></div>`).join(""),closeP,e=>{const x=e.target.closest("[data-pl]")?.dataset.pl;if(!x)return;if(!isOwner()){closeP();return}try{localStorage.setItem(PK(),x)}catch(er){}setPlanServer(x);
  if(x=="Free")FQW({v:2,cap:newCap(),used:0,left:null,seen:Date.now()});{const rm=a=>{for(let i=a.length;i--;)if(a[i].lim)a.splice(i,1)};rm(D.msgs);D.chats.forEach(c=>rm(c.msgs));save();render()}updPlan();closeP();uiAlert(x+" plan activated.")})}
-document.getElementById("psl").onclick=()=>plans();
+/* TESTING SWITCH: while the app is being built, tapping the plan button at the bottom opens the plan changer (Free, Basic, Standard, Premium)
+ so answers can be tried on every plan. TO GO BACK TO THE REAL SUBSCRIPTION: set PLAN_TEST_MODE to false. The button then opens the real Upgrade plans screen again. */
+const PLAN_TEST_MODE=true;
+document.getElementById("psl").onclick=()=>PLAN_TEST_MODE&&isOwner()?activatePlan():plans();
 function limitMsg(){D.msgs.push({s:"i",lim:1,t:"**"+LIM+"**",ts:Date.now()});save();render()}
 function freeReset(){FQW({v:2,cap:newCap(),used:0,left:null,seen:Date.now()});const rm=a=>{for(let i=a.length;i--;)if(a[i].lim)a.splice(i,1)};rm(D.msgs);D.chats.forEach(c=>rm(c.msgs));D.msgs.push({s:"i",note:1,t:"Your free plan has been reset. You can continue asking.",ts:Date.now()});save();render();const h=document.getElementById("plh");if(h)h.innerHTML='<b>Free plan</b><div style="color:var(--sub);margin-top:3px">Your free words have been reset.</div>'}
 let _pn=performance.now();
@@ -2727,7 +2753,8 @@ function ask(q,mode){
    if(a&&a.t)f=a}
   if(f.un&&!mode)logUn(q);
   if(!f.ai&&!f.un){const Tm=topicOf(q);if(Tm&&Tm.ai)f.ai=1}
-  const m={s:"i",t:"",ts:Date.now(),q,mode,stream:1},w=f.t.split(/(?<=\s)/);if(f.quiz)m.quiz=f.quiz;if(f.qz)m.qz=f.qz;if(f.w)m.w=f.w;if(f.aid)m.aid=f.aid;if(f.ai)m.ai=1;
+  if(f.ai&&!f.tid){const Tm=topicOf(q);if(Tm&&Tm.tid)f.tid=Tm.tid}
+  const m={s:"i",t:"",ts:Date.now(),q,mode,stream:1},w=f.t.split(/(?<=\s)/);if(f.quiz)m.quiz=f.quiz;if(f.qz)m.qz=f.qz;if(f.w)m.w=f.w;if(f.aid)m.aid=f.aid;if(f.ai)m.ai=1;if(f.tid)m.tid=f.tid;
   D.msgs.push(m);sm=m;let k=0;stream=setInterval(()=>{m.t+=w[k++]||"";if(k>=w.length){stopS();notify("Answer ready",'Your answer about "'+(q||"your question").slice(0,40)+'" is ready.');if(gn){D.msgs.push({s:"i",note:1,up:1,t:gn,ts:Date.now()});save();render()}if(capped())limitMsg()}else render()},35)},600)}
 $("msgs").addEventListener("click",e=>{
 
@@ -2747,7 +2774,57 @@ $("msgs").addEventListener("click",e=>{
 function subs(){$("subs").innerHTML='<button data-all="1">All subjects</button>'+subsList().map(x=>`<button class="${x==D.sub?"on":""}" data-s="${x}">${x}</button>`).join("");const o=$("subs").querySelector(".on");if(o)o.scrollIntoView({inline:"center",block:"nearest"})}
 function allSubs(){showP("All subjects",[GR[lvIdx()]].map(g=>`<div class="sec">${g[0]}</div><div class="sws" style="gap:8px"><button class="lk ${"General"==D.sub?"on":""}" data-s="General">General</button>${g[1].map(x=>`<button class="lk ${x==D.sub?"on":""}" data-s="${x}">${x}</button>`).join("")}</div>`).join(""),closeP,e=>{const x=e.target.dataset.s;if(x){closeP();setSub(x)}})}
 $("subs").onclick=e=>{if(e.target.dataset.all)return allSubs();const s=e.target.dataset.s;if(s)setSub(s)};
-function empty(){return`<div class="empty"><b style="font-size:1.25em">Hello${D.pname?" "+esc(D.pname):""}, what do you want to learn?</b><p style="margin:6px 0 12px">${esc(D.cls||lvKey())} · Pick a question or type your own.</p>${startsFor().map(x=>`<button class="st" data-st="${x}">${x}</button>`).join("")}</div>`}
+/* ===== HOME SCREEN: time-of-day greeting and three fresh questions for the learner's level ===== */
+const HOMEQ={
+PLE:{"English":["What is a noun?","Explain the past tense","How do I write a good letter?","What is an adjective?","What are antonyms?","How do I use capital letters?"],
+"Mathematics":["Explain place value","What is 3/4 + 1/8?","How do I find the area of a rectangle?","What is a prime number?","How do I change a fraction to a percentage?","What is the perimeter of a square?"],
+"Science":["How do plants make food?","What are the states of matter?","How is rain formed?","What is a food chain?","Why do we need a balanced diet?","How does a magnet work?"],
+"Social Studies":["What are the districts of Uganda?","Why is Lake Victoria important?","What are the main tribes in Uganda?","What is a map scale?","How did Uganda get independence?","What are the uses of forests?"],
+"Religious Education":["Who was Prophet Muhammad?","What are the Ten Commandments?","Why do people pray?","What is baptism?","What are the five pillars of Islam?","Who was Moses?"]},
+UCE:{"English":["How do I write a formal letter?","What is a figure of speech?","Explain reported speech","How do I write a good composition?","What is the difference between active and passive voice?"],
+"Mathematics":["How do I solve a quadratic equation?","What is the Pythagoras theorem?","Explain simultaneous equations","How do I find the gradient of a line?","What is probability?"],
+"Biology":["How does photosynthesis work?","What is osmosis?","Explain the structure of a cell","How is blood circulated in the body?","What is natural selection?"],
+"Chemistry":["What is an acid and a base?","Explain the periodic table","How is salt prepared?","What is electrolysis?","What is the mole concept?"],
+"Physics":["What is Newton's second law?","Explain how a lever works","What is the difference between speed and velocity?","How does a transformer work?","What is refraction of light?"],
+"History":["What caused World War 1?","How did colonialism begin in East Africa?","What was the Berlin Conference?","Explain the scramble for Africa","What led to the independence of Uganda?"],
+"Geography":["How are fold mountains formed?","What causes earthquakes?","Explain the water cycle","What are the factors affecting climate?","How is soil formed?"],
+"Christian Religious Education":["What are the fruits of the Holy Spirit?","Explain the parable of the Good Samaritan","Who was Apostle Paul?","What is the Trinity?","What does the Bible teach about forgiveness?"],
+"Islamic Religious Education":["What are the pillars of Iman?","Explain the importance of Hajj","What is Zakat?","Who were the Rightly Guided Caliphs?","What is the importance of the Quran?"],
+"Kiswahili":["Eleza maana ya nomino","Andika barua rasmi","Ngeli za nomino ni zipi?","Methali ni nini?","Eleza matumizi ya vitenzi"],
+"Entrepreneurship":["What is a business plan?","Explain the qualities of a good entrepreneur","What is market research?","How do I keep business records?","What is capital?"],
+"Agriculture":["What is crop rotation?","How do I prepare a seedbed?","Explain the causes of soil erosion","What are the signs of a sick animal?","What is mulching?"],
+"ICT":["What is a spreadsheet?","Explain the parts of a computer","What is the internet?","What is a database?","How do I protect a computer from viruses?"],
+"Physical Education":["What are the benefits of exercise?","Explain the rules of netball","What is a warm-up?","What are the types of fitness?","How do I prevent sports injuries?"],
+"Art and Design":["What are the primary colours?","Explain the elements of art","What is perspective in drawing?","What is a still life?","How do I mix colours?"],
+"Performing Arts":["What is a folk song?","Explain the elements of drama","What are traditional dances in Uganda?","What is a rhythm?","How do I perform a good speech?"]},
+UACE:{"General Paper":["How do I write a good essay for General Paper?","What is the difference between summary and précis?","How do I structure an argument?","What is globalisation?","How do I answer a comprehension passage?"],
+"Subsidiary ICT":["What is a computer network?","Explain the types of software","What is a spreadsheet function?","What is data security?","Explain the system development life cycle"],
+"Subsidiary Mathematics":["What is the mean, median and mode?","How do I solve a quadratic inequality?","Explain probability rules","What is a matrix?","How do I differentiate a simple function?"],
+"Mathematics":["How do I integrate by parts?","Explain the binomial theorem","What is a complex number?","How do I solve a differential equation?","What is the chain rule?"],
+"Physics":["Explain simple harmonic motion","What is electromagnetic induction?","What is the photoelectric effect?","Explain Kirchhoff's laws","What is radioactive decay?"],
+"Chemistry":["Explain Le Chatelier's principle","What is an organic reaction mechanism?","How do I calculate pH?","What is electrode potential?","Explain the types of isomerism"],
+"Biology":["Explain the process of protein synthesis","What is the Krebs cycle?","How does the nerve impulse travel?","Explain Mendel's laws of inheritance","What is genetic engineering?"],
+"Economics":["What is price elasticity of demand?","Explain the causes of inflation","What is comparative advantage?","What is the law of diminishing returns?","How does the central bank control money supply?"],
+"Geography":["Explain the causes of rural-urban migration","What is plate tectonics?","How are rivers used in Uganda?","Explain the factors of industrial location","What is population density?"],
+"History":["What were the causes of the First World War?","Explain the rise of nationalism in Africa","What was the impact of colonial rule in Uganda?","Explain the role of the League of Nations","What caused the Cold War?"],
+"Literature in English":["How do I analyse a poem?","What are the themes in a novel?","Explain dramatic irony","What is characterisation?","How do I answer a Literature essay question?"],
+"Divinity":["Explain the covenant in the Old Testament","What is the importance of the resurrection?","Explain the teachings of Jesus on the Kingdom of God","Who were the major prophets?","What is Christian ethics?"],
+"Islamic Studies":["Explain the sources of Islamic law","What is the importance of the Hijra?","What are the principles of Islamic economics?","Explain the life of Prophet Muhammad in Makkah","What is Shura?"],
+"Entrepreneurship":["Explain the steps of starting a business","What is break-even point?","What are the sources of business finance?","How do I prepare a cash flow forecast?","What is a marketing mix?"],
+"Agriculture":["Explain the principles of farm management","What is soil fertility management?","How are pests and diseases controlled?","What is agricultural marketing?","Explain livestock breeding methods"],
+"Fine Art":["What is composition in art?","Explain the history of African art","What is printmaking?","How do I create a good portrait?","What are the elements of design?"],
+"Kiswahili":["Eleza dhima ya fasihi simulizi","Andika insha ya kujadili","Eleza aina za tungo","Maana ya semi ni nini?","Eleza sifa za ushairi"],
+"Technical Drawing":["What is orthographic projection?","How do I draw an isometric view?","Explain the types of lines used in drawings","What is a sectional view?","How do I use drawing instruments?"],
+"Food and Nutrition":["What are the functions of proteins?","Explain food preservation methods","What is a balanced diet?","Explain deficiency diseases","How do I plan a meal?"]}};
+const HQC={};
+function homeQs(){const lv=lvKey(),bank=HOMEQ[lv]||HOMEQ.PLE,key=lv+"|"+D.sub;if(HQC[key])return HQC[key];
+ const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+ let out=[];
+ if(D.sub&&D.sub!=="General"&&bank[D.sub])out=shuf(bank[D.sub]).slice(0,3);
+ else out=shuf(Object.keys(bank)).slice(0,3).map(k=>bank[k][Math.floor(Math.random()*bank[k].length)]);
+ return HQC[key]=out}
+function greetNow(){const h=new Date().getHours();return h<12?"Good morning":h<17?"Good afternoon":"Good evening"}
+function empty(){return`<div class="empty"><b style="font-size:1.25em">${greetNow()}${D.pname?", "+esc(D.pname):""}. What do you want to learn?</b><p style="margin:6px 0 12px">${esc(D.cls||lvKey())} · Pick a question or type your own.</p>${homeQs().map(x=>`<button class="st" data-st="${esc(x)}">${esc(x)}</button>`).join("")}</div>`}
 (()=>{
 const R=window.SpeechRecognition||window.webkitSpeechRecognition,inp=$("inp"),mic=$("mic");
 if(!R){mic.onclick=()=>uiAlert("Voice input is not supported in this browser. Try Chrome.");return}
@@ -3049,6 +3126,9 @@ const HANDOFF={
     ["Read published topics from Supabase and look up find_answer, log unanswered questions, send feedback votes",1],
     ["New questions the database cannot answer: the app asks the ai_answer function (Gemini writes it once, saved as a draft). The reply follows the plan and shows the label AI generated, not yet checked. Written and tested with a fake server only; not yet tried against the live function or on a real phone",0],
     ["Approve AI drafts: in Supabase open Table Editor, topics, find the row with ai_generated on and status draft, check the text and quiz, then change status to published. The label disappears once it is published. The admin panel for this is not built yet",0],
+    ["Rating AI generated answers: the database function rate_ai_topic checks the login token. The owner account (username DAVID, phone on file) publishes with one thumbs up. Other accounts are counted (one vote each, table topic_feedback) and the answer is published at 10 positive votes (constant needed in the function). When published the label disappears and later related questions find it",1],
+    ["Plans are locked: app_users.plan (default Free) is the truth and is copied to the phone after login. Only the owner account DAVID can switch plans (set_my_plan). To give a paying learner a plan, set app_users.plan in Supabase; an admin page for this is still to be built. The free word limit is still counted on the phone, not on the server",0],
+    ["TESTING: the plan button at the bottom opens the plan changer. To return to the real subscription set PLAN_TEST_MODE to false in the script (it then opens the Upgrade plans screen). Also remove activatePlan when payments are live",0],
     ["Publish the 60 draft Mathematics answers after teacher review (all still drafts, so learners cannot see them)",0],
     ["Add topics for subjects other than Primary Mathematics and Science: questions with no topic get a placeholder answer and are logged as unanswered",0],
     ["Try on a real phone; Free and Basic limits are not checked on the server",0],

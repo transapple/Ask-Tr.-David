@@ -3004,10 +3004,11 @@ async function annSync(){
  if(!PUSH_SYNCED&&D.notif){PUSH_SYNCED=1;pushOn()}
  try{const L=await svRpc("ann_list",{p_t:tokNow()});if(!Array.isArray(L))return;
   const first=!D.annInit;let added=0;
-  L.slice().reverse().forEach(a=>{if(D.annSeen[a.id])return;D.annSeen[a.id]=1;added++;
-   const ts=new Date(a.created_at).getTime(),fresh=!first||Date.now()-ts<2*864e5;
-   D.notes.unshift({id:a.id,t:annTitle(a),b:a.body||"",ts,r:fresh?0:1});
-   if(!first){if(document.hidden)devAlert(a);else annBanner(a)}});
+  L.slice().reverse().forEach(a=>{if(D.annSeen[a.id])return;D.annSeen[a.id]=1;
+   if(first)return;/* a new install starts fresh: everything posted before its first sign-in is skipped, no list entry, no red dot, no banner, no alert */
+   added++;const ts=new Date(a.created_at).getTime();
+   D.notes.unshift({id:a.id,t:annTitle(a),b:a.body||"",ts,r:0});
+   if(document.hidden)devAlert(a);else annBanner(a)});
   D.annInit=1;if(added){D.notes.sort((x,y)=>y.ts-x.ts);D.notes=D.notes.slice(0,50)}save();updateBadge()}
  catch(e){}finally{ANN_BUSY=0}}
 setInterval(()=>{if(!document.hidden||D.notif)annSync()},60000);

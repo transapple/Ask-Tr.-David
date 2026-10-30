@@ -5,8 +5,8 @@
    - Never touches Supabase or any other site. */
 
 const CACHE_PREFIX = "ask-tr-david-";
-const CACHE = CACHE_PREFIX + "v6";
-const SHELL = ["./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png"];
+const CACHE = CACHE_PREFIX + "v7";
+const SHELL = ["./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png", "./badge-96.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -78,11 +78,12 @@ self.addEventListener("push", (event) => {
   }
   const id = data.id != null ? String(data.id) : String(Date.now());
   event.waitUntil((async () => {
-    await self.registration.showNotification(data.title || "Ask Tr. David", {
-      body: String(data.body || "").slice(0, 180),
+    // Heading = app name; the post's title goes on its own line above the message. No large picture on the right.
+    const line = [data.title, data.body].filter(Boolean).join("\n");
+    await self.registration.showNotification("Ask Tr. David", {
+      body: line.slice(0, 240),
       tag: "ann-" + id,
-      icon: "./icon-192.png",
-      badge: "./icon-192.png",
+      badge: "./badge-96.png",
       timestamp: Date.now(),
       data: { id: data.id != null ? data.id : null }
     });

@@ -2995,9 +2995,9 @@ const annTitle=a=>(a.kind=="update"?"Update: ":"")+a.title;
 function annBanner(a){try{$("annt").textContent=annTitle(a);$("annb").textContent=a.body||"";$("ann").style.display="flex";clearTimeout(annT);if(+a.duration_seconds>0)annT=setTimeout(hideAnn,a.duration_seconds*1000)}catch(e){}}
 async function devAlert(a){
  if(!D.notif||!("Notification"in window)||Notification.permission!="granted")return;
- const o={body:String(a.body||"").slice(0,180),tag:"ann-"+a.id,data:{id:a.id}};
- try{if(PUSHREG){await PUSHREG.showNotification(annTitle(a),o);return}}catch(e){}
- try{const n=new Notification(annTitle(a),o);n.onclick=()=>{window.focus();n.close();try{notifs(true)}catch(e){}}}catch(e){}}
+ const o={body:(annTitle(a)+"\n"+String(a.body||"")).slice(0,240),tag:"ann-"+a.id,badge:"./badge-96.png",data:{id:a.id}};
+ try{if(PUSHREG){await PUSHREG.showNotification("Ask Tr. David",o);return}}catch(e){}
+ try{const n=new Notification("Ask Tr. David",o);n.onclick=()=>{window.focus();n.close();try{notifs(true)}catch(e){}}}catch(e){}}
 let PUSH_SYNCED=0;
 async function annSync(){
  if(ANN_BUSY||!(window.AK&&AK.me()))return;ANN_BUSY=1;

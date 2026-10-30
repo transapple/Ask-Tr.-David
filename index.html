@@ -202,6 +202,29 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 #mic.on{background:#1a73e8;border-color:#1a73e8;color:#fff;animation:micp 1.6s ease-out infinite}
 @keyframes micp{0%{box-shadow:0 0 0 0 rgba(26,115,232,.5)}100%{box-shadow:0 0 0 12px rgba(26,115,232,0)}}
 @media(prefers-reduced-motion:reduce){#mic.on{animation:none}}
+/* Permission gate: the app stays closed until every permission is allowed */
+#permGate{display:none;position:fixed;inset:0;z-index:2147483000;background:#0000b9;color:#fff;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:calc(28px + env(safe-area-inset-top,0px)) 22px calc(28px + env(safe-area-inset-bottom,0px));font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+#permGate.on{display:flex}
+#permGate .pm-box{width:100%;max-width:380px;margin:auto;display:flex;flex-direction:column;align-items:stretch}
+#permGate .pm-logo{width:84px;height:84px;border-radius:20px;margin:0 auto 14px;background:#0000ba center/cover;box-shadow:0 10px 28px rgba(0,0,0,.35)}
+#permGate h1{margin:0 0 6px;font-size:24px;text-align:center;font-weight:800}
+#permGate p.pm-sub{margin:0 0 18px;text-align:center;font-size:15px;line-height:1.45;color:rgba(255,255,255,.9)}
+#permGate .pm-row{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.12);border-radius:14px;padding:12px 14px;margin-bottom:10px}
+#permGate .pm-ic{flex:0 0 38px;height:38px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center}
+#permGate .pm-ic svg{width:20px;height:20px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#permGate .pm-t{flex:1;min-width:0}
+#permGate .pm-t b{display:block;font-size:15px}
+#permGate .pm-t span{display:block;font-size:13px;color:rgba(255,255,255,.82);margin-top:1px}
+#permGate .pm-st{flex:0 0 auto;font-size:13px;font-weight:700;padding:4px 10px;border-radius:99px;background:rgba(255,255,255,.2)}
+#permGate .pm-st.ok{background:#12b886}
+#permGate .pm-st.no{background:#e03131}
+#permGate button.pm-go{margin-top:8px;height:54px;border:0;border-radius:16px;background:#ffd400;color:#111;font:inherit;font-size:17px;font-weight:800;cursor:pointer}
+#permGate button.pm-go:disabled{opacity:.7}
+#permGate button.pm-re{margin-top:10px;height:48px;border:2px solid rgba(255,255,255,.7);border-radius:16px;background:none;color:#fff;font:inherit;font-size:15px;font-weight:700;cursor:pointer}
+#permGate .pm-help{display:none;margin-top:14px;background:rgba(0,0,0,.28);border-radius:14px;padding:12px 14px;font-size:13.5px;line-height:1.5}
+#permGate .pm-help.on{display:block}
+#permGate .pm-help b{display:block;margin-bottom:4px}
+#ann{cursor:pointer}
 </style></head><body>
 <button id="pwaInstallBtn" title="Install App" style="display:none;position:fixed;right:18px;bottom:calc(120px + env(safe-area-inset-bottom));z-index:999;width:52px;height:52px;border-radius:50%;background:#0000b9;color:#fff;border:none;box-shadow:0 6px 18px rgba(0,0,185,.4);align-items:center;justify-content:center;cursor:pointer;">
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -463,7 +486,7 @@ function settings(){
  <div class="row" data-a="th"><span class="ri">${isDark()?IC.sun:IC.moon}</span><div>Switch theme<small>${isDark()?"Dark":"Light"} mode</small></div></div>
  <div class="row" data-a="ct"><span class="ri">${IC.pal}</span><div>Chat theme<small>Choose a color</small></div></div>
  <div class="row" data-a="wn"><span class="ri">${IC.star}</span><div>What's new<small>${D.notes.filter(x=>!x.r).length?D.notes.filter(x=>!x.r).length+" new":"Announcements and updates"}</small></div></div>
- <div class="row" data-a="nt"><span class="ri">${IC.bell}</span><div>Away alerts<small>${D.notif?"On":"Off"}: phone alert for new announcements and updates</small></div></div>
+ <div class="row" data-a="nt"><span class="ri">${IC.bell}</span><div>Away alerts<small>${D.notif?"Always on":"Off"}: phone alert for new announcements and updates</small></div></div>
  <div class="row" data-a="ex"><span class="ri">${IC.dl}</span><div>Export chat<small>Download as a text file</small></div></div>
  <div class="row" data-a="tr"><span class="ri">${IC.bin}</span><div>Trash<small>${D.trash.length} message${D.trash.length==1?"":"s"}</small></div></div>
  <div class="row" data-a="md"><span class="ri">${IC.star}</span><div>AI models<small>Which model is best for lessons, exams and research</small></div></div>
@@ -528,7 +551,7 @@ window.receiveAnnouncement=showAnn;
 $("annx").onclick=hideAnn;
 $("avw").onclick=()=>{$("more").style.display="none";notifs(true)};
 function toggleNotif(){
- if(D.notif){D.notif=false;save();settings();pushOff();return}
+ if(D.notif){uiAlert("Phone alerts stay on so you never miss an announcement or update.");return}
  if(!("Notification"in window)){uiAlert("This browser does not support notifications.");return}
  const fin=p=>{if(p=="granted"){D.notif=true;save();settings();pushOn()}else uiAlert("Notifications are blocked. Turn them on in your browser settings.")};
  if(Notification.permission=="granted")fin("granted");else if(Notification.permission=="denied")fin("denied");else Notification.requestPermission().then(fin)}
@@ -2806,69 +2829,64 @@ function normMd(md){const L=String(md).split("\n");let n="";const rest=[];L.forE
  return{n:n||"This topic",d:def,pts:bl(rest.join("\n")).slice(0,12),uses:bl(pick(/use|where|appl/)),simple:bl(pick(/simple|easy|think/)).join(" "),ex:bl(pick(/example/)),mis:bl(pick(/mistake|tip/)),quiz:[],cl:"",body,h0:"How it works",h1:"Where it is used"}}
 function keyTerms(N){const s=[N.d].concat(N.pts),o=[];s.forEach(x=>{(String(x).match(/\*\*(.+?)\*\*/g)||[]).forEach(b=>{b=b.replace(/\*/g,"");if(!o.includes(b))o.push(b)})});
  if(!o.length)N.n.split(/\s+/).filter(w=>w.length>3).forEach(w=>o.push(w));return o.slice(0,8)}
+/* NCDC/UNEB competency-based (scenario) format. Item = scenario + information; Tasks ask the learner to identify, explain,
+   apply and evaluate; the marking guide lists what a competent answer shows. No marks or times are shown. */
+const CBA_SUB={
+ "English Language":T=>({o:"A school press club in Uganda is preparing material on "+T+" for the school magazine.",b:"Explain, in your own words, the main ideas about "+T+" that the club should include.",c:"Write a short passage or letter for the magazine that recommends how learners can make good use of "+T+".",d:"Explain why clear communication matters when presenting "+T+" to the community."}),
+ "Mathematics":T=>({o:"A trader, farmer or planner in a Ugandan community needs to solve a real-life problem that involves "+T+".",b:"Explain the method or rule of "+T+" that applies to the problem, showing your working where needed.",c:"Apply "+T+" to solve the problem in the item and interpret your answer in the situation.",d:"Evaluate whether your answer is reasonable and suggest how it could be checked."}),
+ "Physics":T=>({o:"Learners in a school science club in Uganda are carrying out an investigation on "+T+".",b:"Explain, using physics ideas, what the learners observe or measure.",c:"Suggest how the learners can use their results or the ideas of "+T+" to solve a practical problem.",d:"Explain why accurate observation and measurement matter in this investigation."}),
+ "Chemistry":T=>({o:"A school laboratory team in Uganda is investigating substances and reactions linked to "+T+".",b:"Explain what the team should observe and what the observations show.",c:"Suggest how the team can use the ideas of "+T+" to draw a conclusion or solve a problem.",d:"Explain why safety and careful recording matter in this investigation."}),
+ "Biology":T=>({o:"A community in Uganda is facing a health, farming or environmental problem linked to "+T+".",b:"Explain how the ideas of "+T+" help to account for the problem.",c:"Suggest four measures the community could take to deal with the problem.",d:"Explain why community participation is important in dealing with the problem."}),
+ "History and Political Education":T=>({o:"A community history club in Uganda is studying sources and accounts about "+T+".",b:"Explain the causes and the effects of "+T+" using evidence from the item.",c:"Suggest lessons that the community and the nation can learn from "+T+".",d:"Evaluate how reliable the evidence in the item is."}),
+ "Geography":T=>({o:"A district planning team in Uganda is studying a geographical problem linked to "+T+".",b:"Explain the geographical factors behind the problem, using the information in the item.",c:"Recommend ways the team can solve or reduce the problem.",d:"Explain why the plan should involve local people and protect the environment."})
+};
+function cbaBuild(N,d,c,k){k=k||0;const T=c.T,P=c.P,SUB=(typeof D!=="undefined"&&D.sub)||"",
+ f=(CBA_SUB[SUB]||(T=>({o:"A school in Uganda is preparing a display on "+T+".",b:"Explain the key facts about "+T+" as outlined in the item.",c:"Advise the learners on how "+T+" can be used in daily life.",d:"Explain why "+T+" is important to the community."})))(T),
+ pts=P.filter(x=>x!==N.d),body=pts.length?pts:P,uses=(N.uses.length?N.uses:N.ex).concat(body),rot=a=>a.length?a.slice(k).concat(a.slice(0,k)):a,
+ info=(k&&N.uses.length?N.uses:(N.ex.length?N.ex:uses)).slice(k?0:0,k?1:2).map(x=>String(x).replace(/[.]+$/,"")+".");
+ const lab=["A","B","C","D"],tasks=["Identify and define "+T+" based on the item.",f.b,f.c].concat(d>=3?[f.d]:[]),
+ ans=[[N.d||P[0]||"-"],take(rot(body),3),take(rot(uses),3),take(rot(body).slice(3).concat(body),3)].map(a=>a.filter((x,i)=>a.indexOf(x)==i));
+ const item="**Item:**\n"+f.o+(info.length?"\n**Information:** "+info.join(" "):"")+"\nA visiting inspector asks the learners to explain what they have found.",
+  tk=tasks.map((t,i)=>"**Task "+lab[i]+":** "+t).join("\n"),
+  guide=tasks.map((t,i)=>"**Task "+lab[i]+":**\n"+ul(ans[i].filter(Boolean).length?ans[i].filter(Boolean):["-"])).join("\n")+"\n- Accept any other correct point that uses details from the item.";
+ return{item,tk,guide}}
+
+/* NCDC lesson-notes format (Teaching & Lessons models): Topic, Sub-topic, Learning Outcomes, Key Concepts and Definitions,
+   Detailed Explanations, Examples and Illustrations, Diagrams/Maps/Equations/Formulas, Practical Activities or Applications,
+   Summary, Revision Questions, Competency-Based Assessment. Depth d decides how many items each part gives. */
+function ncdcNotes(N,d,c,extra){const T=c.T,P=c.P,SUB=(typeof D!=="undefined"&&D.sub)||"",
+ pts=P.filter(x=>x!==N.d),body=pts.length?pts:P,kt=keyTerms(N),
+ vis=/^(Mathematics|Physics|Chemistry|Biology|Geography)$/.test(SUB),
+ fx=[N.d].concat(N.pts).filter(x=>/=|formula|equation|diagram|map|graph|sketch|label/i.test(String(x)));
+ let o="# "+T+(N.cl?"\n"+N.cl:"");
+ o+="\n## Topic\n"+T;
+ o+="\n## Sub-topic\n"+(N.h0&&N.h0!="How it works"?N.h0:"The main ideas of "+T);
+ o+=sec("Learning Outcomes","By the end of this lesson you should be able to:\n"+ul(["define "+T+" using the correct terms","explain "+(N.h0||"how it works").toLowerCase()].concat(d>=2?["give examples of "+T+" from daily life in Uganda"]:[]).concat(d>=3?["apply what you have learnt about "+T+" to a new situation"]:[]).concat(d>=5?["judge the importance and the limits of "+T]:[])));
+ o+=sec("Key Concepts and Definitions",(N.d?"**"+T+":** "+N.d+"\n":"")+(kt.length?ul(take(kt.filter(x=>!T.toLowerCase().includes(x.toLowerCase())),d+2)):""));
+ o+=sec("Detailed Explanations",N.body||nl(take(body,3+d)));
+ o+=sec("Examples and Illustrations",ul(take(N.ex.length?N.ex:N.uses,d+1)));
+ if(fx.length)o+=sec("Diagrams, Maps, Equations or Formulas",ul(take(fx,d+1)));
+ else if(vis&&d>=2)o+=sec("Diagrams, Maps, Equations or Formulas","Draw a neat, labelled diagram, sketch map or graph for "+T+", and write any formula or equation that goes with it, with the meaning of each symbol.");
+ o+=sec("Practical Activities or Applications",ul(take(N.uses,d+1).concat(["Activity: look for one example of "+T+" at home or at school, and describe it to a classmate."])));
+ if(extra)o+=extra;
+ o+=sec("Summary",N.simple||N.d);
+ const rq=["State what is meant by "+T+".",c.cw[1]+" the main points about "+T+"."].concat(N.ex[0]?["Give one example of "+T+" from your community."]:[]);
+ o+=sec("Revision Questions",nl(take(rq.concat(N.quiz.map(z=>quizq(z,false))),2+d))+(N.quiz.length?"\n\n**Answers to the multiple choice questions:** "+N.quiz.map((z,i)=>"Q"+(i+(rq.length>2+d?2+d:rq.length)+1)+" "+"ABC"[z[2]]).join(", "):""));
+ {const q=cbaBuild(N,d,c,0);o+="\n## Competency-Based Assessment\n"+q.item+"\n"+q.tk+"\n\n**Guide:**\n"+q.guide}
+ return o}
+
 const FM={
-teacher:(N,d,c)=>{let o=c.head;
- o+=sec("Lesson objectives","By the end of this lesson you will be able to:\n"+ul(["explain what "+c.T+" is","describe "+(N.h0||"how it works").toLowerCase()].concat(d>=3?["give examples from daily life"]:[]).concat(d>=4?["answer a quick check question on it"]:[])));
- if(!N.body)o+=sec("Introduction",N.d);
- o+=sec("The lesson",N.body||ul(take(c.P,2+d)));
- if(d>=2)o+=sec("Example",ul(take(N.ex,d>=3?3:1)));
- if(d>=3&&!N.body)o+=sec(N.h1||"Where it is used",ul(take(N.uses,3)));
- if(d>=4&&N.quiz[0])o+=sec("Quick check",quizq(N.quiz[0],true));
- return o+sec("Summary",N.simple||N.d)},
-tutor:(N,d,c)=>{let o=c.head;
- o+=sec("Start here",N.simple||N.d);
- o+=sec("Step by step",N.body||nl(take(c.P,3+d)));
- if(N.ex.length)o+=sec("Worked example",ul(take(N.ex,d>=4?2:1)));
- if(d>=4&&N.mis.length)o+=sec("Where learners often go wrong",ul(take(N.mis,3)));
- if(N.quiz[0])o+=sec("Try it yourself",quizq(N.quiz[0],false)+"\n\n**Check:** "+N.quiz[0][1][N.quiz[0][2]]);
- if(d>=5)o+=sec("Practise with me",nl(["Say the meaning of "+c.T+" in your own words.","Give one example from your home or school.","Tell me which step felt hard and I will go through it again."]));
- o+=sec("Next step","Tell me which part is still unclear and I will explain it a different way, or ask me for one more example of "+c.T+".");
- if(d>=5)o+=sec("Study tip","Explain "+c.T+" aloud in your own words. If you get stuck, that is the part to read again.");
- return o},
-lecturer:(N,d,c)=>{let o=c.head;
- o+=sec("Overview",N.d);
- o+=sec("Learning outcomes",ul(["Define "+c.T+" using the correct terms","Explain how and why it works","Apply it to a new situation"].concat(d>=6?["Judge its importance and its limits"]:[])));
- o+=sec("Key terms",ul(take(keyTerms(N),d+1)));
- o+=sec("Detailed explanation",N.body||nl(take(c.P,4+d)));
- o+=sec(N.h1||"Applications",ul(take(N.uses,d)));
- o+=sec("Worked examples",ul(take(N.ex,d-1)));
- o+=sec("Common misconceptions",ul(take(N.mis,d-2)));
- if(d>=6&&N.ex[0])o+=sec("Case study","Study this situation: "+N.ex[0].replace(/[.]+$/,"")+".\nAsk yourself:\n"+nl(["What is happening?","Which ideas about "+c.T+" explain it?","What would change if one condition were different?"]));
- o+=sec("Discussion questions",nl(["Why is "+c.T+" important in real life?","How does "+c.T+" connect to other topics you have studied?","What would happen if the main idea of "+c.T+" were ignored?"].concat(d>=6?["Which part of "+c.T+" is hardest to understand, and why?","How would you teach "+c.T+" to a younger learner?"]:[])));
- if(d>=6&&N.quiz.length)o+=sec("Test yourself",N.quiz.map(z=>quizq(z,true)).join("\n\n"));
- o+=sec("Exam approach",c.L=="PLE"?"Learn the definition and two examples. Write short, clear answers.":"Note the command word ("+c.cw.join(", ")+") and match your answer to it. Use the correct terms for full marks.");
- return o+sec("Summary",N.simple||N.d)},
-professor:(N,d,c)=>{let o=c.head;
- o+=sec("Overview",N.d);
- o+=sec("What you will master",ul(["The central idea of "+c.T+" and the terms that describe it","The reasoning and evidence behind it","How to apply it, question it and extend it"]));
- o+=sec("Key terms",ul(take(keyTerms(N),d+1)));
- o+=sec("Core ideas",N.body||nl(take(c.P,4+d)));
- o+=sec("Critical analysis",nl(["What assumptions does "+c.T+" depend on?","Where might it not hold, and why?","What evidence would strengthen or weaken the main claim?","How would you test it in a Ugandan setting?","What is the strongest objection, and how would you answer it?"]));
- o+=sec("Advanced applications",ul(take(N.uses,d)));
- o+=sec("Examples to analyse",ul(take(N.ex,d))+"\nFor each one say: what is the claim, what is the evidence, and what is left out?");
- if(N.ex[0])o+=sec("Case analysis","Take this case: "+N.ex[0].replace(/[.]+$/,"")+".\n"+nl(["Describe what is happening using the correct terms.","Explain it with the main ideas of "+c.T+".","Identify one thing the case cannot tell us.","Suggest how you would find out more."]));
- o+=sec("Compare and contrast","Choose a related topic and build a table with three columns: what is the same, what is different, and when each applies. Then state which idea explains more and why.");
- o+=sec("Connections to other topics","Link "+c.T+" to related topics in your subject and in other subjects. Ask how a change in one part affects the others.");
- o+=sec("Debates and open questions",ul(["Which part of "+c.T+" do experts still discuss or refine?","Which parts depend on the situation or the place?","Which common statements about "+c.T+" are simplified?"]));
- if(N.mis.length)o+=sec("Misconceptions to correct",ul(take(N.mis,4)));
- o+=sec("Research questions",nl(["How does "+c.T+" differ between communities or regions?","What data would you collect to study "+c.T+"?","What problem could a better understanding of "+c.T+" help to solve?"]));
- if(N.quiz.length)o+=sec("Test your mastery",N.quiz.map(z=>quizq(z,true)).join("\n\n"));
- o+=sec("Model answer structure","Point: state the idea clearly.\nEvidence: support it with a fact or example.\nExplanation: show why it matters.\nLimit: say where it may not apply.\nConclusion: answer the question asked.");
- o+=sec("Exam-level guidance","Use command words such as "+c.cw.join(", ")+". Give a point, support it with evidence or an example, then explain why it matters.");
- return o+sec("Summary",N.simple||N.d)},
-examiner:(N,d,c)=>{const T=c.T,P=c.P,A=[],mcq=d>=4?N.quiz:[];let scen=null;
- A.push({q:c.cw[0]+" what is meant by "+T+".",a:N.d||P[0]||"-",m:2});
- const n=Math.min(3,Math.max(1,P.length));A.push({q:c.cw[1]+" "+n+" important point"+(n>1?"s":"")+" about "+T+".",a:ul(take(P,n))||"-",m:n});
- if(d>=2){const u=N.uses.length?N.uses:N.ex;A.push({q:"Give two uses or examples of "+T+".",a:ul(take(u,2))||"-",m:2})}
- if(d>=3)scen={q:"**Item:** "+(N.ex[0]?"A community in Uganda is facing problems linked to "+T+". "+N.ex[0].replace(/[.]+$/,"")+".":"A community in Uganda is facing problems linked to "+T+".")+" The local leaders have called a meeting and want advice on the way forward.\n**Task A:** Prepare a short speech for the meeting that points out the main problems or causes linked to "+T+". (3 marks)\n**Task B:** Advise the people on what they can do to deal with the problem. Use details from the item. (3 marks)",a:"**Task A:** "+ul(take(P,3))+"\n**Task B:** "+(ul(take(P.slice(3).concat(P),3))||"-")+"\n- Marks are given for using details from the item in both tasks.",m:6};
- const tot=A.reduce((x,y)=>x+y.m,0)+(scen?scen.m:0)+mcq.length;
- let o="# Exam practice: "+T+(N.cl?"\n"+N.cl:"")+"\n**Time:** "+Math.round(tot*1.5)+" minutes · **Total:** "+tot+" marks";
- o+="\n## Section A: Short questions\n"+A.map((x,i)=>(i+1)+". "+x.q+" ("+x.m+" marks)").join("\n");
- if(scen)o+="\n## Section B: Scenario question\n"+(A.length+1)+". "+scen.q;
- if(mcq.length)o+="\n## Section C: Multiple choice\n"+mcq.map((z,i)=>(i+1)+". "+quizq(z,false)).join("\n");
- o+="\n## Marking guide\n"+A.map((x,i)=>"**Q"+(i+1)+".** "+x.a).join("\n")+(scen?"\n**Q"+(A.length+1)+".**\n"+scen.a:"")+(mcq.length?"\n**Section C:** "+mcq.map((z,i)=>(i+1)+" "+"ABC"[z[2]]).join(", "):"");
- if(d>=3)o+=sec("Examiner's tips",ul(["Read the command word first: "+c.cw.join(", ")+".","One mark is one clear point. Match the number of points to the marks.","In a scenario question, use details from the situation in your answer."]));
- if(d>=4)o+=sec("How the marks are given",ul(["Definition questions: one mark for each correct point","Explain questions: a point plus its reason earns the marks","Scenario questions: marks for using the details given","Clear working and correct terms protect your marks"]));
+teacher:(N,d,c)=>ncdcNotes(N,d,c),
+tutor:(N,d,c)=>ncdcNotes(N,d,c,(N.mis.length?sec("Where learners often go wrong",ul(take(N.mis,3))):"")),
+lecturer:(N,d,c)=>ncdcNotes(N,d,c,(N.mis.length?sec("Common misconceptions",ul(take(N.mis,d-2))):"")+sec("Discussion questions",nl(["Why is "+c.T+" important in real life?","How does "+c.T+" connect to other topics you have studied?","What would happen if the main idea of "+c.T+" were ignored?"]))),
+professor:(N,d,c)=>ncdcNotes(N,d,c,sec("Critical analysis",nl(["What assumptions does "+c.T+" depend on?","Where might it not hold, and why?","What evidence would strengthen or weaken the main claim?","How would you test it in a Ugandan setting?"]))+(N.mis.length?sec("Misconceptions to correct",ul(take(N.mis,4))):"")),
+examiner:(N,d,c)=>{const T=c.T,EX=({PLE:"Primary Leaving Examination",UCE:"Uganda Certificate of Education",UACE:"Uganda Advanced Certificate of Education"})[c.L]||"Exam",SB=(typeof D!=="undefined"&&D.sub&&D.sub!="General")?D.sub:T,
+ s1=cbaBuild(N,d,c,0),s2=d>=4?cbaBuild(N,d,c,1):null;
+ let o="# "+EX+": "+SB+" Exam Practice\n## Integrated Scenario\n"+s1.item+"\n"+s1.tk;
+ if(s2)o+="\n## Integrated Scenario 2\n"+s2.item+"\n"+s2.tk;
+ o+="\n## Marking guide\nA competent answer shows that the learner can identify, explain, apply and evaluate, using details from the item.\n"+s1.guide;
+ if(s2)o+="\n\n**Scenario 2**\n"+s2.guide;
+ if(d>=3)o+=sec("Examiner's tips",ul(["Read the item and the information first, and use their details in every task.","Read the command word of each task: identify, explain, suggest, recommend, evaluate.","Answer each task separately and label it Task A, Task B and so on.","Give one clear point at a time, with a reason or an example."]));
  return o},
 instructor:(N,d,c)=>{const T=c.T,P=c.P;let o="# Revision exercise: "+T+(N.cl?"\n"+N.cl:"");
  o+=sec("Revise first",ul(take(P,3+d)));
@@ -2876,8 +2894,8 @@ instructor:(N,d,c)=>{const T=c.T,P=c.P;let o="# Revision exercise: "+T+(N.cl?"\n
  const qs=["Explain "+T+" in your own words."].concat(N.quiz.map(z=>quizq(z,false)));
  o+=sec("Practice questions",nl(take(qs,2+d)));
  o+=sec("Check your answers",ul(["Q1: "+(N.d||"see the revise first points")].concat(N.quiz.map((z,i)=>"Q"+(i+2)+": "+"ABC"[z[2]]+". "+z[1][z[2]]))));
- if(d>=5)o+=sec("Step-by-step model answer","Question: "+c.cw[0]+" "+T+".\n"+nl(["Read the command word and underline it.","Write the main point in one clear sentence.","Add a reason or an example.","Check that the number of points matches the marks."]));
- if(d>=5)o+=sec("Mini test (10 minutes)",nl(["Define "+T+". (2 marks)",c.cw[1]+" two points about "+T+". (4 marks)","Give an example of "+T+". (2 marks)","Write one sentence that links "+T+" to daily life. (2 marks)"])+"\nMark yourself out of 10, then revise the parts where you lost marks.");
+ if(d>=5)o+=sec("Step-by-step model answer","Question: "+c.cw[0]+" "+T+".\n"+nl(["Read the command word and underline it.","Write the main point in one clear sentence.","Add a reason or an example.","Check that you have given the number of points the task asks for."]));
+ if(d>=5){const q=cbaBuild(N,d,c,0);o+=sec("Practice scenario",q.item+"\n"+q.tk+"\n\nCheck your answers against the points in Revise first.")}
  if(d>=4)o+=sec("Revision checklist",ul(["I can define "+T,"I can list the main points","I can give an example","I can answer a past paper question on it"].map(x=>"[ ] "+x)));
  if(d>=4&&N.mis.length)o+=sec("Common mistakes",ul(take(N.mis,3)));
  return o},
@@ -2888,9 +2906,9 @@ mentor:(N,d,c)=>{const T=c.T,P=c.P,ac=take(P,5).map(x=>(x.replace(/[^A-Za-z]/g,"
  o+=sec("Key points to know",ul(take(P,6)));
  o+=sec("Your revision plan",nl(["Day 1: Read the main points and write the meaning of "+T+" from memory.","Day 2: Do practice questions and mark them yourself.","Day 3: Teach "+T+" to a friend, then test yourself.","Day 4: Practise past paper questions with a timer.","Day 5: Quick review and rest well."]));
  o+=sec("Remember it",ul(["Turn the main points into one short sentence."].concat(ac.length>=3?["Memory letters from the first words of the main points: **"+ac+"**"]:[]).concat(["Draw a small mind map of "+T+" with one branch for each point.","Say the main points aloud while walking."])));
- o+=sec("Mock exam questions",nl(["State what is meant by "+T+". (2 marks)",c.cw[1]+" two important points about "+T+". (4 marks)"].concat(N.ex[0]?["Use this situation to explain "+T+": "+N.ex[0].replace(/[.]+$/,"")+". (6 marks)"]:[])));
- o+=sec("How to answer them",ul(["Q1: write the meaning in one sentence"+(N.d?". For example: "+N.d:""),"Q2: two clear points, each with a reason","Q3: use the details in the situation, then link them to the main points"]));
- o+=sec("Exam technique",ul(["Spend about one and a half minutes for each mark.","Underline the command word and the topic.","Answer the easy questions first, then return to the hard ones.","Leave two minutes at the end to check your answers.","If you are stuck, write what you know: partial answers earn marks."]));
+ {const q=cbaBuild(N,d,c,0);o+=sec("Mock scenario",q.item+"\n"+q.tk)}
+ o+=sec("How to answer them",ul(["Task A: write the meaning in one sentence"+(N.d?". For example: "+N.d:""),"Task B: three clear points, each with a reason","Use the details in the item, then link them to the main points"]));
+ o+=sec("Exam technique",ul(["Underline the command word and the topic.","Answer the easy questions first, then return to the hard ones.","Leave two minutes at the end to check your answers.","If you are stuck, write what you know: partial answers earn marks."]));
  o+=sec("Mistakes to avoid",ul((N.mis.length?take(N.mis,4):["Writing everything you know instead of what the question asks","Forgetting examples","Running out of time"])));
  if(N.quiz.length)o+=sec("Test yourself now",N.quiz.map(z=>quizq(z,true)).join("\n\n"));
  o+=sec("The night before","Read your short notes once, pack your pencils, ruler and calculator, and sleep early. Do not start new topics.");
@@ -3486,6 +3504,7 @@ $("jump").onclick=()=>$("msgs").scrollTo({top:1e9,behavior:"smooth"});
  One app, two modes for the owner account DAVID. Switch: Settings > Learner profile > Update account > Switch to Admin panel.
  Every admin database function checks the login token again (username DAVID with the owner phone), so other accounts are refused even if they find this code. */
 const ADMT=[["home","Home"],["inbox","Inbox"],["users","Users"],["asked","Asked"],["review","Review"],["ai","AI"],["news","Post"],["pay","Pay"],["rate","Rate"]];
+const ADMMAIN=["home","inbox","users","pay"];
 let ADMON=false,ADMTAB="home",ADMSEQ=0,ADMUQ="",ADMUL=[],ADMAS="open",ADMAL=[],ADMPL=[],ADMPR=[];
 const admCall=async(fn,a)=>{try{const j=await svRpc(fn,Object.assign({p_t:tokNow()},a||{}));return j&&typeof j.ok=="boolean"?j:{ok:false,err:"fail"}}catch(e){return{ok:false,err:"net"}}};
 const admMsg=j=>j&&j.err=="not allowed"?"This panel is only for the owner account.":j&&j.err=="net"?"No internet. Check your connection and try again.":"Could not load. Try again.";
@@ -3501,10 +3520,12 @@ function admHide(){ADMON=false;const a=$("adm");if(a)a.style.display="none"}
 function admClose(){admHide();try{localStorage.setItem("ask_mode_DAVID","user")}catch(e){}closeP()}
 function admOpen(){if(!isOwner())return;ADMON=true;try{localStorage.setItem("ask_mode_DAVID","admin")}catch(e){}
  const a=$("adm");a.style.display="flex";
- a.innerHTML=`<header class="ah"><div><b>Admin panel</b><small>Ask Tr. David · only you see this</small></div><button id="ax">Learner app</button></header><div id="abody"></div><nav class="an">${ADMT.map(t=>`<button data-t="${t[0]}">${t[1]}</button>`).join("")}</nav>`;
- a.onclick=e=>{if(e.target.id=="ax"){admClose();return}const t=e.target.closest(".an button");if(t)admGo(t.dataset.t)};
+ a.innerHTML=`<header class="ah"><div><b>Admin panel</b><small>Ask Tr. David · only you see this</small></div><button id="ax">Learner app</button></header><div id="abody"></div><nav class="an">${ADMT.filter(t=>ADMMAIN.includes(t[0])).map(t=>`<button data-t="${t[0]}">${t[1]}</button>`).join("")}<button data-t="more">More</button></nav>`;
+ a.onclick=e=>{if(e.target.id=="ax"){admClose();return}const t=e.target.closest(".an button");if(t){if(t.dataset.t=="more")admMore();else admGo(t.dataset.t)}};
  admGo(ADMTAB);try{admPollUn()}catch(e){}}
-function admGo(t){ADMTAB=t;ADMSEQ++;document.querySelectorAll("#adm .an button").forEach(b=>b.classList.toggle("on",b.dataset.t==t));
+function admMore(){const L={asked:"Questions learners asked that have no answer yet",review:"Approve or reject AI-written answers",ai:"Edit the voice of each model",news:"Post announcements to learners",rate:"Learner ratings and reviews"};
+ showP("More",ADMT.filter(t=>!ADMMAIN.includes(t[0])).map(t=>'<div class="row" data-t="'+t[0]+'"><div><b>'+t[1]+'</b>'+(L[t[0]]?'<small>'+L[t[0]]+'</small>':'')+'</div></div>').join(""),closeP,e=>{const r=e.target.closest("[data-t]");if(!r)return;closeP();admGo(r.dataset.t)})}
+function admGo(t){ADMTAB=t;ADMSEQ++;document.querySelectorAll("#adm .an button").forEach(b=>b.classList.toggle("on",b.dataset.t==t||(b.dataset.t=="more"&&!ADMMAIN.includes(t))));
  ({home:admHome,inbox:admInbox,users:admUsers,asked:()=>admAsked(),review:admReview,ai:admAi,news:admNews,pay:admPay,rate:()=>admRate()})[t]()}
 
 /* HOME */
@@ -4431,6 +4452,182 @@ async function admThread(t){
     const r=await admCall("admin_review_send");
     if(!r.ok){uiAlert("Could not send. Try again.");return}
     RUSERS=null;admRate()},"Send")}};
+})();
+</script>
+<div id="permGate" role="dialog" aria-modal="true" aria-label="Allow permissions">
+  <div class="pm-box">
+    <div class="pm-logo" id="pmLogo"></div>
+    <h1>Allow permissions</h1>
+    <p class="pm-sub">Ask Tr. David needs these to work well. You can open the app after you allow all of them.</p>
+    <div class="pm-row" data-p="notif"><div class="pm-ic"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0"/></svg></div><div class="pm-t"><b>Notifications</b><span>Announcements and updates, even when the app is closed</span></div><div class="pm-st" data-s="notif"></div></div>
+    <div class="pm-row" data-p="mic"><div class="pm-ic"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg></div><div class="pm-t"><b>Microphone</b><span>Ask your questions by voice</span></div><div class="pm-st" data-s="mic"></div></div>
+    <div class="pm-row" data-p="cam"><div class="pm-ic"><svg viewBox="0 0 24 24"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div><div class="pm-t"><b>Camera</b><span>Ask about a photo of your work</span></div><div class="pm-st" data-s="cam"></div></div>
+    <button class="pm-go" id="pmGo" type="button">Allow all permissions</button>
+    <button class="pm-re" id="pmRe" type="button" style="display:none">I have allowed it, check again</button>
+    <div class="pm-help" id="pmHelp"></div>
+  </div>
+</div>
+<script>
+/* Permission gate: on every open, Notifications, Microphone and Camera must be allowed.
+   Until then the app cannot be used. Once notifications are allowed, phone alerts are switched on automatically. */
+(function () {
+  var gate = document.getElementById("permGate");
+  if (!gate) return;
+  var root = document.documentElement, busy = false, shown = false, watched = false;
+  var NAMES = { notif: "Notifications", mic: "Microphone", cam: "Camera" };
+  var KEY = { mic: "ask_perm_mic", cam: "ask_perm_cam" };
+  var ls = function () { try { return window.localStorage; } catch (e) { return null; } };
+  var flag = function (k, v) { var s = ls(); if (!s) return null; try { if (v === undefined) return s.getItem(k); if (v === null) s.removeItem(k); else s.setItem(k, v); } catch (e) {} return null; };
+
+  try { var lg = document.getElementById("pmLogo"); if (lg && typeof AVATAR === "string") lg.style.backgroundImage = "url(" + AVATAR + ")"; } catch (e) {}
+
+  function hasDevice(kind) {
+    if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) return Promise.resolve(false);
+    if (!navigator.mediaDevices.enumerateDevices) return Promise.resolve(true);
+    return navigator.mediaDevices.enumerateDevices().then(function (l) {
+      return l.some(function (d) { return d.kind === kind; });
+    }).catch(function () { return true; });
+  }
+
+  /* returns "granted" | "denied" | "prompt" | "na" (this device cannot offer it, so it is not required) */
+  function stateOf(p) {
+    if (p === "notif") {
+      if (!("Notification" in window)) return Promise.resolve("na");
+      var n = Notification.permission;
+      return Promise.resolve(n === "granted" ? "granted" : n === "denied" ? "denied" : "prompt");
+    }
+    var kind = p === "mic" ? "audioinput" : "videoinput";
+    return hasDevice(kind).then(function (has) {
+      if (!has) return "na";
+      var fallback = function () { return flag(KEY[p]) === "1" ? "granted" : "prompt"; };
+      if (!(navigator.permissions && navigator.permissions.query)) return fallback();
+      return navigator.permissions.query({ name: p === "mic" ? "microphone" : "camera" })
+        .then(function (r) {
+          if (!watched) { try { r.onchange = function () { check(); }; } catch (e) {} }
+          return r.state === "granted" ? "granted" : r.state === "denied" ? "denied" : "prompt";
+        })
+        .catch(fallback);
+    });
+  }
+
+  function ask(p) {
+    if (p === "notif") {
+      if (!("Notification" in window)) return Promise.resolve();
+      try {
+        var r = Notification.requestPermission(function () {});
+        return Promise.resolve(r).catch(function () {});
+      } catch (e) { return Promise.resolve(); }
+    }
+    var c = p === "mic" ? { audio: true } : { video: true };
+    return navigator.mediaDevices.getUserMedia(c).then(function (st) {
+      try { st.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {}
+      flag(KEY[p], "1");
+    }).catch(function (e) {
+      var n = e && e.name;
+      if (n === "NotReadableError" || n === "AbortError") flag(KEY[p], "1"); /* allowed, but the device is busy right now */
+      else flag(KEY[p], null);
+    });
+  }
+
+  function paint(st) {
+    ["notif", "mic", "cam"].forEach(function (p) {
+      var el = gate.querySelector('[data-s="' + p + '"]'); if (!el) return;
+      var s = st[p];
+      el.className = "pm-st" + (s === "granted" || s === "na" ? " ok" : s === "denied" ? " no" : "");
+      el.textContent = s === "granted" ? "Allowed" : s === "na" ? "Not needed" : s === "denied" ? "Blocked" : "Not yet";
+    });
+    var blocked = ["notif", "mic", "cam"].filter(function (p) { return st[p] === "denied"; });
+    var help = document.getElementById("pmHelp"), re = document.getElementById("pmRe");
+    if (blocked.length) {
+      help.innerHTML = "<b>" + blocked.map(function (p) { return NAMES[p]; }).join(", ") + " blocked</b>" +
+        "Your phone will not ask again. Open your phone Settings, then Apps, then Ask Tr. David, then Permissions, and allow " +
+        blocked.map(function (p) { return NAMES[p]; }).join(", ") +
+        ". In a browser, tap the lock icon next to the address, then Permissions. Come back here and the app opens by itself.";
+      help.classList.add("on"); re.style.display = "";
+    } else { help.classList.remove("on"); re.style.display = "none"; }
+  }
+
+  function lock(on) {
+    ["app", "auth"].forEach(function (id) {
+      var el = document.getElementById(id); if (!el) return;
+      try { if (on) el.setAttribute("inert", ""); else el.removeAttribute("inert"); } catch (e) {}
+    });
+    gate.classList.toggle("on", on);
+    if (on) root.style.overflow = "hidden"; else root.style.overflow = "";
+  }
+
+  /* everything allowed: switch phone alerts on and subscribe this phone */
+  function done() {
+    lock(false); shown = false;
+    try {
+      if (typeof D !== "undefined" && typeof Notification !== "undefined" && Notification.permission === "granted") {
+        if (!D.notif) { D.notif = true; if (typeof save === "function") save(); }
+        if (typeof pushOn === "function") pushOn();
+      }
+    } catch (e) {}
+  }
+
+  function check() {
+    if (root.classList.contains("pg-on")) return Promise.resolve(); /* install page is showing; gate comes after it */
+    return Promise.all([stateOf("notif"), stateOf("mic"), stateOf("cam")]).then(function (a) {
+      var st = { notif: a[0], mic: a[1], cam: a[2] };
+      watched = true;
+      var ok = a.every(function (s) { return s === "granted" || s === "na"; });
+      if (ok) { paint(st); done(); return true; }
+      paint(st); lock(true); shown = true; return false;
+    });
+  }
+
+  function allow() {
+    if (busy) return;
+    busy = true;
+    var go = document.getElementById("pmGo"); go.disabled = true; go.textContent = "Waiting for you…";
+    /* notifications first: it needs the tap itself on some phones */
+    var chain = Promise.resolve();
+    ["notif", "mic", "cam"].forEach(function (p) {
+      chain = chain.then(function () {
+        return stateOf(p).then(function (s) { return s === "prompt" ? ask(p) : null; });
+      });
+    });
+    chain.then(function () { return check(); }).then(function () {}, function () {}).then(function () {
+      busy = false; go.disabled = false; go.textContent = "Allow all permissions";
+    });
+  }
+
+  document.getElementById("pmGo").addEventListener("click", allow);
+  document.getElementById("pmRe").addEventListener("click", function () { check(); });
+  document.addEventListener("visibilitychange", function () { if (!document.hidden && shown) check(); });
+  window.addEventListener("focus", function () { if (shown) check(); });
+
+  /* the install page hides first; when the person continues, the gate takes over */
+  try { new MutationObserver(function () { if (!root.classList.contains("pg-on")) check(); }).observe(root, { attributes: true, attributeFilter: ["class"] }); } catch (e) {}
+
+  /* tapping the in-app banner goes to What's new */
+  try {
+    var ann = document.getElementById("ann");
+    if (ann) ann.addEventListener("click", function (e) {
+      if (e.target.closest && e.target.closest("#annx")) return;
+      try { hideAnn(); notifs(true); } catch (x) {}
+    });
+  } catch (e) {}
+
+  check().then(function (ok) {
+    if (ok === false && !busy) {
+      /* ask right away on open; if the phone wants a tap first, the button does it */
+      stateOf("mic").then(function () { allowAuto(); });
+    }
+  });
+  function allowAuto() {
+    if (busy) return;
+    busy = true;
+    var chain = Promise.resolve();
+    ["notif", "mic", "cam"].forEach(function (p) {
+      chain = chain.then(function () {
+        return stateOf(p).then(function (s) { return s === "prompt" ? ask(p) : null; });
+      });
+    });
+    chain.then(function () { return check(); }).then(function () {}, function () {}).then(function () { busy = false; });
+  }
 })();
 </script>
 </body></html>

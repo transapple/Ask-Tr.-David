@@ -2915,6 +2915,8 @@ function cbaBuild(N,d,c,k){k=k||0;const T=c.T,P=c.P,SUB=(typeof D!=="undefined"&
 /* NCDC lesson-notes format (Teaching & Lessons models): Topic, Sub-topic, Learning Outcomes, Key Concepts and Definitions,
    Detailed Explanations, Examples and Illustrations, Diagrams/Maps/Equations/Formulas, Practical Activities or Applications,
    Summary, Revision Questions, Competency-Based Assessment. Depth d decides how many items each part gives. */
+const wantRQ=()=>/\b(revision questions?|practice questions?|review questions?|questions? (on|about|for)|quizz?(es)?|test me|exercises?|past papers?|exam questions?|exam practice|assess(ment)?|competency|cba)\b/i.test(window.ASKQ||"");
+const wantCBA=()=>/\b(competency|assess(ment)?|cba|scenario|exam questions?|exam practice|past papers?|test me)\b/i.test(window.ASKQ||"");
 function ncdcNotes(N,d,c,extra){const T=c.T,P=c.P,SUB=(typeof D!=="undefined"&&D.sub)||"",
  pts=P.filter(x=>x!==N.d),body=pts.length?pts:P,kt=keyTerms(N),
  vis=/^(Mathematics|Physics|Chemistry|Biology|Geography)$/.test(SUB),
@@ -2932,8 +2934,8 @@ function ncdcNotes(N,d,c,extra){const T=c.T,P=c.P,SUB=(typeof D!=="undefined"&&D
  if(extra)o+=extra;
  o+=sec("Summary",N.simple||N.d);
  const rq=["State what is meant by "+T+".",c.cw[1]+" the main points about "+T+"."].concat(N.ex[0]?["Give one example of "+T+" from your community."]:[]);
- o+=sec("Revision Questions",nl(take(rq.concat(N.quiz.map(z=>quizq(z,false))),2+d))+(N.quiz.length?"\n\n**Answers to the multiple choice questions:** "+N.quiz.map((z,i)=>"Q"+(i+(rq.length>2+d?2+d:rq.length)+1)+" "+"ABC"[z[2]]).join(", "):""));
- {const q=cbaBuild(N,d,c,0);o+="\n## Competency-Based Assessment\n"+q.item+"\n"+q.tk+"\n\n**Guide:**\n"+q.guide}
+ if(wantRQ())o+=sec("Revision Questions",nl(take(rq.concat(N.quiz.map(z=>quizq(z,false))),2+d))+(N.quiz.length?"\n\n**Answers to the multiple choice questions:** "+N.quiz.map((z,i)=>"Q"+(i+(rq.length>2+d?2+d:rq.length)+1)+" "+"ABC"[z[2]]).join(", "):""));
+ if(wantCBA()){const q=cbaBuild(N,d,c,0);o+="\n## Competency-Based Assessment\n"+q.item+"\n"+q.tk+"\n\n**Guide:**\n"+q.guide}
  return o}
 
 const FM={
@@ -3008,10 +3010,19 @@ philosopher:(N,d,c)=>{const T=c.T,P=c.P;let o="# Thinking it through: "+T;
  o+=sec("Values and consequences","Who gains and who loses when we apply "+T+"? Is it fair, and how would you decide?");
  o+=sec("Write your own position",nl(["State your claim in one sentence.","Give your strongest reason.","Support it with evidence or an example.","State the best objection to your claim.","Answer that objection."]));
  return o+sec("Think further",nl(["How would you explain "+T+" to someone who disagrees?","What is the strongest point you found, and what is the weakest?","What would you like to find out next?"]))}};
+/* Short answers by default. Full notes only when the learner asks to explain, wants details, or asks for revision/assessment material. */
+const wantFull=()=>/\b(explain|explanation|explanations|details?|detailed|elaborate|in depth|describe|full notes|notes|lesson|teach me|why|how (does|do|is|are|can|did)|steps?|expand|tell me more|more about)\b/i.test(window.ASKQ||"")||wantRQ()||wantCBA();
+function briefNotes(N,c){const T=c.T,pts=(c.P||[]).filter(x=>x!==N.d),k=pts.length?pts:(c.P||[]);
+ let o="# "+T+(N.cl?"\n"+N.cl:"");
+ o+="\n"+(N.d||k[0]||"");
+ if(k.length)o+="\n\n**Key points**\n"+ul(take(k,3));
+ if(N.ex&&N.ex[0])o+="\n\n**Example:** "+N.ex[0];
+ const sm=N.simple||"";if(sm)o+="\n\n**In short:** "+sm;
+ return o+"\n\nAsk me to explain or give details if you want more."}
 function modelText(N){const k=modelName(),d=modelDepth(k),L=lvKey(),P=N.pts.length?N.pts:(N.d?[N.d]:[]),
  cw=L=="PLE"?["State","Give"]:L=="UCE"?["State","Explain","Describe"]:["Explain","Analyse","Evaluate"],
  c={T:N.n,P,L,cw,head:"# "+N.n+(N.cl?"\n"+N.cl:"")};cw.length<2&&cw.push("Explain");
- try{return FM[k](N,d,c)}catch(e){return FM.teacher(N,1,c)}}
+ try{if(!wantFull())return briefNotes(N,c);return FM[k](N,d,c)}catch(e){return FM.teacher(N,1,c)}}
 const modelFromMd=t=>modelText(normMd(t));
 function modelPicker(){const cur=modelName(),pl=planName();
  let h='<div style="padding:10px 18px;color:var(--sub);line-height:1.4">Your plan: <b>'+pl+'</b>. Pick the model that answers you. Higher models and higher plans give fuller answers.</div>';
@@ -3383,6 +3394,7 @@ let AN=0;
 function ask(q,mode){
  if(stream!=null)return;let gn=null,FU=null,bareG=false;
  if(!mode){FU=ctxFollow(q);if(FU&&!FU.local)q=FU.q}
+ window.ASKQ_RAW=String(q);
  if(!mode){const G=planGate(q);if(G){bareG=!!G.bare;
   const nt=(t,up)=>{D.msgs.push({s:"i",note:1,up:up?1:0,t,ts:Date.now()});save();render()};
   if(capped())return limitMsg();
@@ -3394,7 +3406,7 @@ function ask(q,mode){
  if(FU&&FU.sub&&D.sub=="General"&&subsList().includes(FU.sub))D.sub=FU.sub;
  const CTX=(FU||bareG||mode||smallTalk(q))?ctxGet():{tq:String(q).slice(0,120),sub:D.sub};
  const now=Date.now();stamps=stamps.filter(t=>now-t<6e4);
- const err=x=>{D.msgs.push({s:"i",err:1,t:x,q,mode,ts:Date.now()});save();render()};
+ const err=x=>{D.msgs.push({s:"i",err:1,t:x,q,mode,ts:Date.now()});save();render()};window.ASKQ=String(q)+" "+String(window.ASKQ_RAW||"")+" "+String(mode||"");
  if(!navigator.onLine)return err("No internet connection. Check your network and try again.");
  if(stamps.length>=8)return err("Too many requests. Please wait a minute and try again.");
  stamps.push(now);sm=null;const tok=++AN;

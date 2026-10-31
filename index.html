@@ -671,7 +671,9 @@ function detectSub(v){const L=subsList();if(lvKey()=="PLE"&&L.includes("Mathemat
 function routeSub(q){q=String(q||"");let t=null;try{t=detectSub(q)}catch(e){}
  if(t)return t;const lo=q.toLowerCase(),L=subsList(),T=(typeof TOP!="undefined"?TOP:[]).find(x=>!x.nd&&(x.ai!=null||kwOK(lo))&&x.re.test(lo)&&(!x.L||x.L.includes(lvKey()))&&x.S&&x.S.some(y=>L.includes(y)));
  return T?T.S.find(y=>L.includes(y)):"General"}
-function offSub(q){q=String(q||"");let t=null;try{t=detectSub(q)}catch(e){}
+function offSub(q,I){q=String(q||"");
+ if(I&&I.intent==="new"&&I.subject&&I.subject!=="General")return I.subject!==D.sub?I.subject:null;
+ let t=null;try{t=detectSub(q)}catch(e){}
  if(t&&t!==D.sub&&!SUBRULES.some(x=>x[0].test(q)&&x[1].includes(D.sub)))return t;
  const own=new RegExp("\\b"+D.sub.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\b","i");
  if(own.test(q))return null;
@@ -2803,7 +2805,7 @@ async function aiAnswer(q,FUx){
  const c=new AbortController(),tm=setTimeout(()=>c.abort(),25000);
  try{
   const sub=D.sub=="General"?(detectSub(q)||"General"):D.sub;
-  const r=await fetch(AIU,{method:"POST",signal:c.signal,headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({question:String(q).slice(0,300),level:D.lvl,subject:sub,plan:planName(),follow:FUx&&!FUx.local?{kind:FUx.kind,topic:FUx.topic,step:FUx.step||0,instruction:FUx.hint||"",previous:lastAnsText()}:undefined})});
+  const r=await fetch(AIU,{method:"POST",signal:c.signal,headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({question:String(q).slice(0,300),level:D.lvl,subject:sub,plan:planName(),curriculum:"Uganda NCDC",strict_subject:true,brief:!wantFull(),follow:FUx&&!FUx.local?{kind:FUx.kind,topic:FUx.topic,step:FUx.step||0,instruction:FUx.hint||"",previous:lastAnsText()}:undefined})});
   if(!r.ok)return null;
   const j=await r.json();
   if(j.status=="busy")return{busy:1};
@@ -3322,8 +3324,8 @@ const FU_R=/\b(it|this|that|its|them|these|those|they)\b/;
 const FU_K=[
  ["quiz",/\b(quiz|test me|examine me|practice|practise|exercises?|drill|homework|assignment|problems?|sums?|ask me)\b/],
  ["example",/\b(examples?|samples?|instances?|for instance|illustrat\w*|demonstrat\w*|show me one|scenarios?|worked)\b/],
- ["summary",/\b(summar\w*|recap|key points?|main points?|highlights?|in short|in brief|nutshell|briefly|few words|one line|shorter|short notes?|short)\b/],
- ["simple",/\b(simple|simply|simpler|easy|easier|easily|eli5|kids?|child|children|baby|basic|basics|plain|layman|quick|quickly)\b/],
+ ["summary",/\b(summar\w*|recap|key points?|main points?|highlights?|in short|in brief|nutshell|briefly|brief|concise|concisely|tl dr|tldr|condense\w*|shorten\w*|abridge\w*|point form|bullet\w*|outline|overview|snapshot|cut it short|make it short|in a sentence|one sentence|sum up|wrap up|in few words|few words|one line|shorter|short notes?|short)\b/],
+ ["simple",/\b(simple|simply|simpler|simplif\w*|dumb it down|in easy words|in plain english|in plain words|easy|easier|easily|eli5|kids?|child|children|baby|basic|basics|plain|layman|quick|quickly)\b/],
  ["formula",/\b(formulas?|formulae|equations?|expressions?|rules?|laws?|theorems?|principles?|identity|identities|symbols?|notation|calculat\w*|compute|computing)\b/],
  ["mistakes",/\b(mistakes?|errors?|wrong|pitfalls?|traps?|misconceptions?|avoid|careful|confused with)\b/],
  ["compare",/\b(differences?|different from|compare|compared|comparison|versus|vs|similar|same as|related|relationship|connection|linked to|link to)\b/],
@@ -3332,9 +3334,9 @@ const FU_K=[
  ["how",/\b(how|steps?|procedures?|process|methods?|solve|solving|workings?|work out|approach|technique|algorithm|stages?|walk me through|guide me|instructions?)\b/],
  ["why",/\b(why|reasons?|causes?|purpose|importance|important|matter|matters|needed|benefits?|advantages?|significance|point of)\b/],
  ["uses",/\b(uses?|used|using|applications?|applied|apply|where|real life|everyday|daily life|in life|practical|relevance|relevant|good for|what for|employ\w*|utili[sz]\w*)\b/],
- ["understand",/\b((do not|did not|does not|can not|could not|still do not|still not|not) (understand|get|follow|catch|see|know|clear|sure)|not clear|unclear|confus\w*|lost|too (hard|difficult|complicated|long)|hard|difficult|complicated|make (it )?(clear|clearer|sense)|no idea|what do you mean|what does (it|that|this) mean|again|better|clearly|slowly|another way|different way|differently|repeat|once more|one more time|re ?explain|come again|pardon|break (it )?down|break it up|step by step)\b/],
+ ["understand",/\b((do not|did not|does not|can not|could not|still do not|still not|not) (understand|get|follow|catch|see|know|clear|sure)|not clear|unclear|confus\w*|lost|too (hard|difficult|complicated|long)|hard|difficult|complicated|make (it )?(clear|clearer|sense)|no idea|what do you mean|what does (it|that|this) mean|again|better|clearly|slowly|another way|different way|differently|repeat|once more|one more time|re ?explain|come again|pardon|break (it |this |that )?down|break it up|step by step|explain better|explain again|explain clearly|teach me again|help me understand|i am lost|i am struggling|not getting it|walk me through)\b/],
  ["define",/\b(what is|what are|what was|meaning|means?|define|definition|stand for|who is|who are|called|name)\b/],
- ["more",/\b(more|further|elaborate|expand|deeper|deep|depth|details?|detailed|go on|continue|carry on|keep going|proceed|next|else|and then|all|everything|full|complete|longer|rest|info|information|points?|ideas?|facts?|notes?|extra|additional|another|other)\b/]];
+ ["more",/\b(continue chatting|keep chatting|continue talking|keep talking|continue the chat|continue with this|go ahead|go further|go on and|tell me more|say more|give me more|add more|more please|anything else|what else|something more|break out|breakdown|unpack|unfold|dig deeper|dig|flesh out|enlarge|extend\w*|clarif\w*|elaborat\w*|more|further|expand|deeper|deep|depth|details?|detailed|go on|continue|carry on|keep going|proceed|next|else|and then|all|everything|full|complete|longer|rest|info|information|points?|ideas?|facts?|notes?|extra|additional|another|other)\b/]];
 const FU_ALL=FU_K.map(x=>new RegExp(x[1].source,"g"));
 /* each repeat of the same request uses the next way of answering: [template, minimum plan rank, show even if the plan is lower (so the upgrade note appears)] */
 const FU_V={
@@ -3380,7 +3382,7 @@ function ctxFollow(q){
  let r=t;FU_ALL.forEach(x=>{r=r.replace(x," ")});
  const left=r.split(" ").filter(w=>w&&!FU_STOP.has(w)),hasR=FU_R.test(t);
  if(!left.length){
-  if(!kind){if(!hasR)return null;kind=/\b(explain|describe|teach|break)\b/.test(t)?"understand":"more"}
+  if(!kind){if(!hasR&&!/^(explain|describe|elaborate|expand|continue|proceed|clarify|simplify|summari[sz]e|shorten|brief|briefly|more|again|next|go on|carry on|breakdown|break down|details?|detail it|teach me|help)$/.test(t))return null;kind=/\b(explain|describe|teach|break)\b/.test(t)?"understand":"more"}
   const V=FU_V[kind]||FU_V.more,el=V.filter(v=>rank>=v[1]||v[2]),cnt=D.msgs.filter(x=>x.s=="i"&&x.tq===c.tq&&x.fk===kind).length,v=el[cnt%el.length]||V[0];
   const cu=kind=="understand"||kind=="simple"||kind=="define";
   return{q:v[0].replace("{p}",p),kind,sub:c.sub,topic:p,step:cnt,hint:FU_HINT[kind],chkk:kind=="quiz"?null:pk(cu?FU_CU:FU_CM,cnt+nn)}}
@@ -3390,10 +3392,42 @@ function ctxFollow(q){
   return{q:t.replace(/\bits\b/,p+"'s").replace(/\b(it|this|that|them|these|those|they)\b/,p),kind:"custom",sub:c.sub,topic:p,step:0,hint:FU_HINT.custom}}
  return null}
 function lastAnsText(){for(let i=D.msgs.length;i--;){const x=D.msgs[i];if(x.s=="i"&&x.t&&!x.err&&!x.note&&!x.lim)return String(x.t).slice(0,700)}return""}
-let AN=0;
+let AN=0,INTP=false;
+/* ===== GEMINI INTERPRETATION: every typed question is first sent, with the chat so far, to the "interpret" Edge Function.
+   It says whether the learner is following up on what is already on this screen, starting a new topic, or just chatting,
+   and gives back a clear stand-alone question. If it is slow or fails, the app falls back to its own local rules. ===== */
+async function interpretQ(q){
+ const c=new AbortController(),tm=setTimeout(()=>c.abort(),3500);
+ try{
+  const cx=ctxGet(),hist=D.msgs.filter(x=>!x.err&&!x.lim&&x.t).slice(-6).map(x=>({role:x.s=="o"?"learner":"tutor",text:String(x.t).replace(/\s+/g," ").slice(0,x.s=="o"?240:380)}));
+  const r=await fetch(SBU.replace("/rest/v1/","/functions/v1/")+"interpret",{method:"POST",signal:c.signal,headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({question:String(q).slice(0,300),level:D.lvl,subject:D.sub,subject_locked:!!(D.lock&&D.sub!="General"),subjects:subsList(),current_topic:cx?cx.tq:"",class_label:D.cls||"",history:hist})});
+  if(!r.ok)return null;const j=await r.json();
+  if(!j||!j.ok||!["followup","new","chat"].includes(j.intent))return null;
+  j.subject=subsList().includes(j.subject)?j.subject:"";return j}
+ catch(e){return null}finally{clearTimeout(tm)}}
+function interpApply(q,I){
+ const c=ctxGet(),cl=x=>String(x||"").replace(/\s+/g," ").trim().slice(0,300),std=cl(I.question),nn=D.msgs.length,pk=(a,n)=>a[n%a.length];
+ const L=t=>({FU:{local:t,q:String(q),kind:"local",sub:c?c.sub:D.sub,topic:c?c.tq:""},q}),conf=Number(I.confidence);
+ /* Gemini could not tell what is wanted: ask the learner one short question, and keep the topic on screen */
+ if(cl(I.clarify))return L(cl(I.clarify));
+ if(I.intent==="chat"){let tp=null;try{tp=topicOf(q)}catch(e){}
+  if(!cl(I.reply)||(!smallTalk(q)&&tp))return null;return L(cl(I.reply))}
+ if(I.intent==="followup"&&c&&c.tq){
+  if(conf<0.6)return null;
+  const kind=FU_HINT[I.kind]?I.kind:"more",cnt=D.msgs.filter(x=>x.s=="i"&&x.tq===c.tq&&x.fk===kind).length,cu=kind=="understand"||kind=="simple"||kind=="define",qq=std||String(q);
+  return{FU:{q:qq,kind,sub:c.sub,topic:c.tq,step:cnt,hint:FU_HINT[kind]||FU_HINT.custom,chkk:kind=="quiz"?null:pk(cu?FU_CU:FU_CM,cnt+nn),gem:1},q:qq}}
+ if(I.intent==="new"&&std)return{FU:null,q:std};
+ return null}
 function ask(q,mode){
+ if(stream!=null||INTP)return;
+ if(mode||!navigator.onLine||String(q).trim().length<2)return askCore(q,mode,null);
+ INTP=true;$("stat").textContent="understanding…";
+ interpretQ(q).then(I=>I,()=>null).then(I=>{INTP=false;$("stat").textContent="Anything about your studies";askCore(q,mode,I)})}
+function askCore(q,mode,I){
  if(stream!=null)return;let gn=null,FU=null,bareG=false;
- if(!mode){FU=ctxFollow(q);if(FU&&!FU.local)q=FU.q}
+ if(!mode){let a=null;if(I)try{a=interpApply(q,I)}catch(e){}
+  if(a){FU=a.FU;q=a.q}else FU=ctxFollow(q);
+  if(FU&&!FU.local)q=FU.q}
  window.ASKQ_RAW=String(q);
  if(!mode){const G=planGate(q);if(G){bareG=!!G.bare;
   const nt=(t,up)=>{D.msgs.push({s:"i",note:1,up:up?1:0,t,ts:Date.now()});save();render()};
@@ -3402,11 +3436,11 @@ function ask(q,mode){
   if(G.block&&(G.bare||G.kind=="quiz"))return nt(G.note,1);
   if(G.block)gn=G.note;
   q=G.q;mode=G.mode||null}}
- if(D.lock&&D.sub!="General"){if(!FU&&!mode){const o=offSub(q);if(o){D.msgs.push({s:"i",note:1,up:0,t:"This chat is set to "+D.sub+", so I answer "+D.sub+" questions only. Your question looks like "+o+". Tap the subject button above to switch, or ask me something about "+D.sub+".",ts:Date.now()});save();render();return}}}else D.sub=routeSub(q);if(capped())return limitMsg();const ch=D.chats.find(c=>c.id==D.cur);if(ch.title=="New chat"||ch.title=="Chat")ch.title=q.slice(0,32);
+ if(D.lock&&D.sub!="General"){if(!FU&&!mode){const o=offSub(q,I);if(o){D.msgs.push({s:"i",note:1,up:0,t:"This chat is set to "+D.sub+", so I answer "+D.sub+" questions only. Your question looks like "+o+". Tap the subject button above to switch, or ask me something about "+D.sub+".",ts:Date.now()});save();render();return}}}else D.sub=(I&&I.intent==="new"&&I.subject&&I.subject!=="General"?I.subject:routeSub(q));if(capped())return limitMsg();const ch=D.chats.find(c=>c.id==D.cur);if(ch.title=="New chat"||ch.title=="Chat")ch.title=q.slice(0,32);
  if(FU&&FU.sub&&D.sub=="General"&&subsList().includes(FU.sub))D.sub=FU.sub;
  const CTX=(FU||bareG||mode||smallTalk(q))?ctxGet():{tq:String(q).slice(0,120),sub:D.sub};
  const now=Date.now();stamps=stamps.filter(t=>now-t<6e4);
- const err=x=>{D.msgs.push({s:"i",err:1,t:x,q,mode,ts:Date.now()});save();render()};window.ASKQ=String(q)+" "+String(window.ASKQ_RAW||"")+" "+String(mode||"");
+ const err=x=>{D.msgs.push({s:"i",err:1,t:x,q,mode,ts:Date.now()});save();render()};window.ASKQ=String(q)+" "+String(window.ASKQ_RAW||"")+" "+String(mode||"")+" "+((FU&&FU.kind&&FU.kind!=="summary"&&FU.kind!=="define"&&FU.kind!=="local")||(I&&I.detail==="full")?"explain":"");
  if(!navigator.onLine)return err("No internet connection. Check your network and try again.");
  if(stamps.length>=8)return err("Too many requests. Please wait a minute and try again.");
  stamps.push(now);sm=null;const tok=++AN;

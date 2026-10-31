@@ -254,8 +254,11 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 (function(){
   var el=document.getElementById("spl");if(!el)return;
   try{
-    var l=document.querySelector("#pgGate .pg-logo"),i=document.getElementById("splLogo");
-    if(l&&i)i.src=l.src;
+    /* the logo image lives further down the page, so it is not there yet when this script runs: set it once the page has loaded */
+    var setLogo=function(){var l=document.querySelector("#pgGate .pg-logo"),i=document.getElementById("splLogo");if(l&&i&&l.src&&i.getAttribute("src")!==l.src)i.src=l.src};
+    setLogo();
+    if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",setLogo);
+    window.addEventListener("load",setLogo);
     var n=document.getElementById("splName"),t="Ask Tr. David",h="";
     for(var k=0;k<t.length;k++){var c=t.charAt(k);
       h+=c==" "?'<span class="sp">&nbsp;</span>':'<span style="animation-delay:'+(0.55+k*0.06).toFixed(2)+'s">'+c+'</span>';}
@@ -671,13 +674,20 @@ function detectSub(v){const L=subsList();if(lvKey()=="PLE"&&L.includes("Mathemat
 function routeSub(q){q=String(q||"");let t=null;try{t=detectSub(q)}catch(e){}
  if(t)return t;const lo=q.toLowerCase(),L=subsList(),T=(typeof TOP!="undefined"?TOP:[]).find(x=>!x.nd&&(x.ai!=null||kwOK(lo))&&x.re.test(lo)&&(!x.L||x.L.includes(lvKey()))&&x.S&&x.S.some(y=>L.includes(y)));
  return T?T.S.find(y=>L.includes(y)):"General"}
-function offSub(q,I){q=String(q||"");
- if(I&&I.intent==="new"&&I.subject&&I.subject!=="General")return I.subject!==D.sub?I.subject:null;
+function offSub(q,I){q=String(q||"");const fam=relSubs(D.sub);
+ if(I&&I.intent==="new"&&I.subject&&I.subject!=="General")return fam.includes(I.subject)?null:I.subject;
  let t=null;try{t=detectSub(q)}catch(e){}
- if(t&&t!==D.sub&&!SUBRULES.some(x=>x[0].test(q)&&x[1].includes(D.sub)))return t;
+ if(t&&!fam.includes(t)&&!SUBRULES.some(x=>x[0].test(q)&&x[1].some(y=>fam.includes(y))))return t;
  const own=new RegExp("\\b"+D.sub.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\b","i");
  if(own.test(q))return null;
- return subsList().find(x=>x!=="General"&&x!==D.sub&&new RegExp("\\b"+x.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\b","i").test(q))||null}
+ const named=subsList().find(x=>x!=="General"&&!fam.includes(x)&&new RegExp("\\b"+x.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\b","i").test(q));
+ if(named)return named;
+ /* a known topic that belongs to another subject */
+ try{if(kwOK(q)){const lo=q.toLowerCase(),H=TOP.filter(x=>!x.nd&&x.S&&x.re.test(lo)&&(!x.L||x.L.includes(lvKey())));
+  if(H.length&&!H.some(x=>x.S.some(y=>fam.includes(y)))){const o=H[0].S.find(y=>y!=="General"&&subsList().includes(y));if(o)return o}}}catch(e){}
+ /* sums and equations belong to Mathematics only */
+ try{if(!fam.includes("Mathematics")&&(work(q)||arithSolve(q)))return"Mathematics"}catch(e){}
+ return null}
 function setSub(sb){D.lock=sb!="General";save();if(sb==D.sub&&D.chats.some(c=>c.id==D.cur&&c.sub==sb&&(c.lv||lvKey())==lvKey())){render();return}stopS();stopEdit();
  const cur=D.chats.find(c=>c.id==D.cur);if(cur&&!cur.msgs.length&&D.chats.length>1)D.chats=D.chats.filter(c=>c!==cur);
  D.sub=sb;let c=D.chats.find(x=>x.sub==sb&&(x.lv||lvKey())==lvKey());
@@ -2643,20 +2653,23 @@ function heads(T){if(T&&T.a)return[T.a,T.b];const s=D.sub;
  if(/Religio|Divinity|Islamic/.test(s))return["What it teaches","How it is lived out"];
  if(/English|Literature|Literacy|Kiswahili|Luganda|French|German|Arabic|Latin|Chinese|Language|General Paper/.test(s))return["How to use it","Where it is used"];
  return["How it works","Where it applies"]}
-function topicOf(q){const s=q.toLowerCase(),lv=lvKey(),kw=kwOK(q);return TOP.find(t=>t.re.test(s)&&(kw||t.ai!=null)&&(!t.S||D.sub=="General"||t.S.includes(D.sub))&&(D.sub!="General"||!t.nd)&&(!t.L||t.L.includes(lv)))||null}
+const RELS={ICT:["ICT","Subsidiary ICT"],"Subsidiary ICT":["Subsidiary ICT","ICT"],Mathematics:["Mathematics","Subsidiary Mathematics"],"Subsidiary Mathematics":["Subsidiary Mathematics","Mathematics"]},relSubs=x=>RELS[x]||[x];
+/* a chosen subject only gets topics that belong to it; a topic with no subject tag is not used when a subject is chosen */
+const subOK=t=>D.sub=="General"||(t.S?t.S.some(x=>relSubs(D.sub).includes(x)):!(D.lock&&D.sub!="General"));
+function topicOf(q){const s=q.toLowerCase(),lv=lvKey(),kw=kwOK(q);return TOP.find(t=>t.re.test(s)&&(kw||t.ai!=null)&&subOK(t)&&(D.sub!="General"||!t.nd)&&(!t.L||t.L.includes(lv)))||null}
 function cleanQ(q){return q.replace(/[?.!]+$/,"").replace(/^(what\s+(is|are|was|were)|define|explain|describe|tell me about|how (do|does|can) (i|we|you)|why (is|are|do|does))\s+(an?\s+|the\s+)?/i,"").trim().slice(0,60)||q.slice(0,60)}
 function qText(t,z){return "# Quiz: "+t+"\nQuestion "+(z.n+1)+" of "+z.list.length+"\n"+z.list[z.n][0]}
 function faithOf(q){return/\b(islam\w*|muslim\w*|quran|allah|prophet muhammad|hadith|mosque|ramadan|salah|zakat)\b/i.test(q)?"Islamic":/\b(christian\w*|bible|jesus|christ|church|god the father|gospel|apostles?|easter|christmas|baptism)\b/i.test(q)?"Christian":null}
 let QLAST="";
 function quizAns(q){
  const bare=isBare(q);let T=null;
- if(bare){const pool=TOP.filter(t=>!t.ai&&t.q&&t.q.length&&(!t.L||t.L.includes(lvKey()))&&(D.sub=="General"||!t.S||t.S.includes(D.sub))),alt=pool.filter(t=>t.n!=QLAST),src=alt.length?alt:pool;T=src[Math.floor(Math.random()*src.length)]||null}
+ if(bare){const pool=TOP.filter(t=>!t.ai&&t.q&&t.q.length&&(!t.L||t.L.includes(lvKey()))&&subOK(t)),alt=pool.filter(t=>t.n!=QLAST),src=alt.length?alt:pool;T=src[Math.floor(Math.random()*src.length)]||null}
  else T=topicOf(q);
  if(!T){const k=cleanQ(q);return bare?{t:"# Quiz\nI do not have a quiz ready for this level and subject yet."}:{t:"# Quiz: "+cap(k)+"\nI do not have a quiz on **"+k+"** yet. Say **quiz me** and I will pick a topic for you."}}
  QLAST=T.n;const list=T.q.slice().sort(()=>Math.random()-.5),z={list,n:0,score:0,t:T.n};
  return{t:qText(T.n,z),quiz:["q",list[0][1],list[0][2]],qz:z}}
 function mockBase(q,mode){
- if(!mode){const W=work(q)||mathWork(q);if(W)return W}
+ if(!mode&&mathOK()){const W=work(q)||mathWork(q);if(W)return W}
  const T=topicOf(q),H=heads(T),k=cleanQ(q),F=/Religio|Divinity|Islamic/.test(D.sub)?faithOf(q):null,s=F?F+" "+D.sub:D.sub,L=lvKey(),nm=(T?T.n:k.charAt(0).toUpperCase()+k.slice(1))+(F?" ("+F+")":""),b="**"+k+"**";
  if(mode=="Explain simpler")return{t:"# "+nm+", simpler\n"+clLine(T)+(T?T.s:"Think of "+b+" as a small idea in "+s+".\n- Break it into small parts.\n- Learn one part at a time.\n- Say it back in your own words.")};
  if(mode=="Give an example")return{t:"# Examples of "+nm.toLowerCase()+"\n"+clLine(T)+(T?T.e:"- Example 1: a simple case of "+b+".\n- Example 2: a case from daily life.\n- Example 3: a case from an exam question.")};
@@ -2761,10 +2774,11 @@ function smallTalk(q){
  if(/^(i do not know|i don t know|dont know|i have no idea)$/.test(t))return{t:"That is okay"+nm+". Tell me what you are studying and I will help you step by step."};
  if(/^(how was your day|how is your day|how is school|how are you today)$/.test(t))return{t:"My day is going well, thank you"+nm+". How can I help you with your studies?"};
  return null}
+function mathOK(){return D.sub=="General"||relSubs(D.sub).includes("Mathematics")}
 function mock(q,mode){
  if(mode)return mockBase(q,mode);
  const ST=smallTalk(q);if(ST)return ST;
- const W=work(q)||mathWork(q);if(W)return W;
+ const W=mathOK()?(work(q)||mathWork(q)):null;if(W)return W;
  const t=tiered(q);if(t)return t;
  const f=mockBase(q),pl=planName();f.un=1;if(f.hon)return f;
  if(pl!="Premium"){const i=f.t.search(/\n## (Science|Mathematics|English) topics you can ask about|\n## Note\n/),tail=i>=0?f.t.slice(i):"";f.t=f.t.split(pl=="Standard"?"\n## 3.":"\n## 2.")[0]+tail}
@@ -2776,21 +2790,24 @@ const clName=c=>{c=String(c||"").trim();let m=/^P(\d)$/i.exec(c);if(m)return"Pri
 function levelNote(lv,cls){return"";/* research is free: no above/below-level notes for anyone */if(!lv||!(lv in LRANK))return"";const me=LRANK[lvKey()],it=LRANK[lv];if(it===me)return"";const c=cls?clName(cls):"";
  if(it>me)return"This topic is "+LNAME[lv]+" work and is not in your class topics"+(c?" (it is usually taught in "+c+")":"")+". You can read it for research, but focus on your own class topics first.";
  return"This is "+LNAME[lv]+" work"+(c?", taught in "+c:"")+". It is good for revision, but it is below your current level."}
-function topicOfAny(q){const s=q.toLowerCase(),kw=kwOK(q);return TOP.find(t=>t.re.test(s)&&kw&&t.ai==null&&(D.sub!="General"||!t.nd))||null}
+function topicOfAny(q){const s=q.toLowerCase(),kw=kwOK(q);return TOP.find(t=>t.re.test(s)&&kw&&t.ai==null&&subOK(t)&&(D.sub!="General"||!t.nd))||null}
+/* subject lock: a stored answer is used only if it belongs to this subject */
+function rowOK(r){if(D.sub=="General"||!r)return true;const n=r.subject_name||r.subject;return !n||relSubs(D.sub).includes(String(n))}
 async function crossLevel(q){
  const T=topicOfAny(q);
  if(T){const f=tiered(q,T);if(f){f.lv=T.sl||(T.L&&T.L[0])||null;f.cls=T.cl&&T.cl[0]?T.cl[0][0]:(T.cls||null);return f}}
  const me=LRANK[lvKey()],order=["PLE","UCE","UACE"].filter(x=>x!==lvKey()).sort((a,b)=>{const la=LRANK[a]<me,lb=LRANK[b]<me;if(la!==lb)return la?-1:1;return la?LRANK[b]-LRANK[a]:LRANK[a]-LRANK[b]});
- const rs=await Promise.all(order.map(l=>sbCall("rpc/find_answer",{method:"POST",body:JSON.stringify({p_question:String(q).slice(0,300),p_level:l,p_subject:null,p_mode:"answer",p_threshold:0.6})},3000).then(r=>Array.isArray(r)&&r[0]?{r:r[0],l}:null).catch(()=>null)));
+ const sj=D.sub=="General"?[null]:relSubs(D.sub);
+ const rs=await Promise.all(order.flatMap(l=>sj.map(sx=>sbCall("rpc/find_answer",{method:"POST",body:JSON.stringify({p_question:String(q).slice(0,300),p_level:l,p_subject:sx,p_mode:"answer",p_threshold:0.6})},3000).then(r=>Array.isArray(r)&&r[0]&&rowOK(r[0])?{r:r[0],l}:null).catch(()=>null))));
  const h=rs.find(x=>x);if(!h)return null;
  return{t:modelFromMd(/^\s*#/.test(h.r.body_md)?h.r.body_md:"# "+h.r.title+"\n"+h.r.body_md),aid:h.r.answer_id,lv:h.l,fmt:1}}
 /* owner-written answers from Supabase (find_answer), chosen by plan */
 const MODEMAP={"Explain simpler":"simpler","Give an example":"example","More detail":"detail"};
 async function dbAnswer(q,mode){
  if(mode&&!MODEMAP[mode])return null;
- if(!mode&&(smallTalk(q)||work(q)||mathWork(q)))return null;
+ if(!mode&&(smallTalk(q)||(mathOK()&&(work(q)||mathWork(q)))))return null;
  const pl=planName(),I=qIntent(q),narrow=pl=="Free"||pl=="Basic"||((I.only||I.defw)&&!I.full);
- const get=m=>sbCall("rpc/find_answer",{method:"POST",body:JSON.stringify({p_question:String(q).slice(0,300),p_level:D.lvl,p_subject:(D.sub=="General"?(detectSub(q)||"General"):D.sub),p_mode:m,p_threshold:0.55})},3000).then(r=>Array.isArray(r)&&r[0]?r[0]:null).catch(()=>null);
+ const get=m=>sbCall("rpc/find_answer",{method:"POST",body:JSON.stringify({p_question:String(q).slice(0,300),p_level:D.lvl,p_subject:(D.sub=="General"?(detectSub(q)||"General"):D.sub),p_mode:m,p_threshold:0.55})},3000).then(r=>Array.isArray(r)&&r[0]&&rowOK(r[0])?r[0]:null).catch(()=>null);
  const txt=r=>/^\s*#/.test(r.body_md)?r.body_md:"# "+r.title+"\n"+r.body_md;
  let r=null,t="";
  if(mode){r=await get(MODEMAP[mode]);if(r)t=txt(r)}
@@ -3423,6 +3440,11 @@ function ask(q,mode){
  if(mode||!navigator.onLine||String(q).trim().length<2)return askCore(q,mode,null);
  INTP=true;$("stat").textContent="understanding…";
  interpretQ(q).then(I=>I,()=>null).then(I=>{INTP=false;$("stat").textContent="Anything about your studies";askCore(q,mode,I)})}
+function leakSub(f){if(!f||f.un||f.w||D.sub=="General")return null;const fam=relSubs(D.sub),hd=((String(f.t||"").match(/^\s*#\s*(.+)$/m)||[])[1]||"").replace(/^Quiz:\s*/i,"").replace(/,\s*(simpler|in more detail)$/i,"").trim().toLowerCase();
+ if(!hd)return null;
+ const T=TOP.find(x=>x.n&&x.S&&String(x.n).toLowerCase()===hd);
+ if(T&&!T.S.some(y=>fam.includes(y)))return T.S.find(y=>y!=="General"&&subsList().includes(y))||"another subject";
+ return null}
 function askCore(q,mode,I){
  if(stream!=null)return;let gn=null,FU=null,bareG=false;
  if(!mode){let a=null;if(I)try{a=interpApply(q,I)}catch(e){}
@@ -3436,7 +3458,7 @@ function askCore(q,mode,I){
   if(G.block&&(G.bare||G.kind=="quiz"))return nt(G.note,1);
   if(G.block)gn=G.note;
   q=G.q;mode=G.mode||null}}
- if(D.lock&&D.sub!="General"){if(!FU&&!mode){const o=offSub(q,I);if(o){D.msgs.push({s:"i",note:1,up:0,t:"This chat is set to "+D.sub+", so I answer "+D.sub+" questions only. Your question looks like "+o+". Tap the subject button above to switch, or ask me something about "+D.sub+".",ts:Date.now()});save();render();return}}}else D.sub=(I&&I.intent==="new"&&I.subject&&I.subject!=="General"?I.subject:routeSub(q));if(capped())return limitMsg();const ch=D.chats.find(c=>c.id==D.cur);if(ch.title=="New chat"||ch.title=="Chat")ch.title=q.slice(0,32);
+ if(D.lock&&D.sub!="General"){if((!FU||!FU.local)&&!mode){const o=offSub(q,I);if(o){D.msgs.push({s:"i",note:1,up:0,t:"This chat is set to "+D.sub+", so I answer "+D.sub+" questions only. Your question looks like "+o+". Tap the subject button above to switch, or ask me something about "+D.sub+".",ts:Date.now()});save();render();return}}}else D.sub=(I&&I.intent==="new"&&I.subject&&I.subject!=="General"?I.subject:routeSub(q));if(capped())return limitMsg();const ch=D.chats.find(c=>c.id==D.cur);if(ch.title=="New chat"||ch.title=="Chat")ch.title=q.slice(0,32);
  if(FU&&FU.sub&&D.sub=="General"&&subsList().includes(FU.sub))D.sub=FU.sub;
  const CTX=(FU||bareG||mode||smallTalk(q))?ctxGet():{tq:String(q).slice(0,120),sub:D.sub};
  const now=Date.now();stamps=stamps.filter(t=>now-t<6e4);
@@ -3448,6 +3470,7 @@ function askCore(q,mode,I){
  stream=setTimeout(async()=>{let f=FU&&FU.local?{t:FU.local}:null;if(!f)try{f=await Promise.race([dbAnswer(q,mode),new Promise(r=>setTimeout(()=>r(null),3200))])}catch(e){}
   if(stream==null||tok!=AN)return;
   if(!f)f=mock(q,mode);
+  {const lk=leakSub(f);if(lk){stopS();D.msgs.push({s:"i",note:1,up:0,t:"This chat is set to "+D.sub+", so I answer "+D.sub+" questions only. That answer belongs to "+lk+". Tap the subject button above to switch, or ask me something about "+D.sub+".",ts:Date.now()});save();render();return}}
   if(f.un&&!mode){let x=null;try{x=await crossLevel(q)}catch(e){}if(stream==null||tok!=AN)return;if(x)f=x}
   if(f.un&&!mode){const a=await aiAnswer(q,FU);if(stream==null||tok!=AN)return;
    if(a&&a.busy){logUn(q);stopS();return err("Many learners are asking right now. Please try again in a little while.")}

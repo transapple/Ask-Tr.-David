@@ -2837,6 +2837,7 @@ async function aiAnswer(q,FUx){
   if(dr)f.ai=1;if(T.tid)f.tid=T.tid;if(T.sl){f.lv=T.sl;f.cls=T.cls}
   return f
  }catch(e){return null}finally{clearTimeout(tm)}}
+function logAct(act,m,ans){try{const t=tokNow();if(!t||!m)return;fetch(SBU+"rpc/log_user_action",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_t:t,p_action:act,p_q:String(m.q||"").slice(0,200),p_ref:String(m.tid||m.aid||"").slice(0,60),p_ans:String(ans!=null?ans:m.t||"").replace(/\s+/g," ").slice(0,200)})}).catch(()=>{})}catch(e){}}
 function logUn(q){try{q=String(q).trim().slice(0,300);if(q.length<3)return;fetch(SBU+"rpc/log_unanswered",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_question:q,p_level:D.lvl,p_subject:D.sub})}).catch(()=>{})}catch(e){}}
 /* Rating an "AI generated, not yet checked" answer. Only the owner account (username DAVID, checked in the database) approves with ONE thumbs up.
  Every other account's thumbs up is counted, and the database approves the answer once 10 different accounts have rated it helpful.
@@ -2851,6 +2852,17 @@ function sendFb(m){try{
   return}
  if(m.aid&&m.fb)fetch(SBU+"rpc/submit_feedback",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_answer_id:m.aid,p_vote:m.fb})}).catch(()=>{})}catch(e){}}
 
+/* ===== TRAINING 11: "ASK ABOUT" BUTTON. On the latest long answer it shows tappable parts (bold words, numbered steps, formulas, table rows).
+   A tap types a clear pointer question for the learner (the same kind ctxPart understands), so typing by hand works the same way. ===== */
+function abParts(t){
+ const out=[],seen={},add=(lab,q)=>{const k=lab.toLowerCase();if(seen[k]||out.length>=14)return;seen[k]=1;out.push({lab:lab.length>34?lab.slice(0,32)+"…":lab,q})},cl=x=>String(x).replace(/["\u201c\u201d]/g,"").replace(/\*\*|`/g,"").replace(/\s+/g," ").trim().slice(0,50);
+ const L=String(t||"").split("\n");let tb=0;
+ L.forEach(l=>{const n=l.match(/^\s*(\d{1,2})[.)]\s+\S/);if(n)add("Step "+n[1],"Explain step "+n[1]+" of your answer in more detail")});
+ L.forEach(l=>{if(/^\s*\|/.test(l)){if(/^\s*\|[\s:|-]+\|?\s*$/.test(l)){tb=2;return}if(tb==0){tb=1;return}if(tb==1)tb=2;const c=cl(l.replace(/^\s*\|/,"").split("|")[0]);if(c.length>1)add("Row: "+c,'Explain that row in your table: "'+c+'"')}else tb=0});
+ L.forEach(l=>{if(/^\s*\|/.test(l))return;const f=l.replace(/\*\*|`/g,"").trim();if(f.length>=5&&f.length<=80&&(/[A-Za-z0-9)\]]\s*=\s*[A-Za-z0-9(\-]/.test(f)||/\^|sqrt\(/.test(f))&&!/^#/.test(f)&&f.split(" ").length<=12){const c=cl(f);add(c,'Explain that formula in your answer: "'+c+'"')}});
+ (String(t||"").match(/\*\*[^*\n]{2,40}\*\*/g)||[]).forEach(b=>{const c=cl(b);if(c.length>1)add(c,'What do you mean by "'+c+'"')});
+ return out}
+function abShow(m){return !m.stream&&m.fk!="local"&&String(m.t||"").split(/\s+/).length>=80&&abParts(m.t).length>=2}
 function bub(m,i,last){
  if(m.note)return `<div class="b i ai" data-i="${i}"><div class="md">${md(m.t)}</div>${m.up?`<div class="chips"><button data-act="plans" data-i="${i}">See plans</button></div>`:""}<small>${hm(m.ts)}</small></div>`;
  if(m.lim)return `<div class="b i ai" data-i="${i}"><div style="display:flex;gap:10px;align-items:flex-start"><span style="flex:none;width:34px;height:34px;border-radius:50%;background:rgba(245,158,11,.16);color:#d97706;display:grid;place-items:center"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></span><div style="font-weight:700;font-size:16px;line-height:1.3;color:#d97706;padding-top:1px">${LIM1}</div></div>${rtime()?`<div style="display:flex;gap:8px;align-items:center;margin-top:10px;color:var(--sub);font-size:14px"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#2f80ed" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Your free plan resets at <b style="color:#2f80ed">${rtime()}</b></span></div>`:""}<button data-act="plans" data-i="${i}" style="display:block;width:100%;margin-top:12px;padding:12px 14px;border:0;border-radius:22px;background:var(--green);color:#fff;font:inherit;font-weight:700;cursor:pointer;text-align:center">${LIM2}</button><small>${hm(m.ts)}</small></div>`;
@@ -2859,7 +2871,8 @@ function bub(m,i,last){
  let h=`<div class="b i ai" data-i="${i}">${m.mdl?`<div class="mdltag">${esc(m.mdl)}</div>`:""}<div class="md">${md(m.t)}</div>`;
  if(m.quiz){h+=m.quiz[1].map((o,k)=>`<button class="opt ${m.pick!=null?(k==m.quiz[2]?"ok":k==m.pick?"bad":""):""}" data-act="pick" data-i="${i}" data-k="${k}">${esc(o)}</button>`).join("")+(m.pick!=null?`<p>${m.pick==m.quiz[2]?"Correct, well done.":"Not quite. The correct answer is highlighted."}</p>`+(m.qz?(m.qz.n<m.qz.list.length-1?`<div class="chips"><button data-act="nq" data-i="${i}">Next question</button></div>`:`<p><b>Quiz finished: ${m.qz.score} out of ${m.qz.list.length}.</b></p>`):""):"")}
  let act="";
- if(!m.stream){act=`<div class="act out">${A.map(a=>`<button class="${a[2]?"on":""}" data-act="${a[0]}" data-i="${i}" aria-label="${a[1]}" title="${a[1]}">${AI[a[0]]}</button>`).join("")}${last?`<button data-act="regen" data-i="${i}" aria-label="Regenerate" title="Regenerate">${AI.regen}</button>`:""}</div>`;
+ if(m.ab&&last&&abShow(m)){h+=`<div class="chips">${abParts(m.t).map(x=>`<button data-st="${esc(x.q).replace(/"/g,"&quot;")}">${esc(x.lab)}</button>`).join("")}</div>`}
+ if(!m.stream){act=`<div class="act out">${A.map(a=>`<button class="${a[2]?"on":""}" data-act="${a[0]}" data-i="${i}" aria-label="${a[1]}" title="${a[1]}">${AI[a[0]]}</button>`).join("")}${last?`<button data-act="regen" data-i="${i}" aria-label="Regenerate" title="Regenerate">${AI.regen}</button>`:""}${last&&abShow(m)?`<button data-act="ab" data-i="${i}" style="font-size:12px;padding:14px 10px 8px">${m.ab?"Hide":"Ask about"}</button>`:""}</div>`;
   if(last&&m.w&&m.w.shown<m.w.parts.length)h+=wBtns(m,i)}
  return h+`<small>${hm(m.ts)}</small></div>${act}`}
 /* ===== FREE PLAN: random word limit (2000 to 3000) per account, kept on this phone ===== */
@@ -3561,6 +3574,66 @@ function ctxFollow(q){
   return{q:t.replace(/\bits\b/,p+"'s").replace(/\b(it|this|that|them|these|those|they)\b/,p),kind:"custom",sub:c.sub,topic:p,step:0,hint:FU_HINT.custom}}
  return null}
 function lastAnsText(){for(let i=D.msgs.length;i--;){const x=D.msgs[i];if(x.s=="i"&&x.t&&!x.err&&!x.note&&!x.lim)return String(x.t).slice(0,700)}return""}
+/* ===== TRAINING 11: QUESTIONS ABOUT A PART OF AN EARLIER ANSWER =====
+   When the learner points at something already said in this chat (a word, a step, a row, a formula, an example, a claim),
+   the last answers of this chat are sent to the ai_explain Edge Function so that exactly that part is explained.
+   Only clear pointers count ("that step", "step 3", "you said", "what do you mean by", "are you sure"); anything else is left to the older paths.
+   If ai_explain gives no answer, the question goes through the normal paths unchanged. Nothing is saved. ===== */
+const PT_WORD="word|words|term|terms|phrase|symbol|letter|sign|step|steps|point|part|line|row|column|example|formula|equation|table|sentence|reason|claim|statement|answer|explanation|definition|diagram|list|result",
+PT_NUM="(?:step|point|item|line|row|column|example|bullet|part|sentence|paragraph|number|no)\\.?\\s*(?:\\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten)\\b|(?:first|second|third|fourth|fifth|last|previous|next) (?:step|point|item|line|row|column|example|bullet|part|sentence|paragraph)",
+PT_RX=new RegExp("\\b(?:you (?:just |also )?(?:said|mentioned|wrote|used|told me|meant|gave|listed|showed|explained)|(?:in|from|on|of) (?:the|your|that|this) (?:last|previous|above|earlier|first|second|third) (?:answer|explanation|table|example|list|steps?|notes?|paragraph|definition|formula|diagram|response|reply)|(?:in|from) (?:your|the) (?:answer|explanation|reply|response|notes)|what do you mean(?: by)?|what does (?:that|this|it) mean|(?:that|this|these|those|your) (?:"+PT_WORD+")|"+PT_NUM+"|are you sure|is (?:that|it|this) (?:true|correct|right)|(?:that|this|it) is (?:wrong|not (?:true|correct|right))|you are wrong)","i"),
+PT_NR=new RegExp(PT_NUM,"i");
+function ptHist(){const H=[];for(let i=0;i<D.msgs.length;i++){const x=D.msgs[i];if(x.s=="i"&&x.t&&!x.err&&!x.note&&!x.lim&&!x.stream&&x.fk!="local")H.push({q:String(x.q||"").slice(0,300),a:String(x.t).slice(0,3500)})}return H.slice(-4)}
+function ctxPart(q){
+ const t=String(q||"").replace(/\s+/g," ").trim();if(t.length<4||t.length>300)return null;
+ if(!ptHist().length)return null;
+ const low=t.toLowerCase().replace(/[\u2018\u2019`]/g,"'");
+ if(!PT_RX.test(low))return null;
+ const qm=t.match(/["\u201c]([^"\u201c\u201d]{2,60})["\u201d]/),nm=low.match(PT_NR),c=ctxGet();
+ return{part:1,q:t,kind:"part",sub:c?c.sub:D.sub,topic:c?c.tq:"",term:qm?qm[1]:nm?nm[0]:"",step:0}}
+async function explainPart(q,P){
+ const c=new AbortController(),tm=setTimeout(()=>c.abort(),30000);
+ try{
+  const r=await fetch(SBU.replace("/rest/v1/","/functions/v1/")+"ai_explain",{method:"POST",signal:c.signal,headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({question:String(q).slice(0,300),level:D.lvl,subject:P.sub||D.sub,term:String(P.term||"").slice(0,80),brief:!wantFull(),history:ptHist()})});
+  if(!r.ok)return null;const j=await r.json();
+  if(j&&j.status=="busy")return{busy:1};
+  if(j&&j.status=="ok"&&j.markdown&&String(j.markdown).length>=20)return{t:String(j.markdown),part:1};
+  return null}catch(e){return null}finally{clearTimeout(tm)}}
+/* ===== TRAINING 12: DEEPER EXPLANATIONS (ai_expand). Four kinds: deeper (layers), causes (causes and consequences), compare (two named concepts), links (how topics connect).
+   Only clear requests inside an open chat count; a request that names a new topic is left to the older paths. The plan decides who gets it (Standard and above).
+   Below Standard the older path answers and an upgrade note follows. Answers are Gemini text: nothing is saved and nothing is marked checked.
+   If ai_expand gives no answer, the request goes through the older follow-up path unchanged. ===== */
+GATE.expand=["Deeper explanations","Standard"];
+const EX_DEEP=/\b(go deeper|deeper (explanation|layer|level|understanding)|explain (it |this |that )?deeper|in layers|layer by layer|layered|layers of|more depth|deep dive|go (a bit |a little )?further into)\b/,
+EX_CAUSE=/\b(causes? and (consequences?|effects?)|consequences?|what (causes|caused)|causes?|effects? of (it|this|that))\b/,
+EX_LINK=/\b(connect\w*|links?|linked|related to|relate\w*|relationship|builds? on|leads? to|fit\w* (in|with)|(other|related) (topics?|concepts?)|what do i need (to know )?(before|first)|where does (it|this|that) lead)\b/,
+EX_X=new Set("cause causes consequence consequences effect effects result results link links linked connect connects connected connection connections other related relate relates relationship topics topic concepts concept layer layers layered deeper deep depth explanation level understanding fit fits builds build leads lead what and or".split(" "));
+function expandReq(q){
+ const c=ctxGet();if(!c||!c.tq||!ptHist().length)return null;
+ const t=ctxNorm(q);if(!t||t.length>110)return null;
+ const p=cleanQ(c.tq);if(!p)return null;
+ const ptr=FU_R.test(t),isP=x=>/^(it|this|that|them|these|those|they)$/.test(x),tr=x=>String(x).replace(/\s+(please|thanks|thank you|sir|teacher|david)$/,"").trim().slice(0,80);
+ let m=t.match(/^compare\s+(.+?)\s+(?:and|with|to|against|vs|versus)\s+(.+)$/)||t.match(/^(?:what is |what are )?(?:the )?differences? between\s+(.+?)\s+and\s+(.+)$/)||t.match(/^(.+?)\s+(?:vs|versus)\s+(.+)$/);
+ if(m){let a=tr(m[1]),b=tr(m[2]);if(isP(b)){b=a;a=p}else if(isP(a))a=p;
+  if(b.length<2||a.length<2)return null;return{type:"compare",c2:b,topic:a,q:String(q).trim().slice(0,300)}}
+ m=t.match(/^(?:compare|contrast)\s+(?:it |this |that )?(?:with|to|against)\s+(.+)$/)||t.match(/^(?:how|what) (?:is|are|does|do) (?:it|this|that|they) (?:different|differ)(?: from| to)?\s+(.+)$/);
+ if(m){const b=tr(m[1]);if(b.length<2||isP(b))return null;return{type:"compare",c2:b,topic:p,q:String(q).trim().slice(0,300)}}
+ const type=EX_DEEP.test(t)?"deeper":EX_LINK.test(t)?"links":EX_CAUSE.test(t)?"causes":null;if(!type)return null;
+ const left=t.split(" ").filter(w=>w&&!FU_STOP.has(w)&&!EX_X.has(w));
+ if(left.length&&!ptr)return null;if(left.length>3)return null;
+ return{type,c2:"",topic:p,q:String(q).trim().slice(0,300)}}
+function expandNote(q){const x=expandReq(q);if(!x)return null;const pl=planName();if((PRANK[pl]||0)>=PRANK[GATE.expand[1]])return null;
+ return GATE.expand[0]+" are available on the "+GATE.expand[1]+" plan and above. You are on the "+pl+" plan."}
+function ctxExpand(q){const x=expandReq(q);if(!x)return null;if((PRANK[planName()]||0)<PRANK[GATE.expand[1]])return null;
+ const c=ctxGet();return{part:1,exp:1,q:x.q,kind:"expand",xt:x.type,c2:x.c2,topic:x.topic,sub:c?c.sub:D.sub,step:0}}
+async function expandPart(q,P){
+ const c=new AbortController(),tm=setTimeout(()=>c.abort(),30000),pl=planName();
+ try{
+  const r=await fetch(SBU.replace("/rest/v1/","/functions/v1/")+"ai_expand",{method:"POST",signal:c.signal,headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({question:String(q).slice(0,300),type:P.xt,concept2:String(P.c2||"").slice(0,80),topic:String(P.topic||"").slice(0,120),level:D.lvl,class:String(D.cls||"").replace(/^Primary /,"P").replace(/^Senior /,"S"),subject:P.sub||D.sub,brief:P.xt!="deeper"&&pl!="Premium",history:ptHist()})});
+  if(!r.ok)return null;const j=await r.json();
+  if(j&&j.status=="busy")return{busy:1};
+  if(j&&j.status=="ok"&&j.markdown&&String(j.markdown).length>=40)return{t:String(j.markdown),part:1};
+  return null}catch(e){return null}finally{clearTimeout(tm)}}
 let AN=0,INTP=false;
 /* ===== GEMINI INTERPRETATION: every typed question is first sent, with the chat so far, to the "interpret" Edge Function.
    It says whether the learner is following up on what is already on this screen, starting a new topic, or just chatting,
@@ -3589,7 +3662,7 @@ function interpApply(q,I){
  return null}
 function ask(q,mode){
  if(stream!=null||INTP)return;
- if(mode||!navigator.onLine||String(q).trim().length<2)return askCore(q,mode,null);
+ if(mode||!navigator.onLine||String(q).trim().length<2||ctxPart(q)||ctxExpand(q))return askCore(q,mode,null);
  INTP=true;$("stat").textContent="understanding…";
  interpretQ(q).then(I=>I,()=>null).then(I=>{INTP=false;$("stat").textContent="Anything about your studies";askCore(q,mode,I)})}
 function leakSub(f){if(!f||f.un||f.w||D.sub=="General")return null;const fam=relSubs(D.sub),hd=((String(f.t||"").match(/^\s*#\s*(.+)$/m)||[])[1]||"").replace(/^Quiz:\s*/i,"").replace(/,\s*(simpler|in more detail)$/i,"").trim().toLowerCase();
@@ -3598,19 +3671,20 @@ function leakSub(f){if(!f||f.un||f.w||D.sub=="General")return null;const fam=rel
  if(T&&!T.S.some(y=>fam.includes(y)))return T.S.find(y=>y!=="General"&&subsList().includes(y))||"another subject";
  return null}
 function askCore(q,mode,I){
- if(stream!=null)return;let gn=null,FU=null,bareG=false;
+ if(stream!=null)return;let gn=null,FU=null,bareG=false;const q0=String(q);
  if(!mode){let a=null;if(I)try{a=interpApply(q,I)}catch(e){}
-  if(a){FU=a.FU;q=a.q}else FU=ctxFollow(q);
-  if(FU&&!FU.local)q=FU.q}
+  if(a){FU=a.FU;q=a.q}else FU=ctxPart(q)||ctxExpand(q)||ctxFollow(q);
+  if(FU&&!FU.local)q=FU.q;
+  if(!(FU&&FU.part)){const xn=expandNote(q0);if(xn)gn=xn}}
  window.ASKQ_RAW=String(q);
- if(!mode){const G=planGate(q);if(G){bareG=!!G.bare;
+ if(!mode&&!(FU&&FU.part)){const G=planGate(q);if(G){bareG=!!G.bare;
   const nt=(t,up)=>{D.msgs.push({s:"i",note:1,up:up?1:0,t,ts:Date.now()});save();render()};
   if(capped())return limitMsg();
   if(G.noBase)return nt("Ask me a question first, then I can do that for it.",0);
   if(G.block&&(G.bare||G.kind=="quiz"))return nt(G.note,1);
   if(G.block)gn=G.note;
   q=G.q;mode=G.mode||null}}
- if(D.lock&&D.sub!="General"){if((!FU||!FU.local)&&!mode){const o=offSub(q,I);if(o){D.msgs.push({s:"i",note:1,up:0,t:"This chat is set to "+D.sub+", so I answer "+D.sub+" questions only. Your question looks like "+o+". Tap the subject button above to switch, or ask me something about "+D.sub+".",ts:Date.now()});save();render();return}}}else D.sub=(I&&I.intent==="new"&&I.subject&&I.subject!=="General"?I.subject:routeSub(q));if(capped())return limitMsg();const ch=D.chats.find(c=>c.id==D.cur);if(ch.title=="New chat"||ch.title=="Chat")ch.title=q.slice(0,32);
+ if(D.lock&&D.sub!="General"){if((!FU||(!FU.local&&!FU.part))&&!mode){const o=offSub(q,I);if(o){D.msgs.push({s:"i",note:1,up:0,t:"This chat is set to "+D.sub+", so I answer "+D.sub+" questions only. Your question looks like "+o+". Tap the subject button above to switch, or ask me something about "+D.sub+".",ts:Date.now()});save();render();return}}}else if(!(FU&&FU.part))D.sub=(I&&I.intent==="new"&&I.subject&&I.subject!=="General"?I.subject:routeSub(q));if(capped())return limitMsg();const ch=D.chats.find(c=>c.id==D.cur);if(ch.title=="New chat"||ch.title=="Chat")ch.title=q.slice(0,32);
  if(FU&&FU.sub&&D.sub=="General"&&subsList().includes(FU.sub))D.sub=FU.sub;
  const CTX=(FU||bareG||mode||smallTalk(q))?ctxGet():{tq:String(q).slice(0,120),sub:D.sub};
  const now=Date.now();stamps=stamps.filter(t=>now-t<6e4);
@@ -3619,33 +3693,34 @@ function askCore(q,mode,I){
  if(stamps.length>=8)return err("Too many requests. Please wait a minute and try again.");
  stamps.push(now);sm=null;const tok=++AN;
  $("stat").textContent="typing…";$("send").innerHTML=STOP;
- stream=setTimeout(async()=>{let f=FU&&FU.local?{t:FU.local}:null;if(!f)try{f=await Promise.race([dbAnswer(q,mode),new Promise(r=>setTimeout(()=>r(null),3200))])}catch(e){}
+ stream=setTimeout(async()=>{let f=FU&&FU.local?{t:FU.local}:null;if(!f&&FU&&FU.part){try{f=FU.exp?await expandPart(q,FU):await explainPart(q,FU)}catch(e){f=null}if(stream==null||tok!=AN)return;if(f&&f.busy){stopS();return err("Many learners are asking right now. Please try again in a little while.")}if(!f){if(FU.exp){const F2=ctxFollow(q);FU=F2||null;if(F2&&F2.local)f={t:F2.local};else if(F2)q=F2.q}else{FU.part=0;FU.kind="custom";FU.hint=FU_HINT.custom}}}if(!f)try{f=await Promise.race([dbAnswer(q,mode),new Promise(r=>setTimeout(()=>r(null),3200))])}catch(e){}
   if(stream==null||tok!=AN)return;
   if(!f)f=mock(q,mode);
-  {const lk=leakSub(f);if(lk){stopS();D.msgs.push({s:"i",note:1,up:0,t:"This chat is set to "+D.sub+", so I answer "+D.sub+" questions only. That answer belongs to "+lk+". Tap the subject button above to switch, or ask me something about "+D.sub+".",ts:Date.now()});save();render();return}}
+  {const lk=f.part?null:leakSub(f);if(lk){stopS();D.msgs.push({s:"i",note:1,up:0,t:"This chat is set to "+D.sub+", so I answer "+D.sub+" questions only. That answer belongs to "+lk+". Tap the subject button above to switch, or ask me something about "+D.sub+".",ts:Date.now()});save();render();return}}
   if(f.un&&!mode){let x=null;try{x=await crossLevel(q)}catch(e){}if(stream==null||tok!=AN)return;if(x)f=x}
   if(f.un&&!mode){const a=await aiAnswer(q,FU);if(stream==null||tok!=AN)return;
    if(a&&a.busy){logUn(q);stopS();return err("Many learners are asking right now. Please try again in a little while.")}
    if(a&&a.t)f=a}
   if(f.un&&!mode&&!FU)logUn(q);
   if(f.fmt&&!f.un&&!mode){const st=await styleAnswer(f.t,q);if(stream==null||tok!=AN)return;if(st)f.t=st.md}
-  if(!f.ai&&!f.un){const Tm=topicOf(q);if(Tm&&Tm.ai)f.ai=1}
-  if(f.ai&&!f.tid){const Tm=topicOf(q);if(Tm&&Tm.tid)f.tid=Tm.tid}
-  if(!f.lv&&!f.un){const Tm=topicOf(q);if(Tm&&Tm.sl){f.lv=Tm.sl;f.cls=Tm.cls}}
+  if(!f.part&&!f.ai&&!f.un){const Tm=topicOf(q);if(Tm&&Tm.ai)f.ai=1}
+  if(!f.part&&f.ai&&!f.tid){const Tm=topicOf(q);if(Tm&&Tm.tid)f.tid=Tm.tid}
+  if(!f.part&&!f.lv&&!f.un){const Tm=topicOf(q);if(Tm&&Tm.sl){f.lv=Tm.sl;f.cls=Tm.cls}}
   let chk=0;if(FU&&FU.chkk&&f&&f.t&&!f.un&&!f.w&&!f.quiz&&!f.qz&&!FU.local){f.t+="\n\n"+FU.chkk;chk=1}
   const m={s:"i",t:"",ts:Date.now(),q,mode,stream:1,fk:FU&&FU.kind||undefined,chk:chk||undefined,tq:CTX&&CTX.tq||undefined,tsub:CTX&&(CTX.sub||D.sub)||undefined},w=f.t.split(/(?<=\s)/);if(f.quiz)m.quiz=f.quiz;if(f.qz)m.qz=f.qz;if(f.w)m.w=f.w;if(f.aid)m.aid=f.aid;if(f.ai)m.ai=1;if(f.tid)m.tid=f.tid;if(f.fmt){const M=MODELS[modelName()];m.mdl=M.n+" "+M.v}{const ln=levelNote(f.lv,f.cls);if(ln)m.lvn=ln}
-  D.msgs.push(m);sm=m;let k=0;stream=setInterval(()=>{m.t+=w[k++]||"";if(k>=w.length){stopS();if(gn){D.msgs.push({s:"i",note:1,up:1,t:gn,ts:Date.now()});save();render()}if(capped())limitMsg()}else render()},35)},600)}
+  D.msgs.push(m);sm=m;let k=0;if(!(FU&&FU.local))logAct("ask",m,f.t);stream=setInterval(()=>{m.t+=w[k++]||"";if(k>=w.length){stopS();if(gn){D.msgs.push({s:"i",note:1,up:1,t:gn,ts:Date.now()});save();render()}if(capped())limitMsg()}else render()},35)},600)}
 $("msgs").addEventListener("click",e=>{
 
  const st=e.target.closest("[data-st]");if(st){$("inp").value=st.dataset.st;send();return}
  const b=e.target.closest("[data-act]");if(!b)return;const i=+b.dataset.i,m=D.msgs[i],a=b.dataset.act;if(a=="plans"){plans();return}if(a=="activate"){activatePlan();return}
+ {const _x={copy:"copy",share:"share",regen:"redo",bm:m&&m.bm?"save_off":"save",up:m&&m.fb==1?"like_off":"like",dn:m&&m.fb==-1?"dislike_off":"dislike"}[a];if(_x&&m&&!m.err)logAct(_x,m)}
  if(a=="copy"){navigator.clipboard&&navigator.clipboard.writeText(m.t.replace(/[#*`|]/g,""));return}
  if(a=="share"){(async()=>{const L=await AK.short(m),T=(m.q||"Answer")+"\n";
   const sheet=()=>{const E=encodeURIComponent,u=E(L),t=E(T+L),P=[["wa","WhatsApp","https://wa.me/?text="+t],["tg","Telegram","https://t.me/share/url?url="+u+"&text="+E(m.q||"Answer")],["fb","Facebook","https://www.facebook.com/sharer/sharer.php?u="+u],["x","X (Twitter)","https://twitter.com/intent/tweet?text="+E(m.q||"Answer")+"&url="+u],["sms","Messages (SMS)","sms:?&body="+t],["em","Email","mailto:?subject="+E("Ask Tr. David")+"&body="+t]];
    showP("Share answer",P.map(x=>`<div class="row" data-p="${x[0]}"><div>${x[1]}</div></div>`).join("")+'<div class="row" data-p="cp"><div>Copy link</div></div>',closeP,e=>{const k=e.target.closest(".row")?.dataset.p;if(!k)return;if(k=="cp"){try{navigator.clipboard.writeText(L)}catch(x){}closeP();uiAlert("Link copied.");return}const f=P.find(x=>x[0]==k);closeP();window.open(f[2],"_blank")})};
   if(navigator.share){try{await navigator.share({title:"Ask Tr. David",text:T,url:L})}catch(e){if(e&&e.name!="AbortError")sheet()}}else sheet()})();return}
  if(m.w){if(a=="next"){m.w.shown=Math.min(m.w.shown+1,m.w.parts.length);m.t=wBuild(m)}if(a=="all"){m.w.shown=m.w.parts.length;m.t=wBuild(m)}if(a=="brk"){m.w.open[m.w.shown-1]=1;m.t=wBuild(m)}}
- if(a=="bm")m.bm=!m.bm;if(a=="up")m.fb=m.fb==1?0:1;if(a=="dn")m.fb=m.fb==-1?0:-1;if(a=="up"||a=="dn")sendFb(m);
+ if(a=="ab")m.ab=!m.ab;if(a=="bm")m.bm=!m.bm;if(a=="up")m.fb=m.fb==1?0:1;if(a=="dn")m.fb=m.fb==-1?0:-1;if(a=="up"||a=="dn")sendFb(m);
   if(a=="pick"&&m.pick==null){m.pick=+b.dataset.k;if(m.qz&&m.pick==m.quiz[2])m.qz.score++}
  if(a=="nq"&&m.qz&&m.pick!=null&&m.qz.n<m.qz.list.length-1){const z=m.qz;z.n++;m.quiz=["q",z.list[z.n][1],z.list[z.n][2]];m.pick=null;m.t=qText(z.t,z)}
  if(a=="retry"||a=="regen"){D.msgs.splice(i,1);save();render();ask(m.q,m.mode);return}
@@ -3859,12 +3934,25 @@ function admUser(u){if(!u)return;ADMSEQ++;const b=$("abody");
    const hr=e.target.closest("[data-h]");if(hr){const h=+hr.dataset.h;uiConfirm("Put "+u.username+" on the "+p+" plan"+(h?" for "+admDur(h):" with no expiry")+"?",()=>apply(p,h),"Set plan");return}
    if(e.target.closest("[data-c]")){const h=parseInt($("ahr").value,10);if(!(h>=1&&h<=8760)){uiAlert("Enter a number of hours from 1 to 8760.");return}uiConfirm("Put "+u.username+" on the "+p+" plan for "+admDur(h)+"?",()=>apply(p,h),"Set plan")}}};
  const ex=u.plan!="Free"&&u.plan_expires_at?"Ends "+new Date(u.plan_expires_at).toLocaleString():(u.plan!="Free"?"No expiry":"");
- b.innerHTML=`<div class="row" data-b="1"><div>‹ Back to users</div></div><div style="padding:12px 18px;line-height:1.6"><b style="font-size:18px">${esc(u.names)}</b><br>${esc(u.username)} · ${esc(u.phone)}<br><small style="color:var(--sub)">Joined ${admDate(u.created_at)}</small></div><div class="asec">Plan</div>`
+ b.innerHTML=`<div class="row" data-b="1"><div>‹ Back to users</div></div><div style="padding:12px 18px;line-height:1.6"><b style="font-size:18px">${esc(u.names)}</b><br>${esc(u.username)} · ${esc(u.phone)}<br><small style="color:var(--sub)">Joined ${admDate(u.created_at)}</small></div><div class="asec">Activity</div><div id="aus">${admLd()}</div><div class="asec">Plan</div>`
   +PLANS4.map(p=>`<div class="row" data-p="${p}"><span style="width:10px;height:10px;border-radius:50%;background:${PCOL[p]};flex:none"></span><div><b>${p}</b>${p==u.plan?"<small>Current plan"+(ex?" · "+ex:"")+"</small>":""}</div></div>`).join("")
   +'<div style="padding:8px 18px;color:var(--sub);font-size:13px;line-height:1.4">Tap a paid plan to choose how long it lasts. It ends by itself when the time is over.</div><div id="aum" style="padding:6px 18px 10px;color:var(--green);font-weight:600;min-height:20px"></div>';
- b.onclick=e=>{if(e.target.closest("[data-b]")){ADMSEQ++;admUsers();return}const p=e.target.closest("[data-p]")?.dataset.p;if(!p)return;
+ admStats(u,ADMSEQ);
+ b.onclick=e=>{if(e.target.closest("[data-b]")){ADMSEQ++;admUsers();return}const kk=e.target.closest("[data-k]")?.dataset.k;if(kk){admActs(u,kk);return}const p=e.target.closest("[data-p]")?.dataset.p;if(!p)return;
   if(p=="Free"){if(u.plan!="Free")uiConfirm("Change "+u.username+" to the Free plan?",()=>apply("Free",0),"Change plan")}else pick(p)}}
 
+/* USER ACTIVITY: counts shown at once on the user screen; tap a count to see what the learner did. Counts start from the day this was published. */
+const ACT_T=[["responses","Responses"],["copies","Copies"],["saved","Saved"],["likes","Likes"],["unlikes","Unlikes"],["shares","Shares"],["redos","Redos"]],
+ACT_L={ask:"Got an answer",copy:"Copied",save:"Saved",save_off:"Removed from saved",like:"Liked",like_off:"Removed the like",dislike:"Unliked (thumbs down)",dislike_off:"Removed the thumbs down",share:"Shared",redo:"Asked for a new answer"};
+async function admStats(u,seq){const j=await admCall("admin_user_stats",{p_user:u.id});if(seq!==ADMSEQ)return;const e=$("aus");if(!e)return;
+ if(!j.ok){e.innerHTML=admFail(j);return}
+ const n=x=>Number(x||0),tot=ACT_T.reduce((a,t)=>a+n(j[t[0]]),0);
+ e.innerHTML='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:6px 18px 4px">'+ACT_T.map(t=>`<div data-k="${t[0]}" style="cursor:pointer;border:1px solid var(--line);border-radius:12px;padding:10px 6px;text-align:center"><div style="font-size:22px;font-weight:800">${n(j[t[0]])}</div><div style="font-size:12px;color:var(--sub)">${t[1]}</div></div>`).join("")+'</div>'
+  +`<div style="padding:4px 18px 8px;color:var(--sub);font-size:13px;line-height:1.4">${n(j.opens)} app opens${j.last_action?" · last activity "+esc(new Date(j.last_action).toLocaleString()):""}. Tap a count to see the details.${tot?"":" Nothing recorded yet: counts begin from the day this feature was published."}</div>`}
+async function admActs(u,k){const s=++ADMSEQ,b=$("abody"),T=ACT_T.find(t=>t[0]==k);b.innerHTML=admLd();const j=await admCall("admin_user_actions",{p_user:u.id,p_kind:k,p_limit:100});if(s!==ADMSEQ)return;
+ b.onclick=e=>{if(e.target.closest("[data-b]"))admUser(u)};
+ b.innerHTML=`<div class="row" data-b="1"><div>‹ Back to ${esc(u.names)}</div></div><div class="asec">${esc(T?T[1]:k)} · ${esc(u.username)}</div>`
+  +(j.ok?((j.items||[]).length?j.items.map(x=>`<div class="row" style="cursor:default"><div style="flex:1;min-width:0"><b>${esc(ACT_L[x.action]||x.action)}</b><small>${esc(new Date(x.created_at).toLocaleString())}</small>${x.question?`<div style="margin-top:4px;line-height:1.4">“${esc(x.question)}”</div>`:""}${x.snippet?`<div style="margin-top:4px;color:var(--sub);font-size:13px;line-height:1.4">${esc(x.snippet)}</div>`:""}</div></div>`).join(""):'<div style="padding:18px;color:var(--sub)">Nothing recorded yet.</div>'):admFail(j))}
 /* PAY: payment screenshots sent by learners; delete removes the row from the database */
 async function admPay(){const s=ADMSEQ,b=$("abody");b.innerHTML=admLd();const j=await admCall("admin_proof_list");if(s!==ADMSEQ)return;
  if(!j.ok){b.innerHTML=admFail(j,1);b.onclick=e=>{if(e.target.closest("[data-r]"))admPay()};return}

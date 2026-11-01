@@ -5,7 +5,7 @@
    - Never touches Supabase or any other site. */
 
 const CACHE_PREFIX = "ask-tr-david-";
-const CACHE = CACHE_PREFIX + "v8";
+const CACHE = CACHE_PREFIX + "v9";
 const SHELL = ["./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png", "./badge-96.png", "./blank-96.png"];
 
 self.addEventListener("install", (event) => {
@@ -78,11 +78,13 @@ self.addEventListener("push", (event) => {
   }
   const id = data.id != null ? String(data.id) : String(Date.now());
   event.waitUntil((async () => {
-    // Heading = app name; the post's title goes on its own line above the message. No large picture on the right.
-    const post = String(data.title || "").replace(/^(update|announcement):\s*/i, "");
-    const line = [post, data.body].filter(Boolean).join("\n");
-    await self.registration.showNotification("Ask Tr. David", {
-      body: line.slice(0, 240),
+    // The post's title is the notification's own title (bold and larger on the phone).
+    // The body keeps the line breaks exactly as they were typed. No large picture on the right.
+    const post = String(data.title || "").replace(/^(update|announcement):\s*/i, "").trim();
+    const title = post || "Ask Tr. David";
+    const body = String(data.body || "");
+    await self.registration.showNotification(title, {
+      body: body.slice(0, 240),
       tag: "ann-" + id,
       icon: "./blank-96.png", // empty picture slot on the right (without it Android draws a letter)
       badge: "./badge-96.png",

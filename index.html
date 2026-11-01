@@ -2817,12 +2817,12 @@ async function dbAnswer(q,mode){
  return r?{t:mode?t:modelFromMd(t),aid:r.answer_id,fmt:mode?0:1}:null}
 /* NEW QUESTIONS: ask the ai_answer Edge Function. Gemini writes the answer once and it is saved as a draft in Supabase.
  The reply is built by tiered() so it follows the learner's plan; draft answers get the "AI generated, not yet checked" label. */
-const AIU=SBU.replace("/rest/v1/","/functions/v1/")+"ai_answer",escRe=x=>x.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+const AIU=SBU.replace("/rest/v1/","/functions/v1/")+"ai_answer_v2",escRex=x=>x.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
 async function aiAnswer(q,FUx){
  const c=new AbortController(),tm=setTimeout(()=>c.abort(),25000);
  try{
   const sub=D.sub=="General"?(detectSub(q)||"General"):D.sub;
-  const r=await fetch(AIU,{method:"POST",signal:c.signal,headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({question:String(q).slice(0,300),level:D.lvl,subject:sub,plan:planName(),curriculum:"Uganda NCDC",strict_subject:true,brief:!wantFull(),follow:FUx&&!FUx.local?{kind:FUx.kind,topic:FUx.topic,step:FUx.step||0,instruction:FUx.hint||"",previous:lastAnsText()}:undefined})});
+  const r=await fetch(AIU,{method:"POST",signal:c.signal,headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({question:String(q).slice(0,300),level:D.lvl,class:String(D.cls||"").replace(/^Primary /,"P").replace(/^Senior /,"S"),subject:sub,plan:planName(),curriculum:"Uganda NCDC",strict_subject:true,brief:!wantFull(),follow:FUx&&!FUx.local?{kind:FUx.kind,topic:FUx.topic,step:FUx.step||0,instruction:FUx.hint||"",previous:lastAnsText()}:undefined})});
   if(!r.ok)return null;
   const j=await r.json();
   if(j.status=="busy")return{busy:1};
@@ -3140,6 +3140,72 @@ function voiceItem(i,showOrig){
    fetch(STU,{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({text:x.source_md,model:x.model,level:x.level,plan:x.plan||"Free",depth:MODELS[x.model].r+(PBONUS[x.plan||"Free"]||0),t:tokNow(),regen:true,q:x.question||""})}).then(r=>r.json()).then(j=>{
     if(j&&j.status=="ok"){voiceRoom(null,"draft")}else{b.disabled=false;m.textContent=j&&j.status=="busy"?"Gemini is busy. Try again in a minute.":"Could not write it again. The old text is kept."}}).catch(()=>{b.disabled=false;m.textContent="Could not reach the server. The old text is kept."})}})}
 
+
+/* ===== VERIFICATION QUEUE (Training 08, owner only: Admin > Review > Verification queue) =====
+ New Gemini answers are saved as PENDING candidates (knowledge_pending). They are not trusted and never reused as knowledge.
+ Here the owner reads each one, edits the text if needed, then approves (needs a source, goes to the permanent verified store) or rejects (needs a reason).
+ Every decision is checked again in the database (owner login only). The older drafts in the topics table can be added to the queue with one tap. */
+const KBLBL={open:"Waiting",promoted:"Approved",rejected:"Rejected"};
+const KBFIELDS=[["name","Title",2],["definition","Definition",3],["steps","How it works",5],["uses","Where it is used",4],["simple","In simple words",4],["examples","Examples",5],["more","Mistakes and tips",5]];
+let KBT="open",KBL=[],KBC={},KBS=[];
+const kbErr=j=>j&&j.err=="not allowed"?"This room is only for the owner account.":j&&j.err=="net"?"No internet. Check your connection and try again.":"Could not load. Try again.";
+const kbOrig=o=>o=="import"?"Older draft":o=="admin"?"Written by you":"AI (Gemini)";
+const kbStat=s=>s=="under_review"?"Under review":s=="promoted"?"Approved":s=="rejected"?"Rejected":"Waiting";
+async function kbRoom(st,msg){
+ if(!isOwner())return;if(st)KBT=st;
+ showP("Verification queue",'<div style="padding:22px 18px;color:var(--sub)">Loading…</div>',SVBACK);
+ const j=await admCall("admin_pending_list",{p_status:KBT});
+ if(!j.ok){$("pbody").innerHTML='<div class="pbn" style="margin:14px 18px;line-height:1.5">'+kbErr(j)+'</div>';return}
+ KBL=j.items||[];KBC=j.counts||{};const n=admN;
+ let h=`<div style="padding:12px 18px;color:var(--sub);line-height:1.5">New AI answers wait here. Nothing in this list is trusted or reused until you approve it with a source. Learners already got their answer straight away.</div>
+ <div style="display:flex;gap:6px;padding:4px 18px 12px">${["open","promoted","rejected"].map(s=>svBtn(s==KBT,KBLBL[s]+" "+n(KBC[s]),"data-tab",s)).join("")}</div>
+ <div id="kbm" style="padding:0 18px 6px;min-height:18px;color:var(--sub)">${esc(msg||"")}</div>`;
+ if(KBT=="open"&&n(KBC.old_drafts)>0)h+=`<div class="row" data-imp="1"><div><b>Add ${n(KBC.old_drafts)} older AI drafts to this queue</b><small>Drafts saved before the queue existed. Safe to tap twice. Nothing is approved by this.</small></div></div>`;
+ if(!KBL.length)h+=`<div style="padding:18px;color:var(--sub);line-height:1.5">${KBT=="open"?"Nothing is waiting.":"Nothing here yet."}</div>`;
+ KBL.forEach((x,i)=>{h+=`<div class="row" data-it="${i}"><div><b>${esc("“"+x.question+"”")}</b><small>${esc((x.candidate&&x.candidate.name)||"")} · ${esc(x.level_code||"")} · ${esc(x.subject_name||"")} · ${kbOrig(x.origin)}${x.was_edited?" · edited":""}${KBT=="open"&&x.status=="under_review"?" · under review":""} · ${admDate(x.created_at)}</small></div></div>`});
+ showP("Verification queue",h,SVBACK,async e=>{
+  const t=e.target.closest("[data-tab]");if(t){kbRoom(t.dataset.tab);return}
+  if(e.target.closest("[data-imp]")){const m=$("kbm");if(m)m.textContent="Adding…";const r=await admCall("admin_import_old_drafts");
+   if(r.ok)kbRoom("open","Added "+n(r.queued)+" older drafts"+(r.skipped?" ("+n(r.skipped)+" skipped as duplicates)":"")+".");else if(m)m.textContent="Could not add them. Try again.";return}
+  const r=e.target.closest("[data-it]");if(r)kbItem(+r.dataset.it)})}
+async function kbItem(i,msg,keep){
+ const x=KBL[i];if(!x)return;const c=x.candidate||{},open=x.status=="pending"||x.status=="under_review";
+ if(open&&!KBS.length){const s=await admCall("admin_sources_list");if(s.ok)KBS=s.items||[]}
+ const T=k=>String(c[k]==null?"":c[k]),sec=(l,k)=>T(k)?`<div style="padding:6px 18px 0"><b>${l}</b></div><div class="md" style="padding:0 18px 4px;line-height:1.55">${md(T(k))}</div>`:"";
+ const quiz=Array.isArray(c.quiz)?c.quiz.map((q,j)=>{try{return `<div style="padding:4px 18px;line-height:1.5"><b>${j+1}. ${esc(q[0])}</b><br>${q[1].map((o,k)=>(k==q[2]?"✔ ":"– ")+esc(o)).join("<br>")}</div>`}catch(er){return""}}).join(""):"";
+ const warn=[];if(c.confidence_checked===false||c.confidence=="not checked")warn.push("Confidence: "+esc(c.confidence||"not checked")+" (the AI's own rating, not checked by anyone)");
+ if(c.curriculum_link)warn.push("Syllabus link: "+esc(c.curriculum_link.title||"")+" (unverified)");if(c.removed_topic)warn.push("Removed from the 2025 syllabus: "+esc(c.removed_topic));
+ if(c.not_sure_note)warn.push("The AI is unsure: "+esc(c.not_sure_note));
+ const sel=`<select id="kbs" class="ain" style="margin:6px 18px;width:calc(100% - 36px)"><option value="">Choose the source…</option>${KBS.map(s=>`<option value="${s.id}">${esc(s.title)}${s.version_label?" · "+esc(s.version_label):""}</option>`).join("")}</select>`;
+ const ed=KBFIELDS.map(f=>`<div style="padding:6px 18px 0;color:var(--sub);font-size:13px">${f[1]}</div><textarea id="kbf_${f[0]}" data-k="${f[0]}" style="display:block;width:calc(100% - 36px);margin:4px 18px;min-height:${f[2]*22}px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit;font-size:14px;line-height:1.5;box-sizing:border-box">${esc(T(f[0]))}</textarea>`).join("");
+ const bt=(a,l,col)=>`<button data-a="${a}" style="flex:1;min-width:30%;padding:12px 8px;border:0;border-radius:22px;font:inherit;font-weight:700;cursor:pointer;color:#fff;background:${col}">${l}</button>`;
+ showP(esc(c.name||"Answer"),`<div style="padding:12px 18px 4px;color:var(--sub);line-height:1.5">Learner asked: <b style="color:var(--text)">${esc(x.question)}</b><br>${esc(x.level_code||"")} · ${esc(x.subject_name||"")} · ${kbOrig(x.origin)}${x.model?" · "+esc(x.model):""}${x.prompt_version?" · "+esc(x.prompt_version):""} · <b>${kbStat(x.status)}</b>${x.was_edited?" · edited "+x.edit_count+"×":""}</div>
+ ${warn.length?`<div style="margin:8px 18px;padding:10px 12px;border-radius:10px;background:var(--wall);line-height:1.5;font-size:13px">${warn.join("<br>")}</div>`:""}
+ ${x.review_note?`<div style="padding:4px 18px;color:var(--sub);font-size:13px">Note: ${esc(x.review_note)}</div>`:""}
+ ${sec("Definition","definition")}${sec("How it works","steps")}${sec("Where it is used","uses")}${sec("In simple words","simple")}${sec("Examples","examples")}${sec("Mistakes and tips","more")}
+ ${quiz?`<div style="padding:8px 18px 0"><b>Quiz</b> (✔ is the answer the AI marked)</div>${quiz}`:""}
+ ${open?`<details style="padding:8px 0"${keep?" open":""}><summary style="padding:6px 18px;font-weight:600">Edit the text</summary>${ed}</details>
+ <div style="padding:6px 18px 0;color:var(--sub);font-size:13px">Source (needed to approve)</div>${sel}
+ <details style="padding:0 18px 6px;color:var(--sub);font-size:13px"><summary>Add a new source</summary><input id="kbst" class="ain" placeholder="Title, e.g. NCDC Biology syllabus 2025" style="margin:6px 0;width:100%;box-sizing:border-box"><select id="kbsy" class="ain" style="margin:0 0 6px;width:100%"><option value="ncdc_syllabus">NCDC syllabus</option><option value="uneb_guideline">UNEB guideline</option><option value="textbook">Textbook</option><option value="other">Other</option></select>${bt("src","Save source","#6b7280")}</details>`:""}
+ <div style="padding:6px 18px 0;color:var(--sub);font-size:13px">${open?"Note (a reason is needed to reject)":"Note"}</div>
+ <textarea id="kbn" style="display:block;width:calc(100% - 36px);margin:4px 18px;min-height:60px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit;font-size:14px;box-sizing:border-box" ${open?"":"disabled"}>${esc(open?"":(x.review_note||""))}</textarea>
+ <div id="kbm" style="padding:2px 18px;min-height:20px;color:var(--sub)">${esc(msg||"")}</div>
+ <div style="display:flex;gap:8px;flex-wrap:wrap;padding:6px 18px 28px">${open?bt("ok","Approve","#00a884")+bt("no","Reject","#ff453a")+bt("sv","Save edit","#3b82f6")+(x.status=="pending"?bt("ur","Mark under review","#6b7280"):bt("wt","Back to waiting","#6b7280")):x.status=="rejected"?bt("ro","Reopen","#6b7280"):""}</div>`,()=>kbRoom(),async e=>{
+  const b=e.target.closest("[data-a]");if(!b)return;const a=b.dataset.a,m=()=>$("kbm"),say=t=>{const z=m();if(z)z.textContent=t},note=()=>($("kbn")?$("kbn").value.trim():"");
+  const changed=()=>{const o={};KBFIELDS.forEach(f=>{const t=$("kbf_"+f[0]);if(t&&t.value.trim()!=T(f[0]).trim())o[f[0]]=t.value.trim()});return o};
+  const saveEdit=async()=>{const o=changed();if(!Object.keys(o).length)return true;say("Saving the edit…");const r=await admCall("admin_pending_edit",{p_id:x.id,p_candidate:o});
+   if(r.ok){x.candidate=Object.assign({},x.candidate,o);x.status="under_review";x.was_edited=true;x.edit_count=(x.edit_count||0)+1;return true}
+   say(r.err=="bad text"?"The text is not valid: "+(r.detail||""):r.err&&r.err.indexOf("already")==0?"This item was already decided.":"Could not save the edit. Try again.");return false};
+  const after=async(r,okMsg)=>{if(r.ok){try{if(a=="ok")TOP.forEach(t=>{if(t.tid==x.legacy_topic_id)t.ai=0})}catch(er){}kbRoom(null,okMsg)}else say(r.err=="a source is required"?"Choose the source first.":r.err=="reason needed"?"Write the reason in the note box.":r.err&&r.err.indexOf("already")==0?"This item was already decided.":r.err=="same question already waiting"?"The same question is already waiting.":"Could not save. Try again.")};
+  b.disabled=true;
+  try{
+   if(a=="sv"){if(!Object.keys(changed()).length){say("Nothing was changed.")}else if(await saveEdit())kbItem(i,"Edit saved. The first version is kept.",1)}
+   else if(a=="ok"){const src=$("kbs")?$("kbs").value:"";if(!src){say("Choose the source first.")}else if(await saveEdit()){say("Approving…");after(await admCall("admin_pending_approve",{p_id:x.id,p_source:src,p_note:note()||null}),"Approved and moved to the permanent store.")}}
+   else if(a=="no"){if(note().length<3){say("Write the reason in the note box.")}else{say("Rejecting…");after(await admCall("admin_pending_reject",{p_id:x.id,p_note:note()}),"Rejected.")}}
+   else if(a=="ur"||a=="wt"||a=="ro"){after(await admCall("admin_pending_mark",{p_id:x.id,p_status:a=="ur"?"under_review":"pending"}),a=="ro"?"Reopened.":"Updated.")}
+   else if(a=="src"){const t=$("kbst")?$("kbst").value.trim():"";if(t.length<3){say("Write the source title first.")}else if(await saveEdit()){say("Saving the source…");const r=await admCall("admin_source_add",{p_title:t,p_publisher:null,p_doc_type:$("kbsy").value,p_version:null,p_reference:null});
+     if(r.ok){const s=await admCall("admin_sources_list");if(s.ok)KBS=s.items||[];kbItem(i,"Source saved. Choose it above.",1)}else say(r.err||"Could not save the source.")}}
+  }finally{b.disabled=false}})}
 
 /* ===== ANNOUNCEMENTS AND UPDATES: What's new + Away alerts (phone alerts) =====
  The owner posts in Admin > Post. Everyone sees it in What's new (red dot on the avatar). When Away alerts is ON the phone is alerted:
@@ -3663,12 +3729,14 @@ function admGo(t){ADMTAB=t;ADMSEQ++;document.querySelectorAll("#adm .an button")
 /* HOME */
 async function admHome(){const s=ADMSEQ,b=$("abody");b.innerHTML=admLd();const j=await admCall("admin_stats");if(s!==ADMSEQ)return;
  if(!j.ok){b.innerHTML=admFail(j,1);b.onclick=e=>{if(e.target.closest("[data-r]"))admHome()};return}
+ const kq=await admCall("admin_pending_counts");if(s!==ADMSEQ)return;const KQ=kq.ok?kq:{open:0,promoted:0,old_drafts:0};
  const P=j.plans||{},n=admN,C=(l,v,sub)=>`<div class="ac"><span>${l}</span><b>${n(v)}</b><small>${sub}</small></div>`;
  b.innerHTML=`<div class="ag">${C("Learners",j.users_total,"+"+n(j.users_new_7d)+" this week")}${C("Signed in",j.logged_in_now,"accounts with a live login")}${C("Installs",j.installs_total,"+"+n(j.installs_7d)+" this week")}${C("Using today",j.devices_today,n(j.devices_7d)+" devices, "+n(j.accounts_7d)+" accounts this week")}</div>
  <div style="padding:0 18px 4px;color:var(--sub);font-size:12px;line-height:1.4">Installs and usage are counted from this version of the app onward.</div>
  <div class="asec">Plans</div><div style="display:flex;flex-wrap:wrap;gap:8px;padding:6px 18px 10px">${PLANS4.map(p=>`<span class="apl" style="background:${PCOL[p]}">${p} ${n(P[p])}</span>`).join("")}</div>
  <div class="asec">Waiting for you</div>
  <div class="row" data-g="asked"><div><b>${n(j.unanswered_open)}</b> questions not understood<small>Asked ${n(j.asked_unanswered)} times in total. Tap to teach the system</small></div></div>
+ <div class="row" data-g="kb"><div><b>${n(KQ.open)}</b> answers in the verification queue<small>AI answers waiting for your approval and a source. ${n(KQ.promoted)} approved into the permanent store${KQ.old_drafts?". "+n(KQ.old_drafts)+" older drafts can be added":""}</small></div></div>
  <div class="row" data-g="rq"><div><b>${n(j.topics_waiting)}</b> AI answers to check<small>${n(j.topics_published)} approved so far</small></div></div>
  <div class="row" data-g="rr"><div><b>${n(j.styles_waiting)}</b> model rewrites to check<small>${n(j.styles_approved)} approved so far</small></div></div>
  <div class="asec">Library</div>
@@ -3676,7 +3744,7 @@ async function admHome(){const s=ADMSEQ,b=$("abody");b.innerHTML=admLd();const j
  <div class="asec">Project</div>
  <div class="row" data-g="ho"><div>Project handoff<small>Notes and files for the next Claude. Only you see this</small></div></div>
  <div class="row" data-g="rf"><div>Refresh</div></div>`;
- b.onclick=e=>{const g=e.target.closest("[data-g]")?.dataset.g;if(!g)return;if(g=="asked")admGo("asked");else if(g=="rq")voiceRoom("q","draft");else if(g=="rr")voiceRoom("r","draft");else if(g=="ho")handoff();else if(g=="rf")admHome()}}
+ b.onclick=e=>{const g=e.target.closest("[data-g]")?.dataset.g;if(!g)return;if(g=="asked")admGo("asked");else if(g=="kb")kbRoom("open");else if(g=="rq")voiceRoom("q","draft");else if(g=="rr")voiceRoom("r","draft");else if(g=="ho")handoff();else if(g=="rf")admHome()}}
 
 /* USERS: find by username or phone, change plan */
 function admUsers(){const s=ADMSEQ,b=$("abody");
@@ -3751,10 +3819,12 @@ function admAskOne(x){if(!x)return;const s=++ADMSEQ,b=$("abody");let R=[];
 async function admReview(){const s=ADMSEQ,b=$("abody");b.innerHTML=admLd();const j=await admCall("admin_stats");if(s!==ADMSEQ)return;
  if(!j.ok){b.innerHTML=admFail(j,1);b.onclick=e=>{if(e.target.closest("[data-r]"))admReview()};return}
  const n=admN;
+ const kq=await admCall("admin_pending_counts");if(s!==ADMSEQ)return;const KQ=kq.ok?kq:{open:0,promoted:0};
  b.innerHTML=`<div style="padding:12px 18px;color:var(--sub);line-height:1.5">Learners get their answers straight away, with no label. Here you see what they asked and decide what is kept for good: approve, edit or reject.</div>
+ <div class="row" data-k="kb"><div><b>${n(KQ.open)}</b> in the verification queue<small>New AI answers are checked here. Approving needs a source. ${n(KQ.promoted)} approved</small></div></div>
  <div class="row" data-k="q"><div><b>${n(j.topics_waiting)}</b> new questions waiting<small>Answers the AI wrote for questions with no saved answer. ${n(j.topics_published)} approved</small></div></div>
  <div class="row" data-k="r"><div><b>${n(j.styles_waiting)}</b> model rewrites waiting<small>Teacher, Tutor, Lecturer and the other models. ${n(j.styles_approved)} approved</small></div></div>`;
- b.onclick=e=>{const k=e.target.closest("[data-k]")?.dataset.k;if(k)voiceRoom(k,"draft")}}
+ b.onclick=e=>{const k=e.target.closest("[data-k]")?.dataset.k;if(k=="kb")kbRoom("open");else if(k)voiceRoom(k,"draft")}}
 
 /* AI: how each model writes */
 async function admAi(){const s=ADMSEQ,b=$("abody");b.innerHTML=admLd();const j=await admCall("admin_prompts_get");if(s!==ADMSEQ)return;

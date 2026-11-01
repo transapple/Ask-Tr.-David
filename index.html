@@ -2924,25 +2924,105 @@ function keyTerms(N){const s=[N.d].concat(N.pts),o=[];s.forEach(x=>{(String(x).m
  if(!o.length)N.n.split(/\s+/).filter(w=>w.length>3).forEach(w=>o.push(w));return o.slice(0,8)}
 /* NCDC/UNEB competency-based (scenario) format. Item = scenario + information; Tasks ask the learner to identify, explain,
    apply and evaluate; the marking guide lists what a competent answer shows. No marks or times are shown. */
-const CBA_SUB={
- "English Language":T=>({o:"A school press club in Uganda is preparing material on "+T+" for the school magazine.",b:"Explain, in your own words, the main ideas about "+T+" that the club should include.",c:"Write a short passage or letter for the magazine that recommends how learners can make good use of "+T+".",d:"Explain why clear communication matters when presenting "+T+" to the community."}),
- "Mathematics":T=>({o:"A trader, farmer or planner in a Ugandan community needs to solve a real-life problem that involves "+T+".",b:"Explain the method or rule of "+T+" that applies to the problem, showing your working where needed.",c:"Apply "+T+" to solve the problem in the item and interpret your answer in the situation.",d:"Evaluate whether your answer is reasonable and suggest how it could be checked."}),
- "Physics":T=>({o:"Learners in a school science club in Uganda are carrying out an investigation on "+T+".",b:"Explain, using physics ideas, what the learners observe or measure.",c:"Suggest how the learners can use their results or the ideas of "+T+" to solve a practical problem.",d:"Explain why accurate observation and measurement matter in this investigation."}),
- "Chemistry":T=>({o:"A school laboratory team in Uganda is investigating substances and reactions linked to "+T+".",b:"Explain what the team should observe and what the observations show.",c:"Suggest how the team can use the ideas of "+T+" to draw a conclusion or solve a problem.",d:"Explain why safety and careful recording matter in this investigation."}),
- "Biology":T=>({o:"A community in Uganda is facing a health, farming or environmental problem linked to "+T+".",b:"Explain how the ideas of "+T+" help to account for the problem.",c:"Suggest four measures the community could take to deal with the problem.",d:"Explain why community participation is important in dealing with the problem."}),
- "History and Political Education":T=>({o:"A community history club in Uganda is studying sources and accounts about "+T+".",b:"Explain the causes and the effects of "+T+" using evidence from the item.",c:"Suggest lessons that the community and the nation can learn from "+T+".",d:"Evaluate how reliable the evidence in the item is."}),
- "Geography":T=>({o:"A district planning team in Uganda is studying a geographical problem linked to "+T+".",b:"Explain the geographical factors behind the problem, using the information in the item.",c:"Recommend ways the team can solve or reduce the problem.",d:"Explain why the plan should involve local people and protect the environment."})
+/* STEP 2 - SCENARIO-BASED QUESTION INTELLIGENCE (NCDC/UNEB competency-based style).
+   A scenario is not a story stuck on an ordinary question. Each item is built from the topic's own facts:
+   - a real setting (family, school, hospital, farm, business, community, environment, investigation, geography, history)
+   - numbered information (i), (ii), (iii) taken from the topic, with worked answers held back for the guide
+   - tasks that each point back to one piece of information and ask for a different competency
+     (identify, explain/apply, advise/recommend, evaluate)
+   - a self-check (scenarioCheck) that rejects an item whose tasks do not use the item.
+   These are AI-generated practice items. They are not UNEB questions and carry no official marks. */
+const SCX={
+ family:{o:"the Okello family in Gulu",who:"the family",pr:"has to make a decision at home"},
+ school:{o:"a secondary school in Mbarara",who:"the school",pr:"has to plan an activity for learners"},
+ hospital:{o:"a health centre in Masaka",who:"the health workers",pr:"have to advise patients and the community"},
+ farm:{o:"Mrs Atim's farm near Lira",who:"the farmer",pr:"has to solve a problem on the farm"},
+ business:{o:"Mr Ssemakula's shop in Kampala",who:"the trader",pr:"has to make a business decision"},
+ community:{o:"a village community in Kabale",who:"the community leaders",pr:"have to deal with a community problem"},
+ environment:{o:"residents near a wetland in Wakiso",who:"the residents",pr:"have to protect their environment"},
+ investigation:{o:"a Senior Three class carrying out a school investigation",who:"the learners",pr:"have to draw a conclusion from what they find"},
+ geographical:{o:"a district planning team in Mbale",who:"the planning team",pr:"has to plan using the geographical facts"},
+ historical:{o:"a community history club in Jinja",who:"the club",pr:"has to judge what the sources tell them"}
 };
-function cbaBuild(N,d,c,k){k=k||0;const T=c.T,P=c.P,SUB=(typeof D!=="undefined"&&D.sub)||"",
- f=(CBA_SUB[SUB]||(T=>({o:"A school in Uganda is preparing a display on "+T+".",b:"Explain the key facts about "+T+" as outlined in the item.",c:"Advise the learners on how "+T+" can be used in daily life.",d:"Explain why "+T+" is important to the community."})))(T),
- pts=P.filter(x=>x!==N.d),body=pts.length?pts:P,uses=(N.uses.length?N.uses:N.ex).concat(body),rot=a=>a.length?a.slice(k).concat(a.slice(0,k)):a,
- info=(k&&N.uses.length?N.uses:(N.ex.length?N.ex:uses)).slice(k?0:0,k?1:2).map(x=>String(x).replace(/[.]+$/,"")+".");
- const lab=["A","B","C","D"],tasks=["Identify and define "+T+" based on the item.",f.b,f.c].concat(d>=3?[f.d]:[]),
- ans=[[N.d||P[0]||"-"],take(rot(body),3),take(rot(uses),3),take(rot(body).slice(3).concat(body),3)].map(a=>a.filter((x,i)=>a.indexOf(x)==i));
- const item="**Item:**\n"+f.o+(info.length?"\n**Information:** "+info.join(" "):"")+"\nA visiting inspector asks the learners to explain what they have found.",
-  tk=tasks.map((t,i)=>"**Task "+lab[i]+":** "+t).join("\n"),
-  guide=tasks.map((t,i)=>"**Task "+lab[i]+":**\n"+ul(ans[i].filter(Boolean).length?ans[i].filter(Boolean):["-"])).join("\n")+"\n- Accept any other correct point that uses details from the item.";
- return{item,tk,guide}}
+const SCX_BY={
+ "Mathematics":["business","farm","family","school"],
+ "Biology":["hospital","farm","community","environment"],
+ "Chemistry":["investigation","hospital","environment","farm"],
+ "Physics":["investigation","family","school","business"],
+ "Geography":["geographical","environment","community","farm"],
+ "History and Political Education":["historical","community","school"],
+ "English Language":["school","community","business"],
+ "Agriculture":["farm","business","environment"],
+ "Entrepreneurship Education":["business","family","community"]
+};
+/* what Task A and Task B ask for, by subject. Both must use the numbered information. */
+const SCX_A={
+ "Mathematics":"State the rule or formula that information (i) needs, then use it to find the result.",
+ "Physics":"State the physics idea that information (i) illustrates and explain it briefly.",
+ "Chemistry":"State the chemistry idea that information (i) illustrates and explain it briefly."
+};
+const SCX_B={
+ "Mathematics":"Find the result that information (ii) asks for and show your working.",
+ "Physics":"Explain, using physics ideas, what information (ii) shows.",
+ "Chemistry":"Explain, using chemistry ideas, what information (ii) shows.",
+ "Biology":"Explain, using biology ideas, what information (ii) shows about the situation.",
+ "Geography":"Explain the geographical factors that information (ii) points to.",
+ "History and Political Education":"Use information (ii) as evidence to explain a cause and an effect.",
+ "English Language":"Explain how the ideas in information (ii) should be expressed in speech or writing."
+};
+const scxClean=x=>String(x).replace(/\*\*/g,"").replace(/[.\s]+$/,"").trim();
+/* a worked result is hidden from the item: "a x b = c" shows as "a x b (find the result)"; the guide keeps the full line */
+const scxHide=x=>{x=scxClean(x);const p=[];let i=-1;while((i=x.indexOf("=",i+1))>=0)p.push(i);
+ if(!p.length||p[p.length-1]<3)return x;
+ let cut=p[p.length-1];
+ /* two or more "=": drop the working too (a x b = c) unless the middle part is given data such as "1 USD = 3 700 UGX, then 10 USD" */
+ if(p.length>1&&!/,|\bthen\b/.test(x.slice(p[p.length-2]+1,cut)))cut=p[p.length-2];
+ return x.slice(0,cut).trim()+" (find the result)"};
+const scxWords=x=>String(x).trim().split(/\s+/).length;
+function scxMake(N,d,c,k,sh){k=k||0;sh=sh||0;const T=c.T,P=c.P,SUB=(typeof D!=="undefined"&&D.sub)||"",
+ order=SCX_BY[SUB]||["community","school","family","business"],ck=order[k%order.length],X=SCX[ck],
+ math=/^(Mathematics|Physics|Chemistry)$/.test(SUB),
+ uses=(N.uses||[]).map(scxClean),
+ /* information = concrete cases first (examples), then the topic's rules. Use-labels such as "Saving and borrowing" are NOT information. */
+ pool=[].concat(N.ex||[],N.pts||[]).map(scxClean).filter((x,i,a)=>x&&a.indexOf(x)==i&&!uses.includes(x)&&scxWords(x)>=4&&!(math&&/=/.test(x)&&scxHide(x)==scxClean(x))),
+ start=pool.length>2?(k*2+sh)%pool.length:0,rot=pool.slice(start).concat(pool.slice(0,start)),
+ full=rot.slice(0,2);
+ while(full.length<2&&P[full.length])full.push(scxClean(P[full.length]));
+ const hide=math,shown=full.map(x=>hide?scxHide(x):scxClean(x)),
+ stem="This item is about "+T+". In "+X.o+", "+X.who+" "+X.pr+". They have gathered the following information.",
+ A=SCX_A[SUB]||"From information (i), identify the idea being described and define "+T+".",
+ B=SCX_B[SUB]||"Explain what information (ii) shows and how "+T+" helps to understand it.",
+ tasks=[A,B,"Advise "+X.who+" on what to do. Use information (i) and (ii) and your knowledge of "+T+" to support your advice."]
+  .concat(d>=3?["Evaluate your advice: give one strength and one limit, and refer to the item in your answer."]:[]),
+ lab=["A","B","C","D"],
+ item="**Item:**\n"+stem+"\n"+shown.map((x,i)=>"**Information "+["(i)","(ii)"][i]+":** "+x+(/[?!)]$/.test(x)?"":".")).join("\n"),
+ tk=tasks.map((t,i)=>"**Task "+lab[i]+":** "+t).join("\n"),
+ rest=P.filter(x=>x!==N.d&&!full.map(scxClean).includes(scxClean(x))).map(scxClean),
+ gA=[(math?"Worked answer: "+full[0]+".":(N.d||P[0]||"-")),"Link: the learner points to the detail in information (i) that shows the idea."].concat(math?take(rest,1):[]),
+ gB=[(math?"Worked answer: "+full[1]+".":"Point drawn from information (ii): "+full[1]+".")].concat(take(rest,2)),
+ gC=take(uses.length?uses:rest,3).map(x=>"Idea to draw on: "+x).concat(["Link: the advice must rely on a detail in information (i) or (ii), not on general knowledge alone."]),
+ gD=["A strength: the advice follows from a fact in the item (the learner names it).","A limit: the item gives only some of the facts, so the advice may need checking."].concat((N.mis&&N.mis.length)?["Watch for this error: "+scxClean(N.mis[0])+"."]:[]),
+ ans=[gA,gB,gC,gD],
+ guide=tasks.map((t,i)=>"**Task "+lab[i]+":**\n"+ul(ans[i].filter(Boolean))).join("\n")+"\n- Accept any other correct point that uses details from the item.",
+ q={item,tk,guide,tasks,facts:full,shown,hide,uses,ctx:ck};
+ q.bad=scenarioCheck(q,T);return q}
+/* build, check, and try other facts if the check fails; if nothing passes, the best attempt is returned with its problems listed in .bad */
+function cbaBuild(N,d,c,k){let first=null;for(let sh=0;sh<8;sh++){const q=scxMake(N,d,c,k,sh);if(!first)first=q;if(!q.bad.length)return q}return first}
+/* self-check: an item is rejected if its information is not real data, gives away its own answer, or the tasks do not use it */
+function scenarioCheck(q,T){const bad=[],t=q.tasks||[],f=q.facts||[],esc=String(T).replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+ if(f.length<2)bad.push("fewer than 2 facts in the item");
+ if(!new RegExp(esc,"i").test(q.item))bad.push("item does not name the topic");
+ if(f.length>1&&scxClean(f[0])==scxClean(f[1]))bad.push("the two facts are the same");
+ f.forEach((x,i)=>{if(scxWords(x)<4)bad.push("information "+(i+1)+" is too short to be data");
+  if((q.uses||[]).includes(scxClean(x)))bad.push("information "+(i+1)+" is a use-label, not data");
+  if(q.hide&&/=/.test(x)&&(q.item||"").includes(scxClean(x)))bad.push("information "+(i+1)+" gives away its own result")});
+ if(t.length<3)bad.push("fewer than 3 tasks");
+ if(!/information \(i\)/i.test(t[0]||""))bad.push("Task A does not use information (i)");
+ if(!/information \(ii\)/i.test(t[1]||""))bad.push("Task B does not use information (ii)");
+ if(!(/\(i\)/.test(t[2]||"")&&/\(ii\)/.test(t[2]||"")))bad.push("Task C does not use both pieces of information");
+ if(t[3]&&!/item/i.test(t[3]))bad.push("Task D does not refer to the item");
+ if(/preparing a display|preparing material/i.test(q.item))bad.push("generic filler story");
+ return bad}
 
 /* NCDC lesson-notes format (Teaching & Lessons models): Topic, Sub-topic, Learning Outcomes, Key Concepts and Definitions,
    Detailed Explanations, Examples and Illustrations, Diagrams/Maps/Equations/Formulas, Practical Activities or Applications,
@@ -3660,8 +3740,56 @@ function interpApply(q,I){
   return{FU:{q:qq,kind,sub:c.sub,topic:c.tq,step:cnt,hint:FU_HINT[kind]||FU_HINT.custom,chkk:kind=="quiz"?null:pk(cu?FU_CU:FU_CM,cnt+nn),gem:1},q:qq}}
  if(I.intent==="new"&&std)return{FU:null,q:std};
  return null}
+/* STEP 5 - ANSWERING A PASTED SCENARIO QUESTION (every subject, every level).
+   When a learner types or dictates a question that has a scenario and several tasks, the app does NOT look for a topic.
+   It sends the WHOLE text (not the usual 300 characters) to the scenario_answer function, which answers task by task.
+   Layout (owner requirement): Understood -> one heading per task with Answer and Why -> Gaps flagged -> practice-scoring note.
+   Nothing here is saved as knowledge; saving needs the existing approval process (Step 9). */
+const SCN_MARK=/(\(\s*[a-h]\s*\)|\b[a-h]\)\s|\(\s*(i|ii|iii|iv|v|vi)\s*\)|\b(task|part)\s*\(?[a-h]\b|\bquestion\s*\d+)/gi;
+const SCN_CUE=/\b(read the (following|passage|extract|information|scenario)|study the (following|information|table|graph|diagram|passage|map|data)|scenario|item:|the following (table|data|information|passage)|use the information|based on the (information|passage|table|graph)|given that)/i;
+const SCN_CMD=/\b(calculate|explain|suggest|advise|evaluate|identify|state|describe|discuss|determine|find|show|outline|justify|recommend|design|draw|write|compare|analy[sz]e|name|list|give|account for|deduce|predict|solve|prove|construct|differentiate|distinguish|assess|comment)\b/gi;
+/* true for a long question with several tasks or a scenario, whatever the subject; dictated text with no (a)(b) marks still counts if it is long and full of command words */
+function looksScenario(t){t=String(t||"");const L=t.length;if(L<150)return false;
+ const mk=(t.match(SCN_MARK)||[]).length,cm=(t.match(SCN_CMD)||[]).length,cue=SCN_CUE.test(t);
+ if(mk>=2&&cm>=1)return true;
+ if(cue&&cm>=2&&L>=200)return true;
+ return L>=250&&cm>=3}
+const scnLabel=x=>{x=String(x||"").trim().replace(/^task\s*/i,"");if(!x)return"Task";return"Task "+(/^[a-z0-9]+$/i.test(x)?"("+x+")":x)};
+/* turn the server's answer into the owner's layout; a task is never skipped, an unanswered task says so */
+function scnRender(j,raw){const cl=x=>String(x==null?"":x).trim(),T=Array.isArray(j.tasks)?j.tasks:[];let o="**Understood:** "+(cl(j.understood)||"I read your question.")+(j.cleaned?" I tidied the wording because it looked dictated.":""),marks=false;
+ T.forEach(t=>{const a=cl(t.answer)||"I could not work this task out from what was given.",w=cl(t.why);
+  o+="\n\n## "+scnLabel(t.label)+"\n"+(/\n/.test(a)?"**Answer:**\n"+a:"**Answer:** "+a)+(w?"\n\n**Why:** "+w:"");
+  if(cl(t.marks)){marks=true;o+="\n\n**Marks (practice):** "+cl(t.marks)}});
+ const g=(Array.isArray(j.gaps)?j.gaps:[]).map(cl).filter(Boolean);
+ if(g.length)o+="\n\n## Gaps flagged\n"+g.map(x=>"- "+x).join("\n");
+ o+="\n\n*This is an AI-generated practice answer, not an official UNEB answer."+(marks?" Marks shown are AI-generated practice scoring, not official UNEB scoring.":"")+"*";
+ return o}
+async function askScenario(q){
+ if(capped())return limitMsg();
+ const now=Date.now(),raw=String(q).replace(/[ \t]+\n/g,"\n").trim().slice(0,6000);stamps=stamps.filter(t=>now-t<6e4);
+ const err=x=>{D.msgs.push({s:"i",err:1,t:x,q:raw.slice(0,300),ts:Date.now()});save();render()};
+ if(!navigator.onLine)return err("No internet connection. Check your network and try again.");
+ if(stamps.length>=8)return err("Too many requests. Please wait a minute and try again.");
+ stamps.push(now);const tok=++AN;window.ASKQ_RAW=raw;window.ASKQ=raw;
+ const ch=D.chats.find(c=>c.id==D.cur);if(ch&&(ch.title=="New chat"||ch.title=="Chat"))ch.title=raw.slice(0,32);
+ $("stat").textContent="reading the scenario…";$("send").innerHTML=STOP;
+ const m={s:"i",t:"",ts:Date.now(),q:raw.slice(0,300),stream:1,scn:1,tq:raw.slice(0,120),tsub:D.sub};
+ D.msgs.push(m);sm=m;stream=setTimeout(()=>{},9e5);render();
+ let j=null;const c=new AbortController(),tm=setTimeout(()=>c.abort(),50000);
+ try{const r=await fetch(SBU.replace("/rest/v1/","/functions/v1/")+"scenario_answer",{method:"POST",signal:c.signal,headers:{apikey:SBK,"Content-Type":"application/json"},
+   body:JSON.stringify({text:raw,level:D.lvl,class:String(D.cls||"").replace(/^Primary /,"P").replace(/^Senior /,"S"),subject_hint:D.sub=="General"?"":D.sub,plan:planName(),curriculum:"Uganda NCDC"})});
+  if(r.ok)j=await r.json()}catch(e){j=null}finally{clearTimeout(tm)}
+ /* the learner pressed stop, or asked something else while we waited */
+ if(stream==null||tok!=AN){D.msgs=D.msgs.filter(x=>x!==m);save();render();return}
+ const drop=()=>{D.msgs=D.msgs.filter(x=>x!==m);sm=null;stopS()};
+ if(j&&j.ok&&j.is_scenario===false){drop();return askCore(q,null,null)}
+ if(!j||!j.ok||!Array.isArray(j.tasks)||!j.tasks.length){const busy=j&&j.status=="busy";drop();
+  return err(busy?"Many learners are asking right now. Please try again in a little while.":"I could not read and answer this question just now. Check your network and send it again.")}
+ m.t=scnRender(j,raw);if(j.subject&&typeof subsList=="function"&&subsList().includes(j.subject))m.tsub=j.subject;
+ stopS();logAct("ask",m,m.t)}
 function ask(q,mode){
  if(stream!=null||INTP)return;
+ if(!mode&&looksScenario(q))return askScenario(q);
  if(mode||!navigator.onLine||String(q).trim().length<2||ctxPart(q)||ctxExpand(q))return askCore(q,mode,null);
  INTP=true;$("stat").textContent="understanding…";
  interpretQ(q).then(I=>I,()=>null).then(I=>{INTP=false;$("stat").textContent="Anything about your studies";askCore(q,mode,I)})}

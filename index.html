@@ -775,7 +775,12 @@ let annT=0;
    Mark as read = marks it read in What's new (red dot goes) and closes. Hide = closes, it stays unread in What's new. Several at once show one after another. */
 let annQ=[],annCur=null;
 function annShow(x){annCur={id:x.id!=null?x.id:null,ts:x.ts};$("annt").textContent=x.t;$("annb").textContent=x.b||"";$("ann").style.display="flex";try{$("annb").scrollTop=0}catch(e){}}
-function annNext(){if($("ann").style.display=="flex")return;const x=annQ.shift();if(x)annShow(x)}
+/* The pop-up waits until the app has loaded and settled (about 5 seconds after opening, same as the rating pop-up), never appears while someone is typing or another pop-up is open, and is the same for EVERY user. */
+let annSettled=false,annGate=null;
+function annBusy(){const a=document.activeElement;return !!(a&&/^(INPUT|TEXTAREA)$/.test(a.tagName)&&a.id!=="annt")||!!document.getElementById("wkm")||document.hidden||(document.getElementById("auth")&&document.getElementById("auth").style.display!=="none")}
+function annNext(){if($("ann").style.display=="flex")return;if(!annSettled||annBusy()){if(annQ.length&&!annGate)annGate=setInterval(()=>{if(annSettled&&!annBusy()){clearInterval(annGate);annGate=null;annNext()}},1500);return}const x=annQ.shift();if(x)annShow(x)}
+setTimeout(()=>{annSettled=true;annNext()},5000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)setTimeout(annNext,1200)});
 function annPush(x){annQ.push(x);annNext()}
 function hideAnn(){$("ann").style.display="none";annCur=null;annNext()}
 function annRead(){try{const c=annCur;if(c){const n=D.notes.find(z=>c.id!=null?z.id==c.id:z.ts===c.ts);if(n){n.r=1;save();updateBadge()}}}catch(e){}hideAnn()}
@@ -3871,7 +3876,7 @@ async function annSync(){
    if(first)return;/* a new install starts fresh: everything posted before its first sign-in is skipped, no list entry, no red dot, no banner, no alert */
    added++;const ts=new Date(a.created_at).getTime();
    D.notes.unshift({id:a.id,t:annTitle(a),b:a.body||"",ts,r:0});
-   if(document.hidden)devAlert(a);else annBanner(a)});
+   if(document.hidden)devAlert(a);annBanner(a)/* also queued, so it pops up when the person comes back to the app */});
   D.annInit=1;if(added){D.notes.sort((x,y)=>y.ts-x.ts);D.notes=D.notes.slice(0,50)}save();updateBadge()}
  catch(e){}finally{ANN_BUSY=0}}
 setInterval(()=>{if(!document.hidden||D.notif)annSync()},60000);
@@ -3996,7 +4001,7 @@ function payBind(){const f=$("pyf"),b=$("pyb"),sb=$("pys");if(!f||!b||!sb)return
   sb.textContent="Submit screenshot";
   if(j&&j.ok){PAYIMG="";$("pyv").innerHTML="";f.value="";b.textContent="Choose screenshot";$("pym").textContent="Screenshot sent. We will confirm your payment and activate your plan."}
   else{sb.disabled=false;uiAlert(j&&j.err=="too many"?"You have sent many screenshots today. Please contact us on WhatsApp.":j&&j.err=="login"?"Please log in again, then send the screenshot.":"Could not send. Check your internet and try again.")}}}
-function expLine(){try{const pn=planName();if(pn=="Free")return"";const e=localStorage.getItem(PK()+"_exp");if(!e)return"";const d=new Date(e);if(isNaN(d))return"";return `<div style="margin-top:8px;color:var(--sub);font-size:14px">Your plan ends <b>${esc(d.toLocaleString())}</b></div>`}catch(x){return""}}
+function expLine(){try{const pn=planName();if(pn=="Free")return"";const e=localStorage.getItem(PK()+"_exp");if(!e)return"";const d=new Date(e);if(isNaN(d))return"";return `<div style="margin-top:12px;padding:9px 12px;border-radius:10px;background:rgba(0,0,0,.32);color:#fff;font-size:15px;font-weight:600;line-height:1.4;text-shadow:0 1px 2px rgba(0,0,0,.35)">Your plan ends <b style="color:#fff;font-weight:800">${esc(d.toLocaleString())}</b></div>`}catch(x){return""}}
 function plans(fs){
  const q=FQ(),P=[["Basic","500","2,800","9,000","Adds Tutor and Instructor, and a stronger Examiner and Teacher","#2f80ed"],["Standard","750","4,550","16,500","Adds Lecturer and Researcher; Teacher, Tutor, Instructor and Examiner answer deeper","#00a884"],["Premium","1,100","6,650","24,000","Adds Professor, Mentor, Librarian and Philosopher; every model answers at its fullest","#8b5cf6"]],
  cur=planName(),RK={Free:0,Basic:1,Standard:2,Premium:3},UP=P.filter(x=>RK[x[0]]>RK[cur]||(cur=="Premium"&&x[0]=="Premium")),

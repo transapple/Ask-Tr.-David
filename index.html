@@ -81,6 +81,25 @@ html[data-font=mono] body,html[data-font=mono] button,html[data-font=mono] input
 #hbk{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));left:14px;width:46px;height:46px;border-radius:50%;border:0;background:var(--bar);color:var(--text);box-shadow:0 2px 10px rgba(0,0,0,.18);display:grid;place-items:center;z-index:4;padding:0}#hbk svg{width:22px;height:22px}
 #hsb{position:absolute;left:16px;right:16px;bottom:calc(14px + env(safe-area-inset-bottom,0px));background:var(--bar);border-radius:30px;box-shadow:0 4px 18px rgba(0,0,0,.2);display:flex;align-items:center;gap:12px;padding:0 18px;height:56px;z-index:4}#hsb svg{width:22px;height:22px;color:var(--sub);flex:none}#hsb input{flex:1;min-width:0;border:0;outline:0;background:none;color:var(--text);font:inherit;font-size:16px}
 .lc .lcm{max-height:92px;overflow:hidden;font-size:15px;-webkit-mask-image:linear-gradient(#000 60%,transparent);mask-image:linear-gradient(#000 60%,transparent)}.lc.open .lcm{max-height:none;-webkit-mask-image:none;mask-image:none}
+#tb{display:flex;align-items:center;gap:10px;color:var(--sub);font-size:15px;width:fit-content;max-width:82%;transition:opacity .17s}#tb.sw{opacity:.2}
+#tb .tbd{display:inline-flex;align-items:center;gap:3px;min-width:34px;height:20px}
+#tb .tbd i{display:block;width:7px;height:7px;border-radius:50%;background:var(--green)}
+#tb.s0 .tbd i{animation:tb0 1s infinite ease-in-out}
+#tb.s1 .tbd i{animation:tb1 .9s infinite ease-in-out;border-radius:2px;background:#e8590c}
+#tb.s2 .tbd i{animation:tb2 1.2s infinite linear;background:#1c7ed6}
+#tb.s3 .tbd i{display:none}#tb.s3 .tbd::after{content:"";width:16px;height:16px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--green);animation:tbs .8s linear infinite}
+#tb.s4 .tbd i{width:4px;height:16px;border-radius:2px;background:#7048e8;animation:tb4 .9s infinite ease-in-out}
+#tb.s5 .tbd i{animation:tb5 1.3s infinite ease-in-out}
+#tb.s6 .tbd i{width:9px;height:9px;background:#d6336c;animation:tb6 1.1s infinite ease-in-out}
+#tb .tbd i:nth-child(2){animation-delay:.15s}#tb .tbd i:nth-child(3){animation-delay:.3s}
+#tb.s1{border-left:3px solid #e8590c}#tb.s2{border-left:3px solid #1c7ed6}#tb.s4{border-left:3px solid #7048e8}#tb.s6{border-left:3px solid #d6336c}
+@keyframes tb0{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-6px);opacity:1}}
+@keyframes tb1{0%,100%{transform:scale(.6);opacity:.5}50%{transform:scale(1.35);opacity:1}}
+@keyframes tb2{0%{transform:translateX(-4px);opacity:.2}50%{transform:translateX(4px);opacity:1}100%{transform:translateX(-4px);opacity:.2}}
+@keyframes tbs{to{transform:rotate(360deg)}}
+@keyframes tb4{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1.2)}}
+@keyframes tb5{0%,100%{background:var(--green);transform:scale(.7)}33%{background:#e8590c;transform:scale(1.2)}66%{background:#1c7ed6;transform:scale(.9)}}
+@keyframes tb6{0%,100%{transform:translateY(3px) scale(.8)}50%{transform:translateY(-3px) scale(1.2)}}
 .doc{padding:16px 20px 40px;line-height:1.55;font-size:15px}.doc h3{margin:20px 0 4px;font-size:16px}.doc p{margin:0 0 8px;color:var(--text)}
 </style>
 <meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
@@ -502,7 +521,7 @@ function render(){
  if(m.s=="i"){h+=bub(m,i,i==lb);return}
  h+=`<div class="b ${m.s}" data-i="${i}">${m.img?'<img src="'+m.img+'">':""}${hl(m.t)}<small>${m.ed?"edited ":""}${hm(m.ts)}${m.s=="o"?`<span class="${m.st==2?"rd":""}" style="display:inline-flex">${m.st?K2:K1}</span>`:""}</small></div>`});
  if(!D.msgs.length&&!q)h=empty();$("cnt").textContent=q?n+" found":"";if(q&&!n)h='<div class="day">No messages found</div>';
- $("msgs").innerHTML=h;$("msgs").scrollTop=1e9;subs()}
+ $("msgs").innerHTML=h;if(typeof thinkBub=="function")thinkBub();$("msgs").scrollTop=1e9;subs()}
 function stopEdit(){ei=null;$("inp").value="";$("editing").style.display="none"}
 function send(){
  const v=$("inp").value.trim();if(!v||stream!=null)return;
@@ -3013,25 +3032,30 @@ async function dbAnswer(q,mode){
 /* NEW QUESTIONS: ask the ai_answer Edge Function. Gemini writes the answer once and it is saved as a draft in Supabase.
  The reply is built by tiered() so it follows the learner's plan; draft answers get the "AI generated, not yet checked" label. */
 const AIU=SBU.replace("/rest/v1/","/functions/v1/")+"ai_answer_v2",escRex=x=>x.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+let AIWHY="";const AIU1=AIU.replace("ai_answer_v2","ai_answer");
 async function aiAnswer(q,FUx,loose){
- const c=new AbortController(),tm=setTimeout(()=>c.abort(),25000);
+ AIWHY="";const c=new AbortController(),tm=setTimeout(()=>c.abort(),loose?8000:14000);
  try{
-  const sub=D.sub=="General"?(detectSub(q)||"General"):D.sub;
-  const r=await fetch(AIU,{method:"POST",signal:c.signal,headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({question:String(q).slice(0,300),level:D.lvl,class:String(D.cls||"").replace(/^Primary /,"P").replace(/^Senior /,"S"),subject:sub,plan:planName(),curriculum:"Uganda NCDC",strict_subject:!loose,retry:loose?true:undefined,brief:!wantFull(),...svMe(),follow:FUx&&!FUx.local?{kind:FUx.kind,topic:FUx.topic,step:FUx.step||0,instruction:FUx.hint||"",previous:lastAnsText()}:undefined})});
-  if(!r.ok)return null;
-  const j=await r.json();
+  const sub=loose==2?"General":(D.sub=="General"?(detectSub(q)||"General"):D.sub);
+  const bd=JSON.stringify({question:String(q).slice(0,300),level:D.lvl,class:loose==2?"":String(D.cls||"").replace(/^Primary /,"P").replace(/^Senior /,"S"),subject:sub,plan:planName(),curriculum:"Uganda NCDC",strict_subject:!loose,retry:loose?true:undefined,brief:!wantFull(),...svMe(),follow:FUx&&!FUx.local?{kind:FUx.kind,topic:FUx.topic,step:FUx.step||0,instruction:FUx.hint||"",previous:lastAnsText()}:undefined});
+  const hd={apikey:SBK,"Content-Type":"application/json"};
+  let r=await fetch(AIU,{method:"POST",signal:c.signal,headers:hd,body:bd});
+  if(!r.ok&&(r.status==404||r.status>=500)){try{const r2=await fetch(AIU1,{method:"POST",signal:c.signal,headers:hd,body:bd});if(r2.ok)r=r2}catch(e){}}
+  if(!r.ok){AIWHY="http "+r.status;return null}
+  let j;try{j=await r.json()}catch(e){AIWHY="bad reply";return null}
   if(j.status=="busy")return{busy:1};
   if(j.status=="found"&&j.kind=="answer"&&j.answer&&j.answer.body_md){const a=j.answer;return{t:modelFromMd(/^\s*#/.test(a.body_md)?a.body_md:"# "+a.title+"\n"+a.body_md),aid:a.answer_id,fmt:1,lv:a.level||null}}
   const t=(j.status=="created"||(j.status=="found"&&j.kind=="topic"))?j.topic:null;
-  if(!t||!t.name||!t.definition)return null;
+  if(!t||!t.name||!t.definition){AIWHY="no answer: "+(j.status||"empty");return null}
   const dr=j.status=="created"||j.draft===true;
   const T={n:String(t.name),re:new RegExp(escRe(String(q).trim().toLowerCase())),d:t.definition,h:t.steps||"",w:t.uses||"",s:t.simple||"",e:t.examples||"",m:t.more||"",q:Array.isArray(t.quiz)?t.quiz:[],a:t.label_steps||"How to work it out",b:t.label_uses||"Where it is used",nd:0,S:[sub],L:[D.lvl],ai:dr?1:0,tid:t.id||null,sl:t.syllabus_level||null,cls:t.class_label||null};
-  const f=tiered(q,T);if(!f)return null;
+  const f=tiered(q,T);if(!f){AIWHY="no answer: format";return null}
   /* keep it for this session so "explain simpler", "give an example" and "quiz me" work on it */
   if(!FUx)TOP.push(T);const ax=TOP.filter(x=>x.ai!=null&&x.re&&x.db==null);if(ax.length>30)TOP.splice(TOP.indexOf(ax[0]),1);
   if(dr)f.ai=1;if(T.tid)f.tid=T.tid;if(T.sl){f.lv=T.sl;f.cls=T.cls}
   return f
- }catch(e){return null}finally{clearTimeout(tm)}}
+
+ }catch(e){AIWHY=e&&e.name=="AbortError"?"timeout":(navigator.onLine?"net":"offline");return null}finally{clearTimeout(tm)}}
 function logAct(act,m,ans){try{const t=tokNow();if(!t||!m)return;fetch(SBU+"rpc/log_user_action",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_t:t,p_action:act,p_q:String(m.q||"").slice(0,200),p_ref:String(m.tid||m.aid||"").slice(0,60),p_ans:String(ans!=null?ans:m.t||"").replace(/\s+/g," ").slice(0,200)})}).catch(()=>{})}catch(e){}}
 /* ===== REPLY BUTTONS: each one has a server job.
    DAVID (owner): Copy, Share, Save, Like, Unlike and Redo go to the database function owner_reply_action, which checks the login again, so nobody else can use it.
@@ -3952,7 +3976,27 @@ function plans(fs){
  `<div class="sec">PAYMENT METHOD</div><div class="pay"><div class="pl">MTN Mobile Money · Merchant Code</div><div class="pcode">06124096</div><div class="pid">ID: <b>Alfred</b></div><button class="pcp" data-cp="06124096">Copy code</button></div>`+
  `<div class="sec">HOW TO PAY</div>`+ST.map((t,k)=>`<div class="stp"><i>${k+1}</i><div>${t}</div></div>`).join("")+
  `<a class="btn" style="text-align:center;text-decoration:none;margin-bottom:28px" href="tel:*165*3*06124096%23">Dial *165*3*06124096#</a>`+PAYPROOF(),fs?settings:closeP,e=>{const c=e.target.closest("[data-cp]");if(c){const t=c.dataset.cp,ok=()=>{c.textContent="Copied"};if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(ok,ok);else ok()}});payBind()}
-function stopS(){if(stream==null)return;clearInterval(stream);stream=null;if(sm){if(sm.w)sm.t=wBuild(sm);delete sm.stream;useW(sm.t)}sm=null;$("stat").textContent="Anything about your studies";$("send").innerHTML=SEND;save();render()}
+/* ===== WAITING AND TYPING STATUS =====
+   While the answer is being found: a bubble in the chat and the header both show changing words (pondering, searching, retrieving...).
+   When the answer starts to appear: header says typing with dots counting 1, 2, 3 until it finishes. */
+let TH=null,TYI=null;
+const THW=[["Pondering your question","pondering"],["Searching my notes","searching"],["Looking through the topics","searching"],["Retrieving what matches","retrieving"],["Checking the facts","checking"],["Reading it carefully","reading"],["Putting the answer together","preparing"],
+["Thinking it through","thinking"],["Digging into the library","digging"],["Opening the textbooks","opening books"],["Flipping through the pages","flipping pages"],["Finding the best match","matching"],["Sorting the right answer","sorting"],["Gathering the key points","gathering"],["Connecting the ideas","connecting"],["Looking at your class level","checking level"],["Matching it to your subject","matching"],["Scanning the syllabus","scanning"],["Collecting examples","collecting"],["Double checking","double checking"],["Weighing the details","weighing"],["Working out the steps","working it out"],["Choosing simple words","choosing words"],["Making it clear for you","simplifying"],["Tidying the explanation","tidying"],["Asking the teacher's notes","asking notes"],["Checking the spelling","proofreading"],["Lining up the facts","lining up"],["Reviewing what I found","reviewing"],["Polishing the answer","polishing"],["Writing it out neatly","drafting"],["Nearly ready","nearly ready"],["Almost there","almost there"],["Just a moment more","one moment"],["Still working on it","still working"]];
+const THS=7;
+function thinkBub(){if(!TH)return;const b=$("msgs");if(!b)return;let t=$("tb");
+ if(!t){b.insertAdjacentHTML("beforeend",'<div class="b i" id="tb"><span class="tbt"></span><span class="tbd"><i></i><i></i><i></i></span></div>');t=$("tb")}
+ t.className="s"+TH.s;t.firstChild.textContent=TH.o[TH.i%TH.o.length][0];b.scrollTop=1e9}
+function thinkTick(){if(!TH)return;TH.i++;let n;do{n=Math.floor(Math.random()*THS)}while(n==TH.s);TH.s=n;
+ const w=TH.o[TH.i%TH.o.length];$("stat").textContent=w[1]+"…";const t=$("tb");
+ if(t){t.classList.add("sw");setTimeout(()=>{if(!TH)return;thinkBub()},170)}else thinkBub();
+ TH.t=setTimeout(thinkTick,1000+Math.random()*1500)}
+function thinkOn(){thinkOff();const f=THW.slice(0,7),r=THW.slice(7,28).sort(()=>Math.random()-.5),e=THW.slice(28);
+ const o=[f[0]].concat(f.slice(1).sort(()=>Math.random()-.5),r,e);
+ TH={i:0,s:0,o,t:null};$("stat").textContent=o[0][1]+"…";thinkBub();TH.t=setTimeout(thinkTick,1000+Math.random()*1500)}
+function thinkOff(){if(TH){clearTimeout(TH.t);TH=null}const t=$("tb");if(t)t.remove()}
+function typeOn(){typeOff();let n=0;const f=()=>{n=n%3+1;$("stat").textContent="typing"+".".repeat(n)};f();TYI=setInterval(f,380)}
+function typeOff(){if(TYI){clearInterval(TYI);TYI=null}}
+function stopS(){thinkOff();typeOff();if(stream==null)return;clearInterval(stream);stream=null;if(sm){if(sm.w)sm.t=wBuild(sm);delete sm.stream;useW(sm.t)}sm=null;$("stat").textContent="Anything about your studies";$("send").innerHTML=SEND;save();render()}
 /* ===== TYPED REQUESTS BY PLAN (there are no quick-action buttons) =====
  Free: direct answer only. Basic: adds quizzes. Standard: adds explain simpler and examples.
  Premium: everything, and answers are detailed by default. A request above the plan shows an upgrade note. */
@@ -4178,7 +4222,7 @@ async function askScenario(q){
  if(capped())return limitMsg();
  const now=Date.now(),raw=String(q).replace(/[ \t]+\n/g,"\n").trim().slice(0,6000);stamps=stamps.filter(t=>now-t<6e4);
  const err=x=>{D.msgs.push({s:"i",err:1,t:x,q:raw.slice(0,300),ts:Date.now()});save();render()};
- if(!navigator.onLine)return err("No internet connection. Check your network and try again.");
+ if(!navigator.onLine)return err("No internet connection. Please connect to the internet and tap Retry.");
  if(stamps.length>=8)return err("Too many requests. Please wait a minute and try again.");
  stamps.push(now);const tok=++AN;window.ASKQ_RAW=raw;window.ASKQ=raw;
  const ch=D.chats.find(c=>c.id==D.cur);if(ch&&(ch.title=="New chat"||ch.title=="Chat"))ch.title=raw.slice(0,32);
@@ -4351,11 +4395,11 @@ function askCore(q,mode,I){
  const CTX=(FU||bareG||mode||smallTalk(q))?ctxGet():{tq:String(q).slice(0,120),sub:D.sub};
  const now=Date.now();stamps=stamps.filter(t=>now-t<6e4);
  const err=x=>{D.msgs.push({s:"i",err:1,t:x,q,mode,ts:Date.now()});save();render()};window.ASKQ=String(q)+" "+String(window.ASKQ_RAW||"")+" "+String(mode||"")+" "+((FU&&FU.kind&&FU.kind!=="summary"&&FU.kind!=="define"&&FU.kind!=="local")||(I&&I.detail==="full")?"explain":"");
- if(!navigator.onLine)return err("No internet connection. Check your network and try again.");
+ if(!navigator.onLine)return err("No internet connection. Please connect to the internet and tap Retry.");
  if(stamps.length>=8)return err("Too many requests. Please wait a minute and try again.");
  stamps.push(now);sm=null;const tok=++AN;
- $("stat").textContent="typing…";$("send").innerHTML=STOP;
- stream=setTimeout(async()=>{let f=FU&&FU.local?{t:FU.local}:null;if(!f&&FU&&FU.part){try{f=FU.exp?await expandPart(q,FU):await explainPart(q,FU)}catch(e){f=null}if(stream==null||tok!=AN)return;if(f&&f.busy){stopS();return err("Many learners are asking right now. Please try again in a little while.")}if(!f){if(FU.exp){const F2=ctxFollow(q);FU=F2||null;if(F2&&F2.local)f={t:F2.local};else if(F2)q=F2.q}else{FU.part=0;FU.kind="custom";FU.hint=FU_HINT.custom}}}if(!f)try{f=await Promise.race([dbAnswer(q,mode),new Promise(r=>setTimeout(()=>r(null),3200))])}catch(e){}
+ thinkOn();$("send").innerHTML=STOP;
+ stream=setTimeout(async()=>{let f=FU&&FU.local?{t:FU.local}:null;if(!f&&FU&&FU.part){try{f=FU.exp?await expandPart(q,FU):await explainPart(q,FU)}catch(e){f=null}if(stream==null||tok!=AN)return;if(f&&f.busy){stopS();return err("Many learners are asking right now. Please try again in a little while.")}if(!f){if(FU.exp){const F2=ctxFollow(q);FU=F2||null;if(F2&&F2.local)f={t:F2.local};else if(F2)q=F2.q}else{FU.part=0;FU.kind="custom";FU.hint=FU_HINT.custom}}}if(!f)try{f=await Promise.race([dbAnswer(q,mode),new Promise(r=>setTimeout(()=>r(null),2500))])}catch(e){}
   if(stream==null||tok!=AN)return;
   if(!f)f=mock(q,mode);
   {const lk=f.part?null:leakSub(f);if(lk){stopS();D.msgs.push({s:"i",note:1,up:0,t:"This chat is set to "+D.sub+", so I answer "+D.sub+" questions only. That answer belongs to "+lk+". Tap the subject button above to switch, or ask me something about "+D.sub+".",ts:Date.now()});save();render();return}}
@@ -4364,9 +4408,12 @@ function askCore(q,mode,I){
    if(a&&a.busy){logUn(q);stopS();return err("Many learners are asking right now. Please try again in a little while.")}
    if(a&&a.t)f=a}
   /* Gemini gave nothing the first time: try once more, and never show the "no full lesson" text to a learner */
-  if(f.un&&f.hon&&!mode){let a2=null;try{a2=await aiAnswer(q,FU,1)}catch(e){}if(stream==null||tok!=AN)return;
+  if(f.un&&f.hon&&!mode){let a2=null;
+   if(AIWHY!="net"&&AIWHY!="offline"&&AIWHY!="timeout"){try{a2=await aiAnswer(q,FU,1)}catch(e){}if(stream==null||tok!=AN)return;
+    if(!(a2&&(a2.t||a2.busy))&&AIWHY!="net"&&AIWHY!="offline"&&AIWHY!="timeout"){try{a2=await aiAnswer(q,FU,2)}catch(e){}if(stream==null||tok!=AN)return}}
    if(a2&&a2.busy){logUn(q);stopS();return err("Many learners are asking right now. Please try again in a little while.")}
-   if(a2&&a2.t)f=a2;else{logUn(q);stopS();return err("I could not get the answer just now. Please tap Retry.")}}
+   if(a2&&a2.t)f=a2;else{const w=AIWHY;logUn(q);stopS();
+    return err(w=="net"||w=="offline"||!navigator.onLine?"No internet connection. Please connect to the internet and tap Retry.":"The answer is taking longer than expected. Please tap Retry."+(isOwner()?" ("+(w||"unknown")+")":""))}}
   if(f.un&&!mode&&!FU)logUn(q);
   if(f.fmt&&!f.un&&!mode&&f.t!==window.DIRECT_T){const st=await styleAnswer(f.t,q);if(stream==null||tok!=AN)return;if(st){f.sty={t:f.t,k:modelName(),L:lvKey(),pl:planName()};f.t=st.md}}
   if(!f.part&&!f.ai&&!f.un){const Tm=topicOf(q);if(Tm&&Tm.ai)f.ai=1}
@@ -4374,7 +4421,7 @@ function askCore(q,mode,I){
   if(!f.part&&!f.lv&&!f.un){const Tm=topicOf(q);if(Tm&&Tm.sl){f.lv=Tm.sl;f.cls=Tm.cls}}
   let chk=0;if(FU&&FU.chkk&&f&&f.t&&!f.un&&!f.w&&!f.quiz&&!f.qz&&!FU.local){f.t+="\n\n"+FU.chkk;chk=1}
   const m={s:"i",t:"",ts:Date.now(),q,mode,stream:1,fk:FU&&FU.kind||undefined,chk:chk||undefined,tq:CTX&&CTX.tq||undefined,tsub:CTX&&(CTX.sub||D.sub)||undefined},w=f.t.split(/(?<=\s)/);if(f.quiz)m.quiz=f.quiz;if(f.qz)m.qz=f.qz;if(f.w)m.w=f.w;if(f.aid)m.aid=f.aid;if(f.sty)m.sty=f.sty;if(f.ai)m.ai=1;if(f.tid)m.tid=f.tid;if(f.fmt){const M=MODELS[modelName()];m.mdl=M.n+" "+M.v}{const ln=levelNote(f.lv,f.cls);if(ln)m.lvn=ln}
-  D.msgs.push(m);sm=m;let k=0;if(!(FU&&FU.local))logAct("ask",m,f.t);stream=setInterval(()=>{m.t+=w[k++]||"";if(k>=w.length){stopS();if(gn){D.msgs.push({s:"i",note:1,up:1,t:gn,ts:Date.now()});save();render()}if(capped())limitMsg()}else render()},35)},600)}
+  thinkOff();typeOn();D.msgs.push(m);sm=m;let k=0;if(!(FU&&FU.local))logAct("ask",m,f.t);stream=setInterval(()=>{m.t+=w[k++]||"";if(k>=w.length){stopS();if(gn){D.msgs.push({s:"i",note:1,up:1,t:gn,ts:Date.now()});save();render()}if(capped())limitMsg()}else render()},35)},600)}
 $("msgs").addEventListener("click",e=>{
 
  const st=e.target.closest("[data-st]");if(st){$("inp").value=st.dataset.st;send();return}

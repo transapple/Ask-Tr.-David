@@ -48,9 +48,9 @@ html.pg-on #spl{display:none}
 #spl .sn{margin-top:26px;font-size:32px;font-weight:800;letter-spacing:.3px;line-height:1.15;display:flex;flex-wrap:wrap;justify-content:center}
 #spl .sn span{display:inline-block;opacity:0;transform:translateY(18px);animation:splUp .5s ease forwards}
 #spl .sn .sp{width:.3em}
-#spl .st2{margin-top:10px;font-size:13px;font-weight:500;letter-spacing:1.6px;text-transform:uppercase;color:#ffd800;opacity:0;animation:splFade .7s ease 1.35s forwards}
+#spl .st2{margin-top:10px;font-size:13px;font-weight:500;letter-spacing:1.6px;text-transform:uppercase;color:#ffd800;opacity:0;animation:splFade .8s ease 1.6s forwards}
 #spl .sb{margin-top:34px;width:56px;height:3px;border-radius:3px;background:rgba(255,255,255,.2);overflow:hidden}
-#spl .sb i{display:block;height:100%;width:100%;background:#ffd800;transform:translateX(-100%);animation:splBar 2.2s ease-in-out .3s forwards}
+#spl .sb i{display:block;height:100%;width:100%;background:#ffd800;transform:translateX(-100%);animation:splBar 3s ease-in-out .3s forwards}
 @keyframes splLogo{to{opacity:1;transform:scale(1)}}
 @keyframes splUp{to{opacity:1;transform:none}}
 @keyframes splFade{from{opacity:0;transform:translateY(6px)}to{opacity:.95;transform:none}}
@@ -58,6 +58,31 @@ html.pg-on #spl{display:none}
 @media (prefers-reduced-motion:reduce){#spl *{animation-duration:.01s!important;animation-delay:0s!important}}
 </style>
 <meta name="theme-color" content="#0000b9">
+<style>
+html[data-font=serif] body,html[data-font=serif] button,html[data-font=serif] input,html[data-font=serif] textarea{font-family:Georgia,"Times New Roman",serif!important}
+html[data-font=rounded] body,html[data-font=rounded] button,html[data-font=rounded] input,html[data-font=rounded] textarea{font-family:ui-rounded,"Trebuchet MS","Segoe UI",system-ui,sans-serif!important}
+html[data-font=mono] body,html[data-font=mono] button,html[data-font=mono] input,html[data-font=mono] textarea{font-family:ui-monospace,"Courier New",monospace!important}
+.cd{margin:12px 14px;background:var(--bar);border-radius:18px;overflow:hidden}
+.cd .row{border-bottom:1px solid var(--line)}.cd .row:last-child{border-bottom:0}
+.cd .row .rv{margin-left:auto;font-size:13px;color:var(--green);font-weight:600;white-space:nowrap}
+.cd .row .rv.no{color:#e03131}
+.gc{margin:8px 16px;border:1px solid var(--line);border-radius:22px;overflow:hidden;background:var(--bg)}
+.gc .row{border-bottom:1px solid var(--line);padding:15px 16px;font-size:17px}.gc .row:last-child{border-bottom:0}
+.gc .ch{margin-left:auto;display:flex;color:var(--sub)}.gc .rv+.ch{margin-left:0}.gc .ch svg{width:20px;height:20px}
+.gc .rv{margin-left:auto;color:var(--sub);font-size:15px;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.gc .row small{font-size:13px}.gc .ri svg{width:24px;height:24px}
+.gh{padding:22px 24px 4px;color:var(--sub);font-size:17px;font-weight:600}
+.dot{display:inline-block;width:14px;height:14px;border-radius:50%}
+.dd div{display:flex;align-items:center;gap:10px;padding:13px 18px 13px 58px;border-bottom:1px solid var(--line);font-size:16px;cursor:pointer}
+.dd span{margin-left:auto;visibility:hidden}.dd .on span{visibility:visible;color:var(--green);font-weight:700}
+.hh{text-align:center;padding:64px 20px 6px}.hav{position:relative;width:96px;height:96px;margin:0 auto}
+.hpic{width:96px;height:96px;border-radius:50%}.hpe{position:absolute;right:-4px;bottom:-2px;width:34px;height:34px;border-radius:50%;border:2px solid var(--bg);background:var(--line);color:var(--text);display:grid;place-items:center;padding:0}.hpe svg{width:16px;height:16px}
+.hnm{margin-top:12px;font-size:22px;font-weight:700}.hsub{margin-top:3px;font-size:14px;color:var(--sub)}
+#hbk{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));left:14px;width:46px;height:46px;border-radius:50%;border:0;background:var(--bar);color:var(--text);box-shadow:0 2px 10px rgba(0,0,0,.18);display:grid;place-items:center;z-index:4;padding:0}#hbk svg{width:22px;height:22px}
+#hsb{position:absolute;left:16px;right:16px;bottom:calc(14px + env(safe-area-inset-bottom,0px));background:var(--bar);border-radius:30px;box-shadow:0 4px 18px rgba(0,0,0,.2);display:flex;align-items:center;gap:12px;padding:0 18px;height:56px;z-index:4}#hsb svg{width:22px;height:22px;color:var(--sub);flex:none}#hsb input{flex:1;min-width:0;border:0;outline:0;background:none;color:var(--text);font:inherit;font-size:16px}
+.lc .lcm{max-height:92px;overflow:hidden;font-size:15px;-webkit-mask-image:linear-gradient(#000 60%,transparent);mask-image:linear-gradient(#000 60%,transparent)}.lc.open .lcm{max-height:none;-webkit-mask-image:none;mask-image:none}
+.doc{padding:16px 20px 40px;line-height:1.55;font-size:15px}.doc h3{margin:20px 0 4px;font-size:16px}.doc p{margin:0 0 8px;color:var(--text)}
+</style>
 <meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Ask Tr. David"><meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="icon" type="image/png" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
@@ -167,6 +192,7 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 .act,.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.act button{border:0;background:none;color:var(--sub);font:inherit;font-size:12px;cursor:pointer;padding:3px 8px;border-radius:10px}.act{clear:both}.act button{padding:14px 14px 8px;display:grid;place-items:center}.act button svg{width:23px;height:23px}.act.out{align-self:flex-start;margin:-6px 0 8px 0;gap:4px}.act .on{background:none;border:0;color:var(--green)}.act .on svg{fill:currentColor}.act button:active{background:var(--wall)}
 .md b.hl{cursor:pointer;background:rgba(47,128,237,.13);border-bottom:1px dashed var(--green);border-radius:3px;padding:0 2px}.md b.hl:active{background:rgba(47,128,237,.3)}
 .abx{margin-top:8px;border-top:1px solid var(--line);padding-top:6px}.abx .abt{border:1px solid var(--green);background:none;color:var(--green);border-radius:14px;padding:5px 12px;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer}.abx .abt.on{background:var(--green);color:#fff}
+.rtx{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}.rtx .rtq{font-weight:700;font-size:14px}.rtx .rtn{color:var(--sub);font-size:12.5px;line-height:1.45;margin:3px 0 8px}.rtx .rtb{display:flex;gap:8px}.rtx .rtb button{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 6px;border:1px solid var(--line);border-radius:18px;background:none;color:var(--text);font:inherit;font-size:13px;font-weight:600;cursor:pointer}.rtx .rtb button svg{width:18px;height:18px}.rtx .rtb button.up.on{background:var(--green);border-color:var(--green);color:#fff}.rtx .rtb button.dn.on{background:#ff453a;border-color:#ff453a;color:#fff}.rtx .rts{margin-top:7px;font-size:12.5px;color:var(--sub);line-height:1.4}.nqx .abl{font-size:13px;font-weight:700;margin:10px 0 4px}.abp .chips button.top{background:var(--green);color:#fff;border-color:var(--green)}
 .abp .abl{font-size:11.5px;font-weight:700;color:var(--sub);margin:8px 0 0;letter-spacing:.2px}.abp .chips{margin-top:4px}
 .exq .exm{margin:8px 0;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--wall)}.exq .exm ul{margin:3px 0 3px 18px}.exq .exm small{display:block;color:var(--sub);margin-top:6px}
 .exq{margin:6px 0}.exq .ext{margin:10px 0;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}.exq .ext p{margin:0 0 6px}
@@ -192,9 +218,12 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 .sw{width:46px;height:46px;border-radius:50%;border:3px solid transparent;box-shadow:inset 0 0 0 3px var(--bg);cursor:pointer}.sw.on{border-color:var(--text)}
 .sec{padding:16px 18px 0;color:var(--sub);font-size:13px;text-transform:uppercase;letter-spacing:.5px}
 #bdg{position:absolute;top:-2px;right:-2px;width:12px;height:12px;border-radius:50%;background:#ff453a;border:2px solid var(--bar);box-sizing:border-box;display:none}
-#ann{display:none;align-items:center;gap:10px;padding:10px 12px 10px 14px;background:var(--sheet,#fff);color:var(--text);border-bottom:1px solid var(--line);border-left:4px solid var(--green)}
-#ann b{display:block;font-size:17px}#annb{font-size:13px;color:var(--sub);margin-top:2px;white-space:pre-wrap;word-wrap:break-word}
-#annx{border:0;background:none;color:var(--green);font:600 14px inherit;padding:8px 6px;cursor:pointer}
+#ann{display:none;position:fixed;inset:0;z-index:2147483000;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.55)}
+#anncard{width:100%;max-width:340px;max-height:80vh;display:flex;flex-direction:column;background:var(--sheet,#fff);color:var(--text);border-radius:16px;padding:18px 18px 12px;box-shadow:0 12px 40px rgba(0,0,0,.35)}
+#ann b{display:block;font-size:17px;line-height:1.3;overflow-wrap:anywhere}#annb{font-size:14px;line-height:1.45;color:var(--sub);margin-top:8px;white-space:pre-wrap;overflow-wrap:anywhere;overflow-y:auto;min-height:0}
+#annrow{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px;padding-top:10px;border-top:1px solid var(--line)}
+#annrow button{border-radius:8px;font:600 12.5px inherit;padding:6px 12px;cursor:pointer;line-height:1.2}
+#annr{border:0;background:var(--green);color:#fff}#annx{border:1px solid var(--line);background:none;color:var(--text)}
 #jump{position:fixed;right:14px;bottom:calc(84px + env(safe-area-inset-bottom,0px));width:42px;height:42px;border-radius:50%;border:0;background:var(--sheet,#fff);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.3);display:none;place-items:center;z-index:5;cursor:pointer}
 #auth{position:fixed;inset:0;z-index:30;background:var(--bg);color:var(--text);overflow-y:auto;display:block}.ab{max-width:420px;margin:0 auto;padding-bottom:40px}
 .fw{padding:6px 18px}.fw label{font-size:13px;color:var(--sub);display:flex;justify-content:space-between;margin-bottom:3px}.fw .fld{width:100%}.hn{font-size:12px;min-height:16px;color:var(--sub);white-space:pre-wrap;margin-top:3px}.hn.e{color:#e03131}.hn.g{color:var(--green)}.hn .ok{color:var(--green)}.hn .no{color:var(--sub)}.hn .lk{margin:4px 4px 0 0}
@@ -250,7 +279,7 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 #permGate .pm-help{display:none;margin-top:14px;background:rgba(0,0,0,.28);border-radius:14px;padding:12px 14px;font-size:13.5px;line-height:1.5}
 #permGate .pm-help.on{display:block}
 #permGate .pm-help b{display:block;margin-bottom:4px}
-#ann{cursor:pointer}
+
 </style></head><body>
 <button id="pwaInstallBtn" title="Install App" style="display:none;position:fixed;right:18px;bottom:calc(120px + env(safe-area-inset-bottom));z-index:999;width:52px;height:52px;border-radius:50%;background:#0000b9;color:#fff;border:none;box-shadow:0 6px 18px rgba(0,0,185,.4);align-items:center;justify-content:center;cursor:pointer;">
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -274,7 +303,7 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
   var done=false;function go(){if(done)return;done=true;el.classList.add("out");setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el)},600)}
   if(document.documentElement.classList.contains("pg-on")){el.parentNode.removeChild(el);return}
   el.addEventListener("click",go);
-  setTimeout(go,2700);
+  setTimeout(go,3500);
 })();
 </script>
 <div id="pgGate" role="dialog" aria-modal="true" aria-label="Ask Tr. David">
@@ -414,8 +443,8 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 </script>
 
 <div id="app">
-<header><div id="hd" style="display:flex;align-items:center;gap:10px;flex:1"><div id="avw" role="button" aria-label="What's new" style="position:relative;cursor:pointer"><div class="av" id="av">A</div><span id="bdg"></span></div><div><div id="nm">Alex</div><div class="t" id="stat">Anything about your studies</div></div></div><button class="ic" id="dots" aria-label="Menu"><svg viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button></header>
-<div id="ann"><div style="flex:1;min-width:0"><b id="annt"></b><div id="annb"></div></div><button id="annx">Hide</button></div>
+<header><div id="hd" style="display:flex;align-items:center;gap:10px;flex:1"><div id="avw" role="button" aria-label="Account" style="position:relative;cursor:pointer"><div class="av" id="av">A</div><span id="bdg"></span></div><div><div id="nm">Alex</div><div class="t" id="stat">Anything about your studies</div></div></div><button class="ic" id="dots" aria-label="Menu"><svg viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button></header>
+<div id="ann" role="dialog" aria-modal="true" aria-labelledby="annt"><div id="anncard"><b id="annt"></b><div id="annb"></div><div id="annrow"><button id="annr" type="button">Mark as read</button><button id="annx" type="button">Hide</button></div></div></div>
 <div id="srch"><input id="sq" placeholder="Search chat history" autocomplete="off"><span id="cnt"></span><button class="ic" id="sx" aria-label="Close search"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
 <div id="subs"></div>
 <div id="msgs"></div>
@@ -426,7 +455,7 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 <div id="ps"><button id="psl" type="button" aria-label="Your plan"></button><button id="pss" type="button" aria-label="Choose subject"></button><span id="psr"></span></div>
 </div>
 <div id="dlgx" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);place-items:center;z-index:120;padding:20px"><div style="background:var(--sheet,#fff);color:var(--text,#111);border-radius:14px;padding:20px;width:100%;max-width:320px;box-shadow:0 4px 18px rgba(0,0,0,.3)"><div id="dlgm" style="font-size:16px;line-height:1.4;margin-bottom:14px;white-space:pre-wrap"></div><input id="dlgi" autocomplete="off" style="display:none;width:100%;box-sizing:border-box;margin-bottom:14px;padding:10px;font-size:16px;border:1px solid var(--line,#ccc);border-radius:8px;background:var(--wall,#fff);color:inherit"><div style="display:flex;justify-content:flex-end;gap:8px"><button id="dlgc" style="background:none;border:0;padding:8px 14px;font-size:15px;color:inherit;cursor:pointer">Cancel</button><button id="dlgo" style="background:var(--green,#00a884);color:#fff;border:0;border-radius:8px;padding:8px 18px;font-size:15px;cursor:pointer">OK</button></div></div></div>
-<div id="more"><div data-a="n">New chat</div><div data-a="h">Chat history</div><div data-a="b">Saved answers</div><div data-a="s">Search chat</div><div data-a="cc" style="color:#e03131">Clear chat</div><div data-a="g">Settings</div></div>
+<div id="more"><div data-a="n">New chat</div><div data-a="h">Chat history</div><div data-a="b">My library</div><div data-a="nt" id="mnt">Notifications</div><div data-a="ct">Contact us</div><div data-a="pl">Upgrade plan</div><div data-a="cc" style="color:#e03131">Clear chat</div></div>
 <div id="adm" aria-label="Admin panel"></div>
 <div id="panel"></div>
 <div id="scrim"><div id="sheet"></div></div>
@@ -464,7 +493,7 @@ const hm=t=>new Date(t).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})
 const dl=t=>{const d=new Date(t);return d.toDateString()==new Date().toDateString()?"Today":d.toLocaleDateString()};
 const esc=s=>s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
 const isDark=()=>D.theme?D.theme=="dark":matchMedia("(prefers-color-scheme:dark)").matches;
-function applyTheme(){const r=document.documentElement;if(D.theme)r.dataset.theme=D.theme;else delete r.dataset.theme;r.style.setProperty("--green",D.acc);r.style.fontSize=(D.fs||16)+"px";if(D.hc)r.dataset.hc=1;else delete r.dataset.hc}
+function applyTheme(){const r=document.documentElement;if(D.theme)r.dataset.theme=D.theme;else delete r.dataset.theme;r.style.setProperty("--green",D.acc);r.style.fontSize=(D.fs||16)+"px";if(D.hc)r.dataset.hc=1;else delete r.dataset.hc;if(D.font)r.dataset.font=D.font;else delete r.dataset.font}
 function hl(t){t=esc(t);if(!q)return t;const e=esc(q).replace(/[.*+?^${}()|[\]\\]/g,"\\$&");return t.replace(new RegExp(e,"gi"),x=>"<mark>"+x+"</mark>")}
 function render(){
  try{updPlan()}catch(e){}
@@ -525,21 +554,13 @@ function uiPrompt(msg,def,onOk){uiDlg({msg,def,input:1,onOk,ok:"Save"})}
 function showP(title,body,back,onclick){
  $("panel").innerHTML=`<header><button class="ic" id="pb" aria-label="Back">${CH}</button><div style="font-weight:600;font-size:18px">${title}</div></header><div id="pbody">${body}</div>`;
  $("panel").style.display="flex";$("pb").onclick=back;$("pbody").onclick=onclick||null}
-function closeP(){$("panel").style.display="none"}
-function settings(){
- showP("Settings",`<div class="row" data-a="pf"><span class="ri">${IC.user}</span><div>Learner profile<small>Name, class, account</small></div></div>
- <div class="row" data-a="ac"><span class="ri">${IC.eye}</span><div>Accessibility<small>Text size, contrast</small></div></div>
- <div class="row" data-a="vl"><span class="ri"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg></span><div>Voice language<small>${localStorage.getItem("ask_vlang")=="sw"?"Kiswahili":"English"}: language the microphone listens for</small></div></div>
- <div class="row" data-a="th"><span class="ri">${isDark()?IC.sun:IC.moon}</span><div>Switch theme<small>${isDark()?"Dark":"Light"} mode</small></div></div>
- <div class="row" data-a="ct"><span class="ri">${IC.pal}</span><div>Chat theme<small>Choose a color</small></div></div>
- <div class="row" data-a="wn"><span class="ri">${IC.star}</span><div>What's new<small>${D.notes.filter(x=>!x.r).length?D.notes.filter(x=>!x.r).length+" new":"Announcements and updates"}</small></div></div>
- <div class="row" data-a="nt"><span class="ri">${IC.bell}</span><div>Away alerts<small>${D.notif?"Always on":"Off"}: phone alert for new announcements and updates</small></div></div>
+let HUB=false;
+function closeP(){$("panel").style.display="none";HUB=false}
+function settings0(){
+ showP("Settings",`
  <div class="row" data-a="ex"><span class="ri">${IC.dl}</span><div>Export chat<small>Download as a text file</small></div></div>
  <div class="row" data-a="tr"><span class="ri">${IC.bin}</span><div>Trash<small>${D.trash.length} message${D.trash.length==1?"":"s"}</small></div></div>
  <div class="row" data-a="md"><span class="ri">${IC.star}</span><div>AI models<small>Which model is best for lessons, exams and research</small></div></div>
- <div class="row" data-a="pl"><span class="ri">${IC.star}</span><div>Upgrade plan<small>See the plans and how to pay</small></div></div>
- ${isOwner()?"":`<div class="row" data-a="sp"><span class="ri">${IC.chat}</span><div>Contact Tr. David<small>${window.SPU>0?window.SPU+" new repl"+(window.SPU==1?"y":"ies"):"Chat, complaints, feedback and ratings"}</small></div></div>`}
- <div class="row" data-a="cu"><span class="ri"><svg viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1 1 .4 1.9.7 2.8a2 2 0 01-.5 2.1L8.1 9.9a16 16 0 006 6l1.3-1.3a2 2 0 012.1-.4c.9.3 1.8.6 2.8.7a2 2 0 011.7 2z"/></svg></span><div>Call, WhatsApp or email<small>0788 737 517 · asktrdavid@gmail.com</small></div></div>
  ${isOwner()?`<div class="row" data-a="wk"><span class="ri">${IC.star}</span><div>Preview rating pop-up<small>See what learners get when you send it (nothing is sent)</small></div></div>`:""}
  <div class="row" data-a="up"><span class="ri">${IC.refresh}</span><div>Update app<small>Reload to get the latest version</small></div></div>
 `,closeP,e=>{
@@ -548,6 +569,152 @@ function settings(){
   if(a=="ct")chatTheme();if(a=="nt")toggleNotif();if(a=="wn")notifs();if(a=="ho"&&isOwner())handoff();if(a=="sv"&&isOwner())voiceRoom("q","draft");if(a=="md")modelsGuide();if(a=="pl")plans(1);if(a=="pf")profile();if(a=="ak")AK.open();if(a=="ac")access();if(a=="vl")voiceLang();if(a=="up")updateApp();if(a=="sp")supportOpen();if(a=="cu")contactUs();if(a=="wk")wkShow(1);
   if(a=="ex"){const t=D.msgs.map(m=>"["+new Date(m.ts).toLocaleString()+"] "+(m.s=="o"?"You":D.name)+": "+m.t).join("\n");const u=URL.createObjectURL(new Blob([t||"No messages"],{type:"text/plain"}));const l=document.createElement("a");l.href=u;l.download="chat-history.txt";l.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
   if(a=="tr"){sel.clear();trash()}})}
+
+function settings(){if(HUB)(HBACK||hub)();else settings0()}
+let HBACK=null,HSC=0,HO="";
+const h_svg=d=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const H_CH=h_svg('<path d="M9 6l6 6-6 6"/>'),H_DN=h_svg('<path d="M6 9l6 6 6-6"/>');
+const HI={
+ pz:h_svg('<circle cx="12" cy="12" r="9"/><path d="M8 14a4.5 4.5 0 008 0M9 9.5h.01M15 9.5h.01"/>'),
+ mem:h_svg('<path d="M3 5.5C5 4 8 4 12 6c4-2 7-2 9-.5V19c-2-1.5-5-1.5-9 .5-4-2-7-2-9-.5z"/><path d="M12 6v13.5"/>'),
+ up:h_svg('<path d="M12 3l2.2 6.3L21 12l-6.8 2.7L12 21l-2.2-6.3L3 12l6.8-2.7z"/>'),
+ us:h_svg('<path d="M5 20V10M12 20V4M19 20v-7"/>'),
+ user:h_svg('<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4.5 4-6 8-6s7 1.5 8 6"/>'),
+ cls:h_svg('<path d="M3 8l9-4 9 4-9 4z"/><path d="M7 10.5V16c0 1 2.2 2.5 5 2.5s5-1.5 5-2.5v-5.5"/>'),
+ sun:h_svg('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>'),
+ pal:h_svg('<path d="M14 4l6 6-9 9-4 1 1-4z"/><path d="M12 6l6 6"/>'),
+ font:h_svg('<path d="M3 19l5.5-14L14 19M5 14h7M14.5 19l3.2-8 3.3 8M15.8 16h3.8"/>'),
+ eye:h_svg('<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>'),
+ gen:h_svg('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/>'),
+ bell:h_svg('<path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0"/>'),
+ vo:h_svg('<path d="M4 10v4M8 6v12M12 3v18M16 8v8M20 11v2"/>'),
+ sf:h_svg('<path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>'),
+ sl:h_svg('<path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"/><circle cx="12" cy="10" r="2"/><path d="M8.5 16c.6-1.6 2-2.2 3.5-2.2s2.9.6 3.5 2.2"/>'),
+ hd:h_svg('<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/>'),
+ bug:h_svg('<path d="M8 9a4 4 0 018 0v6a4 4 0 01-8 0zM12 9v10M4 12h4M16 12h4M5 6l3 2M19 6l-3 2M5 19l3-2M19 19l-3-2"/>'),
+ ab:h_svg('<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>'),
+ lib:h_svg('<path d="M6 3h12v18l-6-4-6 4z"/>'),
+ lo:h_svg('<path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>'),
+ doc:h_svg('<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 12h7M9 16h7"/>'),
+ dl:h_svg('<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/>'),
+ bin:h_svg('<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>'),
+ chat:h_svg('<path d="M21 12a8 8 0 01-11.5 7.2L4 20l1-4.5A8 8 0 1121 12z"/>'),
+ star:h_svg('<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>'),
+ srch:h_svg('<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>'),
+ back:h_svg('<path d="M19 12H5M12 19l-7-7 7-7"/>'),
+ pen:h_svg('<path d="M4 20l4-1 11-11-3-3L5 16z"/>'),
+ call:h_svg('<path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1 1 .4 1.9.7 2.8a2 2 0 01-.5 2.1L8.1 9.9a16 16 0 006 6l1.3-1.3a2 2 0 012.1-.4c.9.3 1.8.6 2.8.7a2 2 0 011.7 2z"/>'),
+ mic:h_svg('<rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/>')};
+function h_row(a,ic,t,o){o=o||{};const c=o.c?` style="color:${o.c}"`:"";return `<div class="row" data-a="${a}"${o.x?' style="cursor:default"':""}><span class="ri"${c}>${ic}</span><div${c}>${t}${o.s?`<small>${o.s}</small>`:""}</div>${o.v!=null?`<span class="rv">${o.v}</span>`:""}${o.n?"":`<span class="ch">${o.d?H_DN:H_CH}</span>`}</div>`}
+const h_grp=x=>`<div class="gc">${x}</div>`;
+const h_hd=t=>`<div class="gh">${t}</div>`;
+function h_page(title,body,back,click){showP(title,body,back||hub,click)}
+function exportChat(){const t=D.msgs.map(m=>"["+new Date(m.ts).toLocaleString()+"] "+(m.s=="o"?"You":D.name)+": "+m.t).join("\n");const u=URL.createObjectURL(new Blob([t||"No messages"],{type:"text/plain"}));const l=document.createElement("a");l.href=u;l.download="chat-history.txt";l.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
+const ACC=[["#00a884","Green"],["#1c7ed6","Blue"],["#7048e8","Purple"],["#d6336c","Pink"],["#e8590c","Orange"],["#2f9e44","Forest"]];
+function hub(){HUB=true;HBACK=null;
+ const m=(window.AK&&AK.me())||{},pn=planName(),sv=HSC;
+ const apv=D.theme=="dark"?"Dark":D.theme=="light"?"Light":"System",acn=(ACC.find(a=>a[0]==D.acc)||ACC[0])[1];
+ const apO=HO=="ap"?`<div class="dd">${[["","System"],["light","Light"],["dark","Dark"]].map(o=>`<div data-o="ap:${o[0]}" class="${(D.theme||"")==o[0]?"on":""}">${o[1]}<span>✓</span></div>`).join("")}</div>`:"";
+ const acO=HO=="ak"?`<div class="dd">${ACC.map(o=>`<div data-o="ak:${o[0]}" class="${D.acc==o[0]?"on":""}"><b class="dot" style="background:${o[0]}"></b>${o[1]}<span>✓</span></div>`).join("")}</div>`:"";
+ showP("Account",`<div class="hh"><div class="hav"><div class="hpic" style="background:url(${AVATAR}) center/cover"></div><button class="hpe" data-a="pf" aria-label="Edit profile">${HI.pen}</button></div><div class="hnm">${esc(D.name)}</div><div class="hsub">${m.username?"@"+esc(m.username)+" · ":""}${pn} plan</div></div>
+ ${h_hd("My Ask Tr. David")}${h_grp(h_row("lib",HI.lib,"My library",{s:(()=>{const L=libAll();return L.sv.length+" saved · "+L.lk.length+" liked · "+L.sh.length+" shared"})()})+h_row("pz",HI.pz,"Personalization")+h_row("mem",HI.mem,"Memory"))}
+ ${h_hd("Account")}${h_grp(h_row("up",HI.up,"Upgrade plan",{c:"var(--green)"})+h_row("us",HI.us,"Usage and limits")+h_row("cl",HI.cls,"Class",{v:D.cls?esc(D.cls):"Not chosen"})+(m.username?h_row("un",HI.user,"Username",{v:esc(m.username),n:1,x:1}):""))}
+ ${h_grp(h_row("ap",HI.sun,"Appearance",{v:apv,d:1})+apO+h_row("ak",HI.pal,"Accent color",{v:`<b class="dot" style="background:${D.acc||"#00a884"}"></b>${acn}`,d:1})+acO)}
+ ${h_grp(h_row("gn",HI.gen,"General")+h_row("nf",HI.bell,"Notifications")+h_row("vo",HI.vo,"Voice")+h_row("sf",HI.sf,"Safety")+h_row("sl",HI.sl,"Security and login")+h_row("pc",HI.sf,"Privacy center")+h_row("hd",HI.hd,"History and data")+h_row("rb",HI.bug,"Report bug",{c:"var(--green)",n:1})+h_row("ab",HI.ab,"About us"))}
+ ${h_grp(h_row("lo",HI.lo,"Log out",{c:"#e5173f",n:1}))}<div style="height:110px"></div>`,closeP,e=>{
+  const o=e.target.closest("[data-o]");
+  if(o){const i=o.dataset.o.indexOf(":"),k=o.dataset.o.slice(0,i),v=o.dataset.o.slice(i+1);HSC=$("pbody").scrollTop;
+   if(k=="ap"){if(v)D.theme=v;else delete D.theme}else D.acc=v;
+   applyTheme();save();HO="";hub();return}
+  const a=e.target.closest("[data-a]")?.dataset.a;if(!a)return;HSC=$("pbody").scrollTop;
+  if(a=="ap"||a=="ak"){HO=HO==a?"":a;hub();return}
+  ({pf:profile,lib:()=>library("sv"),pz:personalPage,mem:memoryPage,up:()=>plans(1),us:usagePage,cl:()=>clsPick(1),gn:generalPage,nf:notifPage,vo:voiceLang,sf:safetyPage,sl:securityPage,pc:privacyCenter,hd:historyPage,rb:supportOpen,ab:aboutPage,
+   lo:()=>uiConfirm("Log out of this account?",()=>{HUB=false;out()},"Log out")})[a]?.()});
+ const pl=$("panel");pl.firstElementChild.style.display="none";
+ pl.insertAdjacentHTML("beforeend",`<button id="hbk" aria-label="Back">${HI.back}</button><div id="hsb">${HI.srch}<input id="hsq" placeholder="Search settings" autocomplete="off"></div>`);
+ $("hbk").onclick=closeP;
+ $("hsq").oninput=()=>{const q=$("hsq").value.trim().toLowerCase(),b=$("pbody");
+  b.querySelectorAll(".row").forEach(r=>r.style.display=!q||r.textContent.toLowerCase().includes(q)?"":"none");
+  b.querySelectorAll(".gc").forEach(g=>g.style.display=[...g.querySelectorAll(".row")].some(r=>r.style.display!="none")?"":"none");
+  b.querySelectorAll(".gh,.hh,.dd").forEach(h=>h.style.display=q?"none":"")};
+ $("pbody").scrollTop=sv}
+function personalPage(){HBACK=null;const m=(window.AK&&AK.me())||{},fn={serif:"Serif",rounded:"Rounded",mono:"Typewriter"}[D.font]||"Default";
+ h_page("Personalization",h_hd("About you")+h_grp(h_row("nm",HI.user,"Name",{v:esc(m.names||GNm())})+h_row("cl",HI.cls,"Class",{v:D.cls?esc(D.cls):"Not chosen"}))+h_hd("How the app looks")+h_grp(h_row("fo",HI.font,"Font style",{v:fn})+h_row("tx",HI.eye,"Text size and contrast",{v:D.fs==14?"Small":D.fs==20?"Large":"Medium"}))+`<div class="t" style="padding:12px 24px;line-height:1.45">Your name and class help Tr. David give answers that fit your level.</div>`,hub,e=>{
+  const a=e.target.closest("[data-a]")?.dataset.a;if(!a)return;
+  if(a=="nm")AK.upd("names");if(a=="cl")clsPick(1);if(a=="fo"){HBACK=personalPage;fontStyle()}if(a=="tx"){HBACK=personalPage;access()}})}
+function memoryPage(){HBACK=null;let sv=0;D.chats.forEach(c=>c.msgs.forEach(x=>{if(x.bm)sv++}));
+ h_page("Memory",`<div class="doc" style="padding-bottom:4px"><p>Ask Tr. David remembers your name, your class and your subject so answers fit your level. Your chats are kept on this phone, and every new chat starts fresh while the old ones stay in Chat history.</p></div>`+h_grp(h_row("ch",HI.chat,"Chats",{v:D.chats.length,n:1,x:1})+h_row("sv",HI.star,"Saved answers",{v:sv})+h_row("hi",HI.hd,"Chat history")+h_row("tr",HI.bin,"Trash",{v:D.trash.length}))+`<div class="t" style="padding:12px 24px;line-height:1.45">Saved answers are the replies you bookmarked. Deleted messages stay in Trash until you empty it.</div>`,hub,e=>{
+  const a=e.target.closest("[data-a]")?.dataset.a;if(!a)return;
+  if(a=="sv"){HBACK=memoryPage;saved()}if(a=="hi")chatHistory();if(a=="tr"){HBACK=memoryPage;sel.clear();trash()}})}
+function usagePage(){HBACK=null;const q=FQ(),pn=planName(),rk={Free:0,Basic:1,Standard:2,Premium:3}[pn]||0;
+ const F=[["Direct answers",0],["Quizzes",1],["Simpler explanations",2],["Examples",2],["Detailed answers",3]],NM=["Free","Basic","Standard","Premium"];
+ const pct=Math.min(100,Math.round(q.used/Math.max(1,q.cap)*100));
+ h_page("Usage and limits",curPlan(q)+(pn=="Free"?`<div style="padding:4px 24px 8px"><div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:8px"><span>Words used</span><b>${q.used.toLocaleString()} of ${q.cap.toLocaleString()}</b></div><div style="height:10px;border-radius:10px;background:var(--line);overflow:hidden"><i style="display:block;height:100%;width:${pct}%;background:var(--green)"></i></div></div>`:`<div class="t" style="padding:4px 24px 8px">No word limit on your plan.</div>`)+h_hd("What your plan includes")+h_grp(F.map(f=>h_row("x",f[1]<=rk?h_svg('<path d="M5 12.5l4.5 4.5L19 7.5"/>'):h_svg('<path d="M6 6l12 12M18 6L6 18"/>'),f[0],{v:f[1]<=rk?"Included":"Needs "+NM[f[1]],n:1,x:1})).join(""))+(pn=="Premium"?"":h_grp(h_row("up",HI.up,"Upgrade plan",{c:"var(--green)"}))),hub,e=>{if(e.target.closest("[data-a=up]")){HBACK=usagePage;plans(1)}})}
+function generalPage(){HBACK=null;
+ h_page("General",h_grp(h_row("tx",HI.eye,"Text size and contrast")+h_row("fo",HI.font,"Font style")+h_row("md",HI.star,"AI models",{s:"Which model is best for lessons, exams and research"})+h_row("up",HI.gen,"Update app",{s:"Reload to get the latest version"})+(isOwner()?h_row("wk",HI.star,"Preview rating pop-up",{s:"See what learners get (nothing is sent)"}):"")),hub,e=>{
+  const a=e.target.closest("[data-a]")?.dataset.a;if(!a)return;HBACK=generalPage;
+  if(a=="tx")access();if(a=="fo")fontStyle();if(a=="md")modelsGuide();if(a=="up")updateApp();if(a=="wk")wkShow(1)})}
+function notifPage(){HBACK=null;
+ h_page("Notifications",h_grp(h_row("nt",HI.bell,"Away alerts",{v:D.notif?"Always on":"Off",s:"Phone alert for new announcements and updates"})+h_row("wn",HI.star,"What's new",{v:D.notes.filter(x=>!x.r).length?D.notes.filter(x=>!x.r).length+" new":""})+h_row("pm",HI.sf,"Permissions",{s:"Notifications, microphone, camera"})),hub,e=>{
+  const a=e.target.closest("[data-a]")?.dataset.a;if(!a)return;HBACK=notifPage;
+  if(a=="nt")toggleNotif();if(a=="wn")notifs();if(a=="pm")permsPage()})}
+function safetyPage(){HBACK=null;
+ h_page("Safety",`<div class="doc"><h3>Answers can be wrong</h3><p>Ask Tr. David is built to help you learn, but an answer may sometimes have a mistake. Check important work with your teacher or textbook.</p><h3>Keep your details private</h3><p>Do not type passwords, PINs, phone numbers or home addresses into the chat.</p><h3>Be kind</h3><p>Use the app respectfully. Messages that bully, threaten or abuse others are not allowed.</p><h3>Tell someone you trust</h3><p>If something in the app upsets you, or someone asks you for private information, tell a parent, guardian or teacher.</p><h3>No files or downloads</h3><p>The app never sends you files. Do not open links from people who say they are from the app.</p></div>`+h_grp(h_row("rb",HI.bug,"Report a problem",{s:"Write to Tr. David"})),hub,e=>{if(e.target.closest("[data-a=rb]")){HBACK=safetyPage;supportOpen()}})}
+function securityPage(){HBACK=null;const m=(window.AK&&AK.me())||{};
+ h_page("Security and login",h_grp((m.username?h_row("un",HI.user,"Signed in as",{v:"@"+esc(m.username),n:1,x:1}):"")+h_row("ac",HI.sl,"Update account",{s:"Names, username, phone, password, PIN"})+h_row("lo",HI.lo,"Log out",{c:"#e5173f",n:1}))+`<div class="doc"><h3>Keep your account safe</h3><p>Never share your password or PIN, even with friends. Log out when you use a phone that is not yours. If you think someone else has used your account, change your password and PIN straight away, then tell Tr. David.</p></div>`,hub,e=>{
+  const a=e.target.closest("[data-a]")?.dataset.a;if(!a)return;
+  if(a=="ac"){HBACK=securityPage;AK.open()}if(a=="lo")uiConfirm("Log out of this account?",()=>{HUB=false;out()},"Log out")})}
+function privacyCenter(){HBACK=null;
+ h_page("Privacy center",h_grp(h_row("pv",HI.sf,"Privacy policy",{s:"How your information is used"})+h_row("tc",HI.doc,"Terms and conditions",{s:"Rules for using the app"})+h_row("pm",HI.sl,"Permissions",{s:"Notifications, microphone, camera"})),hub,e=>{
+  const a=e.target.closest("[data-a]")?.dataset.a;if(!a)return;HBACK=privacyCenter;
+  if(a=="pv")privacyPage();if(a=="tc")termsPage();if(a=="pm")permsPage()})}
+function historyPage(){HBACK=null;
+ h_page("History and data",h_grp(h_row("hi",HI.hd,"Chat history",{s:"Open an earlier chat"})+h_row("sv",HI.star,"Saved answers")+h_row("ex",HI.dl,"Export chat",{s:"Download as a text file"})+h_row("tr",HI.bin,"Trash",{v:D.trash.length})+h_row("cc",HI.chat,"Clear this chat",{c:"#e5173f",n:1,s:"Moves its messages to Trash"})),hub,e=>{
+  const a=e.target.closest("[data-a]")?.dataset.a;if(!a)return;
+  if(a=="hi")chatHistory();if(a=="sv"){HBACK=historyPage;saved()}if(a=="ex")exportChat();if(a=="tr"){HBACK=historyPage;sel.clear();trash()}
+  if(a=="cc")uiConfirm("Move all messages in this chat to Trash?",()=>{if(D.msgs.length){toTrash(D.msgs.slice());D.msgs.length=0;stopEdit();save();render()}historyPage()},"Clear")})}
+function aboutPage(){HBACK=null;
+ h_page("About us",`<div class="hh" style="padding-top:20px"><div class="hav"><div class="hpic" style="background:url(${AVATAR}) center/cover"></div></div><div class="hnm">Ask Tr. David</div><div class="hsub">Everything About Your Studies · Version 1.0</div></div><div class="doc"><h3>Who we are</h3><p>Ask Tr. David is a study helper made by Tr. David (Teacher David). It is built for learners who want clear, honest help with school work at any time of day.</p><h3>What you can do</h3><p>Ask any question about your studies, get revision notes, see worked steps, take short quizzes and research a topic. You can type or speak your question.</p><h3>For your level</h3><p>Choose your class and the app answers for Primary, O-Level or A-Level. Ten study models, from Teacher and Tutor to Professor and Philosopher, give you the right kind of answer for lessons, exams and research.</p><h3>Plans</h3><p>Everyone starts on the Free plan. Basic, Standard and Premium unlock more models and features. See Upgrade plan for prices and how to pay.</p><h3>Contact</h3><p>Call or WhatsApp 0788 737 517, or email asktrdavid@gmail.com. You can also write to Tr. David from inside the app.</p></div>`+h_grp(h_row("pv",HI.sf,"Privacy policy")+h_row("tc",HI.doc,"Terms and conditions")+h_row("sp",HI.chat,"Contact Tr. David")+h_row("cu",HI.call,"Call, WhatsApp or email")),hub,e=>{
+  const a=e.target.closest("[data-a]")?.dataset.a;if(!a)return;HBACK=aboutPage;
+  if(a=="pv")privacyPage();if(a=="tc")termsPage();if(a=="sp")supportOpen();if(a=="cu")contactUs()})}
+function libAll(){const o={sv:[],lk:[],sh:[]};D.chats.forEach(c=>c.msgs.forEach(m=>{if(m.s!="i"||m.err)return;if(m.bm)o.sv.push(m);if(m.fb==1)o.lk.push(m);if(m.sh)o.sh.push(m)}));o.sh.sort((a,b)=>b.sh-a.sh);return o}
+function saved(){library("sv")}
+let LIBT="sv";
+function library(t){LIBT=t||LIBT;const L=libAll(),T=[["sv","Saved"],["lk","Liked"],["sh","Shared"]],items=L[LIBT];
+ const EM={sv:"No saved answers yet. Tap Save under an answer to keep it here.",lk:"No liked answers yet. Tap Helpful under an answer you like.",sh:"Nothing shared yet. Answers you share from now on appear here."};
+ const ago=m=>new Date(LIBT=="sh"?m.sh:m.ts).toLocaleDateString([],{day:"numeric",month:"short",year:"numeric"});
+ showP("My library",`<div class="sws" style="padding:14px 16px 6px;gap:8px">${T.map(x=>`<button class="lk ${LIBT==x[0]?"on":""}" data-t="${x[0]}">${x[1]} · ${L[x[0]].length}</button>`).join("")}</div>`+
+  (items.length?items.map((m,i)=>`<div class="gc lc" data-i="${i}" style="padding:14px 16px"><b>${esc(m.q||"Answer")}</b><div class="t" style="margin:2px 0 8px">${ago(m)}${LIBT=="sh"&&m.shn>1?" · shared "+m.shn+" times":""}</div><div class="md lcm">${md(m.t)}</div><div style="display:flex;gap:8px;margin-top:10px"><button class="lk" data-x="open">Read more</button><button class="lk" data-x="copy">Copy</button><button class="lk dg" data-x="rm">${LIBT=="sv"?"Unsave":LIBT=="lk"?"Remove like":"Remove from list"}</button></div></div>`).join(""):`<div class="empty" style="padding:40px 28px">${EM[LIBT]}</div>`)+'<div style="height:30px"></div>',
+  ()=>HUB?settings():closeP(),e=>{
+   const t=e.target.closest("[data-t]");if(t){library(t.dataset.t);return}
+   const x=e.target.closest("[data-x]");if(!x)return;const c=x.closest(".lc"),m=items[+c.dataset.i],k=x.dataset.x;
+   if(k=="open"){c.classList.toggle("open");x.textContent=c.classList.contains("open")?"Show less":"Read more"}
+   if(k=="copy"){try{navigator.clipboard.writeText(m.t.replace(/[#*`|]/g,""));x.textContent="Copied"}catch(er){}}
+   if(k=="rm"){if(LIBT=="sv")m.bm=false;else if(LIBT=="lk")m.fb=0;else{delete m.sh;delete m.shn}save();render();library()}})}
+function fontStyle(){const c=D.font||"";showP("Font style",`<div class="sec">Choose a font</div><div class="sws">${[["","Default"],["serif","Serif"],["rounded","Rounded"],["mono","Typewriter"]].map(a=>`<button class="lk ${c==a[0]?"on":""}" data-fo="${a[0]}">${a[1]}</button>`).join("")}</div><div class="t" style="padding:0 18px;line-height:1.5">The font changes across the whole app. Pick Default to go back.</div>`,settings,e=>{const v=e.target.dataset.fo;if(v==null)return;if(v)D.font=v;else delete D.font;applyTheme();save();fontStyle()})}
+function permsPage(){
+ const items=[["notif","Notifications","Announcements and updates",'<path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0"/>'],["microphone","Microphone","Ask your questions by voice",'<rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/>'],["camera","Camera","Ask about a photo of your work",'<path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/>']];
+ showP("Permissions",`<div class="t" style="padding:16px 18px 0;line-height:1.45">Ask Tr. David asks for these when you first open it, so everything works. They are all you need.</div><div class="cd">${items.map(i=>`<div class="row" data-pm="${i[0]}" style="cursor:default"><span class="ri"><svg viewBox="0 0 24 24">${i[3]}</svg></span><div>${i[1]}<small>${i[2]}</small></div><span class="rv" id="pv_${i[0]}">Checking…</span></div>`).join("")}</div><div class="t" id="pvh" style="padding:0 18px;line-height:1.45"></div>`,settings);
+ $("pbody").style.background="color-mix(in srgb,var(--text) 5%,var(--bg))";
+ const set=(k,st)=>{const el=document.getElementById("pv_"+k);if(!el)return;const ok=st=="granted";el.textContent=ok?"Allowed ✓":st=="prompt"?"Not yet":"Blocked";el.className="rv"+(ok?"":" no");if(!ok){const h=document.getElementById("pvh");if(h)h.textContent="If something shows Blocked or Not yet, open your phone Settings, then Apps, then Ask Tr. David, then Permissions, and allow it."}};
+ set("notif",("Notification"in window)?(Notification.permission=="default"?"prompt":Notification.permission):"denied");
+ ["microphone","camera"].forEach(k=>{try{navigator.permissions.query({name:k}).then(r=>set(k,r.state),()=>set(k,"prompt"))}catch(e){set(k,"prompt")}})}
+function privacyPage(){showP("Privacy",`<div class="doc"><p>Ask Tr. David helps you study. This page explains what the app keeps and why.</p>
+<h3>What is stored</h3><p>Your name, class level and account details are kept so you can sign in and get answers for your level. Your chats, saved answers and settings are stored on your own phone.</p>
+<h3>Questions and answers</h3><p>When a question has no saved answer, it may be sent to an AI service to write one. Please do not type passwords or private details in the chat.</p>
+<h3>Messages to Tr. David</h3><p>Messages you send from Contact Tr. David are stored so he can read and reply to them.</p>
+<h3>Permissions</h3><p>Microphone is used only when you ask a question by voice. Camera is used only when you choose to ask about a photo. Notifications are used for announcements and updates.</p>
+<h3>Usage counts</h3><p>The app counts installs and opens using an anonymous device number. It is not linked to your name for advertising.</p>
+<h3>Your information is not sold</h3><p>We do not sell your information or show you adverts based on it.</p>
+<h3>Your choices</h3><p>You can clear your chat or empty the Trash at any time. To ask for your account to be removed, write to asktrdavid@gmail.com.</p></div>`,settings)}
+function termsPage(){showP("Terms and conditions",`<div class="doc"><p>By using Ask Tr. David you agree to these terms.</p>
+<h3>Using the app</h3><p>The app is for learning. Use it for your own studies and be kind and respectful in anything you write.</p>
+<h3>Answers can be wrong</h3><p>Answers are written to help you learn, but they may sometimes have mistakes. Check important work with your teacher or textbook.</p>
+<h3>Your account</h3><p>Keep your login details private. You are responsible for what happens on your account.</p>
+<h3>Plans and payments</h3><p>Some features need a paid plan. Plans are activated after payment is confirmed using the steps shown under Billing. Limits on each plan are shown in the app and may change.</p>
+<h3>Not allowed</h3><p>Do not misuse the app, try to break it, share your account, or use it to harm or cheat other people.</p>
+<h3>Changes and stopping access</h3><p>The app and these terms may be updated. Accounts that break these rules may be limited or removed.</p>
+<h3>Contact</h3><p>Questions? Write to asktrdavid@gmail.com or use Contact Tr. David in the app.</p></div>`,settings)}
 const CT={tel:"+256788737517",show:"0788 737 517",wa:"256788737517",mail:"asktrdavid@gmail.com"};
 function contactUs(){
  const ic=d=>`<span class="ri"><svg viewBox="0 0 24 24">${d}</svg></span>`;
@@ -587,16 +754,23 @@ function notify(t,b){
  if(WN_ON){D.notes.unshift({t,b,ts:Date.now(),r:0});D.notes=D.notes.slice(0,50);save();updateBadge()}
  if(D.notif&&"Notification"in window&&Notification.permission=="granted"){try{const n=new Notification(t,{body:b});n.onclick=()=>{window.focus();n.close()}}catch(e){}}}
 let annT=0;
-function hideAnn(){clearTimeout(annT);$("ann").style.display="none"}
+/* ANNOUNCEMENT POP-UP: shows in the centre of the screen. It closes ONLY with its two buttons (tapping outside does nothing, and there is no timer).
+   Mark as read = marks it read in What's new (red dot goes) and closes. Hide = closes, it stays unread in What's new. Several at once show one after another. */
+let annQ=[],annCur=null;
+function annShow(x){annCur={id:x.id!=null?x.id:null,ts:x.ts};$("annt").textContent=x.t;$("annb").textContent=x.b||"";$("ann").style.display="flex";try{$("annb").scrollTop=0}catch(e){}}
+function annNext(){if($("ann").style.display=="flex")return;const x=annQ.shift();if(x)annShow(x)}
+function annPush(x){annQ.push(x);annNext()}
+function hideAnn(){$("ann").style.display="none";annCur=null;annNext()}
+function annRead(){try{const c=annCur;if(c){const n=D.notes.find(z=>c.id!=null?z.id==c.id:z.ts===c.ts);if(n){n.r=1;save();updateBadge()}}}catch(e){}hideAnn()}
 /* called when the admin panel sends an announcement: {id,title,body,duration (seconds, 0 = until hidden)} */
 function showAnn(a){
  if(!a||!a.title)return;if(a.id!=null){if(D.annSeen[a.id])return;D.annSeen[a.id]=1}
- if(WN_ON){D.notes.unshift({t:a.title,b:a.body||"",ts:Date.now(),r:0});D.notes=D.notes.slice(0,50);save();updateBadge()}
- $("annt").textContent=a.title;$("annb").textContent=a.body||"";$("ann").style.display="flex";
- clearTimeout(annT);if(+a.duration>0)annT=setTimeout(hideAnn,a.duration*1000)}
+ const nt={t:a.title,b:a.body||"",ts:Date.now(),r:0};
+ if(WN_ON){D.notes.unshift(nt);D.notes=D.notes.slice(0,50);save();updateBadge()}
+ annPush({id:null,ts:nt.ts,t:a.title,b:a.body||""})}
 window.receiveAnnouncement=showAnn;
-$("annx").onclick=hideAnn;
-$("avw").onclick=()=>{$("more").style.display="none";notifs(true)};
+$("annx").onclick=hideAnn;$("annr").onclick=annRead;document.body.appendChild($("ann"));/* straight under <body> so nothing can clip or offset the pop-up */
+$("avw").onclick=()=>{$("more").style.display="none";HSC=0;HO="";hub()};
 function toggleNotif(){
  if(D.notif){uiAlert("Phone alerts stay on so you never miss an announcement or update.");return}
  if(!("Notification"in window)){uiAlert("This browser does not support notifications.");return}
@@ -625,14 +799,14 @@ function trash(){
   else{const i=+r.dataset.i;sel.has(i)?sel.delete(i):sel.add(i)}
   const y=$("pbody").scrollTop;trash();$("pbody").scrollTop=y})}
 /* menu + search */
-$("dots").onclick=e=>{e.stopPropagation();const m=$("more");m.style.display=m.style.display=="block"?"none":"block"};
+$("dots").onclick=e=>{e.stopPropagation();const m=$("more"),n=D.notes.filter(x=>!x.r).length;$("mnt").innerHTML="Notifications"+(n?` <b style="background:#e03131;color:#fff;border-radius:10px;padding:1px 7px;font-size:12px;margin-left:6px">${n}</b>`:"");m.style.display=m.style.display=="block"?"none":"block"};
 document.addEventListener("pointerdown",e=>{if(!e.target.closest("#more")&&!e.target.closest("#dots"))$("more").style.display="none"});
 function closeSearch(){q="";$("sq").value="";$("srch").style.display="none";render()}
 $("sx").onclick=closeSearch;$("sq").oninput=()=>{q=$("sq").value.trim().toLowerCase();render()};
-$("more").onclick=e=>{const a=e.target.dataset.a;if(!a)return;$("more").style.display="none";
+$("more").onclick=e=>{const a=e.target.closest("[data-a]")?.dataset.a;if(!a)return;$("more").style.display="none";
  if(a=="s"){$("srch").style.display="flex";$("sq").focus()}
  if(a=="cc"){if(D.msgs.length){toTrash(D.msgs.slice());D.msgs.length=0;stopEdit();save();render()}}
- if(a=="g")settings();if(a=="n")newChat();if(a=="h")chatHistory();if(a=="b")saved()};
+ if(a=="nt")notifs(true);if(a=="ct"){HUB=true;HBACK=closeP;if(isOwner())contactUs();else supportOpen()}if(a=="pl")plans(0);if(a=="ex")exportChat();if(a=="n")newChat();if(a=="h")chatHistory();if(a=="b")saved()};
 $("editing").onclick=stopEdit;$("send").onclick=()=>stream!=null?stopS():send();$("inp").onkeydown=e=>{if(e.key=="Enter")send()};
 let tm,sx,sy;
 $("msgs").addEventListener("pointerdown",e=>{const b=e.target.closest(".b.o");if(!b)return;sx=e.clientX;sy=e.clientY;tm=setTimeout(()=>sheet(+b.dataset.i),500)});
@@ -681,7 +855,21 @@ function detectSub(v){const L=subsList();if(lvKey()=="PLE"&&L.includes("Mathemat
 function routeSub(q){q=String(q||"");let t=null;try{t=detectSub(q)}catch(e){}
  if(t)return t;const lo=q.toLowerCase(),L=subsList(),T=(typeof TOP!="undefined"?TOP:[]).find(x=>!x.nd&&(x.ai!=null||kwOK(lo))&&x.re.test(lo)&&(!x.L||x.L.includes(lvKey()))&&x.S&&x.S.some(y=>L.includes(y)));
  return T?T.S.find(y=>L.includes(y)):"General"}
-function offSub(q,I){q=String(q||"");const fam=relSubs(D.sub);
+/* Subjects share content (soil, plants, animals, water, climate, money, energy...). A question that belongs to a subject that overlaps the chat's subject is answered, not refused. */
+const SUB_GROUPS=[
+ ["Agriculture","Biology","Geography","Science","General Science","Chemistry","Nutrition and Food Technology","Entrepreneurship","Physical Education"],
+ ["Physics","Chemistry","Science","General Science","Mathematics","ICT","Subsidiary ICT","Technology and Design","Art and Design"],
+ ["History","Geography","Social Studies","Christian Religious Education","Islamic Religious Education","Religious Education","Divinity","Islamic Studies","Economics","Citizenship"],
+ ["Economics","Entrepreneurship","Mathematics","Subsidiary Mathematics","Agriculture","Geography","Social Studies"],
+ ["English","Literature","Kiswahili","Luganda","Social Studies","History"]];
+const subOvl=(a,b)=>a===b||SUB_GROUPS.some(g=>g.includes(a)&&g.includes(b));
+/* a short follow-up such as "More", "I mean more details", "explain again" has no subject of its own: it belongs to the chat it is in */
+const FOLLOW_RX=/^(i mean |i said |i want |please |ok |okay |and |so )*(more|more details?|more info(rmation)?|details?|in details?|in more details?|explain( it| that| this| more| again| further)?|elaborate|expand|again|continue|go on|tell me more|what else|examples?|simpler|why|how)( please)?\s*[?!.]*$/i;
+function offSub(q,I){const s=String(q||"").trim();
+ if(FOLLOW_RX.test(s)&&D.msgs.some(m=>m.s=="i"&&!m.note&&!m.err&&!m.lim))return null;
+ const o=offSub0(q,I);if(!o)return null;
+ return relSubs(D.sub).some(f=>subOvl(f,o))?null:o}
+function offSub0(q,I){q=String(q||"");const fam=relSubs(D.sub);
  if(I&&I.intent==="new"&&I.subject&&I.subject!=="General")return fam.includes(I.subject)?null:I.subject;
  let t=null;try{t=detectSub(q)}catch(e){}
  if(t&&!fam.includes(t)&&!SUBRULES.some(x=>x[0].test(q)&&x[1].some(y=>fam.includes(y))))return t;
@@ -2829,7 +3017,7 @@ async function aiAnswer(q,FUx,loose){
  const c=new AbortController(),tm=setTimeout(()=>c.abort(),25000);
  try{
   const sub=D.sub=="General"?(detectSub(q)||"General"):D.sub;
-  const r=await fetch(AIU,{method:"POST",signal:c.signal,headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({question:String(q).slice(0,300),level:D.lvl,class:String(D.cls||"").replace(/^Primary /,"P").replace(/^Senior /,"S"),subject:sub,plan:planName(),curriculum:"Uganda NCDC",strict_subject:!loose,retry:loose?true:undefined,brief:!wantFull(),follow:FUx&&!FUx.local?{kind:FUx.kind,topic:FUx.topic,step:FUx.step||0,instruction:FUx.hint||"",previous:lastAnsText()}:undefined})});
+  const r=await fetch(AIU,{method:"POST",signal:c.signal,headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({question:String(q).slice(0,300),level:D.lvl,class:String(D.cls||"").replace(/^Primary /,"P").replace(/^Senior /,"S"),subject:sub,plan:planName(),curriculum:"Uganda NCDC",strict_subject:!loose,retry:loose?true:undefined,brief:!wantFull(),...svMe(),follow:FUx&&!FUx.local?{kind:FUx.kind,topic:FUx.topic,step:FUx.step||0,instruction:FUx.hint||"",previous:lastAnsText()}:undefined})});
   if(!r.ok)return null;
   const j=await r.json();
   if(j.status=="busy")return{busy:1};
@@ -2845,15 +3033,52 @@ async function aiAnswer(q,FUx,loose){
   return f
  }catch(e){return null}finally{clearTimeout(tm)}}
 function logAct(act,m,ans){try{const t=tokNow();if(!t||!m)return;fetch(SBU+"rpc/log_user_action",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_t:t,p_action:act,p_q:String(m.q||"").slice(0,200),p_ref:String(m.tid||m.aid||"").slice(0,60),p_ans:String(ans!=null?ans:m.t||"").replace(/\s+/g," ").slice(0,200)})}).catch(()=>{})}catch(e){}}
+/* ===== REPLY BUTTONS: each one has a server job.
+   DAVID (owner): Copy, Share, Save, Like, Unlike and Redo go to the database function owner_reply_action, which checks the login again, so nobody else can use it.
+     Like = keep the reply for good. Unlike = remove the stored reply (and its extra versions) at once. Copy, Share, Save and Redo are counted on the reply.
+   Redo (everyone): ai_variant writes the same answer again in a different way and stores it, so later Redos can reuse it. ===== */
+const UUIDRX=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,VRU=SBU.replace("/rest/v1/","/functions/v1/")+"ai_variant";
+function ownerAct(a,m){
+ if(!m||typeof isOwner!="function"||!isOwner())return Promise.resolve(null);
+ const tid=UUIDRX.test(String(m.tid||""))?m.tid:null,vid=UUIDRX.test(String(m.vid||""))?m.vid:null;
+ return fetch(SBU+"rpc/owner_reply_action",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_t:tokNow(),p_action:a,p_tid:tid,p_vid:vid,p_sty:m.sty||null})}).then(r=>r.json()).catch(()=>null)}
+/* after Unlike the stored rewrite is gone from the server, so forget the copy kept on this phone too */
+function forgetSty(m){try{const x=m&&m.sty;if(!x||!x.t)return;localStorage.removeItem("ask_sty3_"+x.k+"_"+x.pl+"_"+x.L+"_"+hsh(x.t)+"_"+x.t.length)}catch(e){}}
+function ownerResult(m,a,j){if(!j||!j.ok)return;
+ if(a=="like"&&j.kept)m.kept=1;
+ if(a=="unlike"&&j.removed){m.kept=0;m.gone=1;forgetSty(m)}
+ try{save();render()}catch(e){}}
+let REDOING=0;
+/* Redo: returns true when it handled the tap (new answer shown, or a limit/busy message), false when the normal regenerate should run instead */
+async function redoReply(i){
+ const m=D.msgs[i];if(!m||REDOING)return true;
+ const q=String(m.q||"").replace(/\s+/g," ").trim(),prev=String(m.t||"");
+ if(m.s!="i"||m.err||m.note||m.lim||m.quiz||m.qz||m.w||m.mode||m.stream||prev.length<20||q.length<3||q.length>300||!navigator.onLine)return false;
+ if(capped()){limitMsg();return true}
+ REDOING=1;const st=$("stat"),old=st.textContent;st.textContent="writing another way…";
+ ownerAct("redo",m);
+ let j=null;const ct=new AbortController(),tm=setTimeout(()=>ct.abort(),28000);
+ try{const r=await fetch(VRU,{method:"POST",signal:ct.signal,headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({question:q,level:lvKey(),subject:String(m.tsub||D.sub||"General"),plan:planName(),class:String(D.cls||""),model:modelName(),previous:prev,seen:(m.seen||[]).slice(-40),rejected:m.fb==-1,liked:m.fb==1,...svMe()})});j=r.ok?await r.json():null}catch(e){j=null}
+ finally{clearTimeout(tm);REDOING=0;st.textContent=old}
+ if(D.msgs[i]!==m)return true;
+ if(j&&j.status=="ok"&&j.md){
+  m.seen=(m.seen||[]).concat(j.id?[j.id]:[]).slice(-40);
+  m.t=String(j.md);m.vid=j.id||null;m.ts=Date.now();
+  m.fb=0;m.kept=0;m.gone=0;m.bm=false;m.ab=false;m.xs=null;m.sty=null;m.tid=null;m.aid=null;
+  save();render();return true}
+ if(j&&j.status=="busy"){uiAlert("Many learners are asking right now. Please tap Redo again in a little while.");return true}
+ return false}
 function logUn(q){try{q=String(q).trim().slice(0,300);if(q.length<3)return;fetch(SBU+"rpc/log_unanswered",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_question:q,p_level:D.lvl,p_subject:D.sub})}).catch(()=>{})}catch(e){}}
 /* Rating an "AI generated, not yet checked" answer. Only the owner account (username DAVID, checked in the database) approves with ONE thumbs up.
  Every other account's thumbs up is counted, and the database approves the answer once 10 different accounts have rated it helpful.
  When the database says "published" the label goes away and the answer is used for later related questions. */
 function sendFb(m){try{
+ /* DAVID (owner): Like keeps the reply for good, Unlike removes it from the database at once. The database checks the login again, so no one else can do this. */
+ if(typeof isOwner=="function"&&isOwner()&&(m.fb==1||m.fb==-1)){const oa=m.fb==1?"like":"unlike";ownerAct(oa,m).then(j=>ownerResult(m,oa,j))}
  if(m.tid){
   const tok=localStorage.getItem("ask_tok")||sessionStorage.getItem("ask_tok")||"";
   fetch(SBU+"rpc/rate_ai_topic",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_topic_id:m.tid,p_vote:m.fb||0,p_t:tok})})
-   .then(r=>r.json()).then(j=>{if(j&&j.ok&&j.status=="published"){
+   .then(r=>r.json()).then(j=>{if(j&&j.ok&&j.kept){m.kept=1;try{save();render()}catch(e){}}if(j&&j.ok&&j.status=="published"){
      m.ai=0;try{TOP.forEach(t=>{if(t.tid==m.tid)t.ai=0})}catch(e){}
      const fix=a=>(a||[]).forEach(x=>{if(x&&x.tid==m.tid)x.ai=0});fix(D.msgs);(D.chats||[]).forEach(c=>fix(c.msgs));save();render()}}).catch(()=>{});
   return}
@@ -2878,6 +3103,14 @@ function abGroups(t){
 function abParts(t){const g=abGroups(t);return g.hl.concat(g.more)}
 /* the bold words in a finished answer become tappable on their own (no buttons): a tap asks about that word */
 const hlWrap=h=>h.replace(/<b>([^<]{2,40})<\/b>/g,(a,x)=>'<b class="hl" data-st="What do you mean by &quot;'+x.replace(/&quot;/g,"")+'&quot;">'+x+'</b>');
+/* Ask about this: shown on EVERY finished reply. Best place to start = the most highlighted part (first bold word, else first important part).
+   If a reply has no parts at all (a short reply), three general follow-ups are offered so the button is never empty. Typing your own question still works. */
+const abGen=[{lab:"Explain in simpler words",q:"Explain that in simpler words"},{lab:"Give an example",q:"Give me an example"},{lab:"Why is this important?",q:"Why is this important?"}];
+function abPlan(t){const G=abGroups(t),all=G.hl.concat(G.more);return{top:all[0]||null,hl:G.hl.slice(1),more:G.more.filter(x=>x!==all[0]),gen:all.length?[]:abGen,all:all.length?all:abGen}}
+/* a closing label with nothing under it (for example the Researcher ending "Next questions to investigate") is taken off, and the label is shown with tappable questions instead */
+const NQ_END=/\n[ \t]*(?:#{1,4}[ \t]*)?(?:\*\*)?[ \t]*(next questions? to investigate|your next step|in summary|remember)[ \t]*:?[ \t]*(?:\*\*)?[ \t]*$/i;
+function nqSplit(t){const x=String(t||"").replace(/\s+$/,""),m=NQ_END.exec(x);return m?{t:x.slice(0,m.index),nq:/^next/i.test(m[1])}:{t:x,nq:false}}
+const stAttr=q=>esc(q).replace(/"/g,"&quot;");
 function abShow(m){return !m.stream&&m.fk!="local"&&String(m.t||"").split(/\s+/).length>=40&&abParts(m.t).length>=2}
 /* ===== STEP 6: ANSWER EXPLANATION FEATURE. A practice item (Item + Information + Task A, B, C...) is shown with, for each task, its own
    "Show Answer" and "Explain Answer" buttons. The marking guide lines are taken out of the plain text and kept behind Show Answer.
@@ -2997,11 +3230,14 @@ function bub(m,i,last){
  if(m.lim)return `<div class="b i ai" data-i="${i}"><div style="display:flex;gap:10px;align-items:flex-start"><span style="flex:none;width:34px;height:34px;border-radius:50%;background:rgba(245,158,11,.16);color:#d97706;display:grid;place-items:center"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></span><div style="font-weight:700;font-size:16px;line-height:1.3;color:#d97706;padding-top:1px">${LIM1}</div></div>${rtime()?`<div style="display:flex;gap:8px;align-items:center;margin-top:10px;color:var(--sub);font-size:14px"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#2f80ed" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Your free plan resets at <b style="color:#2f80ed">${rtime()}</b></span></div>`:""}<button data-act="plans" data-i="${i}" style="display:block;width:100%;margin-top:12px;padding:12px 14px;border:0;border-radius:22px;background:var(--green);color:#fff;font:inherit;font-weight:700;cursor:pointer;text-align:center">${LIM2}</button><small>${hm(m.ts)}</small></div>`;
  if(m.err)return `<div class="b i err" data-i="${i}">${esc(m.t)}<div class="act"><button data-act="retry" data-i="${i}">Retry</button></div></div>`;
  const A=[["copy","Copy"],["bm",m.bm?"Saved":"Save",m.bm],["up","Helpful",m.fb==1],["dn","Not helpful",m.fb==-1],["share","Share"]];
- let h=`<div class="b i ai" data-i="${i}">${m.mdl?`<div class="mdltag">${esc(m.mdl)}</div>`:""}${exHtml(m,i)||`<div class="md">${last&&!m.stream&&!m.quiz?hlWrap(md(m.t)):md(m.t)}</div>`}`;
+ const NQ=(!m.stream&&!m.quiz&&!m.note)?nqSplit(m.t):{t:m.t,nq:false};
+ let h=`<div class="b i ai" data-i="${i}">${m.mdl?`<div class="mdltag">${esc(m.mdl)}</div>`:""}${exHtml(m,i)||`<div class="md">${last&&!m.stream&&!m.quiz?hlWrap(md(NQ.t)):md(NQ.t)}</div>`}`;
  if(m.quiz){h+=m.quiz[1].map((o,k)=>`<button class="opt ${m.pick!=null?(k==m.quiz[2]?"ok":k==m.pick?"bad":""):""}" data-act="pick" data-i="${i}" data-k="${k}">${esc(o)}</button>`).join("")+(m.pick!=null?`<p>${m.pick==m.quiz[2]?"Correct, well done.":"Not quite. The correct answer is highlighted."}</p>`+(m.qz?(m.qz.n<m.qz.list.length-1?`<div class="chips"><button data-act="nq" data-i="${i}">Next question</button></div>`:`<p><b>Quiz finished: ${m.qz.score} out of ${m.qz.list.length}.</b></p>`):""):"")}
  let act="";
- if(last&&abShow(m)){const G=abGroups(m.t),cb=x=>x.map(y=>`<button data-st="${esc(y.q).replace(/"/g,"&quot;")}">${esc(y.lab)}</button>`).join("");
-  h+=`<div class="abx"><button class="abt${m.ab?" on":""}" data-act="ab" data-i="${i}">${m.ab?"Hide":"Ask about this"}</button>${m.ab?`<div class="abp">${G.hl.length?`<div class="abl">Highlighted</div><div class="chips">${cb(G.hl)}</div>`:""}${G.more.length?`<div class="abl">Also important</div><div class="chips">${cb(G.more)}</div>`:""}</div>`:""}</div>`}
+ if(last&&!m.stream&&!m.quiz){const P=abPlan(m.t),cb=(x,c)=>x.map(y=>`<button${c?` class="${c}"`:""} data-st="${stAttr(y.q)}">${esc(y.lab)}</button>`).join("");
+  if(NQ.nq)h+=`<div class="nqx"><div class="abl">Next questions to investigate</div><div class="chips">${cb(P.all.slice(0,3))}</div></div>`;
+  h+=`<div class="abx"><button class="abt${m.ab?" on":""}" data-act="ab" data-i="${i}">${m.ab?"Hide":"Ask about this"}</button>${m.ab?`<div class="abp">${P.top?`<div class="abl">Best place to start</div><div class="chips">${cb([P.top],"top")}</div>`:""}${P.hl.length?`<div class="abl">Highlighted</div><div class="chips">${cb(P.hl)}</div>`:""}${P.more.length?`<div class="abl">Also important</div><div class="chips">${cb(P.more)}</div>`:""}${P.gen.length?`<div class="abl">You can ask</div><div class="chips">${cb(P.gen)}</div>`:""}<div class="abl">Or type your own question below. It will follow on from this answer.</div></div>`:""}</div>`;
+  h+=`<div class="rtx"><div class="rtq">Did this answer your question?</div><div class="rtn">Tap Like if it did. If anything is wrong, tap Unlike. It will be reported to us immediately for review.</div><div class="rtb"><button class="up${m.fb==1?" on":""}" data-act="up" data-i="${i}">${AI.up}<span>Like</span></button><button class="dn${m.fb==-1?" on":""}" data-act="dn" data-i="${i}">${AI.dn}<span>Unlike</span></button></div>${m.fb==1?'<div class="rts">'+(m.kept?'Saved permanently to the database. No review needed.':'Thank you. We are glad it helped.')+'</div>':m.fb==-1?'<div class="rts">'+(m.gone?'Removed from the database.':'Thank you. This answer has been reported for review.')+'</div>':""}</div>`}
  if(!m.stream){act=`<div class="act out">${A.map(a=>`<button class="${a[2]?"on":""}" data-act="${a[0]}" data-i="${i}" aria-label="${a[1]}" title="${a[1]}">${AI[a[0]]}</button>`).join("")}${last?`<button data-act="regen" data-i="${i}" aria-label="Regenerate" title="Regenerate">${AI.regen}</button>`:""}</div>`;
   if(last&&m.w&&m.w.shown<m.w.parts.length)h+=wBtns(m,i)}
  return h+`<small>${hm(m.ts)}</small></div>${act}`}
@@ -3344,7 +3580,7 @@ async function styleAnswer(t,q){
  try{const c=JSON.parse(localStorage.getItem(ck)||"null");if(c&&c.md&&Date.now()-c.at<432e5)return{md:c.md,st:"approved"}}catch(e){}
  if(svNo[ck]&&Date.now()-svNo[ck]<6e5)return null;
  const ct=new AbortController(),tm=setTimeout(()=>ct.abort(),9000);
- try{const r=await fetch(STU,{method:"POST",signal:ct.signal,headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({text:t,model:k,level:L,plan:pl,depth:modelDepth(k),q:String(q||"").slice(0,200)})});
+ try{const r=await fetch(STU,{method:"POST",signal:ct.signal,headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({text:t,model:k,level:L,plan:pl,depth:modelDepth(k),q:String(q||"").slice(0,200),...svMe()})});
   if(!r.ok)return null;const j=await r.json();
   if(j.status=="ok"&&j.md){const st=j.state=="draft"?"draft":"approved";if(st=="approved"){try{localStorage.setItem(ck,JSON.stringify({md:j.md,at:Date.now()}))}catch(e){}}return{md:j.md,st}}
   if(j.status=="no_answer"&&j.reason=="rejected")svNo[ck]=Date.now();
@@ -3358,7 +3594,10 @@ async function styleAnswer(t,q){
 const SVLBL={draft:"Waiting",approved:"Approved",published:"Approved"};
 let SVK="q",SVT="draft",SVL=[],SVC={};
 const svRpc=(fn,a)=>fetch(SBU+"rpc/"+fn,{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify(a)}).then(r=>r.json());
-const svName=k=>(MODELS[k]?MODELS[k].n:k),svOk=()=>SVK=="q"?"published":"approved";
+const svWho=x=>String((x&&(x.asker_name||x.asked_by_name||x.learner_name||x.asker_names||x.user_names||x.names||x.asked_by_username||x.asker_username))||"").trim(),
+ svWhoH=x=>`<div style="padding:12px 18px 0;font-size:17px;font-weight:700;color:var(--text)">${svWho(x)?esc(svWho(x)):'<span style="color:var(--sub);font-weight:600">Name not recorded</span>'}</div>`,
+ svMe=()=>{try{return{asker:String((ME&&ME.names)||"").slice(0,60),asker_user:String((ME&&ME.username)||"").slice(0,40)}}catch(e){return{}}},
+svName=k=>(MODELS[k]?MODELS[k].n:k),svOk=()=>SVK=="q"?"published":"approved";
 const svTopic=x=>"# "+x.name+"\n"+x.definition+"\n\n## How it works\n"+x.steps+"\n\n## Where it is used\n"+x.uses+"\n\n## In simple words\n"+x.simple+"\n\n## Examples\n"+x.examples+"\n\n## Mistakes and tips\n"+x.more;
 const svBtn=(on,l,a,v)=>`<button ${a}="${v}" style="flex:1;padding:10px 4px;border:0;border-radius:18px;font:inherit;font-weight:600;cursor:pointer;background:${on?"var(--green)":"var(--wall)"};color:${on?"#fff":"var(--text)"}">${l}</button>`;
 async function voiceRoom(kind,st){
@@ -3373,7 +3612,7 @@ async function voiceRoom(kind,st){
  <div style="display:flex;gap:6px;padding:4px 18px 8px">${svBtn(SVK=="q","New questions","data-kind","q")}${svBtn(SVK=="r","Style rewrites","data-kind","r")}</div>
  <div style="display:flex;gap:6px;padding:4px 18px 12px">${["draft","approved"].map(s=>svBtn(s==SVT,SVLBL[s]+" "+cn(s),"data-tab",s)).join("")}</div>`;
  if(!SVL.length)h+=`<div style="padding:18px;color:var(--sub);line-height:1.5">${SVT=="draft"?(SVK=="q"?"No new questions are waiting.":"No rewrites are waiting. They appear here after a learner (or you) asks a question with a model selected."):"Nothing here yet."}</div>`;
- SVL.forEach((x,i)=>{const q=SVK=="q"?x.source_question:x.question;h+=`<div class="row" data-it="${i}"><div><b>${esc(q?"“"+q+"”":(x.title||x.name||"Untitled"))}</b><small>${SVK=="q"?esc(x.name||"")+" · "+esc(x.level_code||"")+" · "+esc(x.subject_name||""):esc(x.title||"")+" · "+esc(svName(x.model))+" · "+esc(x.level)+" · "+esc(x.plan||"Free")+" plan"} · ${new Date(x.created_at).toLocaleDateString()}</small></div></div>`});
+ SVL.forEach((x,i)=>{const q=SVK=="q"?x.source_question:x.question;h+=`<div class="row" data-it="${i}"><div><b>${esc(q?"“"+q+"”":(x.title||x.name||"Untitled"))}</b><small><b>${esc(svWho(x)||"Name not recorded")}</b> · ${SVK=="q"?"":""}${SVK=="q"?esc(x.name||"")+" · "+esc(x.level_code||"")+" · "+esc(x.subject_name||""):esc(x.title||"")+" · "+esc(svName(x.model))+" · "+esc(x.level)+" · "+esc(x.plan||"Free")+" plan"} · ${new Date(x.created_at).toLocaleDateString()}</small></div></div>`});
  showP("Learner answers",h,SVBACK,e=>{
   const k=e.target.closest("[data-kind]");if(k){voiceRoom(k.dataset.kind);return}
   const t=e.target.closest("[data-tab]");if(t){voiceRoom(null,t.dataset.tab);return}
@@ -3381,7 +3620,7 @@ async function voiceRoom(kind,st){
 function voiceItem(i,showOrig){
  const x=SVL[i];if(!x)return;const T=SVK=="q",cur=T?svTopic(x):(x.final_md||x.styled_md),shown=showOrig?x.source_md:cur,q=T?x.source_question:x.question;
  const bt=(a,l,c)=>`<button data-a="${a}" style="flex:1;min-width:30%;padding:12px 8px;border:0;border-radius:22px;font:inherit;font-weight:700;cursor:pointer;color:#fff;background:${c}">${l}</button>`;
- showP(esc(x.title||x.name||"Answer"),`<div style="padding:12px 18px 4px;color:var(--sub);line-height:1.5">Learner asked: <b style="color:var(--text)">${q?esc(q):"not recorded"}</b><br>${T?esc(x.level_code||"")+" · "+esc(x.subject_name||""):esc(svName(x.model))+" · "+esc(x.level)+" · "+esc(x.plan||"Free")+" plan"} · <b>${SVLBL[x.status]||x.status}</b></div>
+ showP(esc(x.title||x.name||"Answer"),`${svWhoH(x)}<div style="padding:4px 18px 4px;color:var(--sub);line-height:1.5">Learner asked: <b style="color:var(--text)">${q?esc(q):"not recorded"}</b><br>${T?esc(x.level_code||"")+" · "+esc(x.subject_name||""):esc(svName(x.model))+" · "+esc(x.level)+" · "+esc(x.plan||"Free")+" plan"} · <b>${SVLBL[x.status]||x.status}</b></div>
  ${T?"":`<div style="display:flex;gap:6px;padding:8px 18px">${svBtn(!showOrig,"Rewrite","data-v","n")}${svBtn(!!showOrig,"Original answer","data-v","o")}</div>`}
  <div class="md" style="padding:8px 18px 12px;line-height:1.55">${md(shown)}</div>
  ${T?"":`<div style="padding:0 18px 4px;color:var(--sub);font-size:13px">Edit the rewrite if needed (first line must start with #):</div>
@@ -3426,7 +3665,7 @@ async function kbRoom(st,msg){
  <div id="kbm" style="padding:0 18px 6px;min-height:18px;color:var(--sub)">${esc(msg||"")}</div>`;
  if(KBT=="open"&&n(KBC.old_drafts)>0)h+=`<div class="row" data-imp="1"><div><b>Add ${n(KBC.old_drafts)} older AI drafts to this queue</b><small>Drafts saved before the queue existed. Safe to tap twice. Nothing is approved by this.</small></div></div>`;
  if(!KBL.length)h+=`<div style="padding:18px;color:var(--sub);line-height:1.5">${KBT=="open"?"Nothing is waiting.":"Nothing here yet."}</div>`;
- KBL.forEach((x,i)=>{h+=`<div class="row" data-it="${i}"><div><b>${esc("“"+x.question+"”")}</b><small>${esc((x.candidate&&x.candidate.name)||"")} · ${esc(x.level_code||"")} · ${esc(x.subject_name||"")} · ${kbOrig(x.origin)}${x.was_edited?" · edited":""}${KBT=="open"&&x.status=="under_review"?" · under review":""} · ${admDate(x.created_at)}</small></div></div>`});
+ KBL.forEach((x,i)=>{h+=`<div class="row" data-it="${i}"><div><b>${esc("“"+x.question+"”")}</b><small><b>${esc(svWho(x)||"Name not recorded")}</b> · ${esc((x.candidate&&x.candidate.name)||"")} · ${esc(x.level_code||"")} · ${esc(x.subject_name||"")} · ${kbOrig(x.origin)}${x.was_edited?" · edited":""}${KBT=="open"&&x.status=="under_review"?" · under review":""} · ${admDate(x.created_at)}</small></div></div>`});
  showP("Verification queue",h,SVBACK,async e=>{
   const t=e.target.closest("[data-tab]");if(t){kbRoom(t.dataset.tab);return}
   if(e.target.closest("[data-imp]")){const m=$("kbm");if(m)m.textContent="Adding…";const r=await admCall("admin_import_old_drafts");
@@ -3443,7 +3682,7 @@ async function kbItem(i,msg,keep,dup){
  const sel=`<select id="kbs" class="ain" style="margin:6px 18px;width:calc(100% - 36px)"><option value="">Choose the source…</option>${KBS.map(s=>`<option value="${s.id}">${esc(s.title)}${s.version_label?" · "+esc(s.version_label):""}</option>`).join("")}</select>`;
  const ed=KBFIELDS.map(f=>`<div style="padding:6px 18px 0;color:var(--sub);font-size:13px">${f[1]}</div><textarea id="kbf_${f[0]}" data-k="${f[0]}" style="display:block;width:calc(100% - 36px);margin:4px 18px;min-height:${f[2]*22}px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit;font-size:14px;line-height:1.5;box-sizing:border-box">${esc(T(f[0]))}</textarea>`).join("");
  const bt=(a,l,col)=>`<button data-a="${a}" style="flex:1;min-width:30%;padding:12px 8px;border:0;border-radius:22px;font:inherit;font-weight:700;cursor:pointer;color:#fff;background:${col}">${l}</button>`;
- showP(esc(c.name||"Answer"),`<div style="padding:12px 18px 4px;color:var(--sub);line-height:1.5">Learner asked: <b style="color:var(--text)">${esc(x.question)}</b><br>${esc(x.level_code||"")} · ${esc(x.subject_name||"")} · ${kbOrig(x.origin)}${x.model?" · "+esc(x.model):""}${x.prompt_version?" · "+esc(x.prompt_version):""} · <b>${kbStat(x.status)}</b>${x.was_edited?" · edited "+x.edit_count+"×":""}</div>
+ showP(esc(c.name||"Answer"),`${svWhoH(x)}<div style="padding:4px 18px 4px;color:var(--sub);line-height:1.5">Learner asked: <b style="color:var(--text)">${esc(x.question)}</b><br>${esc(x.level_code||"")} · ${esc(x.subject_name||"")} · ${kbOrig(x.origin)}${x.model?" · "+esc(x.model):""}${x.prompt_version?" · "+esc(x.prompt_version):""} · <b>${kbStat(x.status)}</b>${x.was_edited?" · edited "+x.edit_count+"×":""}</div>
  ${warn.length?`<div style="margin:8px 18px;padding:10px 12px;border-radius:10px;background:var(--wall);line-height:1.5;font-size:13px">${warn.join("<br>")}</div>`:""}
  ${x.review_note?`<div style="padding:4px 18px;color:var(--sub);font-size:13px">Note: ${esc(x.review_note)}</div>`:""}
  ${sec("Definition","definition")}${sec("How it works","steps")}${sec("Where it is used","uses")}${sec("In simple words","simple")}${sec("Examples","examples")}${sec("Mistakes and tips","more")}
@@ -3562,7 +3801,7 @@ async function vkItem(id,msg,keep){
  by a real push alert (push-sw.js + ann_push, works when the app is closed) and, as a back-up, by the app itself while it is open in the background. */
 const PUSHSC="./push-sw-scope/";let PUSHREG=null,ANN_BUSY=0;
 const annTitle=a=>(a.kind=="update"?"Update: ":"")+a.title;
-function annBanner(a){try{$("annt").textContent=annTitle(a);$("annb").textContent=a.body||"";$("ann").style.display="flex";clearTimeout(annT);if(+a.duration_seconds>0)annT=setTimeout(hideAnn,a.duration_seconds*1000)}catch(e){}}
+function annBanner(a){try{annPush({id:a.id,ts:new Date(a.created_at).getTime(),t:annTitle(a),b:a.body||""})}catch(e){}}
 async function devAlert(a){
  if(!D.notif||!("Notification"in window)||Notification.permission!="granted")return;
  const o={body:String(a.body||"").slice(0,240),tag:"ann-"+a.id,icon:"./blank-96.png",badge:"./badge-96.png",data:{id:a.id}};
@@ -3718,7 +3957,7 @@ function stopS(){if(stream==null)return;clearInterval(stream);stream=null;if(sm)
  Free: direct answer only. Basic: adds quizzes. Standard: adds explain simpler and examples.
  Premium: everything, and answers are detailed by default. A request above the plan shows an upgrade note. */
 const PRANK={Free:0,Basic:1,Standard:2,Premium:3},GATE={quiz:["Quizzes","Basic"],simpler:["Simpler explanations","Standard"],example:["Examples","Standard"],detail:["Detailed answers","Premium"]};
-const RX_QZ=/\b(quiz|quizzes|quizz|test me|examine me)\b/,RX_SI=/\b(simpler|simply|more simply|in (a )?(very )?(simple|easy) (words|terms|language|way)|make it (simple|easy|easier)|easier to understand|eli5)\b/,RX_DE=/\b(more details?|in details?|in more details?|in full details?|full details?|detailed|elaborate|in depth)\b/,RX_EX=/\b(examples?|for instance|illustrate|illustration)\b/,RX_EXPL=/\b(explain|what is|what are|define|describe|tell me about|how does|how do|why)\b/;
+const RX_QZ=/\b(quiz|quizzes|quizz|test me|examine me)\b/,RX_SI=/\b(simpler|simply|more simply|in (a )?(very )?(simple|easy) (words|terms|language|way)|make it (simple|easy|easier)|easier to understand|eli5)\b/,RX_DE=/\b(more details?|in details?|in more details?|in full details?|full details?|detailed|elaborate|in depth|tell me more|go on|keep going|carry on|more info(rmation)?)\b|^\s*(more|expand)\s*$/,RX_EX=/\b(examples?|for instance|illustrate|illustration)\b/,RX_EXPL=/\b(explain|what is|what are|define|describe|tell me about|how does|how do|why)\b/;
 function reqQ(q){return String(q).replace(/[?!]+/g," ")
  .replace(/\b(can|could|would|will) you( please)?\b/gi," ").replace(/\bplease\b/gi," ")
  .replace(/\bi (want|need|would like)( you)?( to)?\b/gi," ").replace(/\b(give|show|tell|ask)( me)?\b/gi," ")
@@ -4061,8 +4300,26 @@ function sqHandle(q){
  if(tp){sqMake(tp,n,t);return true}
  const sb=sqSubject(t);if(sb&&sb!=D.sub){D.sub=sb;save()}
  sqAskWhich(n);return true}
+/* ===== FILE REQUESTS: this app gives no downloads. When a learner asks for a PDF, an image, a video, audio, a Word/PowerPoint file or any file,
+   a polite note says so and points to what the app is for. Real subject questions (what is a PDF, advantages of PNG, the image formed by a mirror) are left alone. ===== */
+const FQ_EXT=/\b(pdfs?|pngs?|jpe?gs?|gifs?|mp[34]|docx|pptx?|xlsx?|zip)\b/i,
+FQ_DL=/\b(download(s|ing|able)?|printables?|printouts?)\b/i,
+FQ_FILE=/\b(give|send|share|generate|make|create|get|email|e-mail|provide|prepare|need|want|have)\b[^.?!]{0,30}\b(files?|videos?|audios?|recordings?)\b/i,
+FQ_IMG=/\b(generate|create|download|email|attach|send me)\b[^.?!]{0,25}\b(images?|pictures?|photos?|photographs?)\b/i,
+FQ_SEND=/\b(e-?mail|whatsapp)\s+(me|us)\b[^.?!]{0,30}\b(notes?|answers?|lessons?|copy|copies|papers?)\b/i,
+FQ_VID=/\b(show|play|watch|send|share|give|make|create|generate)\b[^.?!]{0,25}\b(videos?|audios?|movies?|animations?)\b/i,
+FQ_SKIP=/^\s*(what|who|explain|define|describe|meaning|full form)\b|\b(format|formats|extension|advantages?|disadvantages?|compress\w*|difference|stands? for|abbreviation|types? of|uses? of|definition|lossy|lossless)\b/i,
+FQ_ICT=/\b(python|java|html|css|folder|directory|command|program|programming|code|coding|microsoft|ms word|excel|spreadsheet|word processor|database|file system|file management|operating system)\b/i;
+function fileAsk(q){const t=String(q||"").trim();if(t.length<4||t.length>220||FQ_SKIP.test(t))return false;
+ if(FQ_EXT.test(t)||FQ_DL.test(t))return true;
+ if(FQ_ICT.test(t))return false;
+ return FQ_FILE.test(t)||FQ_IMG.test(t)||FQ_VID.test(t)||FQ_SEND.test(t)}
+const FQ_MSG="**Thank you for asking.** Ask Tr. David does not create, send or share files. That means no PDF, no PNG or JPG image, no video or audio, and no Word or PowerPoint document, and there is nothing to download here.\n\nThis is a place for learners to **read, revise, research and ask questions**. Everything you need is already here on the screen, so you do not need to download anything.\n\nPlease type your question and I will explain it clearly, give you revision notes, or test you with a short quiz.";
+function fileNote(q){const ch=D.chats.find(c=>c.id==D.cur);if(ch&&(ch.title=="New chat"||ch.title=="Chat"))ch.title=String(q).slice(0,32);
+ D.msgs.push({s:"i",note:1,up:0,t:FQ_MSG,ts:Date.now()});save();render()}
 function ask(q,mode){
  if(stream!=null||INTP)return;
+ if(!mode&&fileAsk(q)){fileNote(q);return}
  if(!mode&&looksScenario(q))return askScenario(q);
  if(!mode){let k=null;try{k=coreAsk(q)}catch(e){}if(k)q=k}
  if(!mode){let h=false;try{h=sqHandle(q)}catch(e){h=false}if(h)return}
@@ -4072,7 +4329,7 @@ function ask(q,mode){
 function leakSub(f){if(!f||f.un||f.w||D.sub=="General")return null;const fam=relSubs(D.sub),hd=((String(f.t||"").match(/^\s*#\s*(.+)$/m)||[])[1]||"").replace(/^Quiz:\s*/i,"").replace(/,\s*(simpler|in more detail)$/i,"").trim().toLowerCase();
  if(!hd)return null;
  const T=TOP.find(x=>x.n&&x.S&&String(x.n).toLowerCase()===hd);
- if(T&&!T.S.some(y=>fam.includes(y)))return T.S.find(y=>y!=="General"&&subsList().includes(y))||"another subject";
+ if(T&&!T.S.some(y=>fam.includes(y)||fam.some(f=>subOvl(f,y))))return T.S.find(y=>y!=="General"&&subsList().includes(y))||"another subject";
  return null}
 function askCore(q,mode,I){
  if(stream!=null)return;let gn=null,FU=null,bareG=false;const q0=String(q);
@@ -4088,7 +4345,8 @@ function askCore(q,mode,I){
   if(G.block&&(G.bare||G.kind=="quiz"))return nt(G.note,1);
   if(G.block)gn=G.note;
   q=G.q;mode=G.mode||null}}
- if(D.lock&&D.sub!="General"){if((!FU||(!FU.local&&!FU.part))&&!mode){const o=offSub(q,I);if(o){D.msgs.push({s:"i",note:1,up:0,t:"This chat is set to "+D.sub+", so I answer "+D.sub+" questions only. Your question looks like "+o+". Tap the subject button above to switch, or ask me something about "+D.sub+".",ts:Date.now()});save();render();return}}}else if(!(FU&&FU.part))D.sub=(I&&I.intent==="new"&&I.subject&&I.subject!=="General"?I.subject:routeSub(q));if(capped())return limitMsg();const ch=D.chats.find(c=>c.id==D.cur);if(ch.title=="New chat"||ch.title=="Chat")ch.title=q.slice(0,32);
+ let folQ=false;if(!mode&&!FU&&FOLLOW_RX.test(String(q).trim())){const lb=lastBase();if(lb){q=cleanQ(lb)+" in more detail";folQ=true}}
+ if(D.lock&&D.sub!="General"){if((!FU||(!FU.local&&!FU.part))&&!mode){const o=folQ?null:offSub(q,I);if(o){D.msgs.push({s:"i",note:1,up:0,t:"This chat is set to "+D.sub+", so I answer "+D.sub+" questions only. Your question looks like "+o+". Tap the subject button above to switch, or ask me something about "+D.sub+".",ts:Date.now()});save();render();return}}}else if(!(FU&&FU.part))D.sub=(I&&I.intent==="new"&&I.subject&&I.subject!=="General"?I.subject:routeSub(q));if(capped())return limitMsg();const ch=D.chats.find(c=>c.id==D.cur);if(ch.title=="New chat"||ch.title=="Chat")ch.title=q.slice(0,32);
  if(FU&&FU.sub&&D.sub=="General"&&subsList().includes(FU.sub))D.sub=FU.sub;
  const CTX=(FU||bareG||mode||smallTalk(q))?ctxGet():{tq:String(q).slice(0,120),sub:D.sub};
  const now=Date.now();stamps=stamps.filter(t=>now-t<6e4);
@@ -4110,12 +4368,12 @@ function askCore(q,mode,I){
    if(a2&&a2.busy){logUn(q);stopS();return err("Many learners are asking right now. Please try again in a little while.")}
    if(a2&&a2.t)f=a2;else{logUn(q);stopS();return err("I could not get the answer just now. Please tap Retry.")}}
   if(f.un&&!mode&&!FU)logUn(q);
-  if(f.fmt&&!f.un&&!mode&&f.t!==window.DIRECT_T){const st=await styleAnswer(f.t,q);if(stream==null||tok!=AN)return;if(st)f.t=st.md}
+  if(f.fmt&&!f.un&&!mode&&f.t!==window.DIRECT_T){const st=await styleAnswer(f.t,q);if(stream==null||tok!=AN)return;if(st){f.sty={t:f.t,k:modelName(),L:lvKey(),pl:planName()};f.t=st.md}}
   if(!f.part&&!f.ai&&!f.un){const Tm=topicOf(q);if(Tm&&Tm.ai)f.ai=1}
   if(!f.part&&f.ai&&!f.tid){const Tm=topicOf(q);if(Tm&&Tm.tid)f.tid=Tm.tid}
   if(!f.part&&!f.lv&&!f.un){const Tm=topicOf(q);if(Tm&&Tm.sl){f.lv=Tm.sl;f.cls=Tm.cls}}
   let chk=0;if(FU&&FU.chkk&&f&&f.t&&!f.un&&!f.w&&!f.quiz&&!f.qz&&!FU.local){f.t+="\n\n"+FU.chkk;chk=1}
-  const m={s:"i",t:"",ts:Date.now(),q,mode,stream:1,fk:FU&&FU.kind||undefined,chk:chk||undefined,tq:CTX&&CTX.tq||undefined,tsub:CTX&&(CTX.sub||D.sub)||undefined},w=f.t.split(/(?<=\s)/);if(f.quiz)m.quiz=f.quiz;if(f.qz)m.qz=f.qz;if(f.w)m.w=f.w;if(f.aid)m.aid=f.aid;if(f.ai)m.ai=1;if(f.tid)m.tid=f.tid;if(f.fmt){const M=MODELS[modelName()];m.mdl=M.n+" "+M.v}{const ln=levelNote(f.lv,f.cls);if(ln)m.lvn=ln}
+  const m={s:"i",t:"",ts:Date.now(),q,mode,stream:1,fk:FU&&FU.kind||undefined,chk:chk||undefined,tq:CTX&&CTX.tq||undefined,tsub:CTX&&(CTX.sub||D.sub)||undefined},w=f.t.split(/(?<=\s)/);if(f.quiz)m.quiz=f.quiz;if(f.qz)m.qz=f.qz;if(f.w)m.w=f.w;if(f.aid)m.aid=f.aid;if(f.sty)m.sty=f.sty;if(f.ai)m.ai=1;if(f.tid)m.tid=f.tid;if(f.fmt){const M=MODELS[modelName()];m.mdl=M.n+" "+M.v}{const ln=levelNote(f.lv,f.cls);if(ln)m.lvn=ln}
   D.msgs.push(m);sm=m;let k=0;if(!(FU&&FU.local))logAct("ask",m,f.t);stream=setInterval(()=>{m.t+=w[k++]||"";if(k>=w.length){stopS();if(gn){D.msgs.push({s:"i",note:1,up:1,t:gn,ts:Date.now()});save();render()}if(capped())limitMsg()}else render()},35)},600)}
 $("msgs").addEventListener("click",e=>{
 
@@ -4123,16 +4381,17 @@ $("msgs").addEventListener("click",e=>{
  const b=e.target.closest("[data-act]");if(!b)return;const i=+b.dataset.i,m=D.msgs[i],a=b.dataset.act;if(a=="plans"){plans();return}if(a=="activate"){activatePlan();return}
  if((a=="xa"||a=="xe"||a=="xm")&&m){const sc=$("msgs").scrollTop,k=b.dataset.k;m.xs=m.xs||{};const o=m.xs[k]=m.xs[k]||{};if(a=="xa")o.a=o.a?0:1;else if(a=="xm")o.m=o.m?0:1;else o.e=o.e?0:1;save();render();$("msgs").scrollTop=sc;return}
  {const _x={copy:"copy",share:"share",regen:"redo",bm:m&&m.bm?"save_off":"save",up:m&&m.fb==1?"like_off":"like",dn:m&&m.fb==-1?"dislike_off":"dislike"}[a];if(_x&&m&&!m.err)logAct(_x,m)}
- if(a=="copy"){navigator.clipboard&&navigator.clipboard.writeText(m.t.replace(/[#*`|]/g,""));return}
- if(a=="share"){(async()=>{const L=await AK.short(m),T=(m.q||"Answer")+"\n";
+ if(a=="copy"){navigator.clipboard&&navigator.clipboard.writeText(m.t.replace(/[#*`|]/g,""));ownerAct("copy",m);return}
+ if(a=="share"){m.sh=Date.now();m.shn=(m.shn||0)+1;save();ownerAct("share",m);(async()=>{const L=await AK.short(m),T=(m.q||"Answer")+"\n";
   const sheet=()=>{const E=encodeURIComponent,u=E(L),t=E(T+L),P=[["wa","WhatsApp","https://wa.me/?text="+t],["tg","Telegram","https://t.me/share/url?url="+u+"&text="+E(m.q||"Answer")],["fb","Facebook","https://www.facebook.com/sharer/sharer.php?u="+u],["x","X (Twitter)","https://twitter.com/intent/tweet?text="+E(m.q||"Answer")+"&url="+u],["sms","Messages (SMS)","sms:?&body="+t],["em","Email","mailto:?subject="+E("Ask Tr. David")+"&body="+t]];
    showP("Share answer",P.map(x=>`<div class="row" data-p="${x[0]}"><div>${x[1]}</div></div>`).join("")+'<div class="row" data-p="cp"><div>Copy link</div></div>',closeP,e=>{const k=e.target.closest(".row")?.dataset.p;if(!k)return;if(k=="cp"){try{navigator.clipboard.writeText(L)}catch(x){}closeP();uiAlert("Link copied.");return}const f=P.find(x=>x[0]==k);closeP();window.open(f[2],"_blank")})};
   if(navigator.share){try{await navigator.share({title:"Ask Tr. David",text:T,url:L})}catch(e){if(e&&e.name!="AbortError")sheet()}}else sheet()})();return}
  if(m.w){if(a=="next"){m.w.shown=Math.min(m.w.shown+1,m.w.parts.length);m.t=wBuild(m)}if(a=="all"){m.w.shown=m.w.parts.length;m.t=wBuild(m)}if(a=="brk"){m.w.open[m.w.shown-1]=1;m.t=wBuild(m)}}
- if(a=="ab")m.ab=!m.ab;if(a=="bm")m.bm=!m.bm;if(a=="up")m.fb=m.fb==1?0:1;if(a=="dn")m.fb=m.fb==-1?0:-1;if(a=="up"||a=="dn")sendFb(m);
+ if(a=="ab")m.ab=!m.ab;if(a=="bm"){m.bm=!m.bm;ownerAct(m.bm?"save":"unsave",m)}if(a=="up")m.fb=m.fb==1?0:1;if(a=="dn")m.fb=m.fb==-1?0:-1;if(a=="up"||a=="dn")sendFb(m);
   if(a=="pick"&&m.pick==null){m.pick=+b.dataset.k;if(m.qz&&m.pick==m.quiz[2])m.qz.score++}
  if(a=="nq"&&m.qz&&m.pick!=null&&m.qz.n<m.qz.list.length-1){const z=m.qz;z.n++;m.quiz=["q",z.list[z.n][1],z.list[z.n][2]];m.pick=null;m.t=qText(z.t,z)}
- if(a=="retry"||a=="regen"){D.msgs.splice(i,1);save();render();ask(m.q,m.mode);return}
+ if(a=="regen"){redoReply(i).then(h=>{if(h)return;const k=D.msgs.indexOf(m);if(k<0)return;D.msgs.splice(k,1);save();render();ask(m.q,m.mode)});return}
+ if(a=="retry"){D.msgs.splice(i,1);save();render();ask(m.q,m.mode);return}
  save();render()});
 function subs(){$("subs").innerHTML='<button data-all="1">All subjects</button>'+subsList().map(x=>`<button class="${x==D.sub?"on":""}" data-s="${x}">${x}</button>`).join("");const o=$("subs").querySelector(".on");if(o)o.scrollIntoView({inline:"center",block:"nearest"})}
 function allSubs(){showP("All subjects",[GR[lvIdx()]].map(g=>`<div class="sec">${g[0]}</div><div class="sws" style="gap:8px"><button class="lk ${"General"==D.sub?"on":""}" data-s="General">General</button>${g[1].map(x=>`<button class="lk ${x==D.sub?"on":""}" data-s="${x}">${x}</button>`).join("")}</div>`).join(""),closeP,e=>{const x=e.target.dataset.s;if(x){closeP();setSub(x)}})}
@@ -4247,7 +4506,7 @@ function chatSheet(id){const c=D.chats.find(x=>x.id==id),s=$("sheet");
  s.onclick=e=>{const a=e.target.dataset.a;if(!a)return;$("scrim").style.display="none";
   if(a=="r"){uiPrompt("Rename chat",c.title,n=>{if(n&&n.trim()){c.title=n.trim();save();hlist()}})}
   if(a=="d")uiConfirm("Delete this chat?",()=>{D.chats=D.chats.filter(x=>x.id!=id);if(!D.chats.length)D.chats=[{id:Date.now(),title:"New chat",msgs:[]}];if(D.cur==id){sw(D.chats[0].id);chatHistory()}else{save();hlist()}},"Delete")}}
-function saved(){const L=[];D.chats.forEach(c=>c.msgs.forEach(m=>{if(m.bm)L.push(m)}));showP("Saved answers",L.length?L.map(m=>`<div class="row" style="display:block"><b>${esc(m.q||"Answer")}</b><div class="md">${md(m.t)}</div></div>`).join(""):'<div class="empty">No saved answers yet</div>',closeP)}
+function saved0(){const L=[];D.chats.forEach(c=>c.msgs.forEach(m=>{if(m.bm)L.push(m)}));showP("Saved answers",L.length?L.map(m=>`<div class="row" style="display:block"><b>${esc(m.q||"Answer")}</b><div class="md">${md(m.t)}</div></div>`).join(""):'<div class="empty">No saved answers yet</div>',closeP)}
 const op=(a,v)=>a.map(x=>`<option ${x==v?"selected":""}>${x}</option>`).join("");
 const LVS=[["PLE","Primary"],["UCE","O-Level"],["UACE","A-Level"]];
 const CLS=()=>`<div style="display:flex;flex-direction:column;gap:8px;padding:8px 18px">${LVS.map(([k,n])=>`<button class="lk ${k==D.lvl?"on":""}" data-lvl="${k}" style="width:100%;text-align:left">${k} · ${n}</button>`).join("")}</div>`;
@@ -4300,6 +4559,7 @@ function admGo(t){ADMTAB=t;ADMSEQ++;document.querySelectorAll("#adm .an button")
 async function admHome(){const s=ADMSEQ,b=$("abody");b.innerHTML=admLd();const j=await admCall("admin_stats");if(s!==ADMSEQ)return;
  if(!j.ok){b.innerHTML=admFail(j,1);b.onclick=e=>{if(e.target.closest("[data-r]"))admHome()};return}
  const kq=await admCall("admin_pending_counts");if(s!==ADMSEQ)return;const KQ=kq.ok?kq:{open:0,promoted:0,old_drafts:0,verified:0,retired:0};
+ const rx=await admCall("admin_reactions",{p_kind:"dislike",p_limit:1});if(s!==ADMSEQ)return;const RX=rx.ok?(rx.counts||{}):{};
  const P=j.plans||{},n=admN,C=(l,v,sub)=>`<div class="ac"><span>${l}</span><b>${n(v)}</b><small>${sub}</small></div>`;
  b.innerHTML=`<div class="ag">${C("Learners",j.users_total,"+"+n(j.users_new_7d)+" this week")}${C("Signed in",j.logged_in_now,"accounts with a live login")}${C("Installs",j.installs_total,"+"+n(j.installs_7d)+" this week")}${C("Using today",j.devices_today,n(j.devices_7d)+" devices, "+n(j.accounts_7d)+" accounts this week")}</div>
  <div style="padding:0 18px 4px;color:var(--sub);font-size:12px;line-height:1.4">Installs and usage are counted from this version of the app onward.</div>
@@ -4310,12 +4570,25 @@ async function admHome(){const s=ADMSEQ,b=$("abody");b.innerHTML=admLd();const j
  <div class="row" data-g="vk"><div><b>${n(KQ.verified)}</b> in the permanent store<small>Verified answers with their versions and history. ${n(KQ.retired)} retired</small></div></div>
  <div class="row" data-g="rq"><div><b>${n(j.topics_waiting)}</b> AI answers to check<small>${n(j.topics_published)} approved so far</small></div></div>
  <div class="row" data-g="rr"><div><b>${n(j.styles_waiting)}</b> model rewrites to check<small>${n(j.styles_approved)} approved so far</small></div></div>
+ <div class="row" data-g="rx"><div><b>${n(RX.unlikes)}</b> answers marked Unlike by learners<small>${n(RX.unlikes_7d)} in the last 7 days. ${n(RX.likes)} Likes. Tap to see who and what they asked</small></div></div>
  <div class="asec">Library</div>
  <div class="row" style="cursor:default"><div><b>${n(j.questions_total)}</b> questions, <b>${n(j.answers_published)}</b> answers published<small>AI requests in the last 24 hours: ${n(j.gemini_today)}</small></div></div>
  <div class="asec">Project</div>
  <div class="row" data-g="ho"><div>Project handoff<small>Notes and files for the next Claude. Only you see this</small></div></div>
  <div class="row" data-g="rf"><div>Refresh</div></div>`;
- b.onclick=e=>{const g=e.target.closest("[data-g]")?.dataset.g;if(!g)return;if(g=="asked")admGo("asked");else if(g=="kb")kbRoom("open");else if(g=="vk")vkRoom("verified");else if(g=="rq")voiceRoom("q","draft");else if(g=="rr")voiceRoom("r","draft");else if(g=="ho")handoff();else if(g=="rf")admHome()}}
+ b.onclick=e=>{const g=e.target.closest("[data-g]")?.dataset.g;if(!g)return;if(g=="asked")admGo("asked");else if(g=="kb")kbRoom("open");else if(g=="vk")vkRoom("verified");else if(g=="rx")rxRoom("dislike");else if(g=="rq")voiceRoom("q","draft");else if(g=="rr")voiceRoom("r","draft");else if(g=="ho")handoff();else if(g=="rf")admHome()}}
+
+/* LEARNER REACTIONS: every Like / Unlike a learner tapped, with the learner's name, the question and the start of the answer. Unlikes are the ones to review first. */
+async function rxRoom(kind){
+ if(!isOwner())return;kind=kind=="like"?"like":"dislike";
+ showP("Learner reactions",'<div style="padding:22px 18px;color:var(--sub)">Loading…</div>',closeP);
+ const j=await admCall("admin_reactions",{p_kind:kind,p_limit:100}),n=admN;
+ if(!j.ok){$("pbody").innerHTML='<div class="pbn" style="margin:14px 18px;line-height:1.5">'+(j.err=="not allowed"?"This room is only for the owner account.":"Could not load. Check your connection and try again.")+'</div>';return}
+ const C=j.counts||{},L=j.items||[];
+ const h=`<div style="padding:12px 18px;color:var(--sub);line-height:1.5">Learners are asked after every answer: Like if it answered their question, Unlike if anything is wrong. Unlikes are reported here immediately.</div>
+ <div style="display:flex;gap:6px;padding:4px 18px 12px">${svBtn(kind=="dislike","Unlike "+n(C.unlikes),"data-kd","dislike")}${svBtn(kind=="like","Like "+n(C.likes),"data-kd","like")}</div>`
+ +(L.length?L.map(x=>`<div class="row" style="cursor:default"><div style="flex:1;min-width:0"><b>${esc(x.asker_name||x.asker_username||"Name not recorded")}</b><small>${esc(x.asker_username||"")} · ${esc(new Date(x.created_at).toLocaleString())}</small>${x.question?`<div style="margin-top:4px;line-height:1.4">Learner asked: <b>“${esc(x.question)}”</b></div>`:""}${x.snippet?`<div style="margin-top:4px;color:var(--sub);font-size:13px;line-height:1.4">${esc(x.snippet)}</div>`:""}</div></div>`).join(""):`<div style="padding:18px;color:var(--sub)">${kind=="dislike"?"No Unlikes. Nothing is reported.":"No Likes yet."}</div>`);
+ showP("Learner reactions",h,()=>{closeP();admGo("home")},e=>{const k=e.target.closest("[data-kd]");if(k)rxRoom(k.dataset.kd)})}
 
 /* USERS: find by username or phone, change plan */
 function admUsers(){const s=ADMSEQ,b=$("abody");
@@ -5389,14 +5662,7 @@ async function admThread(t){
   /* the install page hides first; when the person continues, the gate takes over */
   try { new MutationObserver(function () { if (!root.classList.contains("pg-on")) check(); }).observe(root, { attributes: true, attributeFilter: ["class"] }); } catch (e) {}
 
-  /* tapping the in-app banner goes to What's new */
-  try {
-    var ann = document.getElementById("ann");
-    if (ann) ann.addEventListener("click", function (e) {
-      if (e.target.closest && e.target.closest("#annx")) return;
-      try { hideAnn(); notifs(true); } catch (x) {}
-    });
-  } catch (e) {}
+  /* the announcement pop-up closes only with its Mark as read and Hide buttons; tapping outside does nothing */
 
   check().then(function (ok) {
     if (ok === false && !busy) {

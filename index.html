@@ -165,6 +165,13 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 .b.ai{max-width:100%}.md h3{font-size:1.1em;margin:2px 0 4px}.md h4{margin:8px 0 2px;color:var(--green)}.md p{margin:3px 0}.md ul,.md ol{margin:3px 0 3px 20px}
 .md table{border-collapse:collapse;margin:6px 0;width:100%}.md td{border:1px solid var(--line);padding:4px 8px;font-size:.9em}.md tr:first-child td{font-weight:600}.md code{background:var(--wall);padding:1px 5px;border-radius:4px}
 .act,.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.act button{border:0;background:none;color:var(--sub);font:inherit;font-size:12px;cursor:pointer;padding:3px 8px;border-radius:10px}.act{clear:both}.act button{padding:14px 14px 8px;display:grid;place-items:center}.act button svg{width:23px;height:23px}.act.out{align-self:flex-start;margin:-6px 0 8px 0;gap:4px}.act .on{background:none;border:0;color:var(--green)}.act .on svg{fill:currentColor}.act button:active{background:var(--wall)}
+.md b.hl{cursor:pointer;background:rgba(47,128,237,.13);border-bottom:1px dashed var(--green);border-radius:3px;padding:0 2px}.md b.hl:active{background:rgba(47,128,237,.3)}
+.abx{margin-top:8px;border-top:1px solid var(--line);padding-top:6px}.abx .abt{border:1px solid var(--green);background:none;color:var(--green);border-radius:14px;padding:5px 12px;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer}.abx .abt.on{background:var(--green);color:#fff}
+.abp .abl{font-size:11.5px;font-weight:700;color:var(--sub);margin:8px 0 0;letter-spacing:.2px}.abp .chips{margin-top:4px}
+.exq .exm{margin:8px 0;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--wall)}.exq .exm ul{margin:3px 0 3px 18px}.exq .exm small{display:block;color:var(--sub);margin-top:6px}
+.exq{margin:6px 0}.exq .ext{margin:10px 0;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}.exq .ext p{margin:0 0 6px}
+.exb{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}.exb button{border:1px solid var(--green);background:var(--bg);color:var(--green);border-radius:16px;padding:6px 12px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}.exb button.on{background:var(--green);color:#fff}
+.exa,.exe{margin-top:8px;padding:8px 10px;border-radius:10px;background:var(--wall);font-size:.95em}.exa ul{margin:4px 0 4px 18px;padding:0}.exe .exs{margin:0 0 8px}.exe .exs b{display:block;margin-bottom:2px}.exa small,.exe small{display:block;color:var(--sub);margin-top:4px}
 .opt{display:block;width:100%;text-align:left;margin-top:6px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit;cursor:pointer}.opt.ok{border-color:#2f9e44;background:#2f9e4430}.opt.bad{border-color:#ff453a;background:#ff453a30}
 .err{border:1px solid #ff453a}.note{text-align:center;font-size:12px;color:var(--sub);padding:3px 10px 6px;background:var(--bar)}.note a{color:var(--green);font-weight:600;text-decoration:none;white-space:nowrap}
 .fld{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit}
@@ -2818,11 +2825,11 @@ async function dbAnswer(q,mode){
 /* NEW QUESTIONS: ask the ai_answer Edge Function. Gemini writes the answer once and it is saved as a draft in Supabase.
  The reply is built by tiered() so it follows the learner's plan; draft answers get the "AI generated, not yet checked" label. */
 const AIU=SBU.replace("/rest/v1/","/functions/v1/")+"ai_answer_v2",escRex=x=>x.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
-async function aiAnswer(q,FUx){
+async function aiAnswer(q,FUx,loose){
  const c=new AbortController(),tm=setTimeout(()=>c.abort(),25000);
  try{
   const sub=D.sub=="General"?(detectSub(q)||"General"):D.sub;
-  const r=await fetch(AIU,{method:"POST",signal:c.signal,headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({question:String(q).slice(0,300),level:D.lvl,class:String(D.cls||"").replace(/^Primary /,"P").replace(/^Senior /,"S"),subject:sub,plan:planName(),curriculum:"Uganda NCDC",strict_subject:true,brief:!wantFull(),follow:FUx&&!FUx.local?{kind:FUx.kind,topic:FUx.topic,step:FUx.step||0,instruction:FUx.hint||"",previous:lastAnsText()}:undefined})});
+  const r=await fetch(AIU,{method:"POST",signal:c.signal,headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({question:String(q).slice(0,300),level:D.lvl,class:String(D.cls||"").replace(/^Primary /,"P").replace(/^Senior /,"S"),subject:sub,plan:planName(),curriculum:"Uganda NCDC",strict_subject:!loose,retry:loose?true:undefined,brief:!wantFull(),follow:FUx&&!FUx.local?{kind:FUx.kind,topic:FUx.topic,step:FUx.step||0,instruction:FUx.hint||"",previous:lastAnsText()}:undefined})});
   if(!r.ok)return null;
   const j=await r.json();
   if(j.status=="busy")return{busy:1};
@@ -2854,25 +2861,148 @@ function sendFb(m){try{
 
 /* ===== TRAINING 11: "ASK ABOUT" BUTTON. On the latest long answer it shows tappable parts (bold words, numbered steps, formulas, table rows).
    A tap types a clear pointer question for the learner (the same kind ctxPart understands), so typing by hand works the same way. ===== */
-function abParts(t){
- const out=[],seen={},add=(lab,q)=>{const k=lab.toLowerCase();if(seen[k]||out.length>=14)return;seen[k]=1;out.push({lab:lab.length>34?lab.slice(0,32)+"…":lab,q})},cl=x=>String(x).replace(/["\u201c\u201d]/g,"").replace(/\*\*|`/g,"").replace(/\s+/g," ").trim().slice(0,50);
- const L=String(t||"").split("\n");let tb=0;
- L.forEach(l=>{const n=l.match(/^\s*(\d{1,2})[.)]\s+\S/);if(n)add("Step "+n[1],"Explain step "+n[1]+" of your answer in more detail")});
- L.forEach(l=>{if(/^\s*\|/.test(l)){if(/^\s*\|[\s:|-]+\|?\s*$/.test(l)){tb=2;return}if(tb==0){tb=1;return}if(tb==1)tb=2;const c=cl(l.replace(/^\s*\|/,"").split("|")[0]);if(c.length>1)add("Row: "+c,'Explain that row in your table: "'+c+'"')}else tb=0});
- L.forEach(l=>{if(/^\s*\|/.test(l))return;const f=l.replace(/\*\*|`/g,"").trim();if(f.length>=5&&f.length<=80&&(/[A-Za-z0-9)\]]\s*=\s*[A-Za-z0-9(\-]/.test(f)||/\^|sqrt\(/.test(f))&&!/^#/.test(f)&&f.split(" ").length<=12){const c=cl(f);add(c,'Explain that formula in your answer: "'+c+'"')}});
- (String(t||"").match(/\*\*[^*\n]{2,40}\*\*/g)||[]).forEach(b=>{const c=cl(b);if(c.length>1)add(c,'What do you mean by "'+c+'"')});
+function abGroups(t){
+ const hl=[],more=[],seen={},cl=x=>String(x).replace(/["\u201c\u201d]/g,"").replace(/\*\*|`/g,"").replace(/\s+/g," ").trim().slice(0,50),
+  add=(arr,lab,q)=>{const k=lab.toLowerCase();if(seen[k]||hl.length+more.length>=24)return;seen[k]=1;arr.push({lab:lab.length>34?lab.slice(0,32)+"…":lab,q})},
+  ask=c=>'Explain "'+c+'" in your answer in more detail';
+ const S=String(t||""),L=S.split("\n");let tb=0;
+ /* highlighted: the bold words */
+ (S.match(/\*\*[^*\n]{2,40}\*\*/g)||[]).forEach(b=>{const c=cl(b);if(c.length>1&&hl.length<10)add(hl,c,'What do you mean by "'+c+'"')});
+ /* other important parts: section headings, steps, table rows, formulas, "Term: explanation" points */
+ L.forEach(l=>{const h=l.match(/^#{2,3}\s+(.+)/);if(h){const c=cl(h[1].replace(/^\d+\.\s*/,""));if(c.length>1)add(more,c,ask(c))}});
+ L.forEach(l=>{const n=l.match(/^\s*(\d{1,2})[.)]\s+\S/);if(n)add(more,"Step "+n[1],"Explain step "+n[1]+" of your answer in more detail")});
+ L.forEach(l=>{if(/^\s*\|/.test(l)){if(/^\s*\|[\s:|-]+\|?\s*$/.test(l)){tb=2;return}if(tb==0){tb=1;return}if(tb==1)tb=2;const c=cl(l.replace(/^\s*\|/,"").split("|")[0]);if(c.length>1)add(more,"Row: "+c,'Explain that row in your table: "'+c+'"')}else tb=0});
+ L.forEach(l=>{if(/^\s*\|/.test(l))return;const f=l.replace(/\*\*|`/g,"").replace(/^[-\u2022]\s+/,"").replace(/^[A-Za-z ]{3,20}:\s+(?=\S+\s*=)/,"").trim();if(f.length>=5&&f.length<=80&&(/[A-Za-z0-9)\]]\s*=\s*[A-Za-z0-9(\-]/.test(f)||/\^|sqrt\(/.test(f))&&!/^#/.test(f)&&f.split(" ").length<=12){const c=cl(f);add(more,c,'Explain that formula in your answer: "'+c+'"')}});
+ L.forEach(l=>{const m=l.match(/^\s*[-\u2022]\s+\**([A-Z][^:*\n]{2,32}?)\**:\s+\S/);if(m){const c=cl(m[1]);if(c.length>1)add(more,c,ask(c))}});
+ return{hl,more}}
+function abParts(t){const g=abGroups(t);return g.hl.concat(g.more)}
+/* the bold words in a finished answer become tappable on their own (no buttons): a tap asks about that word */
+const hlWrap=h=>h.replace(/<b>([^<]{2,40})<\/b>/g,(a,x)=>'<b class="hl" data-st="What do you mean by &quot;'+x.replace(/&quot;/g,"")+'&quot;">'+x+'</b>');
+function abShow(m){return !m.stream&&m.fk!="local"&&String(m.t||"").split(/\s+/).length>=40&&abParts(m.t).length>=2}
+/* ===== STEP 6: ANSWER EXPLANATION FEATURE. A practice item (Item + Information + Task A, B, C...) is shown with, for each task, its own
+   "Show Answer" and "Explain Answer" buttons. The marking guide lines are taken out of the plain text and kept behind Show Answer.
+   Explain Answer breaks that one task into six parts built from the item, the task and its guide. Each task opens on its own.
+   Everything here is AI-generated practice material, never an official UNEB answer. ===== */
+const EX_TASK=/^\*\*Task ([A-Z]):\*\*\s*(.*)$/,EX_INFO=/^\*\*Information (\([ivx]+\)):\*\*\s*(.*)$/i;
+function exParse(t){
+ const L=String(t||"").split("\n"),n=L.length,drop=new Array(n).fill(false),scs=[],groups=[];
+ const isGH=i=>{const m=EX_TASK.exec((L[i]||"").trim());return !!m&&!m[2].trim()};
+ let i=0;
+ while(i<n){
+  if(/^\*\*Item:\*\*\s*$/.test(L[i].trim())){
+   const st=i;let j=i+1;const head=[];
+   while(j<n&&!EX_TASK.test(L[j].trim())&&!/^#/.test(L[j])){head.push(L[j]);j++}
+   const tasks=[];
+   while(j<n){const m=EX_TASK.exec(L[j].trim());if(!m||!m[2].trim())break;tasks.push({lab:m[1],text:m[2].trim(),line:j});j++}
+   if(tasks.length){scs.push({st,en:j-1,head,tasks});i=j;continue}
+  }
+  i++}
+ if(!scs.length)return null;
+ /* guide blocks: "**Task X:**" with nothing after it, followed by bullet points */
+ for(i=0;i<n;i++){
+  if(!isGH(i))continue;
+  const lab=EX_TASK.exec(L[i].trim())[1];let j=i+1;const pts=[];
+  while(j<n&&/^- /.test(L[j])){pts.push(L[j].slice(2).trim());j++}
+  for(let k=i;k<j;k++)drop[k]=true;
+  if(lab=="A"||!groups.length)groups.push({});
+  groups[groups.length-1][lab]=pts;i=j-1}
+ /* remove the guide's own headings when a guide block follows */
+ for(i=0;i<n;i++){const x=L[i].trim();
+  if(/^(\*\*Guide:\*\*|\*\*Scenario \d+\*\*)$/.test(x)){let j=i+1;while(j<n&&!L[j].trim())j++;if(j<n&&isGH(j))drop[i]=true}
+  if(/^## Marking guide\s*$/.test(x)){let j=i+1;while(j<n&&!L[j].trim())j++;let k=j;if(k<n&&/^A competent answer/.test(L[k])){k++;while(k<n&&!L[k].trim())k++}
+   if(k<n&&isGH(k)){for(let z=i;z<k;z++)drop[z]=true}}}
+ scs.forEach((s,k)=>{const stem=s.head.map(x=>x.trim()).filter(x=>x&&!EX_INFO.test(x));
+  s.info=s.head.map(x=>EX_INFO.exec(x.trim())).filter(Boolean).map(m=>({k:m[1],text:m[2]}));
+  s.stem=stem.join(" ");s.topic=((/This item is about (.+?)\. In /.exec(s.stem)||[])[1]||"").trim();
+  s.setting=s.stem.replace(/^This item is about .+?\.\s*/,"").replace(/\s*They have gathered the following information\.?\s*$/,"").trim();
+  s.guide=groups[k]||{};s.accept="";
+  Object.keys(s.guide).forEach(l=>{s.guide[l]=s.guide[l].filter(x=>{if(/^Accept /i.test(x)){if(!s.accept)s.accept=x;return false}return true})});
+  if(Object.keys(s.guide).length&&!s.accept)s.accept="Accept any other correct point that uses details from the item."});
+ /* split the text into plain parts and scenario cards, in order */
+ const seg=[];let buf=[];const flush=()=>{if(buf.length){const x=buf.join("\n");if(x.trim())seg.push({md:x});buf=[]}};
+ let sc=0;i=0;
+ while(i<n){
+  if(sc<scs.length&&i==scs[sc].st){flush();seg.push({sc:sc,s:scs[sc]});i=scs[sc].en+1;sc++;continue}
+  if(!drop[i])buf.push(L[i]);i++}
+ flush();return seg}
+const EX_CMD=[[/\b(find|calculate|determine|solve|work out)\b/i,"find","work out a result and show your working"],
+ [/\b(evaluate|assess|judge)\b/i,"evaluate","weigh a strength against a limit, then reach a judgement"],
+ [/\b(justify)\b/i,"justify","choose one and give a reason that uses the item"],
+ [/\b(advise|recommend|suggest)\b/i,"advise","give a practical recommendation and support it with facts from the item"],
+ [/\b(explain|describe|outline|discuss)\b/i,"explain","give each point together with its reason or detail"],
+ [/\b(state|identify|define|name|list|give)\b/i,"state","write the answer clearly and briefly"]];
+const exClean=x=>String(x||"").replace(/^(Worked answer|Point drawn from information \([ivx]+\)|Idea to draw on|Watch for this error|A strength|A limit):\s*/i,"").replace(/\*\*/g,"").trim();
+/* the six parts of one task's explanation */
+function exExplain(s,ti){
+ const tk=s.tasks[ti],pts=(s.guide[tk.lab]||[]).filter(x=>x),acc=s.accept?[s.accept]:[],
+  link=pts.filter(x=>/^Link:/i.test(x)).map(x=>x.replace(/^Link:\s*/i,"")),core=pts.filter(x=>!/^Link:/i.test(x));
+ let cw=null,cwAt=1e9;EX_CMD.forEach(c=>{const x=c[0].exec(tk.text);if(x&&x.index<cwAt){cwAt=x.index;cw=c}});cw=cw||[null,"answer","answer exactly as the task asks"];
+ const refs=[];(tk.text.match(/\((?:iv|iii|ii|i)\)/gi)||[]).forEach(r=>{r=r.toLowerCase();if(!refs.includes(r))refs.push(r)});
+ const used=refs.length?s.info.filter(x=>refs.includes(x.k.toLowerCase())):s.info,
+  refTxt=used.length?used.map(x=>"information "+x.k).join(" and "):"the item",
+  topic=s.topic||"the topic";
+ const out=[];
+ out.push(["What the question requires","The command word is \""+(((tk.text.match(cw[0]||/$^/)||[])[0])||cw[1]).toLowerCase()+"\": "+cw[2]+". The task says: "+tk.text]);
+ out.push(["Relevant information from the scenario",(s.setting?"Setting: "+s.setting+"\n":"")+(used.length?used.map(x=>"Information "+x.k+": "+x.text).join("\n"):"No numbered information is given for this task, so use the whole item.")]);
+ out.push(["Knowledge applied","Topic: "+topic+"."+(core.length?"\n"+core.slice(0,3).map(x=>"- "+exClean(x)).join("\n"):"\nUse what you have learnt about "+topic+".")]);
+ out.push(["Reasoning","1. Read "+refTxt+" and find the fact that matches the idea of "+topic+".\n2. Decide what the command word asks you to do: "+cw[2]+".\n3. Join the fact to the idea, so that each point you write has a reason."+(link.length?"\nWhat the marker checks: "+link[0].replace(/\.$/,"")+".":"")]);
+ out.push(["How the answer was obtained",core.length?core.map((x,k)=>"Step "+(k+1)+": "+exClean(x)).join("\n"):"Take the facts from "+refTxt+", apply the idea of "+topic+" and write each point with a reason."]);
+ out.push(["Why the answer is appropriate","It uses details given in "+refTxt+", it applies "+topic+", and it does what the command word asks."+(acc.length?" "+acc[0].replace(/^Accept\s+/i,"").replace(/\.$/,"").replace(/^./,c=>c.toUpperCase())+" is also accepted.":"")]);
  return out}
-function abShow(m){return !m.stream&&m.fk!="local"&&String(m.t||"").split(/\s+/).length>=80&&abParts(m.t).length>=2}
+/* ===== STEP 7: MARKING AND SCORING GUIDE for one task. Built from the task's command word and its guide points.
+   Shows: competency assessed, expected response with scoring points and suggested marks, performance levels, acceptable alternatives.
+   Always labelled AI-generated practice scoring, never an official UNEB marking scheme. ===== */
+const EX_COMP={find:"Applying knowledge: working out a result and showing the working",evaluate:"Evaluating: weighing a strength against a limit and reaching a judgement",justify:"Reasoning: choosing one option and justifying it with evidence from the item",advise:"Problem solving: giving advice that is supported by facts from the item",explain:"Understanding: giving each point together with its reason",state:"Knowledge: identifying and stating the idea clearly"};
+function exMark(s,ti){
+ const tk=s.tasks[ti],raw=(s.guide[tk.lab]||[]).filter(x=>x);
+ let cw=null,cwAt=1e9;EX_CMD.forEach(c=>{const x=c[0].exec(tk.text);if(x&&x.index<cwAt){cwAt=x.index;cw=c}});
+ const comp=EX_COMP[cw?cw[1]:"state"]||EX_COMP.state;
+ let generic=0,pts=raw.map(x=>{const lk=/^Link:/i.test(x),t=exClean(x.replace(/^Link:\s*/i,"")).replace(/\.$/,"");return[lk?"Refers to the item: "+t:t,1]});
+ if(!pts.length){generic=1;pts=[["Gives a correct answer that does what the command word asks",1],["Uses a detail from the item to support the answer",1]]}
+ const T=pts.reduce((a,x)=>a+x[1],0),full=Math.max(1,Math.ceil(T*.75));let part=Math.max(1,Math.ceil(T*.4));if(part>=full)part=Math.max(0,full-1);
+ const rg=(a,b)=>a==b?a+" mark"+(a==1?"":"s"):a+" to "+b+" marks",lv=[["Achieved",rg(full,T),"the points are correct and each one uses a detail from the item, with a reason"]];
+ if(part>0&&part<full)lv.push(["Partly achieved",rg(part,full-1),"some correct points, but a reason or a detail from the item is missing"]);
+ lv.push(["Not yet achieved",part>0?rg(0,part-1):rg(0,full-1),"few correct points, or the item is not used"]);
+ return{comp,pts,T,lv,generic,alt:s.accept||"Accept any other correct point that uses details from the item."}}
+function exMarkHtml(s,ti){const m=exMark(s,ti),E=x=>esc(x);
+ return '<div class="exm"><b>Marking guide for Task '+s.tasks[ti].lab+'</b>'+
+  '<div class="exs"><b>Competency assessed</b>'+E(m.comp)+'</div>'+
+  '<div class="exs"><b>Expected response and scoring points</b><ul>'+m.pts.map(x=>'<li>'+E(x[0])+' <em>('+x[1]+' mark)</em></li>').join("")+'</ul>'+(m.generic?'<small>No set points were written for this task, so general points are shown.</small>':'')+'</div>'+
+  '<div class="exs"><b>Suggested marks</b>'+m.T+' mark'+(m.T==1?'':'s')+' for this task.</div>'+
+  '<div class="exs"><b>Performance indicators</b><ul>'+m.lv.map(x=>'<li><b>'+x[0]+'</b> ('+x[1]+'): '+E(x[2])+'.</li>').join("")+'</ul></div>'+
+  '<div class="exs"><b>Acceptable alternative responses</b>'+E(m.alt)+'</div>'+
+  '<small>AI-generated practice scoring guide, not an official UNEB marking scheme.</small></div>'}
+function exBlock(t){return md(t)}
+function exHtml(m,i){
+ if(m.s!="i"||m.note||m.err||m.quiz)return null;
+ let seg;try{seg=exParse(m.t)}catch(e){seg=null}
+ if(!seg)return null;
+ const xs=m.xs||{},done=!m.stream;
+ return seg.map(p=>{
+  if(p.md!=null)return '<div class="md">'+md(p.md)+'</div>';
+  const s=p.s,h=['<div class="md exq">'];
+  h.push(md(["**Item:**",s.stem].concat(s.info.map(x=>"**Information "+x.k+":** "+x.text)).filter(Boolean).join("\n")));
+  s.tasks.forEach((tk,ti)=>{
+   const key=p.sc+"."+ti,o=xs[key]||{},pts=(s.guide[tk.lab]||[]),acc=s.accept?[s.accept]:[];
+   h.push('<div class="ext">'+md("**Task "+tk.lab+":** "+tk.text));
+   if(done){
+    h.push('<div class="exb"><button class="'+(o.a?"on":"")+'" data-act="xa" data-i="'+i+'" data-k="'+key+'">'+(o.a?"Hide Answer":"Show Answer")+'</button><button class="'+(o.e?"on":"")+'" data-act="xe" data-i="'+i+'" data-k="'+key+'">'+(o.e?"Hide Explanation":"Explain Answer")+'</button><button class="'+(o.m?"on":"")+'" data-act="xm" data-i="'+i+'" data-k="'+key+'">'+(o.m?"Hide Marking Guide":"Marking Guide")+'</button></div>');
+    if(o.a)h.push('<div class="exa"><b>Answer for Task '+tk.lab+'</b>'+(pts.length?'<ul>'+pts.map(x=>'<li>'+esc(x).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>")+'</li>').join("")+'</ul>':'<p>No marking points were written for this task. Use Explain Answer to see how to work it out.</p>')+(acc.length?'<small>'+esc(acc[0])+'</small>':'')+'<small>AI-generated practice answer, not an official UNEB answer.</small></div>');
+    if(o.m)h.push(exMarkHtml(s,ti));
+    if(o.e)h.push('<div class="exe">'+exExplain(s,ti).map((r,k)=>'<div class="exs"><b>'+(k+1)+'. '+r[0]+'</b>'+esc(r[1]).replace(/\n/g,"<br>")+'</div>').join("")+'<small>AI-generated practice explanation, not an official UNEB explanation.</small></div>')}
+   h.push('</div>')});
+  h.push('</div>');return h.join("")}).join("")}
 function bub(m,i,last){
- if(m.note)return `<div class="b i ai" data-i="${i}"><div class="md">${md(m.t)}</div>${m.up?`<div class="chips"><button data-act="plans" data-i="${i}">See plans</button></div>`:""}<small>${hm(m.ts)}</small></div>`;
+ if(m.note)return `<div class="b i ai" data-i="${i}"><div class="md">${md(m.t)}</div>${m.up?`<div class="chips"><button data-act="plans" data-i="${i}">See plans</button></div>`:""}${m.opts&&last?`<div class="chips">${m.opts.map(x=>`<button data-st="${esc(x).replace(/"/g,"&quot;")}">${esc(x)}</button>`).join("")}</div>`:""}<small>${hm(m.ts)}</small></div>`;
  if(m.lim)return `<div class="b i ai" data-i="${i}"><div style="display:flex;gap:10px;align-items:flex-start"><span style="flex:none;width:34px;height:34px;border-radius:50%;background:rgba(245,158,11,.16);color:#d97706;display:grid;place-items:center"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></span><div style="font-weight:700;font-size:16px;line-height:1.3;color:#d97706;padding-top:1px">${LIM1}</div></div>${rtime()?`<div style="display:flex;gap:8px;align-items:center;margin-top:10px;color:var(--sub);font-size:14px"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#2f80ed" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Your free plan resets at <b style="color:#2f80ed">${rtime()}</b></span></div>`:""}<button data-act="plans" data-i="${i}" style="display:block;width:100%;margin-top:12px;padding:12px 14px;border:0;border-radius:22px;background:var(--green);color:#fff;font:inherit;font-weight:700;cursor:pointer;text-align:center">${LIM2}</button><small>${hm(m.ts)}</small></div>`;
  if(m.err)return `<div class="b i err" data-i="${i}">${esc(m.t)}<div class="act"><button data-act="retry" data-i="${i}">Retry</button></div></div>`;
  const A=[["copy","Copy"],["bm",m.bm?"Saved":"Save",m.bm],["up","Helpful",m.fb==1],["dn","Not helpful",m.fb==-1],["share","Share"]];
- let h=`<div class="b i ai" data-i="${i}">${m.mdl?`<div class="mdltag">${esc(m.mdl)}</div>`:""}<div class="md">${md(m.t)}</div>`;
+ let h=`<div class="b i ai" data-i="${i}">${m.mdl?`<div class="mdltag">${esc(m.mdl)}</div>`:""}${exHtml(m,i)||`<div class="md">${last&&!m.stream&&!m.quiz?hlWrap(md(m.t)):md(m.t)}</div>`}`;
  if(m.quiz){h+=m.quiz[1].map((o,k)=>`<button class="opt ${m.pick!=null?(k==m.quiz[2]?"ok":k==m.pick?"bad":""):""}" data-act="pick" data-i="${i}" data-k="${k}">${esc(o)}</button>`).join("")+(m.pick!=null?`<p>${m.pick==m.quiz[2]?"Correct, well done.":"Not quite. The correct answer is highlighted."}</p>`+(m.qz?(m.qz.n<m.qz.list.length-1?`<div class="chips"><button data-act="nq" data-i="${i}">Next question</button></div>`:`<p><b>Quiz finished: ${m.qz.score} out of ${m.qz.list.length}.</b></p>`):""):"")}
  let act="";
- if(m.ab&&last&&abShow(m)){h+=`<div class="chips">${abParts(m.t).map(x=>`<button data-st="${esc(x.q).replace(/"/g,"&quot;")}">${esc(x.lab)}</button>`).join("")}</div>`}
- if(!m.stream){act=`<div class="act out">${A.map(a=>`<button class="${a[2]?"on":""}" data-act="${a[0]}" data-i="${i}" aria-label="${a[1]}" title="${a[1]}">${AI[a[0]]}</button>`).join("")}${last?`<button data-act="regen" data-i="${i}" aria-label="Regenerate" title="Regenerate">${AI.regen}</button>`:""}${last&&abShow(m)?`<button data-act="ab" data-i="${i}" style="font-size:12px;padding:14px 10px 8px">${m.ab?"Hide":"Ask about"}</button>`:""}</div>`;
+ if(last&&abShow(m)){const G=abGroups(m.t),cb=x=>x.map(y=>`<button data-st="${esc(y.q).replace(/"/g,"&quot;")}">${esc(y.lab)}</button>`).join("");
+  h+=`<div class="abx"><button class="abt${m.ab?" on":""}" data-act="ab" data-i="${i}">${m.ab?"Hide":"Ask about this"}</button>${m.ab?`<div class="abp">${G.hl.length?`<div class="abl">Highlighted</div><div class="chips">${cb(G.hl)}</div>`:""}${G.more.length?`<div class="abl">Also important</div><div class="chips">${cb(G.more)}</div>`:""}</div>`:""}</div>`}
+ if(!m.stream){act=`<div class="act out">${A.map(a=>`<button class="${a[2]?"on":""}" data-act="${a[0]}" data-i="${i}" aria-label="${a[1]}" title="${a[1]}">${AI[a[0]]}</button>`).join("")}${last?`<button data-act="regen" data-i="${i}" aria-label="Regenerate" title="Regenerate">${AI.regen}</button>`:""}</div>`;
   if(last&&m.w&&m.w.shown<m.w.parts.length)h+=wBtns(m,i)}
  return h+`<small>${hm(m.ts)}</small></div>${act}`}
 /* ===== FREE PLAN: random word limit (2000 to 3000) per account, kept on this phone ===== */
@@ -2978,9 +3108,16 @@ const scxHide=x=>{x=scxClean(x);const p=[];let i=-1;while((i=x.indexOf("=",i+1))
  /* two or more "=": drop the working too (a x b = c) unless the middle part is given data such as "1 USD = 3 700 UGX, then 10 USD" */
  if(p.length>1&&!/,|\bthen\b/.test(x.slice(p[p.length-2]+1,cut)))cut=p[p.length-2];
  return x.slice(0,cut).trim()+" (find the result)"};
+/* ===== STEP 8: CLASS BAND. P13 = Primary 1-3 (thematic, learning-area), P47 = Primary 4-7, S14 = Senior 1-4 (New Lower Secondary), S56 = Senior 5-6 (Advanced Secondary).
+   A class named in the question (Primary 1, 2 or 3 are not in the class list) wins; otherwise the learner's class; otherwise the level. ===== */
+function clBand(){const q=String(window.ASKQ||""),c=String(D.cls||"");
+ if(/\b(primary|p)\s*[1-3]\b/i.test(q))return"P13";
+ let m=/^Primary (\d)$/.exec(c);if(m)return+m[1]<=3?"P13":"P47";
+ m=/^Senior (\d)$/.exec(c);if(m)return+m[1]<=4?"S14":"S56";
+ return D.lvl=="PLE"?"P47":D.lvl=="UACE"?"S56":"S14"}
 const scxWords=x=>String(x).trim().split(/\s+/).length;
 function scxMake(N,d,c,k,sh){k=k||0;sh=sh||0;const T=c.T,P=c.P,SUB=(typeof D!=="undefined"&&D.sub)||"",
- order=SCX_BY[SUB]||["community","school","family","business"],ck=order[k%order.length],X=SCX[ck],
+ order=SCX_BY[SUB]||["community","school","family","business"],ck=order[k%order.length],X0=SCX[ck],bd=clBand(),X=(bd=="P13"||bd=="P47")?Object.assign({},X0,{o:X0.o.replace(/secondary school/g,"primary school").replace(/Senior Three class/g,"Primary Six class")}):X0,
  math=/^(Mathematics|Physics|Chemistry)$/.test(SUB),
  uses=(N.uses||[]).map(scxClean),
  /* information = concrete cases first (examples), then the topic's rules. Use-labels such as "Saving and borrowing" are NOT information. */
@@ -2990,11 +3127,11 @@ function scxMake(N,d,c,k,sh){k=k||0;sh=sh||0;const T=c.T,P=c.P,SUB=(typeof D!=="
  while(full.length<2&&P[full.length])full.push(scxClean(P[full.length]));
  const hide=math,shown=full.map(x=>hide?scxHide(x):scxClean(x)),
  stem="This item is about "+T+". In "+X.o+", "+X.who+" "+X.pr+". They have gathered the following information.",
- A=SCX_A[SUB]||"From information (i), identify the idea being described and define "+T+".",
- B=SCX_B[SUB]||"Explain what information (ii) shows and how "+T+" helps to understand it.",
- tasks=[A,B,"Advise "+X.who+" on what to do. Use information (i) and (ii) and your knowledge of "+T+" to support your advice."]
-  .concat(d>=3?["Evaluate your advice: give one strength and one limit, and refer to the item in your answer."]:[]),
- lab=["A","B","C","D"],
+ A=bd=="P13"?"From information (i), say in your own words what "+T+" is.":(SCX_A[SUB]||"From information (i), identify the idea being described and define "+T+"."),
+ B=bd=="P13"?"Say what information (ii) shows.":(SCX_B[SUB]||"Explain what information (ii) shows and how "+T+" helps to understand it."),
+ tasks=bd=="P13"?[A,B,"Say one way "+T+" helps us at home or at school."]:bd=="P47"?[A,B,"Tell "+X.who+" what to do. Give one reason from information (i) or (ii)."]:[A,B,"Advise "+X.who+" on what to do. Use information (i) and (ii) and your knowledge of "+T+" to support your advice."]
+  .concat(d>=3||bd=="S56"?["Evaluate your advice: give one strength and one limit, and refer to the item in your answer."]:[]).concat(bd=="S56"?["Justify which of information (i) and (ii) matters more for the decision, and give a reason that uses the item."]:[]),
+ lab=["A","B","C","D","E"],
  item="**Item:**\n"+stem+"\n"+shown.map((x,i)=>"**Information "+["(i)","(ii)"][i]+":** "+x+(/[?!)]$/.test(x)?"":".")).join("\n"),
  tk=tasks.map((t,i)=>"**Task "+lab[i]+":** "+t).join("\n"),
  rest=P.filter(x=>x!==N.d&&!full.map(scxClean).includes(scxClean(x))).map(scxClean),
@@ -3002,7 +3139,8 @@ function scxMake(N,d,c,k,sh){k=k||0;sh=sh||0;const T=c.T,P=c.P,SUB=(typeof D!=="
  gB=[(math?"Worked answer: "+full[1]+".":"Point drawn from information (ii): "+full[1]+".")].concat(take(rest,2)),
  gC=take(uses.length?uses:rest,3).map(x=>"Idea to draw on: "+x).concat(["Link: the advice must rely on a detail in information (i) or (ii), not on general knowledge alone."]),
  gD=["A strength: the advice follows from a fact in the item (the learner names it).","A limit: the item gives only some of the facts, so the advice may need checking."].concat((N.mis&&N.mis.length)?["Watch for this error: "+scxClean(N.mis[0])+"."]:[]),
- ans=[gA,gB,gC,gD],
+ gE=["Compares information (i) and (ii) and chooses one.","Link: the reason must use a detail from the item, not general knowledge alone."],
+ ans=[gA,gB,gC,gD,gE].slice(0,tasks.length),
  guide=tasks.map((t,i)=>"**Task "+lab[i]+":**\n"+ul(ans[i].filter(Boolean))).join("\n")+"\n- Accept any other correct point that uses details from the item.",
  q={item,tk,guide,tasks,facts:full,shown,hide,uses,ctx:ck};
  q.bad=scenarioCheck(q,T);return q}
@@ -3055,13 +3193,16 @@ teacher:(N,d,c)=>ncdcNotes(N,d,c),
 tutor:(N,d,c)=>ncdcNotes(N,d,c,(N.mis.length?sec("Where learners often go wrong",ul(take(N.mis,3))):"")),
 lecturer:(N,d,c)=>ncdcNotes(N,d,c,(N.mis.length?sec("Common misconceptions",ul(take(N.mis,d-2))):"")+sec("Discussion questions",nl(["Why is "+c.T+" important in real life?","How does "+c.T+" connect to other topics you have studied?","What would happen if the main idea of "+c.T+" were ignored?"]))),
 professor:(N,d,c)=>ncdcNotes(N,d,c,sec("Critical analysis",nl(["What assumptions does "+c.T+" depend on?","Where might it not hold, and why?","What evidence would strengthen or weaken the main claim?","How would you test it in a Ugandan setting?"]))+(N.mis.length?sec("Misconceptions to correct",ul(take(N.mis,4))):"")),
-examiner:(N,d,c)=>{const T=c.T,EX=({PLE:"Primary Leaving Examination",UCE:"Uganda Certificate of Education",UACE:"Uganda Advanced Certificate of Education"})[c.L]||"Exam",SB=(typeof D!=="undefined"&&D.sub&&D.sub!="General")?D.sub:T,
- s1=cbaBuild(N,d,c,0),s2=d>=4?cbaBuild(N,d,c,1):null;
- let o="# "+EX+": "+SB+" Exam Practice\n## Integrated Scenario\n"+s1.item+"\n"+s1.tk;
- if(s2)o+="\n## Integrated Scenario 2\n"+s2.item+"\n"+s2.tk;
- o+="\n## Marking guide\nA competent answer shows that the learner can identify, explain, apply and evaluate, using details from the item.\n"+s1.guide;
+examiner:(N,d,c)=>{const T=c.T,bd=clBand(),cn=String(D.cls||""),EX=bd=="P13"?"Primary 1 to 3":bd=="P47"?(cn=="Primary 7"?"Primary Leaving Examination":(cn||"Primary")):bd=="S14"?"Uganda Certificate of Education":"Uganda Advanced Certificate of Education",SB=(typeof D!=="undefined"&&D.sub&&D.sub!="General")?D.sub:T,
+ s1=cbaBuild(N,d,c,0),s2=d>=4&&(bd=="S14"||bd=="S56")?cbaBuild(N,d,c,1):null,
+ H1=bd=="P13"?"Learning Area Activity":bd=="P47"?"Situation":bd=="S56"?"Advanced Secondary Scenario":"Integrated Scenario",
+ NT={P13:"*Primary 1 to 3 follow the thematic, learning-area curriculum. These are short oral or written activities, not an examination.*",P47:"*Primary 4 to 7: short situation tasks. They are not yet matched to the official Primary Leaving Examination paper layout.*",S14:"",S56:"*Advanced Secondary: this layout is general. It is not yet matched to the assessment guideline of this subject.*"}[bd],
+ CA={P13:"say what the topic means and give a simple example from the item.",P47:"identify, explain and apply the idea, using details from the item.",S14:"identify, explain, apply and evaluate, using details from the item.",S56:"identify, explain, apply, evaluate and justify, using details from the item."}[bd];
+ let o="# "+EX+": "+SB+(bd=="P13"?" Practice":" Exam Practice")+"\n*AI-generated practice items, not UNEB questions. Marks and layout are practice guidance, not an official paper format.*"+(NT?"\n"+NT:"")+"\n## "+H1+"\n"+s1.item+"\n"+s1.tk;
+ if(s2)o+="\n## "+H1+" 2\n"+s2.item+"\n"+s2.tk;
+ o+="\n## Marking guide\nA competent answer shows that the learner can "+CA+"\n"+s1.guide;
  if(s2)o+="\n\n**Scenario 2**\n"+s2.guide;
- if(d>=3)o+=sec("Examiner's tips",ul(["Read the item and the information first, and use their details in every task.","Read the command word of each task: identify, explain, suggest, recommend, evaluate.","Answer each task separately and label it Task A, Task B and so on.","Give one clear point at a time, with a reason or an example."]));
+ if(d>=3)o+=sec("Examiner's tips",ul(bd=="P13"||bd=="P47"?["Read the information first and use it in every answer.","Answer each task separately and label it Task A, Task B and so on.","Give one clear point with a reason."]:["Read the item and the information first, and use their details in every task.","Read the command word of each task: identify, explain, suggest, recommend, evaluate"+(bd=="S56"?", justify":"")+".","Answer each task separately and label it Task A, Task B and so on.","Give one clear point at a time, with a reason or an example."].concat(bd=="S56"?["Support every judgement with a reason that refers to the item."]:[])));
  return o},
 instructor:(N,d,c)=>{const T=c.T,P=c.P;let o="# Revision exercise: "+T+(N.cl?"\n"+N.cl:"");
  o+=sec("Revise first",ul(take(P,3+d)));
@@ -3070,7 +3211,7 @@ instructor:(N,d,c)=>{const T=c.T,P=c.P;let o="# Revision exercise: "+T+(N.cl?"\n
  o+=sec("Practice questions",nl(take(qs,2+d)));
  o+=sec("Check your answers",ul(["Q1: "+(N.d||"see the revise first points")].concat(N.quiz.map((z,i)=>"Q"+(i+2)+": "+"ABC"[z[2]]+". "+z[1][z[2]]))));
  if(d>=5)o+=sec("Step-by-step model answer","Question: "+c.cw[0]+" "+T+".\n"+nl(["Read the command word and underline it.","Write the main point in one clear sentence.","Add a reason or an example.","Check that you have given the number of points the task asks for."]));
- if(d>=5){const q=cbaBuild(N,d,c,0);o+=sec("Practice scenario",q.item+"\n"+q.tk+"\n\nCheck your answers against the points in Revise first.")}
+ if(d>=5){const q=cbaBuild(N,d,c,0);o+=sec("Practice scenario",q.item+"\n"+q.tk+"\n\n**Guide:**\n"+q.guide+"\n\nCheck your answers against the points in Revise first.")}
  if(d>=4)o+=sec("Revision checklist",ul(["I can define "+T,"I can list the main points","I can give an example","I can answer a past paper question on it"].map(x=>"[ ] "+x)));
  if(d>=4&&N.mis.length)o+=sec("Common mistakes",ul(take(N.mis,3)));
  return o},
@@ -3081,7 +3222,7 @@ mentor:(N,d,c)=>{const T=c.T,P=c.P,ac=take(P,5).map(x=>(x.replace(/[^A-Za-z]/g,"
  o+=sec("Key points to know",ul(take(P,6)));
  o+=sec("Your revision plan",nl(["Day 1: Read the main points and write the meaning of "+T+" from memory.","Day 2: Do practice questions and mark them yourself.","Day 3: Teach "+T+" to a friend, then test yourself.","Day 4: Practise past paper questions with a timer.","Day 5: Quick review and rest well."]));
  o+=sec("Remember it",ul(["Turn the main points into one short sentence."].concat(ac.length>=3?["Memory letters from the first words of the main points: **"+ac+"**"]:[]).concat(["Draw a small mind map of "+T+" with one branch for each point.","Say the main points aloud while walking."])));
- {const q=cbaBuild(N,d,c,0);o+=sec("Mock scenario",q.item+"\n"+q.tk)}
+ {const q=cbaBuild(N,d,c,0);o+=sec("Mock scenario",q.item+"\n"+q.tk+"\n\n**Guide:**\n"+q.guide)}
  o+=sec("How to answer them",ul(["Task A: write the meaning in one sentence"+(N.d?". For example: "+N.d:""),"Task B: three clear points, each with a reason","Use the details in the item, then link them to the main points"]));
  o+=sec("Exam technique",ul(["Underline the command word and the topic.","Answer the easy questions first, then return to the hard ones.","Leave two minutes at the end to check your answers.","If you are stuck, write what you know: partial answers earn marks."]));
  o+=sec("Mistakes to avoid",ul((N.mis.length?take(N.mis,4):["Writing everything you know instead of what the question asks","Forgetting examples","Running out of time"])));
@@ -3124,7 +3265,37 @@ philosopher:(N,d,c)=>{const T=c.T,P=c.P;let o="# Thinking it through: "+T;
  return o+sec("Think further",nl(["How would you explain "+T+" to someone who disagrees?","What is the strongest point you found, and what is the weakest?","What would you like to find out next?"]))}};
 /* Short answers by default. Full notes only when the learner asks to explain, wants details, or asks for revision/assessment material. */
 const wantFull=()=>/\b(explain|explanation|explanations|details?|detailed|elaborate|in depth|describe|full notes|notes|lesson|teach me|why|how (does|do|is|are|can|did)|steps?|expand|tell me more|more about)\b/i.test(window.ASKQ||"")||wantRQ()||wantCBA();
-function briefNotes(N,c){const T=c.T,pts=(c.P||[]).filter(x=>x!==N.d),k=pts.length?pts:(c.P||[]);
+/* DIRECT ANSWERS: when a learner asks one specific question (what is..., state..., give an example..., name two..., where...), answer only that
+   one thing in one or two short lines. No heading, no key points, no example, no closing offer. Asking for "explain", "describe",
+   "details", notes, a lesson or exam practice still gives the fuller answer. The wording comes from the topic's own text. */
+const DR_STOP=new Set("what which where when who whom state give name list identify define mention that this with from have does about their there they them were been being into than then also some such your please tell cause causes".split(" "));
+function directAnswer(N,c){
+ const Q=String(window.ASKQ_RAW||window.ASKQ||"").toLowerCase();
+ if(!/\b(what|which|where|when|who|whom|state|give|name|list|identify|define|mention|how many|how much)\b/.test(Q))return null;
+ const T=String(c.T||N.n||""),tw=T.toLowerCase().split(/\W+/).filter(Boolean),
+  sents=x=>String(x||"").replace(/\*\*/g,"").replace(/\s+/g," ").trim().split(/(?<=[.!?])\s+/).filter(Boolean),
+  one=x=>{const a=sents(x);return (a[0]||"").replace(/[\s]+$/,"")},
+  num=/\b(two|2)\b/.test(Q)?2:/\b(three|3)\b/.test(Q)?3:/\b(four|4)\b/.test(Q)?4:/\b(five|5)\b/.test(Q)?5:1,
+  asks=/\b(uses?|importance|important|benefits?|advantages?|examples?|instances?|mistakes?|errors?|formula|equation|calculate|types?|kinds?|causes?|effects?|functions?|parts?|products?|stages?|steps?|factors?|where|when|why|how)\b/.test(Q),
+  def=/\b(what is|what are|what's|whats|define|definition|meaning of|what do you mean|what does)\b/.test(Q)&&!asks;
+ const clean=x=>String(x||"").replace(/\*\*/g,"").replace(/\s+/g," ").trim();
+ if(def){if(!N.d)return null;const a=sents(N.d).slice(0,2).join(" ");return /^\*\*/.test(N.d)||new RegExp("^"+T.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"i").test(a)?a:"**"+T+"**: "+a}
+ let pool;
+ if(/\b(examples?|instances?)\b/.test(Q))pool=N.ex;
+ else if(/\b(uses?|importance|important|benefits?|advantages?)\b/.test(Q))pool=N.uses;
+ else if(/\b(mistakes?|errors?)\b/.test(Q))pool=N.mis;
+ else if(/\b(formula|equation|calculate)\b/.test(Q))pool=[N.d].concat(N.pts||[]).filter(x=>/=|->|\u2192/.test(String(x||"")));
+ pool=(pool||[]).map(clean).filter(Boolean);
+ if(!pool.length){
+  const kw=Q.split(/\W+/).filter(w=>w.length>3&&!DR_STOP.has(w)&&!tw.includes(w)),
+   st=w=>w.replace(/(ing|ed|es|s)$/,""),
+   all=[].concat.apply([],[N.d].concat(N.pts||[],N.ex||[],N.uses||[]).map(sents)).filter((x,i,a)=>x&&a.indexOf(x)==i),
+   sc=all.map((x,i)=>({x,i,s:kw.reduce((n,w)=>n+(x.toLowerCase().includes(st(w))?1:0),0)})).filter(z=>z.s>0).sort((a,b)=>b.s-a.s||a.i-b.i);
+  pool=sc.map(z=>z.x)}
+ if(!pool.length)return null;
+ const cut=x=>{const a=sents(x);return a.length>1&&x.length>220?a[0]:x},pk=pool.slice(0,num).map(cut);
+ return pk.length==1?pk[0]:pk.map(x=>"- "+x).join("\n")}
+function briefNotes(N,c){const dv=directAnswer(N,c);if(dv){window.DIRECT_T=dv;return dv}const T=c.T,pts=(c.P||[]).filter(x=>x!==N.d),k=pts.length?pts:(c.P||[]);
  let o="# "+T+(N.cl?"\n"+N.cl:"");
  o+="\n"+(N.d||k[0]||"");
  if(k.length)o+="\n\n**Key points**\n"+ul(take(k,3));
@@ -3787,9 +3958,114 @@ async function askScenario(q){
   return err(busy?"Many learners are asking right now. Please try again in a little while.":"I could not read and answer this question just now. Check your network and send it again.")}
  m.t=scnRender(j,raw);if(j.subject&&typeof subsList=="function"&&subsList().includes(j.subject))m.tsub=j.subject;
  stopS();logAct("ask",m,m.t)}
+/* ===== READING WHAT THE LEARNER REALLY MEANS =====
+   1. A long message with a small request ("Good morning teacher, yesterday in class we were learning about plants and my friend said ... so please explain
+      photosynthesis again"): coreAsk keeps only the sentence that really asks, and borrows the topic from another sentence when the asking sentence has none.
+   2. A short message with a big meaning ("and the products?", "what about its uses"): ellipFU joins the words to the topic already on screen.
+   Words like "more", "again", "why" and "I do not understand" are still read by ctxFollow. If nothing is clear, the message is left exactly as typed. */
+const CA_FILL=/^(good (morning|afternoon|evening|day)|hello|hi|hey|dear|greetings|teacher( david)?|tr\.? david|sir|madam|please|kindly|thank you|thanks|my name is [^,.]*|i am (a |an )?(pupil|student|learner|candidate)[^,.]*|i am in (p|s|primary|senior)[ .]?\d[^,.]*|i was (just )?(wondering|thinking)( if| whether| about)?|i (just )?(wanted|want|would like|wish) to (ask|know|find out)( you)?( about)?|i have (a )?(question|problem|doubt)( about| on)?|can i ask( you)?|may i ask( you)?|ok(ay)?|well|so|then|actually|but|and)\b[ ,:;-]*/i;
+const CA_STORY=/\b(yesterday|last (week|term|night)|this morning|today in class|in class|my (friend|brother|sister|mother|father|teacher|classmate|neighbour)|someone (told|said)|(told|said) (me|us) that|we were|we have been|i was|i have been|they said|he said|she said|at school|at home|because of|maybe|i think|i heard|i saw)\b/i;
+const CA_CUE=/\b(what|which|where|when|who|whom|why|how|explain|describe|define|state|give|name|list|identify|outline|calculate|find|solve|show|compare|differentiate|distinguish|discuss|suggest|advise|evaluate|help|teach|tell|example|again|more|understand|difference|meaning)\b/i;
+function coreAsk(q){
+ q=String(q||"").replace(/\s+/g," ").trim();if(q.length<140||q.length>1500)return null;
+ if(typeof looksScenario=="function"&&looksScenario(q))return null;
+ const raw=[].concat.apply([],q.split(/(?<=[.?!])\s+/).map(x=>x.length>90?x.split(/(?:[,;]\s+|\s+(?:but|so|because)\s+|\s+and\s+(?=(?:i|we|my|please|can|could|now)\b))/i):[x])).map(x=>x.trim()).filter(x=>x.length>1);
+ if(raw.length<2)return null;
+ const strip=x=>{let y=x,g=0;while(g++<6){const z=y.replace(CA_FILL,"");if(z===y)break;y=z}return y.replace(/^[,;:\s-]+/,"").trim()};
+ const topicIn=x=>{try{const t=topicOf(x);return t&&t.n?t:null}catch(e){return null}};
+ const S=raw.map((x,i)=>{const c=strip(x),own=topicIn(c);let sc=0;
+  if(/\?\s*$/.test(x))sc+=4;if(CA_CUE.test(c))sc+=3;if(own)sc+=2;
+  if(/\b(do not|don't|dont|did not|can not|cannot) (understand|get|know)\b/i.test(c)||/\b(again|more|another way|simpler|slowly)\b/i.test(c))sc+=2;
+  if(CA_STORY.test(c)&&!/\?\s*$/.test(x)&&!/^(please|kindly|can you|could you|explain|describe|define|state|give|name|list|what|why|how|where|when|which)\b/i.test(c))sc-=4;
+  if(c.split(" ").length<2)sc-=3;if(i==raw.length-1)sc+=1;return{i,c,own,sc,x}});
+ const best=S.slice().sort((a,b)=>b.sc-a.sc||b.i-a.i)[0];
+ if(!best||best.sc<4||best.c.length<4)return null;
+ let core=best.c.replace(/[.!]+$/,"").trim();
+ if(!best.own){const tp=S.find(z=>z.own&&z.i!=best.i);
+  if(tp){const nm=tp.own.n;core=/\b(it|this|that|them|these|those|they)\b/i.test(core)?core.replace(/\bits\b/i,nm+"'s").replace(/\b(it|this|that|them|these|those|they)\b/i,nm):core+" about "+nm}}
+ core=core.replace(/^./,c=>c.toUpperCase()).slice(0,220);
+ return core.length<q.length*0.7?core:null}
+function ellipFU(q){
+ const c=ctxGet();if(!c||!c.tq)return null;
+ const t=ctxNorm(q);if(!t||t.split(" ").length>8||t.length>60)return null;
+ const m=/^(and for|and what about|what about|how about|and about|what of|and|also|then)\s+(the |its |their |a |an )?(.+)$/.exec(t);if(!m)return null;
+ const rest=m[3].trim();if(!rest||/\d/.test(rest))return null;
+ let own=null;try{own=topicOf(rest)}catch(e){}if(own||smallTalk(q))return null;
+ let r=rest;FU_ALL.forEach(x=>{r=r.replace(x," ")});
+ const left=r.split(" ").filter(w=>w&&!FU_STOP.has(w)&&!FU_R.test(w));
+ if(!left.length)return null;
+ const p=cleanQ(c.tq);if(!p)return null;
+ return{q:rest+" of "+p,kind:"custom",sub:c.sub,topic:p,step:0,hint:FU_HINT.custom}}
+/* ===== SAMPLE QUESTIONS ON REQUEST =====
+   "Give me sample questions": with no subject and no topic named, the app asks which subject (or, if a subject is already chosen, which topic) and
+   shows tappable choices. Once the topic is known it writes scenario items (one to five, as asked) with Show Answer and Explain Answer for every task.
+   "Give me the answers" afterwards opens the answers for every task (or for one item). AI-generated practice items, not UNEB questions. */
+const SQ_NUM={one:1,an:1,a:1,single:1,two:2,three:3,four:4,five:5,1:1,2:2,3:3,4:4,5:5};
+const SQ_REQ=/\b((sample|practice|practise|revision|exam(ination)?|model|mock|test|assessment|competency|scenario(-| )?based|past paper)\s+(questions?|items?|scenarios?)|(questions?|items?|scenarios?)\s+(on|about|for|from|in)\b|(give|show|write|set|make|create|generate|provide|need|want|get)\b[^.?!]{0,30}\b(questions?|items?|scenarios?)\b)/i;
+const SQ_ANS=/\b(answers?|solutions?|marking (guide|scheme)|memo)\b/i;
+const escRe=x=>String(x).replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+function sqCount(q){const m=/\b(one|two|three|four|five|an?|single|[1-5])\s+(?:[a-z-]+\s+){0,2}?(?:items?|questions?|scenarios?)\b/i.exec(q);return m?Math.min(5,SQ_NUM[m[1].toLowerCase()]||2):2}
+function sqSubject(q){q=String(q).replace(/\bmaths?\b/gi,"Mathematics").replace(/\bbio\b/gi,"Biology").replace(/\bchem\b/gi,"Chemistry");const L=subsList().filter(x=>x!="General").sort((a,b)=>b.length-a.length);
+ let f=L.find(x=>new RegExp("\\b"+escRe(x)+"\\b","i").test(q));if(f)return f;
+ const t=String(q).trim().toLowerCase().replace(/[?.!]+$/,"");if(t.length>=4&&t.split(/\s+/).length<=3)f=L.find(x=>x.toLowerCase().startsWith(t)||x.toLowerCase()==t);return f||null}
+function sqTopics(){const seen={},out=[];try{TOP.forEach(t=>{if(out.length>=8||!t||!t.n||!t.d||seen[t.n])return;if(t.ai!=null||!subOK(t)||(t.L&&!t.L.includes(lvKey())))return;seen[t.n]=1;out.push(t.n)})}catch(e){}return out}
+function sqNote(t,opts,pend){D.msgs.push({s:"i",note:1,t,ts:Date.now(),opts:opts&&opts.length?opts:undefined,pend:pend||undefined});save();render()}
+function sqAskWhich(n){
+ if(D.sub&&D.sub!="General"){const tp=sqTopics();sqNote("Which topic in **"+D.sub+"** do you want sample questions on? Tap one, or type your own topic.",tp,{k:"topic",n});return}
+ sqNote("Which subject do you want sample questions on? Tap one, or type it.",subsList().filter(x=>x!="General").slice(0,12),{k:"subj",n})}
+function sqMake(T0,n,raw){
+ if(capped()){limitMsg();return}
+ const T=normT(T0),keep=D.sub;
+ if(keep=="General"&&T0.S&&T0.S[0]&&subsList().includes(T0.S[0]))D.sub=T0.S[0];
+ let o="";
+ try{const c={T:T.n,P:T.pts.length?T.pts:(T.d?[T.d]:[]),L:lvKey(),cw:["State","Explain"]},d=Math.max(3,modelDepth(modelName()));
+  o="# Practice items: "+T.n+"\nThese are AI-generated practice items, not UNEB questions. Marks and layout are practice guidance, not an official paper format. Under each task, tap Show Answer to see its answer, Explain Answer to see how it is worked, or Marking Guide to see practice scoring.";
+  for(let k=0;k<n;k++){const q=cbaBuild(T,d,c,k);o+="\n## Item "+(k+1)+"\n"+q.item+"\n"+q.tk+"\n\n**Guide:**\n"+q.guide}}
+ finally{D.sub=keep}
+ const ch=D.chats.find(c=>c.id==D.cur);if(ch&&(ch.title=="New chat"||ch.title=="Chat"))ch.title=("Sample questions: "+T.n).slice(0,32);
+ const m={s:"i",t:o,ts:Date.now(),q:String(raw||"").slice(0,300),tq:T.n,tsub:D.sub,sq:1};
+ D.msgs.push(m);try{logAct("ask",m,"sample questions: "+T.n)}catch(e){}useW(o);save();render()}
+/* the learner's reply to "which subject / which topic?" */
+function sqResume(q,P){
+ const t=String(q).trim();
+ if(RX_QZ.test(t.toLowerCase()))return false;
+ if(t.length>70||/\?\s*$/.test(t)&&t.split(/\s+/).length>6)return false;
+ if(SQ_REQ.test(t)&&t.split(/\s+/).length>3){return false}
+ /* a normal question ("What is osmosis?", "Explain ...") is not an answer to our question: drop the choice and answer it normally */
+ if(/^(what|why|how|where|when|who|which|explain|define|describe|state|give|calculate|tell|solve|is|are|does|do|can|could|please explain)\b/i.test(t))return false;
+ let tp=null;try{tp=topicOf(t)}catch(e){}
+ if(P.k=="subj"||!tp){const sb=sqSubject(t);
+  if(sb&&P.k=="subj"){D.sub=sb;save();sqAskWhich(P.n);return true}}
+ if(tp){sqMake(tp,P.n,t);return true}
+ const sb2=sqSubject(t);if(sb2&&P.k=="topic"&&D.sub!=sb2){D.sub=sb2;save();sqAskWhich(P.n);return true}
+ const tps=sqTopics();
+ sqNote("I could not find **"+t.slice(0,40)+"**"+(D.sub&&D.sub!="General"?" in "+D.sub:"")+". Tap one of these, or type another topic.",P.k=="topic"?tps:subsList().filter(x=>x!="General").slice(0,12),{k:P.k,n:P.n});return true}
+function sqLastExam(){for(let i=D.msgs.length,k=0;i--&&k<10;k++){const x=D.msgs[i];if(x.s=="i"&&x.t&&!x.err&&!x.note&&!x.lim){let g=null;try{g=exParse(x.t)}catch(e){}if(g&&g.some(z=>z.sc!=null))return{m:x,seg:g}}}return null}
+function sqAnswers(q){
+ const t=String(q).toLowerCase();if(t.split(/\s+/).length>14||/\d\s*[+\-x*\/=]\s*\d/.test(t)||!SQ_ANS.test(t))return false;
+ const L=sqLastExam();if(!L)return false;
+ const W={first:1,second:2,third:3,fourth:4,fifth:5,one:1,two:2,three:3,four:4,five:5},im=/\b(?:item|number|no|scenario|question)\s*(\d|one|two|three|four|five)\b|\b(first|second|third|fourth|fifth)\s+(?:item|scenario|question)\b/.exec(t),
+  only=im?(W[im[1]||im[2]]||+(im[1]||im[2])):0,withE=/\b(explain|explanation|how)\b/.test(t),xs={};
+ L.seg.forEach(z=>{if(z.sc==null)return;if(only&&z.sc+1!=only)return;z.s.tasks.forEach((tk,ti)=>{xs[z.sc+"."+ti]={a:1,e:withE?1:0}})});
+ if(!Object.keys(xs).length)return false;
+ const m=Object.assign({},L.m,{ts:Date.now(),xs,ab:0,bm:0,fb:0,q:String(q).slice(0,300)});delete m.stream;
+ D.msgs.push(m);save();render();return true}
+/* returns true when the message was a sample-question request or an answer to the app's own question */
+function sqHandle(q){
+ const t=String(q||"").trim();if(!t)return false;
+ const lastI=(()=>{for(let i=D.msgs.length;i--;){if(D.msgs[i].s=="i")return D.msgs[i]}return null})();
+ if(lastI&&lastI.pend&&lastI.note){if(sqResume(t,lastI.pend))return true}
+ if(sqAnswers(t))return true;
+ if(!SQ_REQ.test(t)||RX_QZ.test(t.toLowerCase())||t.split(/\s+/).length>30||/\b(explain|describe|define)\b/i.test(t)&&!/\b(questions?|items?)\b/i.test(t))return false;
+ const n=sqCount(t);let tp=null;try{tp=topicOf(t)}catch(e){}
+ if(tp){sqMake(tp,n,t);return true}
+ const sb=sqSubject(t);if(sb&&sb!=D.sub){D.sub=sb;save()}
+ sqAskWhich(n);return true}
 function ask(q,mode){
  if(stream!=null||INTP)return;
  if(!mode&&looksScenario(q))return askScenario(q);
+ if(!mode){let k=null;try{k=coreAsk(q)}catch(e){}if(k)q=k}
+ if(!mode){let h=false;try{h=sqHandle(q)}catch(e){h=false}if(h)return}
  if(mode||!navigator.onLine||String(q).trim().length<2||ctxPart(q)||ctxExpand(q))return askCore(q,mode,null);
  INTP=true;$("stat").textContent="understanding…";
  interpretQ(q).then(I=>I,()=>null).then(I=>{INTP=false;$("stat").textContent="Anything about your studies";askCore(q,mode,I)})}
@@ -3801,7 +4077,7 @@ function leakSub(f){if(!f||f.un||f.w||D.sub=="General")return null;const fam=rel
 function askCore(q,mode,I){
  if(stream!=null)return;let gn=null,FU=null,bareG=false;const q0=String(q);
  if(!mode){let a=null;if(I)try{a=interpApply(q,I)}catch(e){}
-  if(a){FU=a.FU;q=a.q}else FU=ctxPart(q)||ctxExpand(q)||ctxFollow(q);
+  if(a){FU=a.FU;q=a.q}else FU=ctxPart(q)||ctxExpand(q)||ctxFollow(q)||ellipFU(q);
   if(FU&&!FU.local)q=FU.q;
   if(!(FU&&FU.part)){const xn=expandNote(q0);if(xn)gn=xn}}
  window.ASKQ_RAW=String(q);
@@ -3829,8 +4105,12 @@ function askCore(q,mode,I){
   if(f.un&&!mode){const a=await aiAnswer(q,FU);if(stream==null||tok!=AN)return;
    if(a&&a.busy){logUn(q);stopS();return err("Many learners are asking right now. Please try again in a little while.")}
    if(a&&a.t)f=a}
+  /* Gemini gave nothing the first time: try once more, and never show the "no full lesson" text to a learner */
+  if(f.un&&f.hon&&!mode){let a2=null;try{a2=await aiAnswer(q,FU,1)}catch(e){}if(stream==null||tok!=AN)return;
+   if(a2&&a2.busy){logUn(q);stopS();return err("Many learners are asking right now. Please try again in a little while.")}
+   if(a2&&a2.t)f=a2;else{logUn(q);stopS();return err("I could not get the answer just now. Please tap Retry.")}}
   if(f.un&&!mode&&!FU)logUn(q);
-  if(f.fmt&&!f.un&&!mode){const st=await styleAnswer(f.t,q);if(stream==null||tok!=AN)return;if(st)f.t=st.md}
+  if(f.fmt&&!f.un&&!mode&&f.t!==window.DIRECT_T){const st=await styleAnswer(f.t,q);if(stream==null||tok!=AN)return;if(st)f.t=st.md}
   if(!f.part&&!f.ai&&!f.un){const Tm=topicOf(q);if(Tm&&Tm.ai)f.ai=1}
   if(!f.part&&f.ai&&!f.tid){const Tm=topicOf(q);if(Tm&&Tm.tid)f.tid=Tm.tid}
   if(!f.part&&!f.lv&&!f.un){const Tm=topicOf(q);if(Tm&&Tm.sl){f.lv=Tm.sl;f.cls=Tm.cls}}
@@ -3841,6 +4121,7 @@ $("msgs").addEventListener("click",e=>{
 
  const st=e.target.closest("[data-st]");if(st){$("inp").value=st.dataset.st;send();return}
  const b=e.target.closest("[data-act]");if(!b)return;const i=+b.dataset.i,m=D.msgs[i],a=b.dataset.act;if(a=="plans"){plans();return}if(a=="activate"){activatePlan();return}
+ if((a=="xa"||a=="xe"||a=="xm")&&m){const sc=$("msgs").scrollTop,k=b.dataset.k;m.xs=m.xs||{};const o=m.xs[k]=m.xs[k]||{};if(a=="xa")o.a=o.a?0:1;else if(a=="xm")o.m=o.m?0:1;else o.e=o.e?0:1;save();render();$("msgs").scrollTop=sc;return}
  {const _x={copy:"copy",share:"share",regen:"redo",bm:m&&m.bm?"save_off":"save",up:m&&m.fb==1?"like_off":"like",dn:m&&m.fb==-1?"dislike_off":"dislike"}[a];if(_x&&m&&!m.err)logAct(_x,m)}
  if(a=="copy"){navigator.clipboard&&navigator.clipboard.writeText(m.t.replace(/[#*`|]/g,""));return}
  if(a=="share"){(async()=>{const L=await AK.short(m),T=(m.q||"Answer")+"\n";

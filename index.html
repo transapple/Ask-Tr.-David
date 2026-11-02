@@ -81,18 +81,6 @@ html[data-font=mono] body,html[data-font=mono] button,html[data-font=mono] input
 #hbk{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));left:14px;width:46px;height:46px;border-radius:50%;border:0;background:var(--bar);color:var(--text);box-shadow:0 2px 10px rgba(0,0,0,.18);display:grid;place-items:center;z-index:4;padding:0}#hbk svg{width:22px;height:22px}
 #hsb{position:absolute;left:16px;right:16px;bottom:calc(14px + env(safe-area-inset-bottom,0px));background:var(--bar);border-radius:30px;box-shadow:0 4px 18px rgba(0,0,0,.2);display:flex;align-items:center;gap:12px;padding:0 18px;height:56px;z-index:4}#hsb svg{width:22px;height:22px;color:var(--sub);flex:none}#hsb input{flex:1;min-width:0;border:0;outline:0;background:none;color:var(--text);font:inherit;font-size:16px}
 .lc .lcm{max-height:92px;overflow:hidden;font-size:15px;-webkit-mask-image:linear-gradient(#000 60%,transparent);mask-image:linear-gradient(#000 60%,transparent)}.lc.open .lcm{max-height:none;-webkit-mask-image:none;mask-image:none}
-#tb{display:flex;align-items:center;gap:10px;color:var(--sub);font-size:15px;width:fit-content;max-width:82%;transition:opacity .17s}#tb.sw{opacity:.2}
-#tb .tbd{display:inline-flex;align-items:center;gap:3px;min-width:34px;height:20px}
-#tb .tbd i{display:block;width:7px;height:7px;border-radius:50%;background:var(--green)}
-#tb.s0 .tbd i{animation:tb0 1s infinite ease-in-out}
-#tb.s1 .tbd i{animation:tb1 .9s infinite ease-in-out;border-radius:2px;background:#e8590c}
-#tb.s2 .tbd i{animation:tb2 1.2s infinite linear;background:#1c7ed6}
-#tb.s3 .tbd i{display:none}#tb.s3 .tbd::after{content:"";width:16px;height:16px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--green);animation:tbs .8s linear infinite}
-#tb.s4 .tbd i{width:4px;height:16px;border-radius:2px;background:#7048e8;animation:tb4 .9s infinite ease-in-out}
-#tb.s5 .tbd i{animation:tb5 1.3s infinite ease-in-out}
-#tb.s6 .tbd i{width:9px;height:9px;background:#d6336c;animation:tb6 1.1s infinite ease-in-out}
-#tb .tbd i:nth-child(2){animation-delay:.15s}#tb .tbd i:nth-child(3){animation-delay:.3s}
-#tb.s1{border-left:3px solid #e8590c}#tb.s2{border-left:3px solid #1c7ed6}#tb.s4{border-left:3px solid #7048e8}#tb.s6{border-left:3px solid #d6336c}
 @keyframes tb0{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-6px);opacity:1}}
 @keyframes tb1{0%,100%{transform:scale(.6);opacity:.5}50%{transform:scale(1.35);opacity:1}}
 @keyframes tb2{0%{transform:translateX(-4px);opacity:.2}50%{transform:translateX(4px);opacity:1}100%{transform:translateX(-4px);opacity:.2}}
@@ -120,6 +108,10 @@ header{display:flex;align-items:center;gap:10px;padding:calc(10px + env(safe-are
 #nm{font-weight:600;font-size:17px}.t{font-size:12px;color:var(--sub)}
 .ic{background:none;border:0;color:var(--sub);cursor:pointer;padding:6px;display:grid;place-items:center}
 svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#tb{display:flex;align-items:center;gap:12px;color:var(--sub);font-size:15px;width:fit-content;max-width:82%;margin:18px 0 6px 6px;transition:opacity .17s}#tb.sw{opacity:.25}
+#tb .tbo{flex:none;width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--green),#1c7ed6 55%,#7048e8);animation:tbm 2.4s ease-in-out infinite,tbc 6s linear infinite}
+@keyframes tbm{0%{border-radius:50%;transform:scale(.85) rotate(0)}20%{border-radius:42% 58% 63% 37%/45% 40% 60% 55%;transform:scale(1.1) rotate(70deg)}40%{border-radius:58% 42% 38% 62%/55% 62% 38% 45%;transform:scale(.9) rotate(140deg)}60%{border-radius:35% 65% 55% 45%/60% 40% 60% 40%;transform:scale(1.15) rotate(220deg)}80%{border-radius:60% 40% 45% 55%/40% 58% 42% 60%;transform:scale(.95) rotate(300deg)}100%{border-radius:50%;transform:scale(.85) rotate(360deg)}}
+@keyframes tbc{to{filter:hue-rotate(360deg)}}
 #msgs{flex:1;overflow-y:auto;padding:12px 10px;display:flex;flex-direction:column;gap:4px}
 .b{max-width:78%;padding:7px 10px 5px;border-radius:14px;word-wrap:break-word;white-space:pre-wrap;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;box-shadow:0 1px 1px rgba(0,0,0,.1)}
 .b.o{align-self:flex-end;background:var(--out);border-bottom-right-radius:4px}
@@ -211,7 +203,7 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 .act,.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.act button{border:0;background:none;color:var(--sub);font:inherit;font-size:12px;cursor:pointer;padding:3px 8px;border-radius:10px}.act{clear:both}.act button{padding:14px 14px 8px;display:grid;place-items:center}.act button svg{width:23px;height:23px}.act.out{align-self:flex-start;margin:-6px 0 8px 0;gap:4px}.act .on{background:none;border:0;color:var(--green)}.act .on svg{fill:currentColor}.act button:active{background:var(--wall)}
 .md b.hl{cursor:pointer;background:rgba(47,128,237,.13);border-bottom:1px dashed var(--green);border-radius:3px;padding:0 2px}.md b.hl:active{background:rgba(47,128,237,.3)}
 .abx{margin-top:8px;border-top:1px solid var(--line);padding-top:6px}.abx .abt{border:1px solid var(--green);background:none;color:var(--green);border-radius:14px;padding:5px 12px;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer}.abx .abt.on{background:var(--green);color:#fff}
-.rtx{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}.rtx .rtq{font-weight:700;font-size:14px}.rtx .rtn{color:var(--sub);font-size:12.5px;line-height:1.45;margin:3px 0 8px}.rtx .rtb{display:flex;gap:8px}.rtx .rtb button{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 6px;border:1px solid var(--line);border-radius:18px;background:none;color:var(--text);font:inherit;font-size:13px;font-weight:600;cursor:pointer}.rtx .rtb button svg{width:18px;height:18px}.rtx .rtb button.up.on{background:var(--green);border-color:var(--green);color:#fff}.rtx .rtb button.dn.on{background:#ff453a;border-color:#ff453a;color:#fff}.rtx .rts{margin-top:7px;font-size:12.5px;color:var(--sub);line-height:1.4}.nqx .abl{font-size:13px;font-weight:700;margin:10px 0 4px}.abp .chips button.top{background:var(--green);color:#fff;border-color:var(--green)}
+.rtx{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}.rtx .rtq{font-weight:700;font-size:14px}.rtx .rtn{color:var(--sub);font-size:12.5px;line-height:1.45;margin:3px 0 8px}.rtx .rtb{display:flex;gap:8px}.rtx .rtb button{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 6px;border:1px solid var(--line);border-radius:18px;background:none;color:var(--text);font:inherit;font-size:13px;font-weight:600;cursor:pointer}.rtx .rtb button svg{width:18px;height:18px}.rtx .rtb button.up.on{background:var(--green);border-color:var(--green);color:#fff}.rtx .rtb button.dn.on{background:#ff453a;border-color:#ff453a;color:#fff}.rtx .rtb.rtr button.rep{background:var(--green);border-color:var(--green);color:#fff}.rtx .rts{margin-top:7px;font-size:12.5px;color:var(--sub);line-height:1.4}.nqx .abl{font-size:13px;font-weight:700;margin:10px 0 4px}.abp .chips button.top{background:var(--green);color:#fff;border-color:var(--green)}
 .abp .abl{font-size:11.5px;font-weight:700;color:var(--sub);margin:8px 0 0;letter-spacing:.2px}.abp .chips{margin-top:4px}
 .exq .exm{margin:8px 0;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--wall)}.exq .exm ul{margin:3px 0 3px 18px}.exq .exm small{display:block;color:var(--sub);margin-top:6px}
 .exq{margin:6px 0}.exq .ext{margin:10px 0;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}.exq .ext p{margin:0 0 6px}
@@ -3261,7 +3253,7 @@ function bub(m,i,last){
  if(last&&!m.stream&&!m.quiz){const P=abPlan(m.t),cb=(x,c)=>x.map(y=>`<button${c?` class="${c}"`:""} data-st="${stAttr(y.q)}">${esc(y.lab)}</button>`).join("");
   if(NQ.nq)h+=`<div class="nqx"><div class="abl">Next questions to investigate</div><div class="chips">${cb(P.all.slice(0,3))}</div></div>`;
   h+=`<div class="abx"><button class="abt${m.ab?" on":""}" data-act="ab" data-i="${i}">${m.ab?"Hide":"Ask about this"}</button>${m.ab?`<div class="abp">${P.top?`<div class="abl">Best place to start</div><div class="chips">${cb([P.top],"top")}</div>`:""}${P.hl.length?`<div class="abl">Highlighted</div><div class="chips">${cb(P.hl)}</div>`:""}${P.more.length?`<div class="abl">Also important</div><div class="chips">${cb(P.more)}</div>`:""}${P.gen.length?`<div class="abl">You can ask</div><div class="chips">${cb(P.gen)}</div>`:""}<div class="abl">Or type your own question below. It will follow on from this answer.</div></div>`:""}</div>`;
-  h+=`<div class="rtx"><div class="rtq">Did this answer your question?</div><div class="rtn">Tap Like if it did. If anything is wrong, tap Unlike. It will be reported to us immediately for review.</div><div class="rtb"><button class="up${m.fb==1?" on":""}" data-act="up" data-i="${i}">${AI.up}<span>Like</span></button><button class="dn${m.fb==-1?" on":""}" data-act="dn" data-i="${i}">${AI.dn}<span>Unlike</span></button></div>${m.fb==1?'<div class="rts">'+(m.kept?'Saved permanently to the database. No review needed.':'Thank you. We are glad it helped.')+'</div>':m.fb==-1?'<div class="rts">'+(m.gone?'Removed from the database.':'Thank you. This answer has been reported for review.')+'</div>':""}</div>`}
+  if(!m.rdone)h+=m.rs=="thanks"?`<div class="rtx"><div class="rts">Thank you, we are glad it helped.</div></div>`:m.rs=="sorry"?`<div class="rtx"><div class="rts">We are sorry it did not help. Please report here. You can also ignore.</div><div class="rtb rtr"><button class="rep" data-act="rep" data-i="${i}">Report</button><button class="ign" data-act="ign" data-i="${i}">Ignore</button></div></div>`:`<div class="rtx"><div class="rtq">Did this answer your question?</div><div class="rtn">Tap Like if it did. If anything is wrong, tap Unlike. It will be reported to us immediately for review.</div><div class="rtb"><button class="up" data-act="up" data-i="${i}">${AI.up}<span>Like</span></button><button class="dn" data-act="dn" data-i="${i}">${AI.dn}<span>Unlike</span></button></div></div>`}
  if(!m.stream){act=`<div class="act out">${A.map(a=>`<button class="${a[2]?"on":""}" data-act="${a[0]}" data-i="${i}" aria-label="${a[1]}" title="${a[1]}">${AI[a[0]]}</button>`).join("")}${last?`<button data-act="regen" data-i="${i}" aria-label="Regenerate" title="Regenerate">${AI.regen}</button>`:""}</div>`;
   if(last&&m.w&&m.w.shown<m.w.parts.length)h+=wBtns(m,i)}
  return h+`<small>${hm(m.ts)}</small></div>${act}`}
@@ -3555,14 +3547,46 @@ function directAnswer(N,c){
  if(!pool.length)return null;
  const cut=x=>{const a=sents(x);return a.length>1&&x.length>220?a[0]:x},pk=pool.slice(0,num).map(cut);
  return pk.length==1?pk[0]:pk.map(x=>"- "+x).join("\n")}
-function briefNotes(N,c){const dv=directAnswer(N,c);if(dv){window.DIRECT_T=dv;return dv}const T=c.T,pts=(c.P||[]).filter(x=>x!==N.d),k=pts.length?pts:(c.P||[]);
+function briefNotes(N,c){const dv=(N.focus&&/\b(what is|what are|what's|whats|define|definition|meaning of)\b/i.test(String(window.ASKQ_RAW||window.ASKQ||"")))?null:directAnswer(N,c);if(dv){window.DIRECT_T=dv;return dv}const T=c.T,pts=(c.P||[]).filter(x=>x!==N.d),k=pts.length?pts:(c.P||[]);
  let o="# "+T+(N.cl?"\n"+N.cl:"");
  o+="\n"+(N.d||k[0]||"");
  if(k.length)o+="\n\n**Key points**\n"+ul(take(k,3));
  if(N.ex&&N.ex[0])o+="\n\n**Example:** "+N.ex[0];
  const sm=N.simple||"";if(sm)o+="\n\n**In short:** "+sm;
  return o+"\n\nAsk me to explain or give details if you want more."}
-function modelText(N){const k=modelName(),d=modelDepth(k),L=lvKey(),P=N.pts.length?N.pts:(N.d?[N.d]:[]),
+/* FOCUS ON THE ASKED TERM: when the question names something that sits inside a bigger topic (for example "electrolysis" inside
+   "Industrial Processes"), the answer starts with that term: its heading, a definition, then a few lines of detail. The topic's
+   own general sentence is no longer used as the opening. Works for short and full answers, and for "more details" follow-ups. */
+const FC_SKIP=new Set("detail details detailed more explain explanation describe about tell example examples uses importance briefly summary summarise summarize please what which where when does mean meaning define definition write give state name list".split(" "));
+function focusN(N){
+ try{
+  const Q=String(window.ASKQ_RAW||window.ASKQ||"").toLowerCase();if(!Q||!N||!N.pts||!N.pts.length)return null;
+  const tw=String(N.n||"").toLowerCase().split(/\W+/).filter(Boolean),st=w=>w.replace(/(ing|ed|es|s)$/,"");
+  const kws=Q.split(/\W+/).filter(w=>w.length>=5&&!DR_STOP.has(w)&&!FC_SKIP.has(w));
+  if(!kws.length)return null;
+  if(kws.some(w=>tw.some(t=>st(t)==st(w))))return null;
+  const cap=x=>x.charAt(0).toUpperCase()+x.slice(1),end=x=>cap(String(x).trim().replace(/[.;:,\s]+$/,""))+".";
+  let hit=null;
+  for(const p of N.pts){const m=String(p).match(/^\*\*([^*]+?)\*\*\s*:?\s*([\s\S]*)$/);if(!m)continue;
+   const lab=m[1].replace(/[:\s]+$/,"");const ll=lab.toLowerCase();
+   if(kws.some(w=>ll.includes(st(w)))){hit={lab,body:m[2].trim(),p};break}}
+  if(!hit||!hit.body)return null;
+  const clauses=hit.body.split(/;\s+|(?<=[.!?])\s+/).map(x=>x.trim()).filter(Boolean);
+  if(!clauses.length)return null;
+  const c0=clauses[0].replace(/[.;:,\s]+$/,""),det=clauses.slice(1).map(end);
+  const term=cap(hit.lab);
+  const proc=/(ysis|tion|sion|ing|process|reaction)$/i.test(term)&&/^[a-z]/.test(c0)&&!/^\w+(ed|ing)\b/.test(c0);
+  const defS=proc?"**"+term+"** is the process in which "+c0+".":"**"+term+"**: "+c0+".";
+  const key=kws.find(w=>hit.lab.toLowerCase().includes(st(w)))||kws[0],ks=st(key),
+   sents=x=>String(x||"").replace(/\*\*/g,"").replace(/\s+/g," ").trim().split(/(?<=[.!?])\s+/).filter(Boolean),
+   rel=a=>[].concat.apply([],(a||[]).map(sents)).filter(x=>x.toLowerCase().includes(ks));
+  const ex=rel(N.ex),extra=rel(N.uses).concat(rel(N.pts.filter(p=>p!==hit.p)));
+  const pts=det.concat(extra.map(end)).filter((x,i,a)=>a.indexOf(x)==i);
+  const d=defS+(pts[0]?" "+pts[0]:"");
+  const rest=pts.length>1?pts.slice(1):pts;
+  return Object.assign({},N,{n:term,d:d,pts:rest,ex:ex.length?ex:N.ex,uses:rel(N.uses).length?rel(N.uses):N.uses,simple:defS.replace(/\*\*/g,""),focus:1})
+ }catch(e){return null}}
+function modelText(N){N=focusN(N)||N;const k=modelName(),d=modelDepth(k),L=lvKey(),P=N.pts.length?N.pts:(N.d?[N.d]:[]),
  cw=L=="PLE"?["State","Give"]:L=="UCE"?["State","Explain","Describe"]:["Explain","Analyse","Evaluate"],
  c={T:N.n,P,L,cw,head:"# "+N.n+(N.cl?"\n"+N.cl:"")};cw.length<2&&cw.push("Explain");
  try{if(!wantFull())return briefNotes(N,c);return FM[k](N,d,c)}catch(e){return FM.teacher(N,1,c)}}
@@ -3984,8 +4008,8 @@ const THW=[["Pondering your question","pondering"],["Searching my notes","search
 ["Thinking it through","thinking"],["Digging into the library","digging"],["Opening the textbooks","opening books"],["Flipping through the pages","flipping pages"],["Finding the best match","matching"],["Sorting the right answer","sorting"],["Gathering the key points","gathering"],["Connecting the ideas","connecting"],["Looking at your class level","checking level"],["Matching it to your subject","matching"],["Scanning the syllabus","scanning"],["Collecting examples","collecting"],["Double checking","double checking"],["Weighing the details","weighing"],["Working out the steps","working it out"],["Choosing simple words","choosing words"],["Making it clear for you","simplifying"],["Tidying the explanation","tidying"],["Asking the teacher's notes","asking notes"],["Checking the spelling","proofreading"],["Lining up the facts","lining up"],["Reviewing what I found","reviewing"],["Polishing the answer","polishing"],["Writing it out neatly","drafting"],["Nearly ready","nearly ready"],["Almost there","almost there"],["Just a moment more","one moment"],["Still working on it","still working"]];
 const THS=7;
 function thinkBub(){if(!TH)return;const b=$("msgs");if(!b)return;let t=$("tb");
- if(!t){b.insertAdjacentHTML("beforeend",'<div class="b i" id="tb"><span class="tbt"></span><span class="tbd"><i></i><i></i><i></i></span></div>');t=$("tb")}
- t.className="s"+TH.s;t.firstChild.textContent=TH.o[TH.i%TH.o.length][0];b.scrollTop=1e9}
+ if(!t){b.insertAdjacentHTML("beforeend",'<div class="b i" id="tb"><span class="tbo"></span><span class="tbt"></span></div>');t=$("tb")}
+ t.className="s"+TH.s;t.querySelector(".tbt").textContent=TH.o[TH.i%TH.o.length][0];b.scrollTop=1e9}
 function thinkTick(){if(!TH)return;TH.i++;let n;do{n=Math.floor(Math.random()*THS)}while(n==TH.s);TH.s=n;
  const w=TH.o[TH.i%TH.o.length];$("stat").textContent=w[1]+"…";const t=$("tb");
  if(t){t.classList.add("sw");setTimeout(()=>{if(!TH)return;thinkBub()},170)}else thinkBub();
@@ -4434,7 +4458,7 @@ $("msgs").addEventListener("click",e=>{
    showP("Share answer",P.map(x=>`<div class="row" data-p="${x[0]}"><div>${x[1]}</div></div>`).join("")+'<div class="row" data-p="cp"><div>Copy link</div></div>',closeP,e=>{const k=e.target.closest(".row")?.dataset.p;if(!k)return;if(k=="cp"){try{navigator.clipboard.writeText(L)}catch(x){}closeP();uiAlert("Link copied.");return}const f=P.find(x=>x[0]==k);closeP();window.open(f[2],"_blank")})};
   if(navigator.share){try{await navigator.share({title:"Ask Tr. David",text:T,url:L})}catch(e){if(e&&e.name!="AbortError")sheet()}}else sheet()})();return}
  if(m.w){if(a=="next"){m.w.shown=Math.min(m.w.shown+1,m.w.parts.length);m.t=wBuild(m)}if(a=="all"){m.w.shown=m.w.parts.length;m.t=wBuild(m)}if(a=="brk"){m.w.open[m.w.shown-1]=1;m.t=wBuild(m)}}
- if(a=="ab")m.ab=!m.ab;if(a=="bm"){m.bm=!m.bm;ownerAct(m.bm?"save":"unsave",m)}if(a=="up")m.fb=m.fb==1?0:1;if(a=="dn")m.fb=m.fb==-1?0:-1;if(a=="up"||a=="dn")sendFb(m);
+ if(a=="ab")m.ab=!m.ab;if(a=="bm"){m.bm=!m.bm;ownerAct(m.bm?"save":"unsave",m)}if(a=="up"){m.fb=1;m.rs="thanks";sendFb(m);setTimeout(()=>{m.rdone=1;try{save();render()}catch(e){}},2500)}if(a=="dn"){m.fb=-1;m.rs="sorry";sendFb(m)}if(a=="ign"){m.rdone=1}if(a=="rep"){m.rdone=1;setTimeout(()=>supportOpen("complaint","About this answer: "),0)}
   if(a=="pick"&&m.pick==null){m.pick=+b.dataset.k;if(m.qz&&m.pick==m.quiz[2])m.qz.score++}
  if(a=="nq"&&m.qz&&m.pick!=null&&m.qz.n<m.qz.list.length-1){const z=m.qz;z.n++;m.quiz=["q",z.list[z.n][1],z.list[z.n][2]];m.pick=null;m.t=qText(z.t,z)}
  if(a=="regen"){redoReply(i).then(h=>{if(h)return;const k=D.msgs.indexOf(m);if(k<0)return;D.msgs.splice(k,1);save();render();ask(m.q,m.mode)});return}
@@ -4764,7 +4788,7 @@ async function hoCopyFile(n){const j=await admCall("admin_file_get",{p_name:n});
  Set done to 1 on finished items, add new items, add a line to log, set updated to today.
  Never mark an item done unless it was built and tested. */
 const HANDOFF={
- "updated": "2026-10-30",
+ "updated": "2026-11-02",
  "about": [
   [
    "What this is",
@@ -5036,6 +5060,7 @@ const HANDOFF={
   ]
  ],
  "log": [
+  ["2026-11-02","Answer rating block reworked: Like shows thanks then the block disappears; Unlike shows a sorry message with Report and Ignore; Report opens the Contact Tr. David chat as a complaint, Ignore removes the block."],
   [
    "2026-10-30",
    "The owner account (username DAVID) now works exactly like a learner in the learner app. The plan is set only by the admin (Admin > Users > pick the account > Plan) and is copied to the app within 30 seconds or when the app is opened; nobody can pick a plan in the learner app any more (Change plan, Activate plan and the testing switch are removed). Plan limits, locked models and the Free word limit apply to David like any learner. The AI generated, not yet checked tag no longer shows in the chat; it only exists in Admin > Review. The app always opens as the learner app; the switch to Admin is in Settings > Learner profile > Update account and only the DAVID account sees it. The bottom right button that said Version 1.0 now shows the plan with an icon (Free leaf, Basic star, Standard shield, Premium gold crown) and opens the plans screen when tapped. Not yet tried on a real phone."
@@ -5372,17 +5397,17 @@ const spDown=(el,force)=>{if(force||el.scrollHeight-el.scrollTop-el.clientHeight
 
 /* learner screen */
 let SPKIND="message",SPRATE=0,SPLAST="";
-function supportOpen(){
- SPKIND="message";SPRATE=0;SPLAST="";
+function supportOpen(kind,pre){
+ SPKIND=SPKL[kind]?kind:"message";SPRATE=0;SPLAST="";
  showP("Contact Tr. David",`<div class="spw"><div id="spm" class="spm"><div class="spe">Loading…</div></div><div class="spc">
-  <div class="spk" id="spk">${Object.keys(SPKL).map(k=>`<button data-k="${k}" class="${k==="message"?"on":""}">${SPKL[k]}</button>`).join("")}</div>
+  <div class="spk" id="spk">${Object.keys(SPKL).map(k=>`<button data-k="${k}" class="${k===SPKIND?"on":""}">${SPKL[k]}</button>`).join("")}</div>
   <div class="sprt" id="sprt"><span>Rate the app:</span>${[1,2,3,4,5].map(n=>`<button data-r="${n}" aria-label="${n} star">★</button>`).join("")}</div>
   <div class="spi"><textarea id="spt" rows="1" maxlength="2000" placeholder="Write to Tr. David…"></textarea><button id="sps" aria-label="Send">${SPSEND}</button></div></div></div>`,settings,null);
  const box=$("pbody");box.style.overflow="hidden";
  const rate=()=>{document.querySelectorAll("#sprt button").forEach(b=>b.classList.toggle("on",+b.dataset.r<=SPRATE))};
  $("spk").onclick=e=>{const k=e.target.closest("[data-k]");if(!k)return;SPKIND=k.dataset.k;document.querySelectorAll("#spk button").forEach(b=>b.classList.toggle("on",b===k));$("sprt").style.display=SPKIND==="feedback"?"flex":"none";if(SPKIND!=="feedback"){SPRATE=0;rate()}};
  $("sprt").onclick=e=>{const r=e.target.closest("[data-r]");if(!r)return;SPRATE=SPRATE===+r.dataset.r?0:+r.dataset.r;rate()};
- const t=$("spt");t.oninput=()=>spGrow(t);
+ const t=$("spt");t.oninput=()=>spGrow(t);if(pre){t.value=pre;spGrow(t);setTimeout(()=>{try{t.focus();t.setSelectionRange(pre.length,pre.length)}catch(e){}},50)}$("sprt").style.display=SPKIND==="feedback"?"flex":"none";
  $("sps").onclick=async()=>{
   const v=t.value.trim(),b=$("sps");
   if(!v&&!SPRATE){t.focus();return}

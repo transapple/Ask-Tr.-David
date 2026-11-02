@@ -3947,9 +3947,15 @@ const isOwner=()=>!!(window.AK&&AK.me()&&AK.me().username==="DAVID"),
 tokNow=()=>{try{return localStorage.getItem("ask_tok")||sessionStorage.getItem("ask_tok")||""}catch(e){return""}};
 function syncPlan(){const t=tokNow();if(!t)return;
  fetch(SBU+"rpc/get_my_plan",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_t:t})}).then(r=>r.json()).then(j=>{
-  if(!j||!j.ok||!PLANS4.includes(j.plan))return;const was=planName();
-  try{localStorage.setItem(PK(),j.plan);localStorage.setItem(PK()+"_exp",j.expires_at||"")}catch(e){}
-  if(was!==j.plan){updPlan();render()}}).catch(()=>{})}
+  if(!j||!j.ok||!PLANS4.includes(j.plan))return;const was=planName(),wasFa=freeAccess();
+  try{localStorage.setItem(PK(),j.plan);localStorage.setItem(PK()+"_exp",j.expires_at||"");localStorage.setItem(PK()+"_fa",j.free_access?JSON.stringify(j.free_access):"")}catch(e){}
+  planEdge(j);
+  if(was!==j.plan||(wasFa&&wasFa.id)!==(j.free_access&&j.free_access.id)){updPlan();render()}}).catch(()=>{})}
+/* FREE-ACCESS WINDOWS: the server decides the plan. The client only keeps one timer set for the exact second a window opens or closes, so the change shows at once. */
+function freeAccess(){try{const a=localStorage.getItem(PK()+"_fa");return a?JSON.parse(a):null}catch(e){return null}}
+let _edgeT=0;
+function planEdge(j){clearTimeout(_edgeT);try{const at=j.free_access?j.free_access.ends_at:(j.free_next&&j.free_next.starts_at),sv=Date.parse(j.now);if(!at||isNaN(sv))return;
+ const ms=Date.parse(at)-sv+400;if(ms>0&&ms<2147483000)_edgeT=setTimeout(syncPlan,ms)}catch(e){}}
 function setPlanServer(x){fetch(SBU+"rpc/set_my_plan",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_t:tokNow(),p_plan:x})}).then(r=>r.json()).then(j=>{if(!j||!j.ok)syncPlan()}).catch(()=>{})}
 /* Installs and usage: one anonymous device id per phone. log_app_event counts an install once per device and an open at most once per 30 minutes. */
 function devId(){try{let d=localStorage.getItem("ask_dev");if(!d||d.length<8){d=Array.from(crypto.getRandomValues(new Uint8Array(12))).map(x=>x.toString(16).padStart(2,"0")).join("");localStorage.setItem("ask_dev",d)}return d}catch(e){return""}}
@@ -4001,7 +4007,7 @@ function payBind(){const f=$("pyf"),b=$("pyb"),sb=$("pys");if(!f||!b||!sb)return
   sb.textContent="Submit screenshot";
   if(j&&j.ok){PAYIMG="";$("pyv").innerHTML="";f.value="";b.textContent="Choose screenshot";$("pym").textContent="Screenshot sent. We will confirm your payment and activate your plan."}
   else{sb.disabled=false;uiAlert(j&&j.err=="too many"?"You have sent many screenshots today. Please contact us on WhatsApp.":j&&j.err=="login"?"Please log in again, then send the screenshot.":"Could not send. Check your internet and try again.")}}}
-function expLine(){try{const pn=planName();if(pn=="Free")return"";const e=localStorage.getItem(PK()+"_exp");if(!e)return"";const d=new Date(e);if(isNaN(d))return"";return `<div style="margin-top:12px;padding:9px 12px;border-radius:10px;background:rgba(0,0,0,.32);color:#fff;font-size:15px;font-weight:600;line-height:1.4;text-shadow:0 1px 2px rgba(0,0,0,.35)">Your plan ends <b style="color:#fff;font-weight:800">${esc(d.toLocaleString())}</b></div>`}catch(x){return""}}
+function expLine(){try{const pn=planName();if(pn=="Free")return"";const e=localStorage.getItem(PK()+"_exp");if(!e)return"";const d=new Date(e);if(isNaN(d))return"";const fa=freeAccess();return `<div style="margin-top:12px;padding:9px 12px;border-radius:10px;background:rgba(0,0,0,.32);color:#fff;font-size:15px;font-weight:600;line-height:1.4;text-shadow:0 1px 2px rgba(0,0,0,.35)">${fa?"Free "+esc(fa.plan)+" access ends":"Your plan ends"} <b style="color:#fff;font-weight:800">${esc(d.toLocaleString())}</b></div>`}catch(x){return""}}
 function plans(fs){
  const q=FQ(),P=[["Basic","500","2,800","9,000","Adds Tutor and Instructor, and a stronger Examiner and Teacher","#2f80ed"],["Standard","750","4,550","16,500","Adds Lecturer and Researcher; Teacher, Tutor, Instructor and Examiner answer deeper","#00a884"],["Premium","1,100","6,650","24,000","Adds Professor, Mentor, Librarian and Philosopher; every model answers at its fullest","#8b5cf6"]],
  cur=planName(),RK={Free:0,Basic:1,Standard:2,Premium:3},UP=P.filter(x=>RK[x[0]]>RK[cur]||(cur=="Premium"&&x[0]=="Premium")),
@@ -4612,7 +4618,7 @@ $("jump").onclick=()=>$("msgs").scrollTo({top:1e9,behavior:"smooth"});
 /* ===== ADMIN PANEL (owner only) =====
  One app, two modes for the owner account DAVID. Switch: Settings > Learner profile > Update account > Switch to Admin panel.
  Every admin database function checks the login token again (username DAVID with the owner phone), so other accounts are refused even if they find this code. */
-const ADMT=[["home","Home"],["inbox","Inbox"],["users","Users"],["asked","Asked"],["review","Review"],["ai","AI"],["news","Post"],["pay","Pay"],["rate","Rate"]];
+const ADMT=[["home","Home"],["inbox","Inbox"],["users","Users"],["asked","Asked"],["review","Review"],["ai","AI"],["news","Post"],["free","Free days"],["pay","Pay"],["rate","Rate"]];
 const ADMMAIN=["home","inbox","users","pay"];
 let ADMON=false,ADMTAB="home",ADMSEQ=0,ADMUQ="",ADMUL=[],ADMAS="open",ADMAL=[],ADMPL=[],ADMPR=[];
 const admCall=async(fn,a)=>{try{const j=await svRpc(fn,Object.assign({p_t:tokNow()},a||{}));return j&&typeof j.ok=="boolean"?j:{ok:false,err:"fail"}}catch(e){return{ok:false,err:"net"}}};
@@ -4632,10 +4638,60 @@ function admOpen(){if(!isOwner())return;ADMON=true;try{localStorage.setItem("ask
  a.innerHTML=`<header class="ah"><div><b>Admin panel</b><small>Ask Tr. David · only you see this</small></div><button id="ax">Learner app</button></header><div id="abody"></div><nav class="an">${ADMT.filter(t=>ADMMAIN.includes(t[0])).map(t=>`<button data-t="${t[0]}">${t[1]}</button>`).join("")}<button data-t="more">More</button></nav>`;
  a.onclick=e=>{if(e.target.id=="ax"){admClose();return}const t=e.target.closest(".an button");if(t){if(t.dataset.t=="more")admMore();else admGo(t.dataset.t)}};
  admGo(ADMTAB);try{admPollUn()}catch(e){}}
-function admMore(){const L={asked:"Questions learners asked that have no answer yet",review:"Approve or reject AI-written answers",ai:"Edit the voice of each model",news:"Post announcements to learners",rate:"Learner ratings and reviews"};
+function admMore(){const L={asked:"Questions learners asked that have no answer yet",review:"Approve or reject AI-written answers",ai:"Edit the voice of each model",news:"Post announcements to learners",free:"Open a plan free for everyone on set days and hours",rate:"Learner ratings and reviews"};
  showP("More",ADMT.filter(t=>!ADMMAIN.includes(t[0])).map(t=>'<div class="row" data-t="'+t[0]+'"><div><b>'+t[1]+'</b>'+(L[t[0]]?'<small>'+L[t[0]]+'</small>':'')+'</div></div>').join(""),closeP,e=>{const r=e.target.closest("[data-t]");if(!r)return;closeP();admGo(r.dataset.t)})}
 function admGo(t){ADMTAB=t;ADMSEQ++;document.querySelectorAll("#adm .an button").forEach(b=>b.classList.toggle("on",b.dataset.t==t||(b.dataset.t=="more"&&!ADMMAIN.includes(t))));
- ({home:admHome,inbox:admInbox,users:admUsers,asked:()=>admAsked(),review:admReview,ai:admAi,news:admNews,pay:admPay,rate:()=>admRate()})[t]()}
+ ({home:admHome,inbox:admInbox,users:admUsers,asked:()=>admAsked(),review:admReview,ai:admAi,news:admNews,free:admFree,pay:admPay,rate:()=>admRate()})[t]()}
+
+/* FREE DAYS: schedule windows when everyone gets a plan free. The database decides who gets what and when; this screen only edits the schedule. Times are East Africa Time (Kampala). */
+const FWD=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],FWP=["Basic","Standard","Premium"];
+const fwNew=()=>({id:null,title:"",plan:"Premium",wd:[],dt:[],st:"08:00",en:"20:00",on:true});
+let FWF=fwNew();
+const fwQ=x=>esc(String(x==null?"":x)).replace(/"/g,"&quot;");
+const fwT=t=>{const a=String(t||"00:00").split(":"),h=+a[0]||0,m=+a[1]||0;return((h%12)||12)+":"+String(m).padStart(2,"0")+(h<12?" AM":" PM")};
+const fwD=d=>{try{return new Date(d+"T00:00").toLocaleDateString([],{weekday:"short",day:"numeric",month:"short"})}catch(e){return d}};
+const fwLT=d=>{try{return new Date(d).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})}catch(e){return""}};
+const fwLS=d=>{try{return new Date(d).toLocaleString([],{weekday:"short",hour:"numeric",minute:"2-digit"})}catch(e){return""}};
+const fwErr=r=>({"not allowed":"This is only for the owner account.","bad range":"The end time must be after the start time.","no days":"Choose at least one weekday or one date.","bad plan":"Choose a plan.","bad time":"Check the start and end times.","bad days":"Check the days.","too many dates":"Too many dates. Remove some.","not found":"That schedule no longer exists."}[r&&r.err]||(r&&r.err=="net"?"No internet. Try again.":"Could not save. Try again."));
+function fwRead(){if($("fwt"))FWF.title=$("fwt").value;if($("fws"))FWF.st=$("fws").value||FWF.st;if($("fwe"))FWF.en=$("fwe").value||FWF.en}
+async function admFree(){const s=ADMSEQ,b=$("abody");b.innerHTML=admLd();const j=await admCall("admin_fw_list");if(s!==ADMSEQ)return;
+ if(!j.ok){b.innerHTML=admFail(j,1);b.onclick=e=>{if(e.target.closest("[data-r]"))admFree()};return}
+ admFreeDraw(j,"")}
+function admFreeDraw(j,msg){const b=$("abody"),F=FWF,days=a=>(a.weekdays||[]).slice().sort().map(d=>FWD[d]).join(", ");
+ const st=j.active?`<b style="color:#00a884">ON now</b> · Free ${esc(j.active.plan)} for everyone until ${fwLT(j.active.ends_at)}`:j.next?`Not active now. Next: <b>Free ${esc(j.next.plan)}</b> from ${fwLS(j.next.starts_at)}`:"Nothing scheduled. Everyone is on their own plan.";
+ b.innerHTML=`<div class="asec">Free access now</div><div style="padding:4px 18px 8px;line-height:1.5">${st}</div>
+ <div class="asec">${F.id?"Edit schedule":"New schedule"}</div>
+ <input class="ain" id="fwt" maxlength="80" placeholder="Name (e.g. Free Tuesdays)" autocomplete="off" value="${fwQ(F.title)}">
+ <div style="padding:0 18px 4px;color:var(--sub);font-size:13px">Everyone gets this plan</div>
+ <div style="display:flex;gap:6px;padding:4px 18px 8px">${FWP.map(p=>svBtn(F.plan==p,p,"data-p",p)).join("")}</div>
+ <div style="padding:0 18px 4px;color:var(--sub);font-size:13px">Every week on</div>
+ <div style="display:flex;flex-wrap:wrap;gap:6px;padding:4px 18px 8px">${FWD.map((n,i)=>`<button data-d="${i}" style="padding:9px 12px;border:0;border-radius:18px;font:inherit;font-weight:600;cursor:pointer;background:${F.wd.includes(i)?"var(--green)":"var(--wall)"};color:${F.wd.includes(i)?"#fff":"var(--text)"}">${n}</button>`).join("")}</div>
+ <div style="padding:0 18px 4px;color:var(--sub);font-size:13px">And/or on a specific date</div>
+ <div style="display:flex;gap:8px;align-items:center;padding:0 14px"><input class="ain" id="fwdt" type="date" style="margin:6px 0;flex:1">${abt("adddate","Add","#2f80ed").replace("flex:1;min-width:30%","flex:0 0 auto;min-width:70px")}</div>
+ ${F.dt.length?`<div style="display:flex;flex-wrap:wrap;gap:6px;padding:4px 18px 8px">${F.dt.map((d,i)=>`<button data-rd="${i}" style="padding:8px 12px;border:0;border-radius:18px;font:inherit;cursor:pointer;background:var(--wall);color:var(--text)">${esc(fwD(d))} ✕</button>`).join("")}</div>`:""}
+ <div style="display:flex;gap:10px;padding:6px 14px"><div style="flex:1"><div style="padding:0 4px;color:var(--sub);font-size:13px">From</div><input class="ain" id="fws" type="time" value="${fwQ(F.st)}" style="margin:4px 0;width:100%"></div><div style="flex:1"><div style="padding:0 4px;color:var(--sub);font-size:13px">Until</div><input class="ain" id="fwe" type="time" value="${fwQ(F.en)}" style="margin:4px 0;width:100%"></div></div>
+ <div style="padding:2px 18px;color:var(--sub);font-size:13px;line-height:1.45">Times are East Africa Time (Kampala). At the end time everyone goes back to the plan they had. Anyone on a higher plan keeps it.</div>
+ <div id="fwm" style="padding:6px 18px;min-height:20px;color:var(--sub)">${esc(msg)}</div>
+ <div style="display:flex;gap:8px;padding:2px 18px 10px">${abt("save",F.id?"Save changes":"Save schedule","#00a884")}${F.id?abt("clear","Cancel","#6b7c85"):""}</div>
+ <div class="asec">Schedules</div>`+(j.items.length?j.items.map((x,i)=>`<div class="row" style="display:block"><b>${esc(x.title)}</b> <small style="color:var(--sub)">Free ${esc(x.plan)} · ${fwT(x.start_time)} to ${fwT(x.end_time)}</small><div style="margin-top:2px;color:var(--sub)">${[days(x),(x.on_dates||[]).map(fwD).join(", ")].filter(Boolean).map(esc).join(" · ")}</div><div style="display:flex;gap:14px;margin-top:6px"><button data-tg="${i}" style="border:0;background:none;color:${x.enabled?"#00a884":"#6b7c85"};font:inherit;font-weight:700;padding:4px 0;cursor:pointer">${x.enabled?"On":"Off"}</button><button data-ed="${i}" style="border:0;background:none;color:#2f80ed;font:inherit;font-weight:600;padding:4px 0;cursor:pointer">Edit</button><button data-del="${i}" style="border:0;background:none;color:#ff453a;font:inherit;font-weight:600;padding:4px 0;cursor:pointer">Delete</button></div></div>`).join(""):'<div style="padding:12px 18px;color:var(--sub)">No schedules yet.</div>');
+ const say=t=>{const m=$("fwm");if(m)m.textContent=t},redo=async(note)=>{const n=await admCall("admin_fw_list");if(n.ok)admFreeDraw(n,note||"");else admFree()};
+ b.onclick=async e=>{
+  const p=e.target.closest("[data-p]");if(p){fwRead();FWF.plan=p.dataset.p;admFreeDraw(j,"");return}
+  const d=e.target.closest("[data-d]");if(d){fwRead();const k=+d.dataset.d,i=FWF.wd.indexOf(k);if(i<0)FWF.wd.push(k);else FWF.wd.splice(i,1);admFreeDraw(j,"");return}
+  if(e.target.closest("[data-a=adddate]")){const v=$("fwdt").value;if(!/^\d{4}-\d{2}-\d{2}$/.test(v)){say("Pick a date first.");return}fwRead();if(!FWF.dt.includes(v))FWF.dt.push(v);FWF.dt.sort();admFreeDraw(j,"");return}
+  const rd=e.target.closest("[data-rd]");if(rd){fwRead();FWF.dt.splice(+rd.dataset.rd,1);admFreeDraw(j,"");return}
+  if(e.target.closest("[data-a=clear]")){FWF=fwNew();admFreeDraw(j,"");return}
+  const ed=e.target.closest("[data-ed]");if(ed){const x=j.items[+ed.dataset.ed];if(!x)return;FWF={id:x.id,title:x.title,plan:x.plan,wd:(x.weekdays||[]).slice(),dt:(x.on_dates||[]).slice(),st:x.start_time,en:x.end_time,on:x.enabled};admFreeDraw(j,"");scrollTo(0,0);b.scrollTop=0;return}
+  const tg=e.target.closest("[data-tg]");if(tg){const x=j.items[+tg.dataset.tg];if(!x)return;tg.disabled=true;const r=await admCall("admin_fw_save",{p_id:x.id,p_title:x.title,p_plan:x.plan,p_weekdays:x.weekdays,p_on_dates:x.on_dates,p_start:x.start_time,p_end:x.end_time,p_enabled:!x.enabled});if(r.ok)redo(x.enabled?"Turned off.":"Turned on.");else{tg.disabled=false;say(fwErr(r))}return}
+  const dl=e.target.closest("[data-del]");if(dl){const x=j.items[+dl.dataset.del];if(!x)return;uiConfirm("Delete this schedule?",async()=>{const r=await admCall("admin_fw_delete",{p_id:x.id});if(r.ok){if(FWF.id==x.id)FWF=fwNew();redo("Deleted.")}else uiAlert("Could not delete. Try again.")},"Delete");return}
+  const sv=e.target.closest("[data-a=save]");if(!sv)return;fwRead();
+  if(!FWF.wd.length&&!FWF.dt.length){say("Choose at least one weekday or one date.");return}
+  if(FWF.st>=FWF.en){say("The end time must be after the start time.");return}
+  sv.disabled=true;say("Saving…");
+  const r=await admCall("admin_fw_save",{p_id:FWF.id||null,p_title:FWF.title.trim(),p_plan:FWF.plan,p_weekdays:FWF.wd.slice().sort(),p_on_dates:FWF.dt,p_start:FWF.st,p_end:FWF.en,p_enabled:FWF.on!==false});
+  if(!r.ok){sv.disabled=false;say(fwErr(r));return}
+  const was=FWF.id;FWF=fwNew();try{syncPlan()}catch(x){}redo(was?"Saved.":"Saved. It runs automatically on those days.")}}
+
 
 /* HOME */
 async function admHome(){const s=ADMSEQ,b=$("abody");b.innerHTML=admLd();const j=await admCall("admin_stats");if(s!==ADMSEQ)return;

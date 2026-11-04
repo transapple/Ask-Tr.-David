@@ -3037,7 +3037,7 @@ async function dbAnswer(q,mode){
 const AIU=SBU.replace("/rest/v1/","/functions/v1/")+"ai_answer_v2",escRex=x=>x.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
 let AIWHY="";const AIU1=AIU.replace("ai_answer_v2","ai_answer");
 async function aiAnswer(q,FUx,loose){
- AIWHY="";const c=new AbortController(),tm=setTimeout(()=>c.abort(),loose?8000:14000);
+ AIWHY="";const c=new AbortController(),tm=setTimeout(()=>c.abort(),loose?25000:40000);
  try{
   const sub=loose==2?"General":(D.sub=="General"?(detectSub(q)||"General"):D.sub);
   const bd=JSON.stringify({question:String(q).slice(0,300),level:D.lvl,class:loose==2?"":String(D.cls||"").replace(/^Primary /,"P").replace(/^Senior /,"S"),subject:sub,plan:planName(),curriculum:"Uganda NCDC",strict_subject:!loose,retry:loose?true:undefined,brief:!wantFull()||modelName()=="malumalu",...svMe(),follow:FUx&&!FUx.local?{kind:FUx.kind,topic:FUx.topic,step:FUx.step||0,instruction:FUx.hint||"",previous:lastAnsText()}:undefined});

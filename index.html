@@ -3632,6 +3632,355 @@ function modelsGuide(){const pl=planName(),RK={Free:0,Basic:1,Standard:2,Premium
    h+='<div class="row" style="cursor:default"><span style="width:10px;height:10px;border-radius:50%;background:'+GCOL[M.g]+';flex:none;margin-right:12px;opacity:'+(on?1:.35)+'"></span><div><b>'+M.n+' '+mver(k,P)+'</b> · '+(on?'<span style="color:#00a884">Available on your plan</span>':'Needs '+P+' plan')+'<small>'+mdesc(k,P).map(esc).join('<br>')+'</small></div></div>'})});
  h+='<div style="padding:14px 18px 24px"><button class="pcp" data-up="1" style="width:100%">See plans and subscribe</button></div>';
  showP("AI models",h,settings,e=>{if(e.target.closest("[data-up]"))plans(1)})}
+
+/* MODEL STYLE: the stored answer is one text for everyone. The ai_style function rewrites it in the chosen model's own writing style
+ (how it summarises, analyses and describes). This has nothing to do with the microphone.
+ FLOW: a learner asks -> if a rewrite is saved it is used; if not, Gemini writes it right then, it is saved and the learner gets it at once.
+ No approval wait and NO label for learners. The owner (DAVID) sees every saved rewrite and every new Gemini-answered question, with what the
+ learner asked, in Settings > Learner answers, and approves, edits or rejects them. Approved = kept for good. If the function is missing, busy
+ or slow, the learner simply gets the normal answer. */
+const STU=SBU.replace("/rest/v1/","/functions/v1/")+"ai_style",hsh=t=>{let h=5381;for(let i=0;i<t.length;i++)h=(h*33^t.charCodeAt(i))>>>0;return h.toString(36)};
+const svNo={};
+async function styleAnswer(t,q){
+ const k=modelName(),pl=planName(),L=lvKey(),ck="ask_sty3_"+k+"_"+pl+"_"+L+"_"+hsh(t)+"_"+t.length;
+ /* approved copies are kept on the phone for 12 hours */
+ try{const c=JSON.parse(localStorage.getItem(ck)||"null");if(c&&c.md&&Date.now()-c.at<432e5)return{md:c.md,st:"approved"}}catch(e){}
+ if(svNo[ck]&&Date.now()-svNo[ck]<6e5)return null;
+ const ct=new AbortController(),tm=setTimeout(()=>ct.abort(),9000);
+ try{const r=await fetch(STU,{method:"POST",signal:ct.signal,headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({text:t,model:k,level:L,plan:pl,depth:modelDepth(k),q:String(q||"").slice(0,200),...svMe()})});
+  if(!r.ok)return null;const j=await r.json();
+  if(j.status=="ok"&&j.md){const st=j.state=="draft"?"draft":"approved";if(st=="approved"){try{localStorage.setItem(ck,JSON.stringify({md:j.md,at:Date.now()}))}catch(e){}}return{md:j.md,st}}
+  if(j.status=="no_answer"&&j.reason=="rejected")svNo[ck]=Date.now();
+ }catch(e){}finally{clearTimeout(tm)}
+ return null}
+/* ===== LEARNER ANSWERS ROOM (owner only: Settings > Learner answers) =====
+ Two lists, both only for the owner account (the database refuses everyone else):
+ 1. New questions: questions the app could not answer, so Gemini answered them. Learners already got the answer (no label for them).
+ 2. Style rewrites: a model's rewrite of a saved answer (Teacher, Tutor, ...).
+ For each one the owner sees what the learner asked, then approves (kept for good), edits, or rejects (a rejected item is deleted for good). */
+const SVLBL={draft:"Waiting",approved:"Approved",published:"Approved"};
+let SVK="q",SVT="draft",SVL=[],SVC={};
+const svRpc=(fn,a)=>fetch(SBU+"rpc/"+fn,{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify(a)}).then(r=>r.json());
+const svWho=x=>String((x&&(x.asker_name||x.asked_by_name||x.learner_name||x.asker_names||x.user_names||x.names||x.asked_by_username||x.asker_username))||"").trim(),
+ svWhoH=x=>`<div style="padding:12px 18px 0;font-size:17px;font-weight:700;color:var(--text)">${svWho(x)?esc(svWho(x)):'<span style="color:var(--sub);font-weight:600">Name not recorded</span>'}</div>`,
+ svMe=()=>{try{return{asker:String((ME&&ME.names)||"").slice(0,60),asker_user:String((ME&&ME.username)||"").slice(0,40)}}catch(e){return{}}},
+svName=k=>(MODELS[k]?MODELS[k].n:k),svOk=()=>SVK=="q"?"published":"approved";
+const svTopic=x=>"# "+x.name+"\n"+x.definition+"\n\n## How it works\n"+x.steps+"\n\n## Where it is used\n"+x.uses+"\n\n## In simple words\n"+x.simple+"\n\n## Examples\n"+x.examples+"\n\n## Mistakes and tips\n"+x.more;
+const svBtn=(on,l,a,v)=>`<button ${a}="${v}" style="flex:1;padding:10px 4px;border:0;border-radius:18px;font:inherit;font-weight:600;cursor:pointer;background:${on?"var(--green)":"var(--wall)"};color:${on?"#fff":"var(--text)"}">${l}</button>`;
+async function voiceRoom(kind,st){
+ if(!isOwner())return;if(kind)SVK=kind;if(st)SVT=st;
+ showP("Learner answers",'<div style="padding:22px 18px;color:var(--sub)">Loading…</div>',SVBACK);
+ const want=SVT=="draft"?"draft":svOk();
+ let j=null;try{j=await svRpc(SVK=="q"?"topic_review_list":"style_review_list",{p_t:tokNow(),p_status:want})}catch(e){}
+ if(!j||!j.ok){$("pbody").innerHTML='<div class="pbn" style="margin:14px 18px;line-height:1.5">'+(j&&j.err=="not allowed"?"This room is only for the owner account.":j&&j.err=="login"?"Please log in again.":"Could not load. Check your connection and try again.")+'</div>';return}
+ SVL=j.items||[];SVC=j.counts||{};
+ const cn=s=>(SVC[s=="approved"?svOk():s]||0);
+ let h=`<div style="padding:12px 18px;color:var(--sub);line-height:1.5">Only you see this room. Learners get their answers straight away, with no label. Here you see what they asked and decide what is kept for good.</div>
+ <div style="display:flex;gap:6px;padding:4px 18px 8px">${svBtn(SVK=="q","New questions","data-kind","q")}${svBtn(SVK=="r","Style rewrites","data-kind","r")}</div>
+ <div style="display:flex;gap:6px;padding:4px 18px 12px">${["draft","approved"].map(s=>svBtn(s==SVT,SVLBL[s]+" "+cn(s),"data-tab",s)).join("")}</div>`;
+ if(!SVL.length)h+=`<div style="padding:18px;color:var(--sub);line-height:1.5">${SVT=="draft"?(SVK=="q"?"No new questions are waiting.":"No rewrites are waiting. They appear here after a learner (or you) asks a question with a model selected."):"Nothing here yet."}</div>`;
+ SVL.forEach((x,i)=>{const q=SVK=="q"?x.source_question:x.question;h+=`<div class="row" data-it="${i}"><div><b>${esc(q?"“"+q+"”":(x.title||x.name||"Untitled"))}</b><small><b>${esc(svWho(x)||"Name not recorded")}</b> · ${SVK=="q"?"":""}${SVK=="q"?esc(x.name||"")+" · "+esc(x.level_code||"")+" · "+esc(x.subject_name||""):esc(x.title||"")+" · "+esc(svName(x.model))+" · "+esc(x.level)+" · "+esc(x.plan||"Free")+" plan"} · ${new Date(x.created_at).toLocaleDateString()}</small></div></div>`});
+ showP("Learner answers",h,SVBACK,e=>{
+  const k=e.target.closest("[data-kind]");if(k){voiceRoom(k.dataset.kind);return}
+  const t=e.target.closest("[data-tab]");if(t){voiceRoom(null,t.dataset.tab);return}
+  const r=e.target.closest("[data-it]");if(r)voiceItem(+r.dataset.it)})}
+function voiceItem(i,showOrig){
+ const x=SVL[i];if(!x)return;const T=SVK=="q",cur=T?svTopic(x):(x.final_md||x.styled_md),shown=showOrig?x.source_md:cur,q=T?x.source_question:x.question;
+ const bt=(a,l,c)=>`<button data-a="${a}" style="flex:1;min-width:30%;padding:12px 8px;border:0;border-radius:22px;font:inherit;font-weight:700;cursor:pointer;color:#fff;background:${c}">${l}</button>`;
+ showP(esc(x.title||x.name||"Answer"),`${svWhoH(x)}<div style="padding:4px 18px 4px;color:var(--sub);line-height:1.5">Learner asked: <b style="color:var(--text)">${q?esc(q):"not recorded"}</b><br>${T?esc(x.level_code||"")+" · "+esc(x.subject_name||""):esc(svName(x.model))+" · "+esc(x.level)+" · "+esc(x.plan||"Free")+" plan"} · <b>${SVLBL[x.status]||x.status}</b></div>
+ ${T?"":`<div style="display:flex;gap:6px;padding:8px 18px">${svBtn(!showOrig,"Rewrite","data-v","n")}${svBtn(!!showOrig,"Original answer","data-v","o")}</div>`}
+ <div class="md" style="padding:8px 18px 12px;line-height:1.55">${md(shown)}</div>
+ ${T?"":`<div style="padding:0 18px 4px;color:var(--sub);font-size:13px">Edit the rewrite if needed (first line must start with #):</div>
+ <textarea id="svt" style="display:block;width:calc(100% - 36px);margin:6px 18px;min-height:190px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit;font-size:14px;line-height:1.5;box-sizing:border-box">${esc(cur)}</textarea>`}
+ <div id="svm" style="padding:2px 18px;min-height:20px;color:var(--sub)"></div>
+ <div style="display:flex;gap:8px;flex-wrap:wrap;padding:6px 18px 10px">${bt("ok","Approve (keep for good)","#00a884")}${bt("no","Reject (delete)","#ff453a")}${x.status!="draft"?bt("dr","Move back to waiting","#6b7280"):""}</div>
+ ${T?"":`<div style="display:flex;gap:8px;flex-wrap:wrap;padding:0 18px 28px">${bt("rg","Write it again","#8b5cf6")}</div>`}`,()=>voiceRoom(),e=>{
+  const v=e.target.closest("[data-v]");if(v){const ta=$("svt");if(ta)x.final_md=ta.value.trim()||x.final_md;voiceItem(i,v.dataset.v=="o");return}
+  const b=e.target.closest("[data-a]");if(!b)return;const a=b.dataset.a,ta=$("svt"),m=$("svm"),txt=(ta?ta.value:"").trim();
+  const done=async(st,fin)=>{m.textContent="Saving…";let j=null;
+   try{j=T?await svRpc("topic_review_set",{p_t:tokNow(),p_id:x.id,p_status:st}):await svRpc("style_review_set",{p_t:tokNow(),p_id:x.id,p_status:st,p_final:fin})}catch(er){}
+   if(j&&j.ok){try{Object.keys(localStorage).forEach(k=>{if(k.indexOf("ask_sty3_")==0)localStorage.removeItem(k)})}catch(er){}for(const k in svNo)delete svNo[k];
+    if(T&&st=="published")try{TOP.forEach(t=>{if(t.tid==x.id)t.ai=0})}catch(er){}
+    voiceRoom()}
+   else m.textContent=j&&j.err=="bad text"?"The text must start with # and be between 20 and 8000 characters.":"Could not save. Try again."};
+  if(a=="ok")done(T?"published":"approved",!T&&txt&&txt!=x.styled_md?txt:null);
+  else if(a=="no")done("rejected",null);
+  else if(a=="dr")done("draft",null);
+  else if(a=="rg"&&!T){m.textContent="Writing it again… this can take up to 20 seconds.";b.disabled=true;
+   fetch(STU,{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({text:x.source_md,model:x.model,level:x.level,plan:x.plan||"Free",depth:(MODELS[x.model]||{r:1}).r+(PBONUS[x.plan||"Free"]||0),t:tokNow(),regen:true,q:x.question||""})}).then(r=>r.json()).then(j=>{
+    if(j&&j.status=="ok"){voiceRoom(null,"draft")}else{b.disabled=false;m.textContent=j&&j.status=="busy"?"Gemini is busy. Try again in a minute.":"Could not write it again. The old text is kept."}}).catch(()=>{b.disabled=false;m.textContent="Could not reach the server. The old text is kept."})}})}
+
+
+/* ===== VERIFICATION QUEUE (Training 08, owner only: Admin > Review > Verification queue) =====
+ New Gemini answers are saved as PENDING candidates (knowledge_pending). They are not trusted and never reused as knowledge.
+ Here the owner reads each one, edits the text if needed, then approves (needs a source, goes to the permanent verified store) or rejects (needs a reason).
+ Every decision is checked again in the database (owner login only). The older drafts in the topics table can be added to the queue with one tap. */
+const KBLBL={open:"Waiting",promoted:"Approved",rejected:"Rejected"};
+const KBFIELDS=[["name","Title",2],["definition","Definition",3],["steps","How it works",5],["uses","Where it is used",4],["simple","In simple words",4],["examples","Examples",5],["more","Mistakes and tips",5]];
+let KBT="open",KBL=[],KBC={},KBS=[];
+const kbErr=j=>j&&j.err=="not allowed"?"This room is only for the owner account.":j&&j.err=="net"?"No internet. Check your connection and try again.":"Could not load. Try again.";
+const kbOrig=o=>o=="import"?"Older draft":o=="admin"?"Written by you":"AI (Gemini)";
+const kbStat=s=>s=="under_review"?"Under review":s=="promoted"?"Approved":s=="rejected"?"Rejected":"Waiting";
+async function kbRoom(st,msg){
+ if(!isOwner())return;if(st)KBT=st;
+ showP("Verification queue",'<div style="padding:22px 18px;color:var(--sub)">Loading…</div>',SVBACK);
+ const j=await admCall("admin_pending_list",{p_status:KBT});
+ if(!j.ok){$("pbody").innerHTML='<div class="pbn" style="margin:14px 18px;line-height:1.5">'+kbErr(j)+'</div>';return}
+ KBL=j.items||[];KBC=j.counts||{};const n=admN;
+ let h=`<div style="padding:12px 18px;color:var(--sub);line-height:1.5">New AI answers wait here. Nothing in this list is trusted or reused until you approve it with a source. Learners already got their answer straight away.</div>
+ <div style="display:flex;gap:6px;padding:4px 18px 12px">${["open","promoted","rejected"].map(s=>svBtn(s==KBT,KBLBL[s]+" "+n(KBC[s]),"data-tab",s)).join("")}</div>
+ <div id="kbm" style="padding:0 18px 6px;min-height:18px;color:var(--sub)">${esc(msg||"")}</div>`;
+ if(KBT=="open"&&n(KBC.old_drafts)>0)h+=`<div class="row" data-imp="1"><div><b>Add ${n(KBC.old_drafts)} older AI drafts to this queue</b><small>Drafts saved before the queue existed. Safe to tap twice. Nothing is approved by this.</small></div></div>`;
+ if(!KBL.length)h+=`<div style="padding:18px;color:var(--sub);line-height:1.5">${KBT=="open"?"Nothing is waiting.":"Nothing here yet."}</div>`;
+ KBL.forEach((x,i)=>{h+=`<div class="row" data-it="${i}"><div><b>${esc("“"+x.question+"”")}</b><small><b>${esc(svWho(x)||"Name not recorded")}</b> · ${esc((x.candidate&&x.candidate.name)||"")} · ${esc(x.level_code||"")} · ${esc(x.subject_name||"")} · ${kbOrig(x.origin)}${x.was_edited?" · edited":""}${KBT=="open"&&x.status=="under_review"?" · under review":""} · ${admDate(x.created_at)}</small></div></div>`});
+ showP("Verification queue",h,SVBACK,async e=>{
+  const t=e.target.closest("[data-tab]");if(t){kbRoom(t.dataset.tab);return}
+  if(e.target.closest("[data-imp]")){const m=$("kbm");if(m)m.textContent="Adding…";const r=await admCall("admin_import_old_drafts");
+   if(r.ok)kbRoom("open","Added "+n(r.queued)+" older drafts"+(r.skipped?" ("+n(r.skipped)+" skipped as duplicates)":"")+".");else if(m)m.textContent="Could not add them. Try again.";return}
+  const r=e.target.closest("[data-it]");if(r)kbItem(+r.dataset.it)})}
+async function kbItem(i,msg,keep,dup){
+ const x=KBL[i];if(!x)return;const c=x.candidate||{},open=x.status=="pending"||x.status=="under_review";
+ if(open&&!KBS.length){const s=await admCall("admin_sources_list");if(s.ok)KBS=s.items||[]}
+ const T=k=>String(c[k]==null?"":c[k]),sec=(l,k)=>T(k)?`<div style="padding:6px 18px 0"><b>${l}</b></div><div class="md" style="padding:0 18px 4px;line-height:1.55">${md(T(k))}</div>`:"";
+ const quiz=Array.isArray(c.quiz)?c.quiz.map((q,j)=>{try{return `<div style="padding:4px 18px;line-height:1.5"><b>${j+1}. ${esc(q[0])}</b><br>${q[1].map((o,k)=>(k==q[2]?"✔ ":"– ")+esc(o)).join("<br>")}</div>`}catch(er){return""}}).join(""):"";
+ const warn=[];if(c.confidence_checked===false||c.confidence=="not checked")warn.push("Confidence: "+esc(c.confidence||"not checked")+" (the AI's own rating, not checked by anyone)");
+ if(c.curriculum_link)warn.push("Syllabus link: "+esc(c.curriculum_link.title||"")+" (unverified)");if(c.removed_topic)warn.push("Removed from the 2025 syllabus: "+esc(c.removed_topic));
+ if(c.not_sure_note)warn.push("The AI is unsure: "+esc(c.not_sure_note));
+ const sel=`<select id="kbs" class="ain" style="margin:6px 18px;width:calc(100% - 36px)"><option value="">Choose the source…</option>${KBS.map(s=>`<option value="${s.id}">${esc(s.title)}${s.version_label?" · "+esc(s.version_label):""}</option>`).join("")}</select>`;
+ const ed=KBFIELDS.map(f=>`<div style="padding:6px 18px 0;color:var(--sub);font-size:13px">${f[1]}</div><textarea id="kbf_${f[0]}" data-k="${f[0]}" style="display:block;width:calc(100% - 36px);margin:4px 18px;min-height:${f[2]*22}px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit;font-size:14px;line-height:1.5;box-sizing:border-box">${esc(T(f[0]))}</textarea>`).join("");
+ const bt=(a,l,col)=>`<button data-a="${a}" style="flex:1;min-width:30%;padding:12px 8px;border:0;border-radius:22px;font:inherit;font-weight:700;cursor:pointer;color:#fff;background:${col}">${l}</button>`;
+ showP(esc(c.name||"Answer"),`${svWhoH(x)}<div style="padding:4px 18px 4px;color:var(--sub);line-height:1.5">Learner asked: <b style="color:var(--text)">${esc(x.question)}</b><br>${esc(x.level_code||"")} · ${esc(x.subject_name||"")} · ${kbOrig(x.origin)}${x.model?" · "+esc(x.model):""}${x.prompt_version?" · "+esc(x.prompt_version):""} · <b>${kbStat(x.status)}</b>${x.was_edited?" · edited "+x.edit_count+"×":""}</div>
+ ${warn.length?`<div style="margin:8px 18px;padding:10px 12px;border-radius:10px;background:var(--wall);line-height:1.5;font-size:13px">${warn.join("<br>")}</div>`:""}
+ ${x.review_note?`<div style="padding:4px 18px;color:var(--sub);font-size:13px">Note: ${esc(x.review_note)}</div>`:""}
+ ${sec("Definition","definition")}${sec("How it works","steps")}${sec("Where it is used","uses")}${sec("In simple words","simple")}${sec("Examples","examples")}${sec("Mistakes and tips","more")}
+ ${quiz?`<div style="padding:8px 18px 0"><b>Quiz</b> (✔ is the answer the AI marked)</div>${quiz}`:""}
+ ${open?`<details style="padding:8px 0"${keep?" open":""}><summary style="padding:6px 18px;font-weight:600">Edit the text</summary>${ed}</details>
+ <div style="padding:6px 18px 0;color:var(--sub);font-size:13px">Source (needed to approve)</div>${sel}
+ <details style="padding:0 18px 6px;color:var(--sub);font-size:13px"><summary>Add a new source</summary><input id="kbst" class="ain" placeholder="Title, e.g. NCDC Biology syllabus 2025" style="margin:6px 0;width:100%;box-sizing:border-box"><select id="kbsy" class="ain" style="margin:0 0 6px;width:100%"><option value="ncdc_syllabus">NCDC syllabus</option><option value="uneb_guideline">UNEB guideline</option><option value="textbook">Textbook</option><option value="other">Other</option></select>${bt("src","Save source","#6b7280")}</details>`:""}
+ <div style="padding:6px 18px 0;color:var(--sub);font-size:13px">${open?"Note (a reason is needed to reject)":"Note"}</div>
+ <textarea id="kbn" style="display:block;width:calc(100% - 36px);margin:4px 18px;min-height:60px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit;font-size:14px;box-sizing:border-box" ${open?"":"disabled"}>${esc(open?"":(x.review_note||""))}</textarea>
+ <div id="kbm" style="padding:2px 18px;min-height:20px;color:var(--sub)">${esc(msg||"")}</div>
+ <div style="display:flex;gap:8px;flex-wrap:wrap;padding:6px 18px 28px">${open?bt("ok","Approve","#00a884")+bt("no","Reject","#ff453a")+bt("sv","Save edit","#3b82f6")+(x.status=="pending"?bt("ur","Mark under review","#6b7280"):bt("wt","Back to waiting","#6b7280"))+(dup?bt("nv","Add as new version of the existing answer","#8b5cf6"):""):x.status=="rejected"?bt("ro","Reopen","#6b7280"):""}</div>`,()=>kbRoom(),async e=>{
+  const b=e.target.closest("[data-a]");if(!b)return;const a=b.dataset.a,m=()=>$("kbm"),say=t=>{const z=m();if(z)z.textContent=t},note=()=>($("kbn")?$("kbn").value.trim():"");
+  const changed=()=>{const o={};KBFIELDS.forEach(f=>{const t=$("kbf_"+f[0]);if(t&&t.value.trim()!=T(f[0]).trim())o[f[0]]=t.value.trim()});return o};
+  const saveEdit=async()=>{const o=changed();if(!Object.keys(o).length)return true;say("Saving the edit…");const r=await admCall("admin_pending_edit",{p_id:x.id,p_candidate:o});
+   if(r.ok){x.candidate=Object.assign({},x.candidate,o);x.status="under_review";x.was_edited=true;x.edit_count=(x.edit_count||0)+1;return true}
+   say(r.err=="bad text"?"The text is not valid: "+(r.detail||""):r.err&&r.err.indexOf("already")==0?"This item was already decided.":"Could not save the edit. Try again.");return false};
+  const after=async(r,okMsg)=>{if(r.err=="duplicate"){kbItem(i,"A verified answer for this question already exists. Add this one as a new version of it (the old version stays in its history), or reject this one.",1,1);return}if(r.ok){try{if(a=="ok")TOP.forEach(t=>{if(t.tid==x.legacy_topic_id)t.ai=0})}catch(er){}kbRoom(null,okMsg)}else say(r.err=="a source is required"?"Choose the source first.":r.err=="reason needed"?"Write the reason in the note box.":r.err&&r.err.indexOf("already")==0?"This item was already decided.":r.err=="same question already waiting"?"The same question is already waiting.":"Could not save. Try again.")};
+  b.disabled=true;
+  try{
+   if(a=="sv"){if(!Object.keys(changed()).length){say("Nothing was changed.")}else if(await saveEdit())kbItem(i,"Edit saved. The first version is kept.",1)}
+   else if(a=="ok"){const src=$("kbs")?$("kbs").value:"";if(!src){say("Choose the source first.")}else if(await saveEdit()){say("Approving…");after(await admCall("admin_pending_approve",{p_id:x.id,p_source:src,p_note:note()||null}),"Approved and moved to the permanent store.")}}
+   else if(a=="nv"){const src=$("kbs")?$("kbs").value:"";if(!src){say("Choose the source first.")}else if(await saveEdit()){say("Adding the new version…");after(await admCall("admin_pending_approve",{p_id:x.id,p_source:src,p_note:note()||null,p_mode:"version"}),"Added as a new version of the existing answer.")}}
+   else if(a=="no"){if(note().length<3){say("Write the reason in the note box.")}else{say("Rejecting…");after(await admCall("admin_pending_reject",{p_id:x.id,p_note:note()}),"Rejected.")}}
+   else if(a=="ur"||a=="wt"||a=="ro"){after(await admCall("admin_pending_mark",{p_id:x.id,p_status:a=="ur"?"under_review":"pending"}),a=="ro"?"Reopened.":"Updated.")}
+   else if(a=="src"){const t=$("kbst")?$("kbst").value.trim():"";if(t.length<3){say("Write the source title first.")}else if(await saveEdit()){say("Saving the source…");const r=await admCall("admin_source_add",{p_title:t,p_publisher:null,p_doc_type:$("kbsy").value,p_version:null,p_reference:null});
+     if(r.ok){const s=await admCall("admin_sources_list");if(s.ok)KBS=s.items||[];kbItem(i,"Source saved. Choose it above.",1)}else say(r.err||"Could not save the source.")}}
+  }finally{b.disabled=false}})}
+
+/* ===== VERIFIED KNOWLEDGE (Training 09, owner only: Admin > Review > Verified knowledge) =====
+ The permanent store. Every item has a version number, a source and a full history (who changed what, when and why).
+ The owner can correct an item (new version), retire it (learners stop getting it) or restore it. Nothing is ever deleted or overwritten:
+ the database keeps every earlier version. Each change is checked again in the database (owner login only). */
+let VKT="verified",VKL=[],VKQ="",VKC={};
+const vkWhen=d=>{try{return new Date(d).toLocaleString()}catch(e){return""}};
+const vkAct={promoted:"Approved",edited:"Corrected",retired:"Retired",restored:"Restored"};
+async function vkRoom(st,msg){
+ if(!isOwner())return;if(st){VKT=st;VKQ=""}
+ showP("Verified knowledge",'<div style="padding:22px 18px;color:var(--sub)">Loading…</div>',SVBACK);
+ const j=await admCall("admin_items_list",{p_status:VKT,p_q:VKQ||null});
+ if(!j.ok){$("pbody").innerHTML='<div class="pbn" style="margin:14px 18px;line-height:1.5">'+kbErr(j)+'</div>';return}
+ VKL=j.items||[];VKC=j.counts||{};const n=admN;
+ let h=`<div style="padding:12px 18px;color:var(--sub);line-height:1.5">The permanent store. Each item keeps every version and who changed it. Retiring hides it from learners; nothing is deleted.</div>
+ <div style="display:flex;gap:6px;padding:4px 18px 8px">${svBtn(VKT=="verified","Verified "+n(VKC.verified),"data-tab","verified")}${svBtn(VKT=="retired","Retired "+n(VKC.retired),"data-tab","retired")}</div>
+ <div style="display:flex;gap:6px;padding:0 18px 8px"><input id="vkq" class="ain" placeholder="Search title, subject or question" value="${esc(VKQ)}" style="flex:1;min-width:0"><button data-go="1" style="padding:0 16px;border:0;border-radius:18px;background:var(--green);color:#fff;font:inherit;font-weight:700;cursor:pointer">Find</button></div>
+ <div id="vkm" style="padding:0 18px 6px;min-height:18px;color:var(--sub)">${esc(msg||"")}</div>
+ <details style="padding:0 18px 8px"><summary style="font-weight:600;padding:4px 0">Test question matching</summary>
+  <div style="color:var(--sub);font-size:13px;line-height:1.5;padding:4px 0">Type a question the way a learner might. It shows whether verified knowledge would answer it. Only a strong match is used; weak matches go to the AI as before.</div>
+  <input id="vkt" class="ain" placeholder="e.g. what is osmossis" style="width:100%;box-sizing:border-box;margin:4px 0">
+  <div style="display:flex;gap:6px"><select id="vkl" class="ain" style="flex:1"><option value="PLE">PLE</option><option value="UCE" selected>UCE</option><option value="UACE">UACE</option></select><button data-tm="1" style="flex:1;padding:10px;border:0;border-radius:18px;background:var(--green);color:#fff;font:inherit;font-weight:700;cursor:pointer">Try it</button></div>
+  <div id="vkx" style="padding:8px 0;line-height:1.5"></div></details>
+ <details style="padding:0 18px 10px"><summary style="font-weight:600;padding:4px 0" data-syl="1">Synonyms (words that mean the same)</summary>
+  <div style="color:var(--sub);font-size:13px;line-height:1.5;padding:4px 0">Teach the matcher that two words mean the same, for example “tummy” means “stomach”. One word on the left, the word it should become on the right.</div>
+  <div style="display:flex;gap:6px"><input id="vks1" class="ain" placeholder="word" style="flex:1;min-width:0"><input id="vks2" class="ain" placeholder="means" style="flex:1;min-width:0"><button data-sya="1" style="padding:0 14px;border:0;border-radius:18px;background:#6b7280;color:#fff;font:inherit;font-weight:700;cursor:pointer">Add</button></div>
+  <div id="vksl" style="padding:8px 0;color:var(--sub);font-size:13px;line-height:1.6">Tap “Synonyms” to load the list.</div></details>`;
+ if(!VKL.length)h+=`<div style="padding:18px;color:var(--sub);line-height:1.5">${VKQ?"Nothing matches.":VKT=="verified"?"Nothing has been approved yet. Approve an item in the Verification queue and it appears here.":"Nothing is retired."}</div>`;
+ VKL.forEach((x,i)=>{h+=`<div class="row" data-it="${i}"><div><b>${esc(x.title||"")}</b><small>${esc(x.level_code||"")} · ${esc(x.subject_name||"")} · version ${n(x.version)} · ${esc(x.source_title||"")} · ${admDate(x.updated_at)}</small></div></div>`});
+ showP("Verified knowledge",h,SVBACK,e=>{
+  const t=e.target.closest("[data-tab]");if(t){vkRoom(t.dataset.tab);return}
+  if(e.target.closest("[data-go]")){VKQ=($("vkq")?$("vkq").value:"").trim();vkRoom();return}
+  if(e.target.closest("[data-tm]")){vkTry();return}
+  if(e.target.closest("[data-syl]")){vkSyn();return}
+  if(e.target.closest("[data-sya]")){vkSynAdd();return}
+  const r=e.target.closest("[data-it]");if(r){const x=VKL[+r.dataset.it];if(x)vkItem(x.id)}})}
+async function vkTry(){
+ const o=$("vkx"),q=($("vkt")?$("vkt").value:"").trim();if(!o)return;if(q.length<3){o.textContent="Type a question first.";return}
+ o.textContent="Checking…";const j=await admCall("admin_match_test",{p_question:q,p_level:$("vkl").value,p_subject:null});
+ if(!j.ok){o.textContent=j.err=="bad question"?"The question is too short or too long.":kbErr(j);return}
+ const m=j.matches||[],lab=b=>b=="strong"?"strong: would be answered from verified knowledge":"weak: not used, the AI would answer";
+ o.innerHTML="Words used: <b>"+esc((j.words||[]).join(", ")||"none")+"</b><br>"+(m.length?m.map(x=>"• <b>"+esc(x.title)+"</b> ("+esc(x.level_code)+" · "+esc(x.subject_name||"")+") "+Math.round(x.score*100)+"% — "+lab(x.band)).join("<br>"):"No verified item matches. The AI would answer.")}
+async function vkSyn(){
+ const o=$("vksl");if(!o)return;const j=await admCall("admin_synonyms_list");
+ if(!j.ok){o.textContent=kbErr(j);return}
+ o.innerHTML=(j.items||[]).map(x=>esc(x.term)+" → "+esc(x.canonical)).join("<br>")||"None yet."}
+async function vkSynAdd(){
+ const o=$("vksl"),a=($("vks1")?$("vks1").value:"").trim(),b=($("vks2")?$("vks2").value:"").trim();if(!o)return;
+ if(a.length<2||b.length<2){o.textContent="Write both words.";return}
+ const r=await admCall("admin_synonym_add",{p_term:a,p_canonical:b});
+ if(r.ok){$("vks1").value="";$("vks2").value="";await vkSyn();o.insertAdjacentHTML("afterbegin","<b>Added: "+esc(r.term)+" → "+esc(r.canonical)+"</b><br>")}
+ else o.textContent=r.err=="bad words"?"Use letters and numbers only.":r.err=="same word"?"The two words are the same.":kbErr(r)}
+async function vkItem(id,msg,keep){
+ showP("Verified item",'<div style="padding:22px 18px;color:var(--sub)">Loading…</div>',()=>vkRoom());
+ const j=await admCall("admin_item_get",{p_id:id});
+ if(!j.ok){$("pbody").innerHTML='<div class="pbn" style="margin:14px 18px;line-height:1.5">'+kbErr(j)+'</div>';return}
+ const it=j.item,src=j.source||{},c=it.content||{},hist=j.history||[],live=it.status=="verified";
+ const T=k=>String(c[k]==null?"":c[k]),sec=(l,k)=>T(k)?`<div style="padding:6px 18px 0"><b>${l}</b></div><div class="md" style="padding:0 18px 4px;line-height:1.55">${md(T(k))}</div>`:"";
+ const quiz=Array.isArray(c.quiz)?c.quiz.map((q,k)=>{try{return `<div style="padding:4px 18px;line-height:1.5"><b>${k+1}. ${esc(q[0])}</b><br>${q[1].map((o,m)=>(m==q[2]?"✔ ":"– ")+esc(o)).join("<br>")}</div>`}catch(er){return""}}).join(""):"";
+ const ed=KBFIELDS.map(f=>`<div style="padding:6px 18px 0;color:var(--sub);font-size:13px">${f[1]}</div><textarea id="vkf_${f[0]}" style="display:block;width:calc(100% - 36px);margin:4px 18px;min-height:${f[2]*22}px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit;font-size:14px;line-height:1.5;box-sizing:border-box">${esc(T(f[0]))}</textarea>`).join("");
+ const hh=hist.map(x=>`<div style="padding:6px 18px;line-height:1.45;border-top:1px solid var(--line)"><b>Version ${admN(x.version)} · ${vkAct[x.action]||esc(x.action)}</b><br><span style="color:var(--sub);font-size:13px">${vkWhen(x.changed_at)} · ${esc(x.changed_by||"")}${(x.changed_fields||[]).length?" · changed: "+esc(x.changed_fields.join(", ")):""}${x.reason?"<br>Reason: "+esc(x.reason):""}</span></div>`).join("");
+ const bt=(a,l,col)=>`<button data-a="${a}" style="flex:1;min-width:30%;padding:12px 8px;border:0;border-radius:22px;font:inherit;font-weight:700;cursor:pointer;color:#fff;background:${col}">${l}</button>`;
+ showP(esc(it.title||"Item"),`<div style="padding:12px 18px 4px;color:var(--sub);line-height:1.5">${it.question?"First asked: <b style=\"color:var(--text)\">"+esc(it.question)+"</b><br>":""}${esc(it.level_code||"")} · ${esc(it.subject_name||"")} · <b>${live?"Verified":"Retired"}</b> · version ${admN(it.version)}<br>Source: ${esc(src.title||"")}${src.version_label?" · "+esc(src.version_label):""}<br>Last change by ${esc(it.verified_by||"")} on ${vkWhen(it.verified_at)}</div>
+ ${sec("Definition","definition")}${sec("How it works","steps")}${sec("Where it is used","uses")}${sec("In simple words","simple")}${sec("Examples","examples")}${sec("Mistakes and tips","more")}
+ ${quiz?`<div style="padding:8px 18px 0"><b>Quiz</b></div>${quiz}`:""}
+ ${live?`<details style="padding:8px 0"${keep?" open":""}><summary style="padding:6px 18px;font-weight:600">Correct the text (makes a new version)</summary>${ed}</details>`:""}
+ <div style="padding:6px 18px 0;color:var(--sub);font-size:13px">Reason (needed for every change)</div>
+ <textarea id="vkr" style="display:block;width:calc(100% - 36px);margin:4px 18px;min-height:60px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit;font-size:14px;box-sizing:border-box"></textarea>
+ <div id="vkm" style="padding:2px 18px;min-height:20px;color:var(--sub)">${esc(msg||"")}</div>
+ <div style="display:flex;gap:8px;flex-wrap:wrap;padding:6px 18px 10px">${live?bt("cor","Save correction","#3b82f6")+bt("ret","Retire","#ff453a"):bt("res","Restore","#00a884")}</div>
+ <div style="padding:10px 18px 0"><b>History</b> (every version is kept)</div>${hh}<div style="height:28px"></div>`,()=>vkRoom(),async e=>{
+  const b=e.target.closest("[data-a]");if(!b)return;const a=b.dataset.a,say=t=>{const z=$("vkm");if(z)z.textContent=t},why=()=>($("vkr")?$("vkr").value.trim():"");
+  const bad=r=>r.err=="changed"?"Someone changed this item meanwhile. It was reloaded.":r.err=="reason needed"?"Write the reason first.":r.err=="bad text"?"The text is not valid: "+(r.detail||""):r.err=="nothing changed"?"Nothing was changed.":r.err=="duplicate"?"Another verified item already answers this question. Retire that one first.":r.err&&r.err.indexOf("item is")==0?"This item is already "+r.err.slice(8)+".":"Could not save. Try again.";
+  if(why().length<3){say("Write the reason first.");return}
+  b.disabled=true;
+  try{
+   if(a=="cor"){const o={};KBFIELDS.forEach(f=>{const t=$("vkf_"+f[0]);if(t&&t.value.trim()!=T(f[0]).trim())o[f[0]]=t.value.trim()});
+    if(!Object.keys(o).length){say("Nothing was changed.");return}
+    say("Saving…");const r=await admCall("admin_item_correct",{p_id:id,p_candidate:o,p_reason:why(),p_expected:it.version});
+    if(r.ok)vkItem(id,"Saved as version "+admN(r.version)+". The earlier version is kept in the history.");else{say(bad(r));if(r.err=="changed")vkItem(id)}}
+   else if(a=="ret"){say("Retiring…");const r=await admCall("admin_item_retire",{p_id:id,p_reason:why(),p_expected:it.version});
+    if(r.ok)vkItem(id,"Retired as version "+admN(r.version)+". Learners no longer get it.");else{say(bad(r));if(r.err=="changed")vkItem(id)}}
+   else if(a=="res"){say("Restoring…");const r=await admCall("admin_item_restore",{p_id:id,p_reason:why(),p_expected:it.version});
+    if(r.ok)vkItem(id,"Restored as version "+admN(r.version)+".");else{say(bad(r));if(r.err=="changed")vkItem(id)}}
+  }finally{b.disabled=false}})}
+
+/* ===== ANNOUNCEMENTS AND UPDATES: What's new + Away alerts (phone alerts) =====
+ The owner posts in Admin > Post. Everyone sees it in What's new (red dot on the avatar). When Away alerts is ON the phone is alerted:
+ by a real push alert (push-sw.js + ann_push, works when the app is closed) and, as a back-up, by the app itself while it is open in the background. */
+const PUSHSC="./push-sw-scope/";let PUSHREG=null,ANN_BUSY=0;
+const annTitle=a=>(a.kind=="update"?"Update: ":"")+a.title;
+function annBanner(a){try{annPush({id:a.id,ts:new Date(a.created_at).getTime(),t:annTitle(a),b:a.body||""})}catch(e){}}
+async function devAlert(a){
+ if(!D.notif||!("Notification"in window)||Notification.permission!="granted")return;
+ const o={body:String(a.body||"").slice(0,240),tag:"ann-"+a.id,icon:"./blank-96.png",badge:"./badge-96.png",data:{id:a.id}};
+ try{if(PUSHREG){await PUSHREG.showNotification(annTitle(a)||"Ask Tr. David",o);return}}catch(e){}
+ try{const n=new Notification(annTitle(a)||"Ask Tr. David",o);n.onclick=()=>{window.focus();n.close();try{notifs(true)}catch(e){}}}catch(e){}}
+let PUSH_SYNCED=0;
+async function annSync(){
+ if(ANN_BUSY||!(window.AK&&AK.me()))return;ANN_BUSY=1;
+ if(!PUSH_SYNCED&&D.notif){PUSH_SYNCED=1;pushOn()}
+ try{const L=await svRpc("ann_list",{p_t:tokNow()});if(!Array.isArray(L))return;
+  const first=!D.annInit;let added=0;
+  L.slice().reverse().forEach(a=>{if(D.annSeen[a.id])return;D.annSeen[a.id]=1;
+   if(first)return;/* a new install starts fresh: everything posted before its first sign-in is skipped, no list entry, no red dot, no banner, no alert */
+   added++;const ts=new Date(a.created_at).getTime();
+   D.notes.unshift({id:a.id,t:annTitle(a),b:a.body||"",ts,r:0});
+   if(document.hidden)devAlert(a);annBanner(a)/* also queued, so it pops up when the person comes back to the app */});
+  D.annInit=1;if(added){D.notes.sort((x,y)=>y.ts-x.ts);D.notes=D.notes.slice(0,50)}save();updateBadge()}
+ catch(e){}finally{ANN_BUSY=0}}
+setInterval(()=>{if(!document.hidden||D.notif)annSync()},60000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)annSync()});
+const b64u=t=>{const p="=".repeat((4-t.length%4)%4),r=atob((t+p).replace(/-/g,"+").replace(/_/g,"/")),o=new Uint8Array(r.length);for(let i=0;i<r.length;i++)o[i]=r.charCodeAt(i);return o};
+async function pushReg(){
+ if(!("serviceWorker"in navigator)||!("PushManager"in window))return null;
+ /* push now lives inside the main sw.js (one service worker, one registration) */
+ try{await navigator.serviceWorker.register("sw.js",{updateViaCache:"none"})}catch(e){}
+ const reg=await Promise.race([navigator.serviceWorker.ready,new Promise(r=>setTimeout(()=>r(null),8000))]);
+ if(!reg)return null;PUSHREG=reg;return reg}
+async function pushOn(){try{
+ if(!("Notification"in window)||Notification.permission!="granted")return;
+ const reg=await pushReg();if(!reg||!reg.pushManager)return;
+ let sub=await reg.pushManager.getSubscription();
+ if(!sub){const k=await svRpc("push_pub",{});if(typeof k!="string"||k.length<40)return;
+  try{sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(k)})}
+  catch(e){try{const o=await reg.pushManager.getSubscription();if(o)await o.unsubscribe()}catch(x){}sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(k)})}}
+ await svRpc("push_save",{p_sub:sub.toJSON(),p_t:tokNow()})}catch(e){}}
+async function pushOff(){try{
+ const reg=PUSHREG||(await navigator.serviceWorker.getRegistration());if(!reg)return;
+ const sub=await reg.pushManager.getSubscription();if(!sub)return;
+ const ep=sub.endpoint;await sub.unsubscribe();await svRpc("push_drop",{p_endpoint:ep})}catch(e){}}
+try{navigator.serviceWorker&&navigator.serviceWorker.addEventListener("message",e=>{if(!e.data)return;if(e.data.openWN){try{notifs(true)}catch(x){}}if(e.data.resub&&D.notif){PUSH_SYNCED=1;pushOn()}if(e.data.annSync)annSync()})}catch(e){}
+/* admin: Post tab */
+let ANK="announcement",ANT="",ANB="",ANTO="",ADMUS=[];
+async function admNews(){const s=ADMSEQ,b=$("abody");b.innerHTML=admLd();const [j,uj]=await Promise.all([admCall("admin_ann_list"),admCall("admin_user_list")]);if(s!==ADMSEQ)return;ADMUS=uj&&uj.ok?uj.items:[];
+ if(!j.ok){b.innerHTML=admFail(j,1);b.onclick=e=>{if(e.target.closest("[data-r]"))admNews()};return}
+ admNewsDraw(j,"")}
+function admNewsDraw(j,msg){const b=$("abody");
+ b.innerHTML=`<div class="asec">Post to What's new</div>
+ <div style="display:flex;gap:6px;padding:4px 18px 8px">${svBtn(ANK=="announcement","Announcement","data-k","announcement")}${svBtn(ANK=="update","Update","data-k","update")}</div>
+ <div style="padding:0 18px 4px;color:var(--sub);font-size:13px">Send to</div>
+ <select class="ain" id="anto"><option value="">Everyone</option>${ADMUS.map(u=>`<option value="${esc(u.id)}"${u.id==ANTO?" selected":""}>${esc(u.names||u.username)} (${esc(u.username)})${admN(u.devices)?"":" · no phone alerts"}</option>`).join("")}</select>
+ <input class="ain" id="ant" maxlength="100" placeholder="Title" autocomplete="off" value="${esc(ANT)}">
+ <textarea class="ain" id="anb" maxlength="1000" placeholder="Message (optional)" style="min-height:110px;resize:vertical">${esc(ANB)}</textarea>
+ <div id="anm" style="padding:2px 18px;min-height:20px;color:var(--sub)">${esc(msg)}</div>
+ <div style="display:flex;gap:8px;padding:6px 18px 6px">${abt("send",ANTO?"Send to "+esc(admUN(ANTO)):"Send to everyone","#00a884")}</div>
+ <div style="padding:2px 18px 10px;color:var(--sub);font-size:13px;line-height:1.45">${ANTO?`Only ${esc(admUN(ANTO))} sees it, in What's new and as a banner when they open the app. ${admN((ADMUS.find(u=>u.id==ANTO)||{}).devices)} of their phone${admN((ADMUS.find(u=>u.id==ANTO)||{}).devices)==1?"":"s"} will also get a phone alert, if Away alerts is on there.`:`Everyone sees it in What's new and as a banner when they open the app. ${admN(j.devices)} phone${admN(j.devices)==1?"":"s"} will also get a phone alert, because Away alerts is on there.`}</div>
+ <div class="asec">Posted</div>`+(j.items.length?j.items.map((x,i)=>`<div class="row" style="display:block"><b>${esc(x.title)}</b> <small style="color:var(--sub)">${x.kind=="update"?"Update":"Announcement"} · ${admDate(x.created_at)}${x.to_user?" · to "+esc(x.to_name||"one user"):""}</small>${x.body?`<div style="margin-top:2px;color:var(--sub)">${esc(x.body)}</div>`:""}<button data-del="${i}" style="margin-top:6px;border:0;background:none;color:#ff453a;font:inherit;font-weight:600;padding:4px 0;cursor:pointer">Delete</button></div>`).join(""):'<div style="padding:12px 18px;color:var(--sub)">Nothing posted yet.</div>');
+ b.onchange=e=>{if(e.target.id=="anto"){ANT=$("ant").value;ANB=$("anb").value;ANTO=e.target.value;admNewsDraw(j,"")}};
+ b.onclick=async e=>{
+  const k=e.target.closest("[data-k]");if(k){ANT=$("ant").value;ANB=$("anb").value;ANK=k.dataset.k;admNewsDraw(j,"");return}
+  const d=e.target.closest("[data-del]");if(d){const x=j.items[+d.dataset.del];if(!x)return;uiConfirm("Delete this post?",async()=>{const r=await admCall("admin_ann_delete",{p_id:x.id});if(r.ok){const n=await admCall("admin_ann_list");if(n.ok)admNewsDraw(n,"Deleted.");else admNews()}else uiAlert("Could not delete. Try again.")},"Delete");return}
+  const sb=e.target.closest("[data-a=send]");if(!sb)return;
+  const t=$("ant").value.trim(),m=$("anb").value.trim(),st=$("anm");ANT=t;ANB=m;
+  if(t.length<3){st.textContent="Write a title (at least 3 letters).";return}
+  sb.disabled=true;st.textContent="Sending…";
+  const r=await admCall("admin_ann_post",{p_title:t,p_body:m,p_kind:ANK,p_duration:0,p_to:ANTO||null});
+  if(!r.ok){sb.disabled=false;st.textContent=r.err=="bad title"?"The title must be 3 to 100 letters.":r.err=="bad user"?"That user was not found. Pick again.":"Could not send. Try again.";return}
+  const toN=ANTO?admUN(ANTO):"";let note=ANTO?"Posted. "+toN+" will see it in What's new.":"Posted. Everyone will see it in What's new.";
+  try{const pr=await fetch(SBU.replace("/rest/v1/","/functions/v1/")+"ann_push",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({t:tokNow(),id:r.id})}).then(z=>z.json());
+   if(pr&&pr.ok)note=ANTO&&!admN(pr.sent)?"Posted to "+toN+". None of their phones has alerts on yet, so they will see it when they open the app.":"Posted. Phone alerts sent to "+admN(pr.sent)+" phone"+(admN(pr.sent)==1?"":"s")+".";else note="Posted. Phone alerts could not be sent (people still see it in What's new)."}catch(er){note="Posted. Phone alerts could not be sent (people still see it in What's new)."}
+  ANT="";ANB="";ANTO="";annSync();
+  const n=await admCall("admin_ann_list");if(n.ok)admNewsDraw(n,note);else admNews()}}
+
+/* PLAN BADGE (bottom right): shows the plan the admin has set for this account, with its own icon. The learner cannot change it. */
+const PICOL={Free:"#6b7c85",Basic:"#2f80ed",Standard:"#00a884",Premium:"#e6a700"},
+PIC={Free:'<svg viewBox="0 0 24 24"><path d="M5 19c0-8 5-13 14-14 0 9-5 14-14 14z"/><path d="M5 19l7-7"/></svg>',
+Basic:'<svg viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>',
+Standard:'<svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg>',
+Premium:'<svg viewBox="0 0 24 24"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/></svg>'};
+function updPlan(){const k=modelName(),M=MODELS[k],l=document.getElementById("psl"),r=document.getElementById("psr");if(l)l.innerHTML='<i style="background:'+GCOL[M.g]+'"></i><b>'+M.n+'</b>';if(r){const pn=planName();r.innerHTML='<span class="pic'+(pn=="Premium"?" fill":"")+'" style="color:'+(PICOL[pn]||"#6b7c85")+'">'+(PIC[pn]||PIC.Free)+'</span><b>'+pn+'</b>';r.setAttribute("aria-label","Your plan: "+pn)}const sp=document.getElementById("pss");if(sp){const on=!!D.lock&&D.sub!="General";sp.innerHTML='<svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2zM4 19V5M9 7h6"/></svg><b>'+(on?esc(D.sub):"Subject")+"</b>";sp.classList.toggle("on",on);sp.setAttribute("aria-label",on?"Subject: "+D.sub+". Tap to change":"Choose subject");const ip=document.getElementById("inp");if(ip)ip.placeholder=on?"Ask a "+D.sub+" question":"Ask questions, make research"}}
+/* PLAN LOCK: the plan is kept in the database (app_users.plan, default Free) and copied here after login.
+ Nobody can switch it from the app except the owner account (username DAVID, checked in the database).
+ Other accounts stay on Free until you mark their paid plan (admin page to be built). */
+const isOwner=()=>!!(window.AK&&AK.me()&&AK.me().username==="DAVID"),
+tokNow=()=>{try{return localStorage.getItem("ask_tok")||sessionStorage.getItem("ask_tok")||""}catch(e){return""}};
+function syncPlan(){const t=tokNow();if(!t)return;
+ fetch(SBU+"rpc/get_my_plan",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_t:t})}).then(r=>r.json()).then(j=>{
+  if(!j||!j.ok||!PLANS4.includes(j.plan))return;const was=planName(),wasFa=freeAccess();
+  try{localStorage.setItem(PK(),j.plan);localStorage.setItem(PK()+"_exp",j.expires_at||"");localStorage.setItem(PK()+"_fa",j.free_access?JSON.stringify(j.free_access):"")}catch(e){}
+  planEdge(j);
+  if(was!==j.plan||(wasFa&&wasFa.id)!==(j.free_access&&j.free_access.id)){updPlan();render()}}).catch(()=>{})}
+/* FREE-ACCESS WINDOWS: the server decides the plan. The client only keeps one timer set for the exact second a window opens or closes, so the change shows at once. */
+function freeAccess(){try{const a=localStorage.getItem(PK()+"_fa");return a?JSON.parse(a):null}catch(e){return null}}
+let _edgeT=0;
+function planEdge(j){clearTimeout(_edgeT);try{const at=j.free_access?j.free_access.ends_at:(j.free_next&&j.free_next.starts_at),sv=Date.parse(j.now);if(!at||isNaN(sv))return;
+ const ms=Date.parse(at)-sv+400;if(ms>0&&ms<2147483000)_edgeT=setTimeout(syncPlan,ms)}catch(e){}}
+function setPlanServer(x){fetch(SBU+"rpc/set_my_plan",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_t:tokNow(),p_plan:x})}).then(r=>r.json()).then(j=>{if(!j||!j.ok)syncPlan()}).catch(()=>{})}
+/* Installs and usage: one anonymous device id per phone. log_app_event counts an install once per device and an open at most once per 30 minutes. */
+function devId(){try{let d=localStorage.getItem("ask_dev");if(!d||d.length<8){d=Array.from(crypto.getRandomValues(new Uint8Array(12))).map(x=>x.toString(16).padStart(2,"0")).join("");localStorage.setItem("ask_dev",d)}return d}catch(e){return""}}
+function evLog(kind){const d=devId();if(!d)return;try{fetch(SBU+"rpc/log_app_event",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_kind:kind,p_device:d,p_t:tokNow()})}).catch(()=>{})}catch(e){}}
+const standaloneNow=()=>{try{return matchMedia("(display-mode: standalone)").matches||matchMedia("(display-mode: fullscreen)").matches||matchMedia("(display-mode: minimal-ui)").matches||navigator.standalone===true}catch(e){return false}};
+setTimeout(()=>{evLog("open");if(standaloneNow())evLog("install")},2500);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)evLog("open")});
+addEventListener("appinstalled",()=>evLog("install"));
+setTimeout(syncPlan,1500);setInterval(syncPlan,30000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)syncPlan()});
+/* TEMPORARY (testing only): Activate plan lets the tester pick any plan. REMOVE when the app is fully developed; a confirmed payment must set the plan instead. */
+function activatePlan(){uiAlert("Your plan is set by the admin after payment.")}
+/* TESTING SWITCH: the chip at the bottom opens the model picker. While the app is being built the owner account also sees Change plan (Free, Basic, Standard, Premium)
+ there, so every model can be tried on every plan. TO GO BACK TO THE REAL SUBSCRIPTION: set PLAN_TEST_MODE to false. The Change plan row then disappears. */
+const PLAN_TEST_MODE=false;
+document.getElementById("psl").onclick=()=>modelPicker();document.getElementById("psr").onclick=()=>plans(1);
+function limitMsg(){D.msgs.push({s:"i",lim:1,t:"**"+LIM+"**",ts:Date.now()});save();render()}
+function freeReset(){FQW({v:2,cap:newCap(),used:0,left:null,seen:Date.now()});const rm=a=>{for(let i=a.length;i--;)if(a[i].lim)a.splice(i,1)};rm(D.msgs);D.chats.forEach(c=>rm(c.msgs));D.msgs.push({s:"i",note:1,t:"Your free plan has been reset. You can continue asking.",ts:Date.now()});save();render();const h=document.getElementById("plh");if(h){const l=h.querySelector(".cpl");if(l)l.innerHTML="Your free words have been reset."}}
 let _pn=performance.now();
 setInterval(()=>{const n=performance.now(),d=n-_pn;_pn=n;if(!(window.AK&&AK.me()))return;const q=FQ();if(q.left==null){if(q.used>=q.cap)capped();return}
  const w=Date.now()-q.seen;q.left-=(w>3000?w:d);q.seen=Date.now();if(q.left<=0){freeReset();return}FQW(q)},1000);

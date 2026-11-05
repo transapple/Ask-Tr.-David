@@ -204,6 +204,14 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 #subs{display:none!important;gap:8px;overflow-x:auto;padding:8px 12px;background:var(--bar);border-bottom:1px solid var(--line)}
 #subs button,.chips button,.st,.lk{border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:16px;padding:6px 12px;font:inherit;font-size:13px;cursor:pointer;white-space:nowrap}
 #subs .on,.lk.on,.act .on,#mic.on{background:var(--green);color:#fff;border-color:var(--green)}#mic.on{border-radius:50%}
+.dg{margin:8px 0 4px;padding:8px 6px 6px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}.dg svg{display:block;width:100%;height:auto;max-height:70vh}
+.dg figcaption{font-size:.8em;color:var(--sub);text-align:center;margin-top:4px;font-weight:600}.dgw{font-size:.85em;color:var(--sub);margin:6px 0}
+.dg .t{fill:var(--text);font:12px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}.dg .tb{font-weight:700}.dg .ts{fill:var(--sub);font-size:10.5px}.dg svg text{fill:var(--text)}.dg svg text.ts{fill:var(--sub)}
+.dg .ld{stroke:var(--sub);stroke-width:1;fill:none}.dg .dt{fill:var(--sub)}.dg .o{stroke:#37474f;stroke-width:1.5;stroke-linejoin:round;fill:none}.dg .w{stroke:var(--text);stroke-width:2.2;fill:none;stroke-linecap:round}.dg .k{fill:#37474f}
+.dg .ar{stroke:var(--text);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}.dg .ar.b{stroke:#1e88e5}.dg .ar.r{stroke:#e53935}.dg .ar.g{stroke:#43a047}
+.dg .c1{fill:#dff3e8}.dg .c2{fill:#b9a7e8}.dg .c3{fill:#f7b7a3}.dg .c4{fill:#bfe3f5}.dg .c5{fill:#cfe8b0}.dg .c6{fill:#43a047}.dg .c7{fill:#ffe28a}.dg .c8{fill:#a1887f}.dg .c9{fill:#9ccc65}.dg .c10{fill:#f3c6e6}
+.dg svg text{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;paint-order:stroke;stroke:var(--bg);stroke-width:3px;stroke-linejoin:round}
+.dg svg text.in{fill:#1b2a30;stroke:none}.dg svg text.in.ts{fill:#37474f}
 .b.ai{max-width:100%}.md h3{font-size:1.1em;margin:2px 0 4px}.md h4{margin:8px 0 2px;color:var(--green)}.md p{margin:3px 0}.md ul,.md ol{margin:3px 0 3px 20px}
 .md table{border-collapse:collapse;margin:6px 0;width:100%}.md td{border:1px solid var(--line);padding:4px 8px;font-size:.9em}.md tr:first-child td{font-weight:600}.md code{background:var(--wall);padding:1px 5px;border-radius:4px}
 .act,.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.act button{border:0;background:none;color:var(--sub);font:inherit;font-size:12px;cursor:pointer;padding:3px 8px;border-radius:10px}.act{clear:both}.act button{padding:14px 14px 8px;display:grid;place-items:center}.act button svg{width:23px;height:23px}.act.out{align-self:flex-start;margin:-6px 0 8px 0;gap:4px}.act .on{background:none;border:0;color:var(--green)}.act .on svg{fill:currentColor}.act button:active{background:var(--wall)}
@@ -977,7 +985,102 @@ function mrow(l){let lb="";const lm=l.match(/^([A-Za-z][A-Za-z ]{2,24}):\s+(.*)$
  const q=l.match(/^(?:(.*?)\s)?=\s(.*)$/);
  if(q)return lb+'<div class="mr"><span class="ml">'+mth(q[1]||"")+'</span><span class="me">=</span><span class="mv">'+mth(q[2])+'</span></div>';
  return lb+'<div class="mr"><span class="mf">'+mth(l)+'</span></div>'}
-function md(t){t=esc(t);let o="",m=null,tb=[];
+/* ===== DIAGRAMS: labelled SVG pictures drawn inside answers (any subject, any model) =====
+   1) The app draws a ready diagram when the question is about it (DG library below).
+   2) An answer may carry its own picture: a ```svg block or ::fig key line. Pictures are cleaned (dgClean) before showing. */
+const DGS=[],DG=(()=>{
+const X=(h,H)=>`<svg viewBox="0 0 360 ${H||250}" role="img" xmlns="http://www.w3.org/2000/svg">${h}</svg>`,
+ T=(x,y,s,a,c)=>`<text class="t${c?" "+c:""}" x="${x}" y="${y}" text-anchor="${a||"middle"}">${s}</text>`,
+ L=(px,py,x,y,s)=>{const r=x>px;return `<path class="ld" d="M${px} ${py}L${r?x-3:x+3} ${y}"/><circle class="dt" cx="${px}" cy="${py}" r="2.2"/>`+T(x+(r?1:-1),y+4,s,r?"start":"end")},
+ A=(x1,y1,x2,y2,c)=>{const a=Math.atan2(y2-y1,x2-x1),h=7,f=v=>Math.round(v*10)/10;return `<path class="ar${c?" "+c:""}" d="M${x1} ${y1}L${x2} ${y2}M${f(x2-h*Math.cos(a-.45))} ${f(y2-h*Math.sin(a-.45))}L${x2} ${y2}L${f(x2-h*Math.cos(a+.45))} ${f(y2-h*Math.sin(a+.45))}"/>`},
+ P=(a,cx,cy,r)=>[Math.round((cx+r*Math.cos(a*Math.PI/180))*10)/10,Math.round((cy+r*Math.sin(a*Math.PI/180))*10)/10],
+ dots=(l,c)=>l.map(p=>`<circle class="o ${c}" cx="${p[0]}" cy="${p[1]}" r="5.5"/>`).join("");
+const D={
+animal:{t:"Animal cell",re:/animal cell|parts of (a|the) cell|cell structure|structure of (a|the) cell|cell organelles?|\bnucleus\b.*\bmitochondri/i,s:()=>X(
+ `<ellipse class="o c1" cx="180" cy="125" rx="72" ry="78"/><circle class="o c2" cx="196" cy="108" r="27"/><circle class="k" cx="202" cy="103" r="8"/>`+
+ `<g transform="rotate(-25 150 160)"><ellipse class="o c3" cx="150" cy="160" rx="17" ry="9"/><path class="o" d="M139 160q3-5 5 0t5 0 5 0 5 0"/></g>`+
+ [[218,152],[226,160],[210,162],[222,170]].map(p=>`<circle class="k" cx="${p[0]}" cy="${p[1]}" r="2.4"/>`).join("")+`<circle class="o c4" cx="170" cy="190" r="9"/>`+
+ L(126,74,92,44,"Cell membrane")+L(140,128,92,100,"Cytoplasm")+L(146,162,92,160,"Mitochondrion")+L(170,190,92,208,"Vacuole")+
+ L(202,103,268,52,"Nucleolus")+L(218,118,268,96,"Nucleus")+L(226,160,268,150,"Ribosomes"),235)},
+plant:{t:"Plant cell",re:/plant cell/i,s:()=>X(
+ `<rect class="o c5" x="110" y="36" width="150" height="170" rx="14" style="stroke-width:3"/><rect class="o c1" x="117" y="43" width="136" height="156" rx="10"/>`+
+ `<ellipse class="o c4" cx="162" cy="128" rx="38" ry="48"/><circle class="o c2" cx="236" cy="80" r="16"/><circle class="k" cx="239" cy="77" r="5"/>`+
+ [[140,64],[228,168],[138,172]].map(p=>`<ellipse class="o c6" cx="${p[0]}" cy="${p[1]}" rx="13" ry="7"/>`).join("")+
+ L(110,70,96,40,"Cell wall")+L(117,110,96,92,"Cell membrane")+L(150,128,96,140,"Vacuole")+L(138,172,96,190,"Chloroplast")+L(236,80,288,52,"Nucleus")+L(232,128,288,110,"Cytoplasm"),230)},
+flower:{t:"Parts of a flower",re:/parts? of a flower|flower structure|structure of a flower|\bstamen|\bcarpel|\bpistil|\banther\b|\bstigma\b/i,s:()=>X(
+ `<path class="o c9" d="M180 262V168" style="stroke-width:5;fill:none"/><ellipse class="o c9" cx="180" cy="166" rx="16" ry="7"/>`+
+ `<ellipse class="o c9" cx="180" cy="104" rx="20" ry="54" transform="rotate(-38 180 160)"/><ellipse class="o c10" cx="180" cy="104" rx="20" ry="54" transform="rotate(38 180 160)"/>`.replace("c9\" cx=\"180\" cy=\"104\" rx=\"20\"","c10\" cx=\"180\" cy=\"104\" rx=\"20\"")+
+ `<path class="o c9" d="M178 172q-26 2-38 18q24 4 38-12zM182 172q26 2 38 18q-24 4-38-12z"/>`+
+ `<path class="w" d="M171 150L160 104M189 150L200 104"/><ellipse class="o c7" cx="159" cy="97" rx="4.5" ry="8"/><ellipse class="o c7" cx="201" cy="97" rx="4.5" ry="8"/>`+
+ `<path class="w" d="M180 140V96"/><ellipse class="o c3" cx="180" cy="88" rx="8" ry="6"/><ellipse class="o c1" cx="180" cy="152" rx="11" ry="14"/><circle class="k" cx="177" cy="152" r="2"/><circle class="k" cx="183" cy="152" r="2"/>`+
+ L(159,92,98,62,"Anther")+L(165,128,98,112,"Filament")+L(170,154,98,160,"Ovary")+L(166,166,98,206,"Receptacle")+
+ L(187,86,262,38,"Stigma")+L(181,118,262,78,"Style")+L(222,88,262,118,"Petal")+L(206,184,262,186,"Sepal")+L(180,235,262,236,"Stem"),270)},
+chain:{t:"Food chain",re:/food chain|food web|producers?.*consumers?/i,s:()=>{const n=[["Grass","Producer","c9"],["Grasshopper","Primary consumer","c7"],["Frog","Secondary consumer","c4"],["Snake","Tertiary consumer","c3"],["Eagle","Top consumer","c10"]];
+ return X(n.map((b,i)=>`<rect class="o ${b[2]}" x="80" y="${10+i*52}" width="200" height="38" rx="10"/>`+T(180,28+i*52,b[0],0,"tb in")+T(180,42+i*52,b[1],0,"ts in")+(i<4?A(180,48+i*52,180,60+i*52):"")).join("")+T(180,284,"Arrows show the direction energy flows (from food to eater).",0,"ts"),296)}},
+water:{t:"The water cycle",re:/water cycle|hydrological cycle/i,s:()=>X(
+ `<rect class="o c4" x="10" y="190" width="150" height="46"/><path class="o c8" d="M160 236V196L240 128 300 160 350 196V236z" style="fill:#a1887f"/><path class="o c9" d="M160 196L240 128 300 160 350 196z"/>`+
+ `<circle class="o c7" cx="40" cy="38" r="15"/><path class="w" d="M40 12v8M40 56v8M14 38h8M58 38h8M22 20l6 6M52 50l6 6M58 20l-6 6M22 56l6-6"/>`+
+ `<path class="o c1" d="M170 74a18 18 0 0 1 14-28a24 24 0 0 1 46-4a20 20 0 0 1 30 14a14 14 0 0 1-4 18z"/>`+
+ A(70,180,70,92,"r")+T(70,84,"Evaporation",0,"tb")+A(128,92,176,76,"b")+T(205,30,"Condensation",0,"tb")+
+ [212,230,248].map(x=>A(x,100,x-8,138,"b")).join("")+T(296,98,"Precipitation",0,"tb")+A(268,170,200,208,"g")+T(212,160,"Runoff",0,"tb")+
+ T(85,222,"Sea",0,"t in")+T(255,224,"Land",0,"t in")+T(180,252,"The sun’s heat drives the whole cycle.",0,"ts"),262)},
+photo:{t:"Photosynthesis",re:/photosynthesis/i,s:()=>X(
+ `<circle class="o c7" cx="42" cy="34" r="14"/><path class="w" d="M42 10v7M42 51v7M18 34h7M59 34h7M25 17l5 5M25 51l5-5M59 17l-5 5"/>`+
+ `<path class="w" d="M180 160V218M180 200l-22 20M180 205l22 18" style="stroke-width:3"/><ellipse class="o c6" cx="180" cy="112" rx="84" ry="38" transform="rotate(-14 180 112)"/><path class="w" d="M104 134Q180 108 256 90" style="stroke-width:1.4"/>`+
+ A(60,52,118,92,"r")+T(64,38,"Sunlight","start","tb")+A(14,140,92,128,"b")+T(52,162,"Carbon dioxide",0,"t")+T(52,176,"(CO₂) in",0,"ts")+
+ A(246,76,300,52,"b")+T(300,34,"Oxygen (O₂)",0,"t")+T(300,46,"given out",0,"ts")+A(180,246,180,196,"b")+T(180,260,"Water (H₂O) from the roots",0,"t")+T(186,134,"Glucose made",0,"tb in")+T(186,147,"(food for the plant)",0,"ts in")+
+ T(180,284,"6CO₂ + 6H₂O → C₆H₁₂O₆ + 6O₂  (light energy)",0,"ts"),296)},
+circuit:{t:"A simple electric circuit",re:/(simple|electric|electrical|series|parallel|complete|closed|open) circuit|circuit diagram/i,s:()=>X(
+ `<path class="w" d="M100 190V118M100 108V60H170M220 60H290V108M290 142V190H100"/><path class="w" d="M88 108h24" style="stroke-width:4"/><path class="w" d="M94 118h12" style="stroke-width:3"/>`+
+ `<path class="w" d="M170 60H220"/><circle class="dt" cx="170" cy="60" r="3"/><circle class="dt" cx="220" cy="60" r="3"/><circle class="o c7" cx="290" cy="125" r="17"/><path class="w" d="M278 113l24 24M302 113l-24 24"/>`+
+ T(124,106,"+",0,"tb")+T(124,128,"−",0,"tb")+A(112,60,146,60,"r")+A(230,190,196,190,"r")+
+ L(88,112,52,112,"Cell")+L(195,60,150,22,"Switch (closed)")+L(307,125,322,100,"Bulb")+L(290,170,322,176,"Wire")+
+ T(200,222,"Current flows from + to − round the circuit.",0,"ts")+T(200,236,"Open the switch and the bulb goes out.",0,"ts"),246)},
+states:{t:"States of matter",re:/states? of matter|changes? of state|particle theory|kinetic (particle )?theory|melting|evaporation and condensation/i,s:()=>{
+ const g=[];for(let i=0;i<4;i++)for(let j=0;j<4;j++)g.push([30+j*17,62+i*17]);
+ const l=[[140,120],[158,126],[176,118],[194,126],[212,120],[148,104],[168,108],[188,106],[206,108],[150,138],[168,140],[186,138],[204,140],[160,92],[196,92]].map(p=>[p[0]+10,p[1]+2]);
+ const ga=[[262,70],[310,84],[285,112],[330,60],[270,130],[318,128]];
+ return X([[10,"Solid"],[130,"Liquid"],[250,"Gas"]].map(b=>`<rect class="w" x="${b[0]}" y="40" width="100" height="110" rx="8" style="stroke-width:1;fill:none"/>`+T(b[0]+50,32,b[1],0,"tb")).join("")+
+ dots(g,"c4")+dots(l,"c4")+dots(ga,"c4")+
+ T(60,166,"Packed tightly,",0,"ts")+T(60,178,"vibrate in place",0,"ts")+T(180,166,"Close together,",0,"ts")+T(180,178,"slide past each other",0,"ts")+T(300,166,"Far apart, move",0,"ts")+T(300,178,"fast in all directions",0,"ts")+
+ T(120,194,"Melting",0,"t")+A(70,200,170,200,"r")+A(170,214,70,214,"b")+T(120,234,"Freezing",0,"t")+
+ T(240,194,"Boiling / evaporation",0,"t")+A(190,200,300,200,"r")+A(300,214,190,214,"b")+T(240,234,"Condensation",0,"t"),246)}},
+atom:{t:"Structure of an atom (carbon)",re:/atomic structure|structure of (an|the|a) atom|what is an atom|bohr|electron(ic)? (shells?|configuration|arrangement)|protons?,? (neutrons?|and neutrons?)/i,s:()=>{
+ const e1=[0,180].map(a=>P(a+20,180,120,38)),e2=[0,90,180,270].map(a=>P(a+45,180,120,68));
+ return X(`<circle class="w" cx="180" cy="120" r="38" style="stroke-dasharray:4 3;stroke-width:1.2"/><circle class="w" cx="180" cy="120" r="68" style="stroke-dasharray:4 3;stroke-width:1.2"/>`+
+ `<circle class="o c3" cx="180" cy="120" r="17"/>`+[[174,114,"c3"],[186,114,"c4"],[174,126,"c4"],[186,126,"c3"]].map(p=>`<circle class="o ${p[2]}" cx="${p[0]}" cy="${p[1]}" r="5"/>`).join("")+
+ e1.concat(e2).map(p=>`<circle class="o c7" cx="${p[0]}" cy="${p[1]}" r="5"/>`).join("")+
+ L(180,106,92,30,"Nucleus")+L(e2[1][0],e2[1][1],268,60,"Electron (−)")+L(P(160,180,120,68)[0],P(160,180,120,68)[1],92,196,"Shell")+
+ T(180,222,"Nucleus: protons (+) and neutrons.",0,"ts")+T(180,236,"Electrons (−) orbit in shells: 2, then 4 here.",0,"ts"),248)}},
+pythag:{t:"Right-angled triangle (Pythagoras)",re:/pythagoras|pythagorean|right[- ]angled triangle|hypotenuse/i,s:()=>X(
+ `<path class="o c1" d="M80 190V50L290 190z"/><path class="o" d="M80 176h14v14" style="stroke-width:1.2"/>`+
+ T(66,124,"a",0,"tb").replace('text-anchor="middle"','text-anchor="end"')+T(185,212,"b",0,"tb")+T(206,100,"c  (hypotenuse)","start","tb")+
+ T(100,168,"90°","start","ts in")+T(180,236,"c² = a² + b²",0,"tb")+T(180,252,"The hypotenuse is the longest side, opposite the right angle.",0,"ts")+T(180,266,"Example: 3² + 4² = 9 + 16 = 25 = 5²",0,"ts"),276)},
+circle:{t:"Parts of a circle",re:/parts? of a circle|circle (parts|terms)|chord|tangent (to|of) a circle|sector of a circle|arc of a circle|radius.*diameter|diameter.*radius/i,s:()=>{
+ const o=[150,125],c1=P(330,150,125,90),c0=P(210,150,125,90),t=P(75,150,125,90),ar=[P(20,150,125,90),P(50,150,125,90)],m=P(35,150,125,90),n=-Math.sin(75*Math.PI/180),d=Math.cos(75*Math.PI/180);
+ return X(`<circle class="o c1" cx="150" cy="125" r="90"/><path class="w" d="M60 125H240" style="stroke:#37474f;stroke-width:2"/><path class="w" d="M${c0}L${c1}" style="stroke:#e53935;stroke-width:2"/><path class="w" d="M150 125L${t}" style="stroke:#1e88e5;stroke-width:2"/>`+
+ `<path class="w" d="M${(t[0]+n*70).toFixed(1)} ${(t[1]+d*70).toFixed(1)}L${(t[0]-n*70).toFixed(1)} ${(t[1]-d*70).toFixed(1)}" style="stroke:#43a047;stroke-width:2"/>`+
+ `<path class="w" d="M${ar[0]}A90 90 0 0 1 ${ar[1]}" style="stroke:#fb8c00;stroke-width:5"/><circle class="k" cx="150" cy="125" r="3"/>`+
+ L(150,125,56,168,"Centre")+L(162,170,56,206,"Radius")+L(228,80,270,58,"Chord")+L(240,125,270,104,"Diameter")+L(m[0],m[1],270,150,"Arc")+L(+(t[0]-n*45).toFixed(1),+(t[1]-d*45).toFixed(1),270,204,"Tangent")+L(210,52,270,30,"Circumference"),250)}}
+};
+return D})();
+function dgClean(src){try{const d=new DOMParser().parseFromString(src,"image/svg+xml"),r=d.documentElement;if(!r||r.nodeName!=="svg"||d.querySelector("parsererror"))return"";
+ const OK=/^(svg|g|path|circle|ellipse|rect|line|polyline|polygon|text|tspan|defs|marker|title|desc)$/i,
+ AT=/^(viewbox|d|x|y|x1|x2|y1|y2|cx|cy|r|rx|ry|width|height|points|transform|fill|stroke|stroke-width|stroke-dasharray|stroke-linecap|stroke-linejoin|opacity|fill-opacity|stroke-opacity|font-size|font-weight|font-style|text-anchor|dominant-baseline|class|id|marker-end|marker-start|markerwidth|markerheight|refx|refy|orient|markerunits|dx|dy)$/i;let n=0;
+ const walk=e=>{[...e.children].forEach(c=>{if(!OK.test(c.localName)||++n>500){c.remove();return}[...c.attributes].forEach(a=>{if(!AT.test(a.name)||/url\((?!#)|javascript|data:|expression/i.test(a.value))c.removeAttribute(a.name)});walk(c)})};
+ [...r.attributes].forEach(a=>{if(!/^viewbox$/i.test(a.name))r.removeAttribute(a.name)});walk(r);
+ if(!r.getAttribute("viewBox"))r.setAttribute("viewBox","0 0 360 250");r.setAttribute("xmlns","http://www.w3.org/2000/svg");return new XMLSerializer().serializeToString(r)}catch(e){return""}}
+function dgPre(t){t=String(t||"");if(t.indexOf("svg")<0)return t;if(DGS.length>150)DGS.length=0;
+ t=t.replace(/```svg\s*([\s\S]*?)```|(<svg[\s\S]*?<\/svg>)/gi,(a,b,c)=>{DGS.push(b||c);return"\n::fig @"+(DGS.length-1)+"\n"});
+ return t.replace(/(```svg|<svg)(?![\s\S]*(```|<\/svg>))[\s\S]*$/i,"\n::fig @wait\n")}
+function dgFig(svg,cap){return svg?`<figure class="dg">${svg}${cap?`<figcaption>${cap}</figcaption>`:""}</figure>`:""}
+function dgHtml(k){if(k=="@wait")return'<div class="dgw">Drawing the diagram…</div>';
+ if(k[0]=="@"){const s=dgClean(DGS[+k.slice(1)]||""),m=s.match(/<title[^>]*>([^<]*)<\/title>/i);return dgFig(s,m?m[1]:"Diagram")}
+ const d=DG[k];return d?dgFig(d.s(),"Diagram: "+d.t):""}
+function dgAuto(m){try{if(!m||m.stream||m.note||m.err||m.lim||m.quiz||!m.t||/::fig |<svg|```svg/.test(m.t))return"";
+ const q=String(m.q||""),hd=(String(m.t).match(/^#\s*(.+)$/m)||[])[1]||"";
+ for(const pass of[q,hd])if(pass)for(const k in DG)if(DG[k].re.test(pass))return dgHtml(k)}catch(e){}return""}
+function md(t){t=dgPre(t);t=esc(t);let o="",m=null,tb=[];
  const cl=()=>{if(m=="table"){const R=tb;tb=[];let h="";R.forEach((r,k)=>{const hd=r.hd;h+="<tr>"+r.c.map(c=>{const num=/^[-+]?(UGX\s)?[\d,.\s]+(%|\s?[a-zA-Z\u00b2\u00b3\/]{0,4})?$/.test(mthLite(c).replace(/<[^>]+>/g,"").trim())&&!hd;return"<"+(hd?"th":"td")+(num?' class="nm"':"")+">"+il(c)+"</"+(hd?"th":"td")+">"}).join("")+"</tr>"});o+='<div class="tw"><table>'+h+"</table></div>";m=null;return}
   if(m=="mb"){o+="</div>";m=null;return}
   if(m){o+="</"+m+">";m=null}},
@@ -985,6 +1088,7 @@ function md(t){t=esc(t);let o="",m=null,tb=[];
  const lines=t.split("\n");
  for(let k=0;k<lines.length;k++){const l=lines[k];
   if(/^\|/.test(l)){if(/^\|[-| :]+\|?$/.test(l)){if(tb.length==1)tb[0].hd=true;continue}if(m!="table"){cl();m="table"}tb.push({c:l.split("|").slice(1,-1).map(c=>c.trim()),hd:false});continue}
+  const fg=l.match(/^::fig (\S+)$/);if(fg){cl();o+=dgHtml(fg[1]);continue}
   const mm=l.match(/^::\s?(.*)$/)||l.match(/^\$\$\s*(.+?)\s*\$\$$/);
   if(mm){if(m!="mb"){cl();o+='<div class="mb">';m="mb"}o+=mrow(mm[1]);continue}
   const b=l.match(/^(\d+)\. (.*)/),u=l.match(/^- (.*)/);
@@ -3331,7 +3435,7 @@ function bub(m,i,last){
  if(m.w&&m.w.parts&&!m.stream)m.t=wBuild(m);
  const A=[["copy","Copy"],["bm",m.bm?"Saved":"Save",m.bm],["up","Helpful",m.fb==1],["dn","Not helpful",m.fb==-1],["share","Share"]];
  const NQ=(!m.stream&&!m.quiz&&!m.note)?nqSplit(m.t):{t:m.t,nq:false};
- let h=`<div class="b i ai" data-i="${i}">${m.mdl?`<div class="mdltag">${esc(m.mdl)}</div>`:""}${exHtml(m,i)||`<div class="md">${last&&!m.stream&&!m.quiz?hlWrap(md(NQ.t)):md(NQ.t)}</div>`}`;
+ let h=`<div class="b i ai" data-i="${i}">${m.mdl?`<div class="mdltag">${esc(m.mdl)}</div>`:""}${exHtml(m,i)||`<div class="md">${last&&!m.stream&&!m.quiz?hlWrap(md(NQ.t)):md(NQ.t)}</div>${dgAuto(m)}`}`;
  if(m.quiz){h+=m.quiz[1].map((o,k)=>`<button class="opt ${m.pick!=null?(k==m.quiz[2]?"ok":k==m.pick?"bad":""):""}" data-act="pick" data-i="${i}" data-k="${k}">${esc(o)}</button>`).join("")+(m.pick!=null?`<p>${m.pick==m.quiz[2]?"Correct, well done.":"Not quite. The correct answer is highlighted."}</p>`+(m.qz?(m.qz.n<m.qz.list.length-1?`<div class="chips"><button data-act="nq" data-i="${i}">Next question</button></div>`:`<p><b>Quiz finished: ${m.qz.score} out of ${m.qz.list.length}.</b></p>`):""):"")}
  let act="";
  if(last&&!m.stream&&!m.quiz){const P=abPlan(m.t),cb=(x,c)=>x.map(y=>`<button${c?` class="${c}"`:""} data-st="${stAttr(y.q)}">${esc(y.lab)}</button>`).join("");
@@ -3697,7 +3801,7 @@ const MGUIDE={"Teaching & Lessons":["Use these when you want to learn a topic, f
 "Examinations & Revision":["Use these when you are revising or getting ready for exams.","Examiner gives exam-style questions and marking guides. Instructor guides you through exercises. Mentor gives study and exam-preparation advice and answers the most."],
 "Research & Academic Writing":["Use these for research, projects and academic writing.","Researcher helps with research questions, evidence and write-up. Librarian finds and organises resources. Philosopher does deep reasoning and analysis."]};
 function modelsGuide(){const pl=planName(),RK={Free:0,Basic:1,Standard:2,Premium:3};
- let h='<div style="padding:10px 18px;color:var(--sub);line-height:1.5">Ask Tr. David uses <b>TransApple Education AI</b>. You are on the <b>'+pl+'</b> plan.</div>';
+ let h='<div style="padding:10px 18px;color:var(--sub);line-height:1.5">Ask Tr. David is an <b>academic intelligence system</b>. You are on the <b>'+pl+'</b> plan.</div>';
  PLANS4.forEach(P=>{const on=RK[P]<=RK[pl];
   h+='<div class="sec">'+P.toUpperCase()+(PTAG[P]?' · '+PTAG[P]:'')+'</div>';
   PMOD[P].forEach(k=>{const M=MODELS[k];
@@ -4091,14 +4195,14 @@ function payBind(){const f=$("pyf"),b=$("pyb"),sb=$("pys");if(!f||!b||!sb)return
   else{sb.disabled=false;uiAlert(j&&j.err=="too many"?"You have sent many screenshots today. Please contact us on WhatsApp.":j&&j.err=="login"?"Please log in again, then send the screenshot.":"Could not send. Check your internet and try again.")}}}
 function expLine(){try{const pn=planName();if(pn=="Free")return"";const e=localStorage.getItem(PK()+"_exp");if(!e)return"";const d=new Date(e);if(isNaN(d))return"";const fa=freeAccess();return `<div style="margin-top:12px;padding:9px 12px;border-radius:10px;background:rgba(0,0,0,.32);color:#fff;font-size:15px;font-weight:600;line-height:1.4;text-shadow:0 1px 2px rgba(0,0,0,.35)">${fa?"Free "+esc(fa.plan)+" access ends":"Your plan ends"} <b style="color:#fff;font-weight:800">${esc(d.toLocaleString())}</b></div>`}catch(x){return""}}
 function plans(fs){
- const q=FQ(),P=[["Basic","500","2,800","9,000","Teaching &amp; Lessons: Teacher 1.2 and Examiner 1.0","#2f80ed"],["Standard","750","4,550","16,500","Examinations &amp; Revision: Teacher 1.3 and Examiner 1.2, with personal help and detailed marking guides","#00a884"],["Premium","1,100","6,650","24,000","Research &amp; Academic Writings: advanced Teacher 1.3 and Examiner 1.2, exam prediction guides and Philosopher 1.1","#8b5cf6"]],
+ const q=FQ(),P=[["Basic","500","2,800","9,000","Teacher 1.2, Examiner 1.0","#2f80ed"],["Standard","750","4,550","16,500","Teacher 1.3, Examiner 1.2","#00a884"],["Premium","1,100","6,650","24,000","Teacher 1.3, Examiner 1.2, Philosopher 1.1","#8b5cf6"]],
  cur=planName(),RK={Free:0,Basic:1,Standard:2,Premium:3},UP=P.filter(x=>RK[x[0]]>RK[cur]||(cur=="Premium"&&x[0]=="Premium")),
  ST=['Tap <b>Subscribe</b> under the amount you want (daily, weekly or monthly). It dials the code with the merchant code and amount already in it.','Confirm the ID name is <b>Alfred</b>.','Enter your <b>PIN</b> to confirm.'];
  showP("Upgrade plans",curPlan(q)+(UP.length?`<div class="sec">${cur=="Premium"?"YOUR PLAN":"UPGRADE PLANS"}</div>`:"")+
  UP.map(x=>`<div class="pc" style="--a:${x[5]}"><div class="pch"><i>${PIC[x[0]]}</i><b>${x[0]}</b>${x[0]==cur?'<span style="margin-left:auto;font-size:12px;font-weight:700;background:rgba(255,255,255,.25);padding:3px 10px;border-radius:12px">YOUR PLAN</span>':""}</div><div class="ptag">${x[4]}</div><div class="pst"><div><b>${x[1]}</b><span>Daily</span></div><div><b>${x[2]}</b><span>Weekly</span></div><div><b>${x[3]}</b><span>Monthly</span></div></div></div><div class="psb" style="--a:${x[5]}">${[1,2,3].map(k=>`<a href="tel:*165*3*06124096*${x[k].replace(/,/g,"")}*1%23" aria-label="Subscribe ${x[0]} ${["daily","weekly","monthly"][k-1]}, ${x[k]}">Subscribe</a>`).join("")}</div>`).join("")+
  `<div class="sec">PAYMENT METHOD</div><div class="pay"><div class="pl">MTN Mobile Money · Merchant Code</div><div class="pcode">06124096</div><div class="pid">ID: <b>Alfred</b></div><button class="pcp" data-cp="06124096">Copy code</button></div>`+
  `<div class="sec">HOW TO PAY</div>`+ST.map((t,k)=>`<div class="stp"><i>${k+1}</i><div>${t}</div></div>`).join("")+
- `<a class="btn" style="text-align:center;text-decoration:none;margin-bottom:28px" href="tel:*165*3*06124096%23">Dial *165*3*06124096#</a>`+PAYPROOF(),fs?settings:closeP,e=>{const c=e.target.closest("[data-cp]");if(c){const t=c.dataset.cp,ok=()=>{c.textContent="Copied"};if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(ok,ok);else ok()}});payBind()}
+ PAYPROOF(),fs?settings:closeP,e=>{const c=e.target.closest("[data-cp]");if(c){const t=c.dataset.cp,ok=()=>{c.textContent="Copied"};if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(ok,ok);else ok()}});payBind()}
 /* ===== WAITING AND TYPING STATUS =====
    While the answer is being found: a bubble in the chat and the header both show changing words (pondering, searching, retrieving...).
    When the answer starts to appear: header says typing with dots counting 1, 2, 3 until it finishes. */

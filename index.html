@@ -653,7 +653,7 @@ function hub(){HUB=true;HBACK=null;
  const acO=HO=="ak"?`<div class="dd">${ACC.map(o=>`<div data-o="ak:${o[0]}" class="${D.acc==o[0]?"on":""}"><b class="dot" style="background:${o[0]}"></b>${o[1]}<span>✓</span></div>`).join("")}</div>`:"";
  showP("Account",`<div class="hh"><div class="hav"><div class="hpic" style="background:url(${AVATAR}) center/cover"></div><button class="hpe" data-a="pf" aria-label="Edit profile">${HI.pen}</button></div><div class="hnm">${esc(D.name)}</div><div class="hsub">${m.username?"@"+esc(m.username)+" · ":""}${pn} plan</div></div>
  ${h_hd("My Ask Tr. David")}${h_grp(h_row("lib",HI.lib,"My library",{s:(()=>{const L=libAll();return L.sv.length+" saved · "+L.lk.length+" liked · "+L.sh.length+" shared"})()})+h_row("pz",HI.pz,"Personalization")+h_row("mem",HI.mem,"Memory"))}
- ${h_hd("Account")}${h_grp(h_row("up",HI.up,"Upgrade plan",{c:"var(--green)"})+h_row("us",HI.us,"Usage and limits")+h_row("cl",HI.cls,"Class",{v:D.cls?esc(D.cls):"Not chosen"})+(m.username?h_row("un",HI.user,"Username",{v:esc(m.username),n:1,x:1}):""))}
+ ${h_hd("Account")}${h_grp(h_row("up",HI.up,"Upgrade plan",{c:"var(--green)"})+h_row("rf",HI.star,"Refer and earn",{s:"Get 2 free Premium days for each friend"})+h_row("us",HI.us,"Usage and limits")+h_row("cl",HI.cls,"Class",{v:D.cls?esc(D.cls):"Not chosen"})+(m.username?h_row("un",HI.user,"Username",{v:esc(m.username),n:1,x:1}):""))}
  ${h_grp(h_row("ap",HI.sun,"Appearance",{v:apv,d:1})+apO+h_row("ak",HI.pal,"Accent color",{v:`<b class="dot" style="background:${D.acc||"#00a884"}"></b>${acn}`,d:1})+acO)}
  ${h_grp(h_row("gn",HI.gen,"General")+h_row("nf",HI.bell,"Notifications")+h_row("vo",HI.vo,"Voice")+h_row("sf",HI.sf,"Safety")+h_row("sl",HI.sl,"Security and login")+h_row("pc",HI.sf,"Privacy center")+h_row("hd",HI.hd,"History and data")+h_row("rb",HI.bug,"Report bug",{c:"var(--green)",n:1})+h_row("ab",HI.ab,"About us"))}
  ${h_grp(h_row("lo",HI.lo,"Log out",{c:"#e5173f",n:1}))}<div style="height:110px"></div>`,closeP,e=>{
@@ -663,7 +663,7 @@ function hub(){HUB=true;HBACK=null;
    applyTheme();save();HO="";hub();return}
   const a=e.target.closest("[data-a]")?.dataset.a;if(!a)return;HSC=$("pbody").scrollTop;
   if(a=="ap"||a=="ak"){HO=HO==a?"":a;hub();return}
-  ({pf:profile,lib:()=>library("sv"),pz:personalPage,mem:memoryPage,up:()=>plans(1),us:usagePage,cl:()=>clsPick(1),gn:generalPage,nf:notifPage,vo:voiceLang,sf:safetyPage,sl:securityPage,pc:privacyCenter,hd:historyPage,rb:supportOpen,ab:aboutPage,
+  ({pf:profile,rf:()=>referPage(),lib:()=>library("sv"),pz:personalPage,mem:memoryPage,up:()=>plans(1),us:usagePage,cl:()=>clsPick(1),gn:generalPage,nf:notifPage,vo:voiceLang,sf:safetyPage,sl:securityPage,pc:privacyCenter,hd:historyPage,rb:supportOpen,ab:aboutPage,
    lo:()=>uiConfirm("Log out of this account?",()=>{HUB=false;out()},"Log out")})[a]?.()});
  const pl=$("panel");pl.firstElementChild.style.display="none";
  pl.insertAdjacentHTML("beforeend",`<button id="hbk" aria-label="Back">${HI.back}</button><div id="hsb">${HI.srch}<input id="hsq" placeholder="Search settings" autocomplete="off"></div>`);
@@ -792,7 +792,20 @@ let annT=0;
 /* ANNOUNCEMENT POP-UP: shows in the centre of the screen. It closes ONLY with its two buttons (tapping outside does nothing, and there is no timer).
    Mark as read = marks it read in What's new (red dot goes) and closes. Hide = closes, it stays unread in What's new. Several at once show one after another. */
 let annQ=[],annCur=null;
-function annShow(x){annCur={id:x.id!=null?x.id:null,ts:x.ts};$("annt").textContent=x.t;$("annb").textContent=x.b||"";$("ann").style.display="flex";try{$("annb").scrollTop=0}catch(e){}}
+
+/* REFERRAL PUSH: a referral announcement shows each learner THEIR OWN code and link with Share (opens the phone's share sheet: WhatsApp, Facebook, SMS...) and Copy buttons. */
+function refInfo(){if(window.__refP)return window.__refP;
+ window.__refP=svRpc("ref_my",{p_t:tokNow()}).then(j=>{if(!j||!j.ok||!j.code){window.__refP=null;return null}
+  const base=(location.protocol=="https:"&&!/^(localhost|127\.|10\.|192\.168\.)/.test(location.hostname))?location.origin+location.pathname:"https://asktrdavid.vercel.app/";
+  return{code:j.code,link:base+"?ref="+j.code}}).catch(()=>{window.__refP=null;return null});return window.__refP}
+function refShare(i){const text="Join me on Ask Tr. David, the study helper for PLE, UCE and UACE. Use my code "+i.code+":";
+ if(navigator.share)navigator.share({title:"Ask Tr. David",text,url:i.link}).catch(()=>{});else window.open("https://wa.me/?text="+encodeURIComponent(text+" "+i.link),"_blank")}
+function refCopy(i,b){const ok=()=>{b.textContent="Copied ✓"},no=()=>{b.textContent="Press and hold the link to copy"};try{navigator.clipboard.writeText(i.link).then(ok).catch(no)}catch(e){no()}}
+function refFill(el){el.innerHTML='<div class="t">Getting your link…</div>';
+ refInfo().then(i=>{if(!i){el.innerHTML='<div class="t">Could not load your link. Open Account, then Refer and earn.</div>';return}
+  el.innerHTML=`<div style="font-weight:700;letter-spacing:2px;font-size:18px">${esc(i.code)}</div><div class="t" style="overflow-wrap:anywhere;margin:2px 0 8px">${esc(i.link)}</div><div style="display:flex;gap:8px"><button class="lk" data-rs="share">Share</button><button class="lk" data-rs="copy">Copy link</button></div>`;
+  el.onclick=e=>{const b=e.target.closest("[data-rs]");if(!b)return;e.stopPropagation();if(b.dataset.rs=="share")refShare(i);else refCopy(i,b)}})}
+function annShow(x){annCur={id:x.id!=null?x.id:null,ts:x.ts};$("annt").textContent=x.t;$("annb").textContent=x.b||"";{const o=$("annref");if(o)o.remove();if(x.ref){const r=document.createElement("div");r.id="annref";r.style.cssText="margin-top:12px;padding:10px 12px;border:1px solid var(--line);border-radius:12px";$("anncard").insertBefore(r,$("annrow"));refFill(r)}}$("ann").style.display="flex";try{$("annb").scrollTop=0}catch(e){}}
 /* The pop-up waits until the app has loaded and settled (about 5 seconds after opening, same as the rating pop-up), never appears while someone is typing or another pop-up is open, and is the same for EVERY user. */
 let annSettled=false,annGate=null;
 function annBusy(){const a=document.activeElement;return !!(a&&/^(INPUT|TEXTAREA)$/.test(a.tagName)&&a.id!=="annt")||!!document.getElementById("wkm")||document.hidden||(document.getElementById("auth")&&document.getElementById("auth").style.display!=="none")}
@@ -817,9 +830,9 @@ function toggleNotif(){
  const fin=p=>{if(p=="granted"){D.notif=true;save();settings();pushOn()}else uiAlert("Notifications are blocked. Turn them on in your browser settings.")};
  if(Notification.permission=="granted")fin("granted");else if(Notification.permission=="denied")fin("denied");else Notification.requestPermission().then(fin)}
 function notifs(direct){
- const L=D.notes,body=L.length?'<div class="row danger" data-a="nclr"><div>Clear all</div></div>'+L.map(n=>`<div class="row" style="display:block"><b style="font-size:calc(1em + 3px);line-height:1.3">${n.r?"":'<span style="color:#ff453a">&#9679; </span>'}${esc(n.t)}</b><div style="margin-top:4px;white-space:pre-wrap;overflow-wrap:anywhere">${esc(n.b||"")}</div><small>${dl(n.ts)}, ${hm(n.ts)}</small></div>`).join(""):'<div class="empty">Nothing new</div>';
+ const L=D.notes,body=L.length?'<div class="row danger" data-a="nclr"><div>Clear all</div></div>'+L.map(n=>`<div class="row" style="display:block"><b style="font-size:calc(1em + 3px);line-height:1.3">${n.r?"":'<span style="color:#ff453a">&#9679; </span>'}${esc(n.t)}</b><div style="margin-top:4px;white-space:pre-wrap;overflow-wrap:anywhere">${esc(n.b||"")}</div>${n.ref?'<div class="refbox" style="margin:8px 0;padding:10px 12px;border:1px solid var(--line);border-radius:12px"></div>':""}<small>${dl(n.ts)}, ${hm(n.ts)}</small></div>`).join(""):'<div class="empty">Nothing new</div>';
  L.forEach(n=>n.r=1);save();updateBadge();
- showP("What's new",body,direct?closeP:settings,e=>{if(e.target.closest("[data-a=nclr]")){D.notes=[];save();updateBadge();notifs(direct)}})}
+ showP("What's new",body,direct?closeP:settings,e=>{if(e.target.closest("[data-a=nclr]")){D.notes=[];save();updateBadge();notifs(direct)}});try{document.querySelectorAll("#pbody .refbox").forEach(refFill)}catch(x){}}
 function chatTheme(){
  const C=["#00a884","#1c7ed6","#7048e8","#d6336c","#e8590c","#2f9e44"];
  showP("Chat theme",`<div class="sec">Color</div><div class="sws">${C.map(c=>`<div class="sw ${c==D.acc?"on":""}" data-c="${c}" style="background:${c}"></div>`).join("")}</div>`,settings,e=>{
@@ -4368,7 +4381,7 @@ async function vkItem(id,msg,keep){
  by a real push alert (push-sw.js + ann_push, works when the app is closed) and, as a back-up, by the app itself while it is open in the background. */
 const PUSHSC="./push-sw-scope/";let PUSHREG=null,ANN_BUSY=0;
 const annTitle=a=>(a.kind=="update"?"Update: ":"")+a.title;
-function annBanner(a){try{annPush({id:a.id,ts:new Date(a.created_at).getTime(),t:annTitle(a),b:a.body||""})}catch(e){}}
+function annBanner(a){try{annPush({id:a.id,ts:new Date(a.created_at).getTime(),t:annTitle(a),b:a.body||"",ref:a.referral?1:0})}catch(e){}}
 async function devAlert(a){
  if(!D.notif||!("Notification"in window)||Notification.permission!="granted")return;
  const o={body:String(a.body||"").slice(0,240),tag:"ann-"+a.id,icon:"./blank-96.png",badge:"./badge-96.png",data:{id:a.id}};
@@ -4383,12 +4396,28 @@ async function annSync(){
   L.slice().reverse().forEach(a=>{if(D.annSeen[a.id])return;D.annSeen[a.id]=1;
    if(first)return;/* a new install starts fresh: everything posted before its first sign-in is skipped, no list entry, no red dot, no banner, no alert */
    added++;const ts=new Date(a.created_at).getTime();
-   D.notes.unshift({id:a.id,t:annTitle(a),b:a.body||"",ts,r:0});
+   D.notes.unshift({id:a.id,t:annTitle(a),b:a.body||"",ts,r:0,ref:a.referral?1:0});
    if(document.hidden)devAlert(a);annBanner(a)/* also queued, so it pops up when the person comes back to the app */});
   D.annInit=1;if(added){D.notes.sort((x,y)=>y.ts-x.ts);D.notes=D.notes.slice(0,50)}save();updateBadge()}
  catch(e){}finally{ANN_BUSY=0}}
 setInterval(()=>{if(!document.hidden||D.notif)annSync()},60000);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)annSync()});
+/* REFERRAL ALERT: when a friend you referred has signed up and asked 2 questions, the server has already given you 2 free Premium days. This tells you at once and refreshes the plan. */
+let REF_BUSY=0;
+async function refSync(){
+ if(REF_BUSY||!(window.AK&&AK.me()))return;REF_BUSY=1;
+ try{const j=await svRpc("ref_poll",{p_t:tokNow()});
+  if(!j||!j.ok||!Array.isArray(j.items)||!j.items.length)return;
+  const nm=j.items.map(x=>x.name||"A friend"),d=j.items.reduce((a,x)=>a+(x.days||2),0),
+   t="You earned free Premium",
+   b=(nm.length==1?nm[0]+" signed up with your code and asked 2 questions.":nm.length+" friends ("+nm.slice(0,3).join(", ")+(nm.length>3?"…":"")+") signed up with your code and asked 2 questions.")+" You earned "+d+" free days of Premium. It is active now.";
+  j.items.forEach(x=>D.notes.unshift({t,b:(x.name||"A friend")+" signed up with your code and asked 2 questions. You earned "+(x.days||2)+" free days of Premium. It is active now.",ts:Date.now(),r:0}));
+  D.notes=D.notes.slice(0,50);save();updateBadge();try{syncPlan()}catch(e){}
+  if(document.hidden){if(D.notif&&"Notification"in window&&Notification.permission=="granted"){try{const n=new Notification(t,{body:b});n.onclick=()=>{window.focus();n.close()}}catch(e){}}}
+  else uiAlert(b)}
+ catch(e){}finally{REF_BUSY=0}}
+setInterval(()=>{if(!document.hidden||D.notif)refSync()},60000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)refSync()});
 const b64u=t=>{const p="=".repeat((4-t.length%4)%4),r=atob((t+p).replace(/-/g,"+").replace(/_/g,"/")),o=new Uint8Array(r.length);for(let i=0;i<r.length;i++)o[i]=r.charCodeAt(i);return o};
 async function pushReg(){
  if(!("serviceWorker"in navigator)||!("PushManager"in window))return null;
@@ -4416,7 +4445,7 @@ async function admNews(){const s=ADMSEQ,b=$("abody");b.innerHTML=admLd();const [
  admNewsDraw(j,"")}
 function admNewsDraw(j,msg){const b=$("abody");
  b.innerHTML=`<div class="asec">Post to What's new</div>
- <div style="display:flex;gap:6px;padding:4px 18px 8px">${svBtn(ANK=="announcement","Announcement","data-k","announcement")}${svBtn(ANK=="update","Update","data-k","update")}</div>
+ <div style="display:flex;gap:6px;padding:4px 18px 8px">${svBtn(ANK=="announcement","Announcement","data-k","announcement")}${svBtn(ANK=="update","Update","data-k","update")}${svBtn(ANK=="referral","Referral push","data-k","referral")}</div>
  <div style="padding:0 18px 4px;color:var(--sub);font-size:13px">Send to</div>
  <select class="ain" id="anto"><option value="">Everyone</option>${ADMUS.map(u=>`<option value="${esc(u.id)}"${u.id==ANTO?" selected":""}>${esc(u.names||u.username)} (${esc(u.username)})${admN(u.devices)?"":" · no phone alerts"}</option>`).join("")}</select>
  <input class="ain" id="ant" maxlength="100" placeholder="Title" autocomplete="off" value="${esc(ANT)}">
@@ -4424,16 +4453,16 @@ function admNewsDraw(j,msg){const b=$("abody");
  <div id="anm" style="padding:2px 18px;min-height:20px;color:var(--sub)">${esc(msg)}</div>
  <div style="display:flex;gap:8px;padding:6px 18px 6px">${abt("send",ANTO?"Send to "+esc(admUN(ANTO)):"Send to everyone","#00a884")}</div>
  <div style="padding:2px 18px 10px;color:var(--sub);font-size:13px;line-height:1.45">${ANTO?`Only ${esc(admUN(ANTO))} sees it, in What's new and as a banner when they open the app. ${admN((ADMUS.find(u=>u.id==ANTO)||{}).devices)} of their phone${admN((ADMUS.find(u=>u.id==ANTO)||{}).devices)==1?"":"s"} will also get a phone alert, if Away alerts is on there.`:`Everyone sees it in What's new and as a banner when they open the app. ${admN(j.devices)} phone${admN(j.devices)==1?"":"s"} will also get a phone alert, because Away alerts is on there.`}</div>
- <div class="asec">Posted</div>`+(j.items.length?j.items.map((x,i)=>`<div class="row" style="display:block"><b>${esc(x.title)}</b> <small style="color:var(--sub)">${x.kind=="update"?"Update":"Announcement"} · ${admDate(x.created_at)}${x.to_user?" · to "+esc(x.to_name||"one user"):""}</small>${x.body?`<div style="margin-top:2px;color:var(--sub)">${esc(x.body)}</div>`:""}<button data-del="${i}" style="margin-top:6px;border:0;background:none;color:#ff453a;font:inherit;font-weight:600;padding:4px 0;cursor:pointer">Delete</button></div>`).join(""):'<div style="padding:12px 18px;color:var(--sub)">Nothing posted yet.</div>');
+ ${ANK=="referral"?'<div style="padding:0 18px 10px;color:var(--green);font-size:13px;line-height:1.45">Referral push: each learner gets this message with their own code and link, plus Share and Copy buttons.</div>':""}<div class="asec">Posted</div>`+(j.items.length?j.items.map((x,i)=>`<div class="row" style="display:block"><b>${esc(x.title)}</b> <small style="color:var(--sub)">${x.referral?"Referral push":x.kind=="update"?"Update":"Announcement"} · ${admDate(x.created_at)}${x.to_user?" · to "+esc(x.to_name||"one user"):""}</small>${x.body?`<div style="margin-top:2px;color:var(--sub)">${esc(x.body)}</div>`:""}<button data-del="${i}" style="margin-top:6px;border:0;background:none;color:#ff453a;font:inherit;font-weight:600;padding:4px 0;cursor:pointer">Delete</button></div>`).join(""):'<div style="padding:12px 18px;color:var(--sub)">Nothing posted yet.</div>');
  b.onchange=e=>{if(e.target.id=="anto"){ANT=$("ant").value;ANB=$("anb").value;ANTO=e.target.value;admNewsDraw(j,"")}};
  b.onclick=async e=>{
-  const k=e.target.closest("[data-k]");if(k){ANT=$("ant").value;ANB=$("anb").value;ANK=k.dataset.k;admNewsDraw(j,"");return}
+  const k=e.target.closest("[data-k]");if(k){ANT=$("ant").value;ANB=$("anb").value;ANK=k.dataset.k;if(ANK=="referral"&&!ANT&&!ANB){ANT="Refer now and get free Premium";ANB="Refer a friend and get 2 free days of Premium. When your friend signs up with your link and asks 2 questions, the days are yours. Tap Share below to send your own link."}admNewsDraw(j,"");return}
   const d=e.target.closest("[data-del]");if(d){const x=j.items[+d.dataset.del];if(!x)return;uiConfirm("Delete this post?",async()=>{const r=await admCall("admin_ann_delete",{p_id:x.id});if(r.ok){const n=await admCall("admin_ann_list");if(n.ok)admNewsDraw(n,"Deleted.");else admNews()}else uiAlert("Could not delete. Try again.")},"Delete");return}
   const sb=e.target.closest("[data-a=send]");if(!sb)return;
   const t=$("ant").value.trim(),m=$("anb").value.trim(),st=$("anm");ANT=t;ANB=m;
   if(t.length<3){st.textContent="Write a title (at least 3 letters).";return}
   sb.disabled=true;st.textContent="Sending…";
-  const r=await admCall("admin_ann_post",{p_title:t,p_body:m,p_kind:ANK,p_duration:0,p_to:ANTO||null});
+  const r=await admCall("admin_ann_post",{p_title:t,p_body:m,p_kind:ANK=="referral"?"announcement":ANK,p_duration:0,p_to:ANTO||null,p_ref:ANK=="referral"});
   if(!r.ok){sb.disabled=false;st.textContent=r.err=="bad title"?"The title must be 3 to 100 letters.":r.err=="bad user"?"That user was not found. Pick again.":"Could not send. Try again.";return}
   const toN=ANTO?admUN(ANTO):"";let note=ANTO?"Posted. "+toN+" will see it in What's new.":"Posted. Everyone will see it in What's new.";
   try{const pr=await fetch(SBU.replace("/rest/v1/","/functions/v1/")+"ann_push",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({t:tokNow(),id:r.id})}).then(z=>z.json());
@@ -4462,7 +4491,7 @@ function syncPlan(){const t=tokNow();if(!t)return;
 /* FREE-ACCESS WINDOWS: the server decides the plan. The client only keeps one timer set for the exact second a window opens or closes, so the change shows at once. */
 function freeAccess(){try{const a=localStorage.getItem(PK()+"_fa");return a?JSON.parse(a):null}catch(e){return null}}
 let _edgeT=0;
-function planEdge(j){clearTimeout(_edgeT);try{const at=j.free_access?j.free_access.ends_at:(j.free_next&&j.free_next.starts_at),sv=Date.parse(j.now);if(!at||isNaN(sv))return;
+function planEdge(j){clearTimeout(_edgeT);try{const cc=[j.free_access?j.free_access.ends_at:(j.free_next&&j.free_next.starts_at),j.bonus_until].filter(Boolean).sort(),at=cc[0],sv=Date.parse(j.now);if(!at||isNaN(sv))return;
  const ms=Date.parse(at)-sv+400;if(ms>0&&ms<2147483000)_edgeT=setTimeout(syncPlan,ms)}catch(e){}}
 function setPlanServer(x){fetch(SBU+"rpc/set_my_plan",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_t:tokNow(),p_plan:x})}).then(r=>r.json()).then(j=>{if(!j||!j.ok)syncPlan()}).catch(()=>{})}
 /* Installs and usage: one anonymous device id per phone. log_app_event counts an install once per device and an open at most once per 30 minutes. */
@@ -5254,6 +5283,27 @@ function applyCls(c){D.cls=c;const l=lvOf(c);if(l!=D.lvl){D.lvl=l;fixSub();setSu
 function setCls(c){try{localStorage.setItem("ask_cls_"+((window.AK&&AK.me()&&AK.me().username)||""),c)}catch(e){}applyCls(c);save();render()}
 function clsPick(fp){const g=(t,l)=>`<div class="sec">${t}</div><div class="sws" style="gap:8px">${l.map(c=>`<button class="lk ${c==D.cls?"on":""}" data-c="${c}">${c}</button>`).join("")}</div>`;
  showP("Select class or combination",`<div style="padding:12px 18px;color:var(--sub);line-height:1.4">Choose your class. In A-Level, choose your combination instead. Ask Tr. David will give answers for your level.</div>`+g("Primary (PLE)",CLASSES.slice(0,4))+g("Senior 1 to 4 (O-Level)",CLASSES.slice(4,8))+`<div class="sec">A-Level: choose your combination</div><div class="sws" style="gap:8px">${COMBOS.map(x=>`<button class="lk ${x[0]==D.cls?"on":""}" data-c="${x[0]}" style="width:100%;text-align:left">${x[0]} · ${x[1]}</button>`).join("")}</div>`,fp?profile:closeP,e=>{const c=e.target.dataset.c;if(c){setCls(c);fp?profile():closeP()}})}
+/* REFER AND EARN: every learner has a code. A friend who signs up with it and asks 2 different questions earns the owner 2 free Premium days. The server counts and rewards; this page only shows it. */
+function referPage(){
+ const hd="Refer and earn",bad='<div class="empty" style="padding:40px 28px">Could not load. Check your internet and try again.</div>';
+ showP(hd,'<div class="empty" style="padding:40px 28px">Loading…</div>',hub);
+ fetch(SBU+"rpc/ref_my",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_t:tokNow()})}).then(r=>r.json()).then(j=>{
+  if(!j||!j.ok||!j.code){showP(hd,bad,hub);return}
+  try{syncPlan()}catch(e){}
+  const base=(location.protocol=="https:"&&!/^(localhost|127\.|10\.|192\.168\.)/.test(location.hostname))?location.origin+location.pathname:"https://asktrdavid.vercel.app/",
+   link=base+"?ref="+j.code,
+   stt=(n,l)=>`<div style="flex:1;text-align:center;padding:14px 4px"><b style="font-size:22px">${n}</b><div class="t" style="margin-top:2px">${l}</div></div>`,
+   dt=x=>new Date(x).toLocaleDateString([],{day:"numeric",month:"short"}),
+   list=(j.items||[]).length?`<div class="gc">${j.items.map(x=>`<div class="row" style="cursor:default"><div>${esc(x.name||"Learner")}<small>Joined ${dt(x.joined)} · ${x.asked}/2 questions${x.done?" · done "+dt(x.completed_at):""}</small></div><span class="rv" style="${x.done?"color:var(--green);font-weight:600":""}">${x.done?"Earned ✓":"Waiting"}</span></div>`).join("")}</div>`:`<div class="empty" style="padding:24px 28px">No referrals yet. Share your link to start.</div>`;
+  showP(hd,`<div class="doc" style="padding-bottom:4px"><p>Share your link. When a friend signs up with it and asks 2 questions, you get <b>2 free days of Premium</b>. You can refer as many friends as you like.</p></div>
+<div class="gc" style="padding:14px 16px"><div class="t">Your code</div><b style="font-size:26px;letter-spacing:3px">${esc(j.code)}</b><div class="t" style="margin:8px 0 2px;overflow-wrap:anywhere">${esc(link)}</div><div style="display:flex;gap:8px;margin-top:10px"><button class="lk" data-r="copy">Copy link</button><button class="lk" data-r="share">Share</button><button class="lk" data-r="refresh">Refresh</button></div></div>
+<div class="gc" style="display:flex">${stt(j.signed,"Signed up")}${stt(j.completed,"Asked 2 questions")}${stt(j.days,"Free days earned")}</div>
+${j.bonus_until?`<div class="t" style="padding:2px 22px 10px;color:var(--green);line-height:1.4">Your free Premium is active until ${new Date(j.bonus_until).toLocaleString([],{dateStyle:"medium",timeStyle:"short"})}.</div>`:""}
+<div class="sec">Your referrals</div>${list}<div style="height:40px"></div>`,hub,e=>{
+   const b=e.target.closest("[data-r]");if(!b)return;
+   const cp=()=>{try{navigator.clipboard.writeText(link).then(()=>{b.textContent="Copied ✓"}).catch(()=>{b.textContent="Press and hold the link to copy"})}catch(x){b.textContent="Press and hold the link to copy"}};
+   if(b.dataset.r=="refresh"){referPage();return}if(b.dataset.r=="share"&&navigator.share){navigator.share({title:"Ask Tr. David",text:"Join me on Ask Tr. David, the study helper for PLE, UCE and UACE. Use my code "+j.code+":",url:link}).catch(()=>{})}else cp()})
+ }).catch(()=>showP(hd,bad,hub))}
 function profile(){const m=(window.AK&&AK.me())||{},nm=m.names||GNm(),LB={PLE:"Primary level",UCE:"O-Level",UACE:"A-Level"};
  const row=(a,ic,t,x)=>`<div class="row" data-a="${a}"><span class="ri">${ic}</span><div>${t}<small>${x}</small></div></div>`;
  showP("Learner profile",`<div class="pcard"><div class="pav">${esc((nm||"?").charAt(0).toUpperCase())}</div><div class="pcn">${esc(nm)}</div><div class="pcu">${esc(D.cls||"Class not chosen yet")}</div></div>`+
@@ -6061,6 +6111,7 @@ U="https://pjdtlpnlvumpefxjmjpv.supabase.co/rest/v1/rpc/",K="sb_publishable_Y48b
 EYE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>',
 EYEOFF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.9 17.9A10.9 10.9 0 0 1 12 19C5 19 1 12 1 12a18.5 18.5 0 0 1 5.1-5.9M9.9 5.1A9.7 9.7 0 0 1 12 5c7 0 11 7 11 7a18.6 18.6 0 0 1-2.2 3.2M14.1 14.1a3 3 0 1 1-4.2-4.2M1 1l22 22"/></svg>',
 stg=()=>SS.getItem("ask_tok")?SS:LS;
+try{const m=/[?&]ref=([A-Za-z0-9]{4,12})/.exec(location.search);if(m)LS.setItem("ask_ref",m[1].toUpperCase())}catch(e){}
 let H=location.hash,T=LS.getItem("ask_tok")||SS.getItem("ask_tok")||"",ME=null,tm={};
 const rpc=(f,b)=>fetch(U+f,{method:"POST",headers:{apikey:K,"Content-Type":"application/json"},body:JSON.stringify(b)}).then(r=>r.json()).then(r=>r&&typeof r.ok=="boolean"?r:{ok:false,err:"Something went wrong. Try again."}).catch(()=>({ok:false,err:"No internet. Check your connection and try again.",net:1}));
 const R={names:/^[A-Z][A-Za-z]+ [A-Z][A-Za-z]+$/,username:/^[A-Z]{5,10}$/,phone:/^0\d{9}$/,pin:/^\d{5}$/},
@@ -6087,7 +6138,7 @@ er=(m,g)=>{const f=$("ferr");if(f){f.textContent=m;f.style.color=g?"var(--green)
 fb=(id,r)=>{const h=$("h_"+id);if(!h)return;h.className="hn e";h.textContent=r.err||"";let sg=r.suggest;const ip=$("x_"+id);if((!sg||!sg.length)&&ip&&ip.dataset.k=="username"&&!r.net&&/taken|exist|already|available|use/i.test(r.err||""))sg=us(ip.value);if(sg&&sg.length)h.insertAdjacentHTML("beforeend",chips(id,sg))};
 function form(el,items,btn,go,extra,pre){
  el.innerHTML=items.map(([id,k,l])=>{const hid=k=="cpw"||k=="cpin";if(k=="cls")return`<div class="fw"><label>${l}</label><select class="fld" id="x_${id}" data-k="${k}" data-id="${id}"><option value="">Select class or combination</option><optgroup label="Primary and O-Level">${CLASSES.filter(c=>!COMBOS.some(x=>x[0]==c)).map(c=>`<option value="${c}">${c}</option>`).join("")}</optgroup><optgroup label="A-Level combination">${COMBOS.map(x=>`<option value="${x[0]}">${x[0]} · ${x[1]}</option>`).join("")}</optgroup></select><div class="hn" id="h_${id}"></div></div>`;return`<div class="fw"><label>${l}</label><div class="pw"><input class="fld" id="x_${id}" data-k="${k}" data-id="${id}" type="${hid?"password":"text"}" autocomplete="off" autocapitalize="off" ${/phone|pin/.test(k)?'inputmode="numeric"':""}>${hid?`<button type="button" class="eye" data-t="x_${id}" aria-label="Show password">${EYE}</button>`:""}</div><div class="hn" id="h_${id}"></div></div>`}).join("")+(pre||"")+'<div class="fe" id="ferr"></div><button class="btn" id="fgo">'+btn+"</button>"+(extra||"");
- el.oninput=e=>{const i=e.target,k=i.dataset.k;if(!k)return;const id=i.dataset.id,h=$("h_"+id),v=mask(k,i.value);if(v!=i.value)i.value=v;if(!NEW[k])return;
+ el.oninput=e=>{const i=e.target,k=i.dataset.k;if(i.id=="refc"){const w=i.value.toUpperCase().replace(/[^A-Z0-9]/g,"");if(w!=i.value)i.value=w;return}if(!k)return;const id=i.dataset.id,h=$("h_"+id),v=mask(k,i.value);if(v!=i.value)i.value=v;if(!NEW[k])return;
   if(!v){h.className="hn";h.innerHTML="";return}
   if(!good(k,v)){h.className="hn";h.innerHTML=ck(k,v).map(c=>`<div class="${c[0]?"ok":"no"}">${c[0]?"✓":"○"} ${c[1]}</div>`).join("")+(k=="password"?chips(id,PS[id]||(PS[id]=[gp(),gp(),gp()])):"");return}
   h.className="hn g";h.textContent="✓";
@@ -6106,11 +6157,11 @@ function done(r,rm){if(r.ok){T=r.token;ME=r.me;const S=rm===false?SS:LS;LS.remov
 function scr(n){const f=$("af"),h=t=>$("ah").textContent=t;$("auth").style.display="block";window.__authScr=n;window.__authGo=scr;try{window.__backSync&&window.__backSync()}catch(e){}
  const FG=(w,id)=>async v=>{const r=await rpc("acct_forgot",{p_what:w,p_user:v.u,p_phone:v.p,p_secret:v.s,p_new:v.n});if(r.ok){scr("login");er((w=="pin"?"Pin":"Password")+" updated. Please login.",1)}return r};
  if(n=="login"){h("Login");form(f,[["i","login","Names / Username"],["p","cpw","Password"]],"Login",async v=>done(await rpc("acct_login",{p_id:v.i,p_pass:v.p}),v.rm),AR(L("fp","Forgot password"),L("create","Create account")),'<label class="rm"><input type="checkbox" id="rm" checked>Remember login</label>')}
- if(n=="create"){h("Create account");form(f,[["n","names","Names"],["u","username","Username"],["p","phone","Phone"],["k","cls","Class or combination"],["w","password","Password"],["c","pin","Pin"]],"Create account",async v=>{const r=await rpc("acct_create",{p_names:v.n,p_user:v.u,p_phone:v.p,p_pass:v.w,p_pin:v.c});if(r.ok){try{LS.setItem("ask_cls_"+((r.me&&r.me.username)||v.u),v.k)}catch(e){}}return done(r)},L("login","I already have an account: Login"))}
+ if(n=="create"){h("Create account");form(f,[["n","names","Names"],["u","username","Username"],["p","phone","Phone"],["k","cls","Class or combination"],["w","password","Password"],["c","pin","Pin"]],"Create account",async v=>{const r=await rpc("acct_create",{p_names:v.n,p_user:v.u,p_phone:v.p,p_pass:v.w,p_pin:v.c});if(r.ok){try{LS.setItem("ask_cls_"+((r.me&&r.me.username)||v.u),v.k)}catch(e){}try{const rc=(($("refc")||{}).value||"").trim().toUpperCase();if(rc){await rpc("ref_claim",{p_t:r.token,p_code:rc});LS.removeItem("ask_ref")}}catch(e){}}return done(r)},L("login","I already have an account: Login"),'<div class="fw"><label>Referral code (optional)</label><div class="pw"><input class="fld" id="refc" maxlength="12" autocomplete="off" autocapitalize="characters" placeholder="Leave empty if you have none" value="'+String(LS.getItem("ask_ref")||"").replace(/[^A-Z0-9]/g,"")+'"></div></div>')}
  if(n=="fp"){h("Forgot password");form(f,[["u","uname","Username"],["p","phoneo","Phone"],["s","cpin","Pin"],["n","password","New password"]],"Reset password",FG("password"),AR(L("fn","Forgot pin"),L("ct","Forgot password and pin"))+BK)}
  if(n=="fn"){h("Forgot pin");form(f,[["u","uname","Username"],["p","phoneo","Phone"],["s","cpw","Password"],["n","pin","New pin"]],"Reset pin",FG("pin"),L("ct","Forgot password and pin")+BK)}
  if(n=="ct"){h("Contact us");f.innerHTML='<div class="fw" style="line-height:1.5">If you forgot both your password and your pin, contact us and we will help you recover your account.</div>'+`<a class="btn" style="text-align:center;text-decoration:none" href="tel:+256788737517">Call 0788 737 517</a><a class="btn" style="text-align:center;text-decoration:none;background:#25d366;margin-top:10px" href="https://wa.me/256788737517" target="_blank" rel="noopener">WhatsApp</a><a class="btn" style="text-align:center;text-decoration:none;background:var(--sub);margin-top:10px" href="mailto:asktrdavid@gmail.com">Email asktrdavid@gmail.com</a>`+BK;f.onclick=e=>{if(e.target.dataset.go)scr(e.target.dataset.go)};f.oninput=null;f.onfocusin=null}}
-function enter(){$("auth").style.display="none";window.__authScr="";try{window.__backSync&&window.__backSync()}catch(e){}if(ME){D.pname=GNm();const c=LS.getItem("ask_cls_"+ME.username);if(c&&CLASSES.includes(c))applyCls(c);else D.cls="";save()}render();link();evLog("open");try{annSync();if(D.notif)pushOn()}catch(e){}if(ME&&!D.cls)clsPick();admHide();try{updPlan()}catch(e){}}
+function enter(){$("auth").style.display="none";window.__authScr="";try{window.__backSync&&window.__backSync()}catch(e){}if(ME){D.pname=GNm();const c=LS.getItem("ask_cls_"+ME.username);if(c&&CLASSES.includes(c))applyCls(c);else D.cls="";save()}render();link();evLog("open");try{annSync();window.refSync&&refSync();if(D.notif)pushOn()}catch(e){}if(ME&&!D.cls)clsPick();admHide();try{updPlan()}catch(e){}}
 function out(){admHide();rpc("acct_logout",{p_t:T});T="";ME=null;LS.removeItem("ask_tok");LS.removeItem("ask_me");SS.removeItem("ask_tok");SS.removeItem("ask_me");closeP();scr("login")}
 const UI={names:[["n","names","New names"],["a","cpw","Confirm password"]],username:[["n","username","New username"],["a","cpw","Confirm password"]],phone:[["n","phone","New phone"],["a","cpw","Confirm password"]],password:[["n","password","New password"],["a","uname","Confirm username"],["b","cpw","Old password"],["c","cpin","Pin"]],pin:[["n","pin","New pin"],["a","uname","Confirm username"],["b","cpw","Password"],["c","cpin","Old pin"]]};
 function upd(w){showP("Update "+w,'<div id="ff"></div>',account);form($("ff"),UI[w],"Save",async v=>{const r=await rpc("acct_change",{p_t:T,p_what:w,p_new:v.n,p_a:v.a,p_b:v.b||"",p_c:v.c||""});if(r.relogin){out();return r}if(r.ok){ME=r.me;stg().setItem("ask_me",JSON.stringify(ME));account();uiAlert("Updated.")}return r})}
@@ -6123,7 +6174,7 @@ async function link(){if(H=="#wn"){H="";try{history.replaceState(null,"",locatio
   showP("Shared answer",`<div style="padding:14px 18px"><div class="t">${esc(p.l+" · "+p.s)}</div><b>${esc(p.q||"")}</b><div class="md" style="margin-top:6px">${md(p.t)}</div></div><button class="btn" id="gx">Ask your own question</button>`,closeP,e=>{if(e.target.id=="gx"){closeP();if(LV.includes(p.l)){D.lvl=p.l;fixSub();setSub(subsList().includes(p.s)?p.s:D.sub);save()}}})}catch(e){}}
 window.AK={me:()=>ME,open:account,upd,short:async m=>{const b={p_l:D.lvl,p_s:D.sub,p_q:(m.q||"").slice(0,300),p_t:m.t.slice(0,6000)};let r=await rpc("ask_share_put",b);if(!(r.ok&&r.id))r=await rpc("ask_share_put",b);return r.ok&&r.id?BASE+"#k="+r.id:BASE},link:m=>BASE+"#s="+b64(JSON.stringify({l:D.lvl,s:D.sub,q:(m.q||"").slice(0,300),t:m.t.slice(0,6000)})),area:()=>BASE+"#a="+D.lvl+"~"+D.sub};
 $("alogo").style.cssText+=";background:url("+AVATAR+") center/cover";
-(async()=>{if(!T){scr("login");return}const r=await rpc("acct_me",{p_t:T});if(r.ok){ME=r.me;stg().setItem("ask_me",JSON.stringify(ME));enter()}else if(r.net&&stg().getItem("ask_me")){ME=JSON.parse(stg().getItem("ask_me"));enter()}else{T="";LS.removeItem("ask_tok");SS.removeItem("ask_tok");scr("login")}})();
+(async()=>{if(!T){scr(LS.getItem("ask_ref")?"create":"login");return}const r=await rpc("acct_me",{p_t:T});if(r.ok){ME=r.me;stg().setItem("ask_me",JSON.stringify(ME));enter()}else if(r.net&&stg().getItem("ask_me")){ME=JSON.parse(stg().getItem("ask_me"));enter()}else{T="";LS.removeItem("ask_tok");SS.removeItem("ask_tok");scr("login")}})();
 })();
 </script>
 

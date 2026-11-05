@@ -4774,7 +4774,6 @@ async function askScenario(q){
  const now=Date.now(),raw=String(q).replace(/[ \t]+\n/g,"\n").trim().slice(0,6000);stamps=stamps.filter(t=>now-t<6e4);
  const err=x=>{D.msgs.push({s:"i",err:1,t:x,q:raw.slice(0,300),ts:Date.now()});save();render()};
  if(!navigator.onLine)return err("No internet connection. Please connect to the internet and tap Retry.");
- if(stamps.length>=8)return err("Too many requests. Please wait a minute and try again.");
  stamps.push(now);const tok=++AN;window.ASKQ_RAW=raw;window.ASKQ=raw;
  const ch=D.chats.find(c=>c.id==D.cur);if(ch&&(ch.title=="New chat"||ch.title=="Chat"))ch.title=raw.slice(0,32);
  $("stat").textContent="reading the scenario…";$("send").innerHTML=STOP;
@@ -5078,7 +5077,6 @@ function askCore(q,mode,I){
  const now=Date.now();stamps=stamps.filter(t=>now-t<6e4);
  const err=x=>{D.msgs.push({s:"i",err:1,t:x,q,mode,ts:Date.now()});save();render()};window.ASKQ=String(q)+" "+String(window.ASKQ_RAW||"")+" "+String(mode||"")+" "+((FU&&FU.kind&&FU.kind!=="summary"&&FU.kind!=="define"&&FU.kind!=="local")||(I&&I.detail==="full")?"explain":"");
  if(!navigator.onLine)return err("No internet connection. Please connect to the internet and tap Retry.");
- if(stamps.length>=8)return err("Too many requests. Please wait a minute and try again.");
  stamps.push(now);sm=null;const tok=++AN;
  thinkOn();$("send").innerHTML=STOP;
  stream=setTimeout(async()=>{let f=FU&&FU.local?{t:FU.local}:null;if(!f&&FU&&FU.part){try{f=FU.exp?await expandPart(q,FU):await explainPart(q,FU)}catch(e){f=null}if(stream==null||tok!=AN)return;if(f&&f.busy){stopS();return err("Many learners are asking right now. Please try again in a little while.")}if(!f){if(FU.exp){const F2=ctxFollow(q);FU=F2||null;if(F2&&F2.local)f={t:F2.local};else if(F2)q=F2.q}else{FU.part=0;FU.kind="custom";FU.hint=FU_HINT.custom}}}if(!f)try{f=await Promise.race([dbAnswer(q,mode),new Promise(r=>setTimeout(()=>r(null),2500))])}catch(e){}

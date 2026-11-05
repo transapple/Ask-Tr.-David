@@ -212,6 +212,7 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 .dg .c1{fill:#dff3e8}.dg .c2{fill:#b9a7e8}.dg .c3{fill:#f7b7a3}.dg .c4{fill:#bfe3f5}.dg .c5{fill:#cfe8b0}.dg .c6{fill:#43a047}.dg .c7{fill:#ffe28a}.dg .c8{fill:#a1887f}.dg .c9{fill:#9ccc65}.dg .c10{fill:#f3c6e6}
 .dg svg text{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;paint-order:stroke;stroke:var(--bg);stroke-width:3px;stroke-linejoin:round}
 .dg svg text.in{fill:#1b2a30;stroke:none}.dg svg text.in.ts{fill:#37474f}
+.md .mi{font-family:"Cambria Math","STIX Two Math","Times New Roman",serif;font-size:1.05em;white-space:nowrap;background:var(--wall);padding:1px 6px;border-radius:5px;margin:0 1px}.md .mi i{font-style:italic}
 .b.ai{max-width:100%}.md h3{font-size:1.1em;margin:2px 0 4px}.md h4{margin:8px 0 2px;color:var(--green)}.md p{margin:3px 0}.md ul,.md ol{margin:3px 0 3px 20px}
 .md table{border-collapse:collapse;margin:6px 0;width:100%}.md td{border:1px solid var(--line);padding:4px 8px;font-size:.9em}.md tr:first-child td{font-weight:600}.md code{background:var(--wall);padding:1px 5px;border-radius:4px}
 .act,.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.act button{border:0;background:none;color:var(--sub);font:inherit;font-size:12px;cursor:pointer;padding:3px 8px;border-radius:10px}.act{clear:both}.act button{padding:14px 14px 8px;display:grid;place-items:center}.act button svg{width:23px;height:23px}.act.out{align-self:flex-start;margin:-6px 0 8px 0;gap:4px}.act .on{background:none;border:0;color:var(--green)}.act .on svg{fill:currentColor}.act button:active{background:var(--wall)}
@@ -965,12 +966,15 @@ const SEND=$("send").innerHTML,STOP='<svg viewBox="0 0 24 24"><rect x="6" y="6" 
 let stream=null,sm=null,stamps=[];
 /* ===== MATHS FORMATTING: fractions, powers, roots, units, UGX. Works on text that is already HTML-escaped. ===== */
 const MG=n=>String(n).replace(/\B(?=(\d{3})+(?!\d))/g,",");
+const EL=new Set("H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Mn Fe Cu Zn Br Ag Sn I Ba Au Hg Pb Cr Ni Co".split(" "));
+function chem(x){return x.replace(/(?<![A-Za-z\d&;])((?:[A-Z][a-z]?\d*|\((?:[A-Z][a-z]?\d*)+\)\d*){2,})(?![A-Za-z])/g,a=>{const t=a.match(/[A-Z][a-z]?/g)||[];if(!/\d/.test(a)||t.length<2||!t.every(e=>EL.has(e)))return a;return a.replace(/(\)|[A-Za-z])(\d+)/g,"$1<sub>$2</sub>")}).replace(/(?<![A-Za-z\d])(O|N|H|Cl|Br|I|F)2(?![A-Za-z\d])/g,"$1<sub>2</sub>")}
 function mthLite(x){
  x=x.replace(/\b(?:U?Shs?|USh|Ugx)\.?\s*(?=\d)/g,"UGX ").replace(/\bUGX\s?(\d{4,})(?![\d,.])/g,(a,n)=>"UGX "+MG(n));
  x=x.replace(/\\(?:left|right)\b/g,"").replace(/\\times\b/g,"\u00d7").replace(/\\div\b/g,"\u00f7").replace(/\\cdot\b/g,"\u00b7").replace(/\\pi\b/g,"\u03c0").replace(/\\therefore\b/g,"\u2234").replace(/\\(?:le|leq)\b/g,"\u2264").replace(/\\(?:ge|geq)\b/g,"\u2265").replace(/\\neq?\b/g,"\u2260");
  x=x.replace(/\\sqrt\{([^{}]+)\}/g,"sqrt($1)").replace(/sqrt\(([^()]+)\)/g,'<span class="rt">\u221a<span class="rx">$1</span></span>');
  x=x.replace(/\^(-?\d+(?:\.\d+)?|-?[a-zA-Z]\b|\{[^}]+\}|\([^)]+\))/g,(a,e)=>"<sup>"+e.replace(/^[{(]|[})]$/g,"")+"</sup>");
- x=x.replace(/(\d|\))\s?(mm|cm|km|m|ha)([23])\b/g,"$1 $2<sup>$3</sup>").replace(/\b(m\/s|km\/h\/s)2\b/g,"$1<sup>2</sup>");
+ x=x.replace(/\b(kg|g|W|N|J|m|km|cm)\/(m|cm|s|km)([23])\b/g,"$1/$2<sup>$3</sup>").replace(/(\d|\))\s?(mm|cm|km|m|ha)([23])\b/g,"$1\u00a0$2<sup>$3</sup>").replace(/(?<![A-Za-z])(m\/s|km\/h\/s)2\b/g,"$1<sup>2</sup>").replace(/(\d)\s?(mm|cm|km|kg|mg|ml|mL|kW|MW|GW|kV|mA|kPa|MPa|kHz|MHz|Hz|ha)(?![A-Za-z<])/g,"$1\u00a0$2").replace(/(\d)\s?(g|m|s)(?![A-Za-z\d])/g,"$1\u00a0$2").replace(/(\d)(N|J|W|V|A|K)(?![A-Za-z\d])/g,"$1\u00a0$2").replace(/(\d)\s[x\u00d7]\s(?=\d)/g,"$1 \u00d7 ");
+ x=chem(x);
  x=x.replace(/([\w)])\s?\*\s?(?=[\w(])/g,"$1 \u00d7 ").replace(/&lt;=/g,"\u2264").replace(/&gt;=/g,"\u2265").replace(/!=/g,"\u2260").replace(/\+-/g,"\u00b1");
  return x}
 function mth(x){
@@ -995,6 +999,9 @@ const X=(h,H)=>`<svg viewBox="0 0 360 ${H||250}" role="img" xmlns="http://www.w3
  A=(x1,y1,x2,y2,c)=>{const a=Math.atan2(y2-y1,x2-x1),h=7,f=v=>Math.round(v*10)/10;return `<path class="ar${c?" "+c:""}" d="M${x1} ${y1}L${x2} ${y2}M${f(x2-h*Math.cos(a-.45))} ${f(y2-h*Math.sin(a-.45))}L${x2} ${y2}L${f(x2-h*Math.cos(a+.45))} ${f(y2-h*Math.sin(a+.45))}"/>`},
  P=(a,cx,cy,r)=>[Math.round((cx+r*Math.cos(a*Math.PI/180))*10)/10,Math.round((cy+r*Math.sin(a*Math.PI/180))*10)/10],
  dots=(l,c)=>l.map(p=>`<circle class="o ${c}" cx="${p[0]}" cy="${p[1]}" r="5.5"/>`).join("");
+const FL=(r,nt,rc)=>{const y=i=>8+i*52;let h=r.map((b,i)=>`<rect class="o ${b[1]}" x="50" y="${y(i)}" width="260" height="34" rx="8"/>`+T(180,y(i)+21,b[0],0,"ts in")+(i<r.length-1?A(180,y(i)+36,180,y(i)+50,"b"):"")).join("");
+if(rc){const a=y(rc[0])+17,b=y(rc[1])+17;h+=`<path class="ar" d="M310 ${a}H338V${b}H316"/>`+A(326,b,312,b)}
+const e=y(r.length-1)+34+22;return X(h+nt.map((s,i)=>T(180,e+i*15,s,0,i?"ts":"tb")).join(""),e+nt.length*15)};
 const D={
 animal:{t:"Animal cell",re:/animal cell|parts of (a|the) cell|cell structure|structure of (a|the) cell|cell organelles?|\bnucleus\b.*\bmitochondri/i,s:()=>X(
  `<ellipse class="o c1" cx="180" cy="125" rx="72" ry="78"/><circle class="o c2" cx="196" cy="108" r="27"/><circle class="k" cx="202" cy="103" r="8"/>`+
@@ -1061,7 +1068,321 @@ circle:{t:"Parts of a circle",re:/parts? of a circle|circle (parts|terms)|chord|
  return X(`<circle class="o c1" cx="150" cy="125" r="90"/><path class="w" d="M60 125H240" style="stroke:#37474f;stroke-width:2"/><path class="w" d="M${c0}L${c1}" style="stroke:#e53935;stroke-width:2"/><path class="w" d="M150 125L${t}" style="stroke:#1e88e5;stroke-width:2"/>`+
  `<path class="w" d="M${(t[0]+n*70).toFixed(1)} ${(t[1]+d*70).toFixed(1)}L${(t[0]-n*70).toFixed(1)} ${(t[1]-d*70).toFixed(1)}" style="stroke:#43a047;stroke-width:2"/>`+
  `<path class="w" d="M${ar[0]}A90 90 0 0 1 ${ar[1]}" style="stroke:#fb8c00;stroke-width:5"/><circle class="k" cx="150" cy="125" r="3"/>`+
- L(150,125,56,168,"Centre")+L(162,170,56,206,"Radius")+L(228,80,270,58,"Chord")+L(240,125,270,104,"Diameter")+L(m[0],m[1],270,150,"Arc")+L(+(t[0]-n*45).toFixed(1),+(t[1]-d*45).toFixed(1),270,204,"Tangent")+L(210,52,270,30,"Circumference"),250)}}
+ L(150,125,56,168,"Centre")+L(162,170,56,206,"Radius")+L(228,80,270,58,"Chord")+L(240,125,270,104,"Diameter")+L(m[0],m[1],270,150,"Arc")+L(+(t[0]-n*45).toFixed(1),+(t[1]-d*45).toFixed(1),270,204,"Tangent")+L(210,52,270,30,"Circumference"),250)}},
+heart:{t:"The human heart",re:/human heart|structure of (the )?heart|heart (structure|diagram|chambers?)|chambers of (the )?heart|\batrium|\bventricle/i,s:()=>X(
+ `<path class="o" style="fill:#ef9a9a" d="M180 218C120 192 100 132 112 84Q126 52 180 56Q234 52 248 84C260 132 240 192 180 218z"/><path class="w" d="M180 58V208M112 130H248" style="stroke:#b71c1c;stroke-width:2.5"/><path class="w" d="M158 58V22" style="stroke:#1e88e5;stroke-width:10"/><path class="w" d="M204 58V22" style="stroke:#e53935;stroke-width:10"/>`+
+ L(158,34,88,26,"Vena cava")+L(204,34,272,26,"Aorta")+L(145,95,88,80,"Right atrium")+L(215,95,272,80,"Left atrium")+L(145,170,88,162,"Right ventricle")+L(215,170,272,162,"Left ventricle")+L(180,195,272,206,"Septum"),240)},
+digest:{t:"The human digestive system",re:/digestive system|alimentary canal|digestive tract|organs of digestion|parts of the digestive/i,s:()=>X(
+ `<ellipse class="o c3" cx="180" cy="28" rx="22" ry="12"/><path class="w" d="M180 40V92" style="stroke:#e57373;stroke-width:8"/><ellipse class="o c7" cx="188" cy="112" rx="32" ry="22"/><ellipse class="o c8" cx="124" cy="104" rx="34" ry="18"/>`+
+ `<path class="w" d="M150 138V222H226V138" style="stroke:#9ccc65;stroke-width:9;fill:none"/><path class="w" d="M188 134q-30 8 0 18t0 18-30 8 0 18t0 18" style="stroke:#f48fb1;stroke-width:9;fill:none"/><path class="w" d="M188 222v16" style="stroke:#8d6e63;stroke-width:8"/>`+
+ L(158,28,88,28,"Mouth")+L(180,66,88,66,"Oesophagus")+L(100,104,88,104,"Liver")+L(150,180,88,180,"Large intestine")+L(214,112,272,104,"Stomach")+L(192,178,272,170,"Small intestine")+L(188,232,272,236,"Rectum and anus"),252)},
+leaf:{t:"Cross-section of a leaf",re:/(cross.?section|structure|section) of a leaf|leaf (cross.?section|structure|section)|palisade|spongy mesophyll|\bstomata\b|\bstoma\b|guard cells?/i,s:()=>X(
+ `<rect class="o c1" x="90" y="40" width="190" height="14"/><rect class="o c6" x="90" y="54" width="190" height="48"/>`+[1,2,3,4,5,6,7].map(i=>`<path class="w" d="M${90+i*23.75} 54V102" style="stroke:#2e7d32"/>`).join("")+
+ `<rect class="o c1" x="90" y="102" width="190" height="58"/>`+[[120,122],[160,142],[225,118],[250,142]].map(p=>`<ellipse class="o c4" cx="${p[0]}" cy="${p[1]}" rx="10" ry="6"/>`).join("")+`<circle class="o c7" cx="190" cy="128" r="12"/>`+
+ `<rect class="o c1" x="90" y="160" width="190" height="14"/><ellipse class="o c6" cx="172" cy="167" rx="8" ry="9"/><ellipse class="o c6" cx="198" cy="167" rx="8" ry="9"/>`+
+ L(100,47,84,36,"Upper epidermis")+L(110,78,84,80,"Palisade layer")+L(120,122,84,124,"Air space")+L(100,167,84,176,"Lower epidermis")+L(270,110,292,96,"Spongy layer")+L(202,128,292,128,"Vein")+L(207,167,292,168,"Stoma"),200)},
+eye:{t:"The human eye",re:/human eye|structure of (the )?eye|parts of (the )?eye|eye (structure|diagram)|\bcornea\b|\bretina\b/i,s:()=>X(
+ `<circle class="o" style="fill:#e3f2fd" cx="200" cy="125" r="78"/><path class="w" d="M124 92Q96 125 124 158" style="stroke:#42a5f5;stroke-width:4;fill:none"/><ellipse class="o c7" cx="146" cy="125" rx="8" ry="24"/><path class="w" d="M136 88V104M136 146V162" style="stroke:#6d4c41;stroke-width:6"/>`+
+ `<path class="w" d="M262 82A78 78 0 0 1 262 168" style="stroke:#e53935;stroke-width:4;fill:none"/><path class="w" d="M276 125H330" style="stroke:#fdd835;stroke-width:9"/>`+
+ L(112,110,84,60,"Cornea")+L(136,92,84,92,"Iris")+L(136,125,84,126,"Pupil")+L(146,145,84,176,"Lens")+L(262,100,292,60,"Retina")+L(310,125,288,176,"Optic nerve"),230)},
+reflex:{t:"The reflex arc",re:/reflex arc|reflex action|simple reflex|sensory neurone.*motor neurone|motor neurone.*sensory neurone/i,s:()=>{const n=[["Stimulus","e.g. a hot object touches the skin","c7"],["Receptor","Detects the stimulus (in the skin)","c6"],["Sensory neurone","Carries the impulse to the spinal cord","c4"],["Relay neurone","In the spinal cord, passes the message on","c2"],["Motor neurone","Carries the impulse to the effector","c4"],["Effector","A muscle or a gland","c3"],["Response","e.g. the hand pulls away","c9"]];
+ return X(n.map((b,i)=>`<rect class="o ${b[2]}" x="40" y="${8+i*44}" width="280" height="34" rx="9"/>`+T(180,23+i*44,b[0],0,"tb in")+T(180,35+i*44,b[1],0,"ts in")+(i<6?A(180,42+i*44,180,52+i*44):"")).join(""),316)}},
+seed:{t:"Structure of a bean seed",re:/(structure|parts?) of a (bean )?seed|seed structure|bean seed|\bplumule|\bradicle|\bcotyledon|\btesta\b/i,s:()=>X(
+ `<ellipse class="o c8" cx="180" cy="125" rx="108" ry="64"/><ellipse class="o c1" cx="180" cy="125" rx="98" ry="54"/><path class="w" d="M180 72V178" style="stroke:#9e9d24;stroke-width:1.5"/><path class="w" d="M110 164Q118 150 126 140" style="stroke:#e53935;stroke-width:7;fill:none"/><path class="w" d="M128 118Q138 98 152 100" style="stroke:#2e7d32;stroke-width:7;fill:none"/>`+
+ L(100,98,84,52,"Testa")+L(140,104,84,96,"Plumule")+L(112,160,84,196,"Radicle")+L(230,100,292,60,"Cotyledon"),240)},
+lungs:{t:"The human breathing system",re:/breathing system|respiratory system|human lungs|parts of the lungs|\btrachea\b|\bbronch|\bdiaphragm\b/i,s:()=>X(
+ `<path class="w" d="M180 24V92" style="stroke:#90a4ae;stroke-width:10"/><path class="w" d="M180 92L138 122M180 92L222 122" style="stroke:#90a4ae;stroke-width:6"/><path class="o" style="fill:#f8bbd0" d="M130 100Q84 110 88 180Q94 206 140 202Q150 160 138 112z"/><path class="o" style="fill:#f8bbd0" d="M230 100Q276 110 272 180Q266 206 220 202Q210 160 222 112z"/><path class="w" d="M70 218Q180 190 290 218" style="stroke:#6d4c41;stroke-width:4;fill:none"/>`+
+ L(185,50,292,36,"Trachea")+L(206,106,292,76,"Bronchus")+L(268,150,292,150,"Lung")+L(110,213,84,240,"Diaphragm"),250)},
+osmosis:{t:"Osmosis",re:/osmosis|(partially|semi).?permeable membrane|water potential/i,s:()=>X(
+ `<rect class="o c4" x="40" y="50" width="130" height="110"/><rect class="o c1" x="190" y="50" width="130" height="110"/><path class="w" d="M180 40V170" style="stroke:#37474f;stroke-width:3;stroke-dasharray:5 4"/>`+
+ [[60,80],[100,100],[140,78],[70,130],[120,140],[150,118],[220,90],[290,140]].map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="3.5" style="fill:#1e88e5"/>`).join("")+[[250,80],[290,100],[225,118],[262,126],[240,146],[205,140]].map(p=>`<circle class="k" cx="${p[0]}" cy="${p[1]}" r="4"/>`).join("")+A(150,106,214,106,"b")+
+ T(105,30,"Dilute solution",0,"tb")+T(105,43,"(more water)",0,"ts")+T(255,30,"Concentrated solution",0,"tb")+T(255,43,"(less water)",0,"ts")+T(180,188,"Water (blue dots) moves from the dilute solution",0,"ts")+T(180,202,"to the concentrated one through the membrane.",0,"ts"),214)},
+bunsen:{t:"The Bunsen burner",re:/bunsen burner|bunsen flame|luminous flame/i,s:()=>X(
+ `<rect class="o c8" x="140" y="212" width="80" height="12" rx="4"/><rect class="o" style="fill:#b0bec5" x="170" y="100" width="20" height="112"/><rect class="o" style="fill:#78909c" x="166" y="168" width="28" height="22"/><ellipse cx="180" cy="179" rx="5" ry="7" style="fill:#263238"/><rect class="o" style="fill:#78909c" x="190" y="196" width="40" height="8"/>`+
+ `<path class="o" style="fill:#fff59d" d="M180 100Q158 70 180 30Q202 70 180 100z"/><path class="o" style="fill:#4fc3f7" d="M180 100Q170 84 180 66Q190 84 180 100z"/>`+
+ L(196,50,272,46,"Flame")+L(182,84,272,86,"Inner cone")+L(170,130,88,126,"Barrel")+L(166,179,88,170,"Air hole")+L(166,186,88,196,"Collar")+L(230,200,272,206,"Gas inlet")+L(150,218,88,236,"Base"),250)},
+filter:{t:"Filtration",re:/\bfiltration\b|filter paper|\bfiltrate\b|\bresidue\b/i,s:()=>X(
+ `<path class="o c4" d="M135 176V232H225V176z"/><path class="o" style="fill:#eceff1" d="M110 80H250L194 150V176H166V150z"/><path class="w" d="M122 84L180 146L238 84" style="stroke:#8d6e63;stroke-width:3;fill:none"/><path class="o c8" d="M152 114L180 144L208 114z"/>`+
+ `<circle cx="180" cy="186" r="3.5" style="fill:#1e88e5"/><circle cx="180" cy="202" r="3.5" style="fill:#1e88e5"/>`+A(180,30,180,70,"b")+T(180,22,"Mixture poured in",0,"ts")+
+ L(113,82,88,70,"Funnel")+L(156,118,88,130,"Residue")+L(238,88,272,92,"Filter paper")+L(225,210,272,214,"Filtrate"),250)},
+distil:{t:"Simple distillation",re:/distillation|liebig|distilling/i,s:()=>X(
+ `<circle class="o c4" cx="80" cy="150" r="38"/><rect class="o" style="fill:#eceff1" x="72" y="76" width="16" height="36"/><path class="w" d="M80 60V140" style="stroke:#e53935;stroke-width:3"/><path class="w" d="M88 84H124" style="stroke:#90a4ae;stroke-width:5"/><path class="o" style="fill:#eceff1" d="M124 80L270 150V168L124 98z"/><path class="o c3" d="M70 192Q62 212 80 224Q98 212 90 192z"/>`+
+ `<path class="o c4" d="M250 196V240H314V196"/><circle cx="272" cy="180" r="3.5" style="fill:#1e88e5"/><circle cx="272" cy="190" r="3.5" style="fill:#1e88e5"/>`+
+ L(80,70,70,46,"Thermometer")+L(44,160,38,200,"Flask")+L(80,214,40,236,"Heat")+L(200,124,236,66,"Condenser")+L(300,240,292,262,"Distillate"),272)},
+chroma:{t:"Paper chromatography",re:/chromatograph|solvent front/i,s:()=>X(
+ `<path class="w" d="M90 80V240H270V80" style="stroke:#546e7a;stroke-width:3;fill:none"/><rect class="o c4" x="92" y="206" width="176" height="32"/><rect class="o" style="fill:#fffde7" x="150" y="44" width="60" height="176"/><path class="w" d="M120 40H240" style="stroke:#6d4c41;stroke-width:4"/>`+
+ `<path class="w" d="M150 190H210" style="stroke:#546e7a;stroke-dasharray:4 3"/><path class="w" d="M150 70H210" style="stroke:#1e88e5;stroke-dasharray:4 3"/><circle class="k" cx="180" cy="190" r="4"/><circle cx="180" cy="152" r="5" style="fill:#e53935"/><circle cx="180" cy="122" r="5" style="fill:#fdd835"/><circle cx="180" cy="90" r="5" style="fill:#43a047"/>`+
+ L(150,70,88,64,"Solvent front")+L(150,190,88,176,"Pencil line")+L(210,122,252,110,"Separated spots")+L(240,224,292,226,"Solvent")+T(180,262,"Different colours travel different distances.",0,"ts"),272)},
+elec:{t:"Electrolysis",re:/electrolysis|electrolyte|\banode\b|\bcathode\b|electrolytic/i,s:()=>X(
+ `<path class="w" d="M70 112V232H290V112" style="stroke:#546e7a;stroke-width:3;fill:none"/><rect class="o c4" x="72" y="132" width="216" height="98"/><rect class="o" style="fill:#546e7a" x="122" y="76" width="14" height="130"/><rect class="o" style="fill:#546e7a" x="224" y="76" width="14" height="130"/>`+
+ `<path class="w" d="M129 76V44H160M231 76V44H200" style="stroke:#37474f;stroke-width:2;fill:none"/><path class="w" d="M160 34V54M200 24V64" style="stroke:#37474f;stroke-width:3"/>`+
+ [[129,160],[129,182],[231,150],[231,176]].map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="3" style="fill:#fff;stroke:#546e7a"/>`).join("")+T(148,30,"−",0,"tb")+T(212,26,"+",0,"tb")+
+ L(129,100,84,96,"Cathode (−)")+L(231,100,276,96,"Anode (+)")+L(262,210,292,210,"Electrolyte")+T(180,254,"Positive ions (cations) move to the cathode.",0,"ts")+T(180,268,"Negative ions (anions) move to the anode.",0,"ts"),280)},
+ionic:{t:"Ionic bonding in sodium chloride",re:/ionic (bond|bonding|compound)|sodium chloride (formation|bonding)|transfer of electrons|ionic lattice/i,s:()=>X(
+ `<circle class="o c3" cx="90" cy="56" r="34"/><circle class="o c4" cx="270" cy="56" r="34"/>`+A(132,56,226,56,"r")+T(179,44,"1 electron moves",0,"ts")+T(90,60,"Na",0,"tb in")+T(90,74,"2,8,1",0,"ts in")+T(270,60,"Cl",0,"tb in")+T(270,74,"2,8,7",0,"ts in")+
+ `<circle class="o c3" cx="90" cy="150" r="28"/><circle class="o c4" cx="270" cy="150" r="38"/>`+A(126,150,156,150)+A(234,150,204,150)+T(180,154,"attract",0,"ts")+T(90,154,"Na⁺",0,"tb in")+T(90,168,"2,8",0,"ts in")+T(270,154,"Cl⁻",0,"tb in")+T(270,168,"2,8,8",0,"ts in")+T(180,214,"Sodium chloride: Na⁺ and Cl⁻ attract each other.",0,"ts"),228)},
+covalent:{t:"Covalent bonding in water",re:/covalent (bond|bonding|compound)|dot.and.cross|water molecule|shared pairs? of electrons/i,s:()=>X(
+ `<path class="w" d="M180 110L100 172M180 110L260 172" style="stroke:#78909c;stroke-width:2"/><circle class="o c3" cx="180" cy="110" r="34"/><circle class="o c4" cx="100" cy="172" r="22"/><circle class="o c4" cx="260" cy="172" r="22"/>`+
+ [[136,141],[131,149],[224,141],[229,149],[166,84],[173,81],[187,81],[194,84]].map(p=>`<circle class="k" cx="${p[0]}" cy="${p[1]}" r="2.6"/>`).join("")+T(180,114,"O",0,"tb in")+T(100,176,"H",0,"tb in")+T(260,176,"H",0,"tb in")+
+ L(133,145,88,120,"Shared pair")+L(190,82,262,52,"Lone pair")+T(180,206,"Bond angle about 104.5°",0,"ts")+T(180,224,"Water, H₂O: each H shares one pair with O.",0,"ts"),236)},
+react:{t:"The reactivity series",re:/reactivity series|reactive (metals?|series)|order of reactivity|displacement (reaction|of metals)/i,s:()=>{const n=["Potassium K","Sodium Na","Calcium Ca","Magnesium Mg","Aluminium Al","Carbon C","Zinc Zn","Iron Fe","Lead Pb","Hydrogen H","Copper Cu","Silver Ag","Gold Au"];
+ return X(T(180,12,"Most reactive",0,"tb")+n.map((s,i)=>`<rect class="o ${i<6?"c3":i<10?"c7":"c4"}" x="90" y="${20+i*22}" width="180" height="19" rx="5"/>`+T(180,34+i*22,s,0,"ts in")).join("")+T(180,320,"Least reactive",0,"tb"),330)}},
+periodic:{t:"The periodic table (groups and periods)",re:/periodic table|groups? and periods?|alkali metals?|halogens?|noble gases/i,s:()=>{
+const cl=g=>g==1?"c3":g==2?"c7":g<13?"c10":g<17?"c5":g==17?"c9":"c2";let h="";
+for(let g=1;g<=18;g++)h+=T(35.5+(g-1)*17,22,g,0,"ts");
+for(let p=1;p<=7;p++){h+=T(21,43+(p-1)*18,p,"end","ts");for(let g=1;g<=18;g++){if(p==1?(g==1||g==18):p<4?(g<3||g>12):true)h+=`<rect class="o ${cl(g)}" x="${27+(g-1)*17}" y="${30+(p-1)*18}" width="17" height="18"/>`}}
+const lg=[["c3","Group 1: alkali metals"],["c7","Group 2: alkaline earth"],["c10","Transition metals"],["c5","Groups 13 to 16"],["c9","Group 17: halogens"],["c2","Group 18: noble gases"]];
+h+=lg.map((e,i)=>{const x=i%2?190:30,y=172+(i>>1)*20;return `<rect class="o ${e[0]}" x="${x}" y="${y}" width="12" height="12"/>`+T(x+18,y+10,e[1],"start","ts")}).join("");
+return X(h+T(180,240,"Columns are groups. Rows are periods.",0,"ts")+T(180,254,"Metals on the left, non-metals on the right.",0,"ts"),265)}},
+gas:{t:"Collecting gases in the laboratory",re:/collect(ing|ion of)? (a )?gas(es)?|gas (jar|syringe)|(downward|upward) (delivery|displacement)|over water/i,s:()=>X(
+`<rect class="o c4" x="12" y="172" width="96" height="30"/><path class="o" d="M42 186V100H78V186"/><rect class="o c4" x="43" y="150" width="34" height="35" style="stroke:none"/><path class="w" d="M8 130H30L62 180"/>`+
+[[52,122],[64,112],[58,134]].map(p=>`<circle class="o c7" cx="${p[0]}" cy="${p[1]}" r="3"/>`).join("")+
+`<rect class="o c7" x="151" y="130" width="58" height="59" style="stroke:none"/><path class="o" d="M150 96V190H210V96"/><path class="w" d="M126 70H180V182M140 190H220"/>`+
+`<rect class="o c7" x="271" y="93" width="58" height="60" style="stroke:none"/><path class="o" d="M270 190V92H330V190"/><path class="w" d="M246 200H300V108"/>`+
+L(150,70,118,40,"Delivery tube")+L(210,110,224,102,"Gas jar")+
+T(60,222,"Over water",0,"tb")+T(60,236,"Insoluble gases",0,"ts")+T(60,250,"O₂, H₂, CO",0,"ts")+
+T(180,222,"Downward delivery",0,"tb")+T(180,236,"Gas denser than air",0,"ts")+T(180,250,"CO₂, Cl₂, HCl",0,"ts")+
+T(300,222,"Upward delivery",0,"tb")+T(300,236,"Gas lighter than air",0,"ts")+T(300,250,"H₂, NH₃",0,"ts"),262)},
+rust:{t:"Conditions needed for rusting",re:/rusting|\brusts?\b|corrosion of iron|prevent(ion of)? rust|galvani[sz]ing/i,s:()=>{
+const cx=[70,180,290],tb=c=>`<path class="o" d="M${c-22} 50V190q0 16 22 16t22-16V50"/>`,nail=(c,y,col)=>`<path class="w" d="M${c} ${y}v50" style="stroke:${col};stroke-width:4"/><circle cx="${c}" cy="${y}" r="4.5" style="fill:${col}"/>`;
+return X(
+`<rect class="c4" x="${cx[0]-21}" y="110" width="42" height="86"/>`+tb(cx[0])+nail(cx[0],130,"#b5651d")+
+`<rect class="c4" x="${cx[1]-21}" y="82" width="42" height="114"/><rect class="c7" x="${cx[1]-21}" y="82" width="42" height="9"/>`+tb(cx[1])+nail(cx[1],130,"#607d8b")+
+`<rect class="o c8" x="${cx[2]-24}" y="44" width="48" height="12"/><rect class="o c1" x="${cx[2]-21}" y="150" width="42" height="12"/><rect class="o c5" x="${cx[2]-17}" y="172" width="34" height="22"/>`+tb(cx[2])+nail(cx[2],80,"#607d8b")+
+L(201,86,226,66,"Oil")+
+["A","B","C"].map((s,i)=>T(cx[i],30,s,0,"tb")).join("")+
+[["Air + water","Rusts"],["Boiled water + oil","No air: no rust"],["Dry air (CaCl₂)","No water: no rust"]].map((s,i)=>T(cx[i],228,s[0],0,"ts")+T(cx[i],242,s[1],0,"tb")).join("")+
+T(180,268,"Iron rusts only with oxygen AND water.",0,"ts"),282)}},
+titr:{t:"Titration",re:/titration|burette|pipette|end.?point/i,s:()=>X(
+`<rect class="o c4" x="171" y="50" width="18" height="100"/><rect class="o" x="170" y="30" width="20" height="130"/><path class="w" d="M165 166H195M180 166V190"/>`+
+`<path class="o c3" d="M152 250L170 206V192H190V206L208 250z"/><rect class="o c1" x="135" y="250" width="90" height="7"/>`+
+`<path class="w" d="M262 40V262M262 100H190"/><rect class="o c8" x="236" y="262" width="52" height="8"/>`+
+`<path class="ar b" d="M180 150V186" style="stroke-dasharray:2 4"/>`+
+L(172,60,88,50,"Burette")+L(180,166,88,168,"Tap")+L(160,235,88,240,"Conical flask")+L(130,254,88,262,"White tile")+L(262,180,276,180,"Stand")+L(226,100,276,84,"Clamp")+
+T(180,290,"Add acid drop by drop until the colour changes.",0,"ts")+T(180,304,"Read the burette before and after.",0,"ts"),315)},
+blast:{t:"The blast furnace (extraction of iron)",re:/blast furnace|extraction of iron|iron (ore )?extraction|extracting iron/i,s:()=>X(
+`<path class="o c3" d="M140 50H220L250 130L236 210L216 252H144L124 210L110 130z"/><path class="o c7" d="M156 215H204L212 250H148z"/>`+
+T(180,12,"Iron ore + coke + limestone",0,"ts")+A(180,16,180,44,"b")+A(228,60,290,60,"r")+T(325,64,"Waste gases",0,"ts")+
+A(40,200,118,200,"r")+T(48,190,"Hot air",0,"ts")+A(236,218,290,218,"r")+T(325,222,"Slag",0,"ts")+A(180,256,180,284,"r")+T(180,298,"Molten iron",0,"tb")+
+L(150,110,88,100,"Cooler zone")+L(150,225,88,236,"Hottest zone")+
+T(180,322,"C + O₂ → CO₂ (heat)   CO₂ + C → 2CO",0,"ts")+T(180,336,"Fe₂O₃ + 3CO → 2Fe + 3CO₂",0,"tb")+T(180,350,"CaCO₃ → CaO; CaO + SiO₂ → slag",0,"ts"),360)},
+haber:{t:"The Haber process (ammonia)",re:/haber|manufacture of ammonia|ammonia manufacture|making ammonia/i,s:()=>FL([["Nitrogen (air) + hydrogen (natural gas)","c4"],["Compressor: about 200 atm","c7"],["Reactor: iron catalyst, 450 °C","c3"],["Cooler: ammonia turns liquid","c1"],["Liquid ammonia collected","c9"]],["N₂ + 3H₂ ⇌ 2NH₃","Unreacted N₂ and H₂ are recycled."],[3,1])},
+contact:{t:"The contact process (sulphuric acid)",re:/contact process|sulphuric acid (manufacture|production)|manufacture of sulphuric|making sulphuric/i,s:()=>FL([["Burn sulphur in air → sulphur dioxide","c7"],["Clean the gas, heat to 450 °C","c3"],["Converter: V₂O₅ catalyst, SO₂ → SO₃","c4"],["Absorb SO₃ in acid → oleum","c1"],["Add water to oleum → H₂SO₄","c9"]],["2SO₂ + O₂ ⇌ 2SO₃","SO₃ is not added to water directly (too much heat)."],[2,1])},
+ph:{t:"The pH scale",re:/\bpH\b|universal indicator|acidic.*alkaline|strong (acids?|alkalis?)/i,s:()=>{
+const c=["#e53935","#ef5350","#f4511e","#fb8c00","#ffb300","#fdd835","#c0ca33","#43a047","#26a69a","#29b6f6","#1e88e5","#3949ab","#5e35b1","#6a1b9a","#4a148c"],w=320/15;
+return X(c.map((k,i)=>`<rect class="o" style="fill:${k}" x="${(20+i*w).toFixed(1)}" y="50" width="${w.toFixed(1)}" height="34"/>`+T((20+i*w+w/2).toFixed(1),100,i,0,"ts")).join("")+
+T(95,128,"ACIDIC",0,"tb")+T(180,128,"NEUTRAL",0,"tb")+T(268,128,"ALKALINE",0,"tb")+T(180,28,"pH scale (universal indicator colours)",0,"tb")+
+["1 to 3  strong acid: stomach acid, lemon, vinegar","4 to 6  weak acid: tomato, coffee, milk","7  neutral: pure water","8 to 10  weak alkali: baking soda, soap","11 to 14  strong alkali: bleach, caustic soda"].map((s,i)=>T(30,156+i*17,s,"start","ts")).join(""),250)}},
+energy:{t:"Energy profile diagrams",re:/exothermic|endothermic|energy profile|activation energy|enthalpy change/i,s:()=>X(
+`<path class="w" d="M30 30V170H172M200 30V170H342"/>`+
+`<path class="w" d="M36 80H58C80 80 82 36 98 36C114 36 116 120 138 120H166" style="stroke:#e53935"/><path class="w" d="M206 120H228C250 120 252 36 268 36C284 36 286 80 308 80H336" style="stroke:#1e88e5"/>`+
+T(100,10,"Exothermic",0,"tb")+T(270,10,"Endothermic",0,"tb")+T(36,26,"Energy","start","ts")+T(52,72,"Reactants",0,"ts")+T(148,136,"Products",0,"ts")+
+A(70,80,70,40)+T(58,64,"Ea",0,"tb")+A(154,82,154,118,"g")+T(138,102,"ΔH",0,"tb")+
+T(228,112,"Reactants",0,"ts")+T(320,72,"Products",0,"ts")+A(244,120,244,40)+T(232,84,"Ea",0,"tb")+A(328,118,328,84,"r")+T(346,106,"ΔH",0,"tb")+
+T(100,190,"Progress of reaction",0,"ts")+T(270,190,"Progress of reaction",0,"ts")+
+T(180,214,"Exothermic: heat given out, ΔH negative (burning).",0,"ts")+T(180,228,"Endothermic: heat taken in, ΔH positive (photosynthesis).",0,"ts")+T(180,242,"Ea = activation energy needed to start the reaction.",0,"ts"),254)},
+cell:{t:"A simple electrochemical cell (zinc and copper)",re:/electrochemical cell|simple cell|daniell|voltaic|galvanic|salt bridge/i,s:()=>X(
+`<rect class="o c1" x="41" y="140" width="98" height="80" style="stroke:none"/><rect class="o c4" x="221" y="140" width="98" height="80" style="stroke:none"/><path class="o" d="M40 120V220H140V120M220 120V220H320V120"/>`+
+`<rect class="o" style="fill:#b0bec5" x="80" y="60" width="16" height="140"/><rect class="o" style="fill:#d2813a" x="260" y="60" width="16" height="140"/>`+
+`<path class="w" d="M110 150V108H250V150" style="stroke:#78909c;stroke-width:8"/><path class="w" d="M88 60V30H268V60"/><circle class="o c1" cx="178" cy="30" r="14"/>`+
+T(178,34,"V",0,"tb in")+A(108,20,146,20,"r")+T(124,12,"e⁻ flow",0,"ts")+T(180,100,"Salt bridge",0,"ts")+
+T(90,238,"Zinc anode (−)",0,"tb")+T(90,252,"ZnSO₄ solution",0,"ts")+T(90,266,"Zn → Zn²⁺ + 2e⁻",0,"ts")+
+T(270,238,"Copper cathode (+)",0,"tb")+T(270,252,"CuSO₄ solution",0,"ts")+T(270,266,"Cu²⁺ + 2e⁻ → Cu",0,"ts")+
+T(180,288,"Electrons flow from zinc to copper through the wire.",0,"ts"),300)},
+gtest:{t:"Laboratory tests for common gases",re:/tests? for (a )?gas(es)?|limewater|glowing splint|squeaky pop|lighted splint/i,s:()=>X([["Hydrogen","Lighted splint → squeaky pop","c4"],["Oxygen","Glowing splint → relights","c7"],["Carbon dioxide","Bubble through limewater → turns milky","c1"],["Chlorine","Damp litmus paper → bleached white","c9"],["Ammonia","Damp red litmus paper → turns blue","c10"]].map((r,i)=>`<rect class="o ${r[2]}" x="20" y="${8+i*46}" width="320" height="38" rx="8"/>`+T(32,8+i*46+16,r[0],"start","tb in")+T(32,8+i*46+31,r[1],"start","ts in")).join(""),240)},
+alkane:{t:"Methane, ethane and ethene",re:/alkanes?|alkenes?|methane|ethene|ethane|hydrocarbons?|homologous series|saturated and unsaturated/i,s:()=>{
+const H=(x,y)=>T(x,y+4,"H",0,"tb"),C=(x,y)=>T(x,y+4,"C",0,"tb");
+return X(C(60,80)+H(60,44)+H(60,116)+H(24,80)+H(96,80)+`<path class="w" d="M60 71V57M60 89V103M51 80H37M69 80H83" style="stroke-width:1.8"/>`+
+C(160,80)+C(200,80)+H(160,44)+H(160,116)+H(124,80)+H(200,44)+H(200,116)+H(236,80)+`<path class="w" d="M169 80H191M160 71V57M160 89V103M151 80H137M200 71V57M200 89V103M209 80H223" style="stroke-width:1.8"/>`+
+C(285,80)+C(315,80)+H(268,56)+H(268,104)+H(332,56)+H(332,104)+`<path class="w" d="M294 77H306M294 83H306M282 73L273 60M282 87L273 100M318 73L327 60M318 87L327 100" style="stroke-width:1.8"/>`+
+T(60,148,"Methane",0,"tb")+T(60,162,"CH₄",0,"ts")+T(180,148,"Ethane",0,"tb")+T(180,162,"C₂H₆",0,"ts")+T(300,148,"Ethene",0,"tb")+T(300,162,"C₂H₄",0,"ts")+
+L(300,80,262,30,"C=C double bond")+T(180,192,"Alkanes: single bonds only (saturated).",0,"ts")+T(180,206,"Alkenes: have C=C (unsaturated); turn bromine water colourless.",0,"ts"),218)}},
+soap:{t:"Soap and its cleaning action",re:/\bsoaps?\b|detergents?|cleansing action|saponification/i,s:()=>{
+const m=[];for(let i=0;i<10;i++){const a=i*36,h=P(a,270,100,50),t=P(a,270,100,28);m.push(`<path class="w" d="M${t[0]} ${t[1]}L${h[0]} ${h[1]}" style="stroke-width:1.8"/><circle class="o c3" cx="${h[0]}" cy="${h[1]}" r="6"/>`)}
+return X(`<circle class="o c3" cx="60" cy="70" r="11"/><path class="w" d="M60 81q-7 10 0 20t0 20t0 20" style="stroke-width:2.2"/>`+L(70,66,100,46,"Head: loves water")+L(62,110,100,126,"Tail: loves grease")+
+T(60,160,"One soap molecule",0,"ts")+m.join("")+`<circle class="o c7" cx="270" cy="100" r="22"/>`+T(270,104,"grease",0,"ts in")+
+T(270,172,"Micelle: tails in the grease,",0,"ts")+T(270,186,"heads in the water",0,"ts")+T(180,214,"Soap lifts grease off cloth so water can wash it away.",0,"ts"),228)}},
+co2prep:{t:"Preparing carbon dioxide in the laboratory",re:/(prepar\w+|making|producing|production) (of )?(carbon dioxide|co2)|carbon dioxide (in the )?lab|marble chips/i,s:()=>X(
+`<path class="w" d="M102 40L110 60H130L138 40M120 60V214"/><path class="o" d="M100 120V160L70 230H170L140 160V120"/>`+
+`<path class="c4" d="M83.5 196H156.5L169 228H71z"/>`+[[95,222],[110,219],[126,224],[141,220]].map(p=>`<circle class="o c8" cx="${p[0]}" cy="${p[1]}" r="4"/>`).join("")+[[104,205],[130,198],[140,208]].map(p=>`<circle class="o c1" cx="${p[0]}" cy="${p[1]}" r="3"/>`).join("")+
+`<rect class="o c8" x="98" y="118" width="44" height="12"/><path class="w" d="M134 124V96H260V222"/><rect class="c7" x="231" y="190" width="58" height="49"/><path class="o" d="M230 130V240H290V130"/><path class="w" d="M220 240H300"/>`+
+L(138,42,170,26,"Thistle funnel")+L(190,96,202,72,"Delivery tube")+L(86,196,64,178,"Dilute HCl")+L(100,222,70,254,"Marble chips")+L(289,170,298,150,"CO₂ gas")+
+T(180,284,"CaCO₃ + 2HCl → CaCl₂ + H₂O + CO₂",0,"tb")+T(180,298,"CO₂ is denser than air: collected by downward delivery.",0,"ts"),310)},
+rates:{t:"Rate of reaction graph",re:/rates? of (a )?reactions?|reaction rates?|collision theory|factors affecting (the )?rate/i,s:()=>X(
+`<path class="w" d="M50 30V190H330"/><path class="w" d="M50 190C70 100 100 60 160 56H320" style="stroke:#e53935"/><path class="w" d="M50 190C120 160 200 100 320 58" style="stroke:#1e88e5"/>`+
+T(50,22,"Volume of gas","start","ts")+T(190,210,"Time",0,"ts")+
+`<path class="w" d="M60 236H90" style="stroke:#e53935"/><path class="w" d="M60 252H90" style="stroke:#1e88e5"/>`+T(98,240,"Fast: hot, powdered, catalyst","start","ts")+T(98,256,"Slow: cold, large pieces","start","ts")+
+T(180,278,"Steeper curve = faster rate. Both end at the same volume.",0,"ts"),290)},
+wtreat:{t:"Water treatment",re:/water treatment|treat(ing|ed|ment of)? (the )?water|water (is |are )?treated|purification of water|water purification|purify(ing)? water|hard water/i,s:()=>FL([["River water","c4"],["Screening: remove large objects","c7"],["Sedimentation: alum settles dirt","c8"],["Filtration: sand removes fine solids","c5"],["Chlorination: kills germs","c9"],["Clean water pumped to homes","c4"]],["Boil or treat water before drinking."])},
+isot:{t:"Isotopes of carbon",re:/isotopes?|mass number|carbon.?14/i,s:()=>{
+const cx=[60,180,300],n=[6,7,8];
+return X(cx.map((c,i)=>`<circle class="w" cx="${c}" cy="90" r="44" style="stroke-dasharray:4 3;stroke-width:1.2"/>`+dots([0,1,2,3,4,5].map(k=>P(k*60,c,90,44)),"c7")+`<circle class="o c3" cx="${c}" cy="90" r="24"/>`+T(c,88,"6p",0,"ts in")+T(c,101,n[i]+"n",0,"ts in")+T(c,166,"Carbon-"+(12+i),0,"tb")+T(c,180,"6 protons, "+n[i]+" neutrons",0,"ts")).join("")+
+T(180,22,"6 electrons in each atom",0,"ts")+T(180,208,"Same protons, different neutrons: same element.",0,"ts")+T(180,222,"Carbon-14 is radioactive (used to date old objects).",0,"ts"),234)}},
+metal:{t:"Metallic bonding",re:/metallic (bond|bonding|structure|lattice)|sea of (delocalised )?electrons|delocalised electrons?/i,s:()=>{
+let h=`<rect class="w" x="92" y="38" width="170" height="140" rx="8" style="stroke-dasharray:4 3;stroke-width:1.5"/>`;
+for(let i=0;i<4;i++)for(let j=0;j<3;j++){const x=110+i*45,y=60+j*45;h+=`<circle class="o c3" cx="${x}" cy="${y}" r="14"/>`+T(x,y+4,"+",0,"tb in");if(i<3)h+=`<circle class="o c7" cx="${x+22}" cy="${y+22}" r="3.5"/><circle class="o c7" cx="${x+22}" cy="${y-10}" r="3.5"/>`}
+return X(h+L(245,60,280,40,"Metal ion (+)")+L(222,82,280,100,"Free electron")+T(180,200,"Ions are held by the sea of free electrons.",0,"ts")+T(180,214,"Moving electrons let metals conduct electricity.",0,"ts"),226)}},
+diff:{t:"Diffusion of ammonia and hydrogen chloride",re:/diffusion|diffuse|ammonia.*hydrogen chloride|hydrogen chloride.*ammonia/i,s:()=>X(
+`<rect class="o" x="30" y="90" width="300" height="40" rx="6"/><rect class="o c4" x="30" y="90" width="24" height="40" rx="4"/><rect class="o c10" x="306" y="90" width="24" height="40" rx="4"/><rect class="o" style="fill:#fff" x="132" y="91" width="10" height="38"/>`+
+A(62,110,124,110,"r")+A(298,110,150,110,"b")+T(92,104,"HCl",0,"ts")+T(224,104,"NH₃",0,"ts")+
+L(42,90,50,30,"Cotton wool + HCl")+L(137,90,150,58,"White ring of NH₄Cl")+L(318,130,290,170,"Cotton wool + NH₃")+
+T(180,204,"Ammonia (light) diffuses faster than HCl (heavy).",0,"ts")+T(180,218,"So the ring forms nearer the HCl end.",0,"ts"),230)},
+flame:{t:"Flame test colours",re:/flame tests?|flame colou?rs?|tests? for (metal )?(cations|ions)/i,s:()=>X(T(180,14,"Flame test colours",0,"tb")+
+[["Lithium","crimson red","#d81b60"],["Sodium","golden yellow","#ffb300"],["Potassium","lilac","#b39ddb"],["Calcium","brick red","#e64a19"],["Copper","blue-green","#26a69a"]].map((r,i)=>`<circle class="o" style="fill:${r[2]}" cx="44" cy="${42+i*38}" r="13"/>`+T(70,46+i*38,r[0],"start","tb")+T(170,46+i*38,r[1],"start","ts")).join("")+
+T(180,238,"Dip a clean wire loop in the salt, then hold it in a hot flame.",0,"ts"),250)},
+reflect:{t:"Reflection of light at a plane mirror",re:/reflection of light|plane mirror|laws? of reflection|angle of incidence/i,s:()=>{let h="";for(let x=50;x<=320;x+=14)h+=`M${x} 180l-8 9`;
+return X(`<path class="w" d="M40 180H320"/><path class="w" d="${h}" style="stroke-width:1"/><path class="w" d="M180 40V180" style="stroke-dasharray:4 3;stroke-width:1.2"/>`+A(80,60,180,180,"r")+A(180,180,280,60,"r")+
+`<path class="w" d="M180 130A50 50 0 0 0 148 141.5M180 130A50 50 0 0 1 212 141.5" style="stroke-width:1.5"/>`+T(160,122,"i",0,"tb")+T(200,122,"r",0,"tb")+
+L(110,96,98,40,"Incident ray")+L(250,96,262,44,"Reflected ray")+L(180,50,226,24,"Normal")+T(180,210,"Plane mirror",0,"tb")+T(180,232,"Angle of incidence = angle of reflection (i = r)",0,"ts"),245)}},
+tir:{t:"Total internal reflection",re:/total internal reflection|critical angle|optical fib(re|er)s?/i,s:()=>X(
+`<rect class="o c4" x="30" y="130" width="300" height="85"/>`+A(120,210,110,134,"r")+A(110,130,88,70,"r")+A(120,210,192,134,"b")+A(192,130,262,130,"b")+A(120,210,270,134,"g")+A(270,130,335,166,"g")+
+`<circle class="k" cx="120" cy="210" r="4"/>`+T(90,60,"1",0,"tb")+T(272,122,"2","start","tb")+T(346,176,"3",0,"tb")+T(120,228,"Source in glass",0,"ts")+T(60,118,"Air",0,"ts")+T(60,150,"Glass",0,"ts")+
+T(180,246,"1: angle below critical: ray escapes (refracts)",0,"ts")+T(180,260,"2: critical angle: ray runs along the surface",0,"ts")+T(180,274,"3: angle above critical: total internal reflection",0,"ts"),286)},
+lens:{t:"Convex lens ray diagram",re:/^(?!.*mirror)[\s\S]*(convex lens|converging lens|lens ray|ray diagram|focal length|magnifying glass)/i,s:()=>X(
+`<path class="w" d="M20 150H340" style="stroke-width:1.2"/><ellipse class="o c4" cx="180" cy="150" rx="9" ry="64"/>`+A(40,150,40,102)+A(285,150,285,186)+A(40,100,180,100,"r")+A(180,100,285,187,"r")+A(40,100,285,187,"b")+
+[60,120,240,300].map((x,i)=>`<circle class="k" cx="${x}" cy="150" r="2.5"/>`+T(x,166,i%3?"F":"2F",0,"ts")).join("")+
+T(40,90,"Object",0,"ts")+T(180,76,"Convex lens",0,"tb")+T(285,206,"Image",0,"ts")+
+T(180,236,"Ray parallel to the axis passes through F.",0,"ts")+T(180,250,"Ray through the centre goes straight on.",0,"ts")+T(180,264,"Object beyond 2F: image real, inverted, smaller.",0,"ts"),276)},
+prism:{t:"Dispersion of white light by a prism",re:/dispersion|\bprisms?\b|spectrum of white light|rainbow|colours? of (white )?light/i,s:()=>{
+const c=[["Red","#e53935"],["Orange","#fb8c00"],["Yellow","#fdd835"],["Green","#43a047"],["Blue","#1e88e5"],["Indigo","#3949ab"],["Violet","#8e24aa"]];
+return X(`<path class="o c4" d="M180 40L110 170H250z"/><path class="w" d="M30 125L145 105L219 112" style="stroke:#78909c;stroke-width:3"/>`+
+c.map((k,i)=>`<path class="w" d="M219 112L290 ${144+i*12}" style="stroke:${k[1]};stroke-width:2.5"/>`+T(296,148+i*12,k[0],"start","ts")).join("")+
+T(62,112,"White light",0,"ts")+T(180,192,"Glass prism",0,"ts")+T(180,236,"Red bends least, violet bends most.",0,"ts"),250)}},
+refract:{t:"Refraction of light (air to glass)",re:/refraction|refractive index|bending of light|snell/i,s:()=>X(
+`<rect class="o c4" x="40" y="130" width="280" height="90"/><path class="w" d="M180 40V215" style="stroke-dasharray:4 3;stroke-width:1.2"/>`+A(90,40,180,130,"r")+A(180,130,222,210,"r")+
+`<path class="w" d="M180 90A40 40 0 0 0 151.7 101.7M180 170A40 40 0 0 0 198.8 165.3" style="stroke-width:1.5"/>`+T(164,98,"i",0,"tb")+T(212,160,"r",0,"tb")+
+L(120,70,92,24,"Incident ray")+L(205,170,250,186,"Refracted ray")+T(66,120,"Air",0,"ts")+T(66,150,"Glass",0,"ts")+L(180,60,226,40,"Normal")+
+T(180,240,"Light bends towards the normal as it enters glass",0,"ts")+T(180,254,"(it slows down). n = sin i ÷ sin r",0,"ts"),264)},
+emspec:{t:"The electromagnetic spectrum",re:/^(?!.*(alpha|beta|radioactiv|half.?life))[\s\S]*(electromagnetic spectrum|em spectrum|gamma rays|radio waves|x.?rays)/i,s:()=>{
+const n=[["Radio waves: TV, radio","#cfd8dc"],["Microwaves: cooking","#b0bec5"],["Infrared: remote controls","#e57373"],["Visible light: sight","url(#dgv)"],["Ultraviolet: sterilising","#b39ddb"],["X-rays: bones, scans","#90a4ae"],["Gamma rays: kill cancer","#78909c"]];
+return X(`<defs><linearGradient id="dgv"><stop offset="0" stop-color="#e53935"/><stop offset=".35" stop-color="#fdd835"/><stop offset=".65" stop-color="#43a047"/><stop offset="1" stop-color="#5e35b1"/></linearGradient></defs>`+
+n.map((b,i)=>{const cx=20+i*46+20;return `<rect class="o" style="fill:${b[1]}" x="${20+i*46}" y="30" width="46" height="34"/><text class="t ts" transform="rotate(90 ${cx} 74)" x="${cx}" y="74" text-anchor="start">${b[0]}</text>`}).join("")+
+T(20,20,"Long wavelength","start","ts")+T(340,20,"Short wavelength","end","ts"),222)}},
+wave:{t:"Transverse and longitudinal waves",re:/wavelength|amplitude|transverse|longitudinal|parts of a wave|wave (diagram|terms)|\bcrest\b|rarefaction/i,s:()=>{
+let p="M30 100",b="";for(let x=36;x<=330;x+=6)p+="L"+x+" "+(100-40*Math.sin(2*Math.PI*(x-30)/120)).toFixed(1);
+for(let i=0;i<30;i++)b+=`M${(30+i*10+8*Math.sin(2*Math.PI*i/12)).toFixed(1)} 186V214`;
+return X(`<path class="w" d="M30 100H330" style="stroke-dasharray:4 3;stroke-width:1"/><path class="w" d="${p}" style="stroke:#1e88e5"/><path class="w" d="${b}" style="stroke-width:1.6"/>`+
+T(30,12,"Transverse wave","start","tb")+A(62,34,178,34)+A(178,34,62,34)+T(120,28,"Wavelength (λ)",0,"ts")+T(60,52,"Crest",0,"ts")+T(120,158,"Trough",0,"ts")+A(240,102,240,138)+T(240,158,"Amplitude",0,"ts")+
+T(30,176,"Longitudinal wave","start","tb")+T(90,230,"Compression",0,"ts")+T(150,230,"Rarefaction",0,"ts")+T(180,248,"Frequency = waves per second (hertz).",0,"ts"),260)}},
+eclipse:{t:"Solar eclipse",re:/eclipse|\bumbra\b|penumbra|formation of shadows?/i,s:()=>X(
+`<circle class="o c7" cx="50" cy="100" r="34"/><path d="M200 90L330 60V140L200 110z" style="fill:#cfd8dc"/><path d="M200 90L300 100L200 110z" style="fill:#78909c"/><circle class="o c4" cx="315" cy="100" r="24"/><circle class="o" style="fill:#9e9e9e" cx="200" cy="100" r="10"/>`+
+T(50,152,"Sun",0,"tb")+T(315,138,"Earth",0,"tb")+L(192,100,150,40,"Moon")+L(250,86,270,34,"Penumbra")+L(250,100,226,170,"Umbra")+
+T(180,214,"The Moon blocks sunlight from reaching Earth.",0,"ts")+T(180,228,"Total eclipse in the umbra; partial in the penumbra.",0,"ts")+T(180,242,"Lunar eclipse: Earth’s shadow falls on the Moon.",0,"ts"),254)},
+solenoid:{t:"An electromagnet (solenoid)",re:/\belectromagnets?\b|solenoid|right.hand grip/i,s:()=>{
+let c="";for(let i=0;i<8;i++)c+=`<ellipse class="w" cx="${110+i*18}" cy="120" rx="7" ry="32" style="stroke:#b87333;stroke-width:2"/>`;
+return X(`<path class="w" d="M255 108C320 10 40 10 105 108M255 108C300 40 60 40 105 108" style="stroke:#1e88e5;stroke-dasharray:4 3;stroke-width:1.4"/><rect class="o c8" x="100" y="104" width="160" height="32"/>`+c+
+`<path class="w" d="M110 152V200H168M184 200H236V152"/><path class="w" d="M168 190V210M184 195V205" style="stroke-width:3"/>`+
+L(100,120,80,100,"Iron core")+L(146,150,80,172,"Coil of wire")+L(176,208,230,226,"Battery")+T(180,12,"Magnetic field lines",0,"ts")+
+T(180,248,"Stronger with more turns, more current, soft iron core.",0,"ts"),260)}},
+transf:{t:"A step-down transformer",re:/transformers?|step.?(up|down) (voltage|transformers?)|primary coil|secondary coil/i,s:()=>{
+let a="",b="";for(let i=0;i<8;i++)a+=`<ellipse class="w" cx="115" cy="${80+i*10}" rx="20" ry="4" style="stroke:#b87333;stroke-width:2"/>`;
+for(let i=0;i<4;i++)b+=`<ellipse class="w" cx="245" cy="${95+i*15}" rx="20" ry="4" style="stroke:#b87333;stroke-width:2"/>`;
+return X(T(180,24,"Step-down transformer",0,"tb")+`<path class="o c8" fill-rule="evenodd" d="M100 50H260V170H100zM130 80H230V140H130z"/>`+a+b+
+`<path class="w" d="M95 80H60M95 150H60M265 95H300M265 140H300"/>`+T(40,118,"Input",0,"ts")+T(325,118,"Output",0,"ts")+T(180,114,"Soft iron core",0,"ts")+
+T(115,196,"Primary coil",0,"tb")+T(115,210,"more turns",0,"ts")+T(245,196,"Secondary coil",0,"tb")+T(245,210,"fewer turns",0,"ts")+
+T(180,238,"Vs ÷ Vp = Ns ÷ Np",0,"tb")+T(180,252,"Works only with alternating current (AC).",0,"ts"),264)}},
+gener:{t:"A simple AC generator",re:/generators?|dynamo|electromagnetic induction|faraday|induced (current|emf)/i,s:()=>X(
+`<rect class="o c3" x="50" y="60" width="40" height="100"/><rect class="o c4" x="270" y="60" width="40" height="100"/>`+T(70,115,"N",0,"tb in")+T(290,115,"S",0,"tb in")+
+`<path class="w" d="M120 110H270"/><rect class="o" style="stroke:#b87333;stroke-width:2.5" x="140" y="80" width="80" height="60"/><rect class="o c7" x="236" y="100" width="6" height="20"/><rect class="o c7" x="256" y="100" width="6" height="20"/>`+
+`<path class="w" d="M239 122V200H194M259 122V226H180V214" style="stroke-width:1.6"/><circle class="o c1" cx="180" cy="200" r="14"/>`+T(180,204,"G",0,"tb in")+
+A(150,66,210,66,"g")+T(180,58,"Coil rotates",0,"ts")+L(180,140,140,170,"Coil")+L(244,104,296,74,"Slip rings")+T(70,178,"Magnet (N)",0,"ts")+T(290,178,"Magnet (S)",0,"ts")+
+T(180,252,"The coil cuts the magnetic field: current is induced (AC).",0,"ts"),264)},
+bmag:{t:"Magnetic field of a bar magnet",re:/magnetic field|bar magnet|field lines|magnetic lines|poles? of a magnet/i,s:()=>X(
+`<path class="w" d="M230 108C260 60 100 60 130 108M230 105C310 0 50 0 130 105M230 122C260 170 100 170 130 122M230 125C310 230 50 230 130 125" style="stroke:#1e88e5;stroke-width:1.4"/>`+
+A(190,72,170,72,"b")+A(190,26,170,26,"b")+A(190,158,170,158,"b")+A(190,204,170,204,"b")+
+`<rect class="o" style="fill:#ef9a9a" x="180" y="100" width="50" height="30"/><rect class="o c4" x="130" y="100" width="50" height="30"/>`+T(205,120,"N",0,"tb in")+T(155,120,"S",0,"tb in")+
+T(180,246,"Field lines leave the N pole and enter the S pole.",0,"ts")+T(180,260,"They are closest where the field is strongest.",0,"ts"),272)},
+static:{t:"Gold-leaf electroscope",re:/static electricity|electroscope|charging by (friction|induction|contact)|positive and negative charges/i,s:()=>X(
+`<rect class="o c1" x="130" y="110" width="100" height="110" rx="10"/><path class="w" d="M180 56V160"/><circle class="o c7" cx="180" cy="44" r="12"/><path class="w" d="M180 160L158 205M180 160L202 205" style="stroke:#ffb300;stroke-width:2.5"/>`+
+`<rect class="o c8" x="30" y="30" width="80" height="16" rx="6"/>`+T(70,42,"− − −",0,"tb in")+T(70,64,"Charged rod",0,"ts")+T(180,30,"+",0,"tb")+T(158,196,"−",0,"tb")+T(204,196,"−",0,"tb")+
+L(192,44,250,34,"Metal cap")+L(180,100,250,90,"Metal rod")+L(202,205,250,204,"Gold leaves")+L(230,150,250,148,"Glass case")+
+T(180,244,"Bring a negative rod near the cap: the leaves diverge.",0,"ts")+T(180,258,"Like charges repel; unlike charges attract.",0,"ts"),270)},
+flask:{t:"The vacuum flask",re:/vacuum flask|thermos|thermo flask/i,s:()=>X(
+`<rect class="o" style="fill:#cfd8dc" x="120" y="40" width="120" height="180" rx="14"/><rect class="o c4" x="135" y="55" width="90" height="150" rx="8"/><rect class="o c1" x="148" y="55" width="64" height="145" rx="6"/><rect class="c3" x="149" y="95" width="62" height="104"/>`+
+`<rect class="o c5" x="148" y="30" width="64" height="26"/>`+L(122,100,100,84,"Plastic case")+L(141,150,100,154,"Vacuum gap")+L(205,120,262,118,"Hot liquid")+L(210,44,262,40,"Stopper")+L(219,175,262,170,"Silvered walls")+
+T(180,238,"Vacuum stops conduction and convection;",0,"ts")+T(180,252,"silvering stops radiation: heat stays in.",0,"ts"),264)},
+heat:{t:"Conduction, convection and radiation",re:/conduction|convection|heat transfer|methods? of (heat|thermal)|thermal radiation|radiation of heat/i,s:()=>X(
+`<rect class="o c8" x="14" y="90" width="92" height="14"/><path class="o c7" d="M12 108Q0 90 12 70Q24 90 12 108z"/>`+A(30,82,95,82,"r")+
+`<path class="o c4" d="M150 70V150H210V70" style="fill:#bfe3f5"/><path class="o c7" d="M170 178Q164 162 180 150Q196 162 190 178z"/>`+A(180,140,180,86,"r")+A(160,86,160,136,"b")+A(200,86,200,136,"b")+
+`<circle class="o c7" cx="262" cy="110" r="14"/>`+A(284,95,345,95,"r")+A(284,110,345,110,"r")+A(284,125,345,125,"r")+
+T(60,50,"Conduction",0,"tb")+T(180,50,"Convection",0,"tb")+T(300,50,"Radiation",0,"tb")+
+T(60,200,"Heat passes along",0,"ts")+T(60,214,"a solid (metals best)",0,"ts")+T(180,200,"Warm fluid rises,",0,"ts")+T(180,214,"cool fluid sinks",0,"ts")+T(300,200,"Heat waves travel",0,"ts")+T(300,214,"through empty space",0,"ts"),228)},
+pend:{t:"The simple pendulum",re:/pendulum|period of oscillation|oscillations?/i,s:()=>X(
+`<path class="w" d="M150 30H210" style="stroke-width:4"/><path class="w" d="M110 151A140 140 0 0 0 250 151" style="stroke-dasharray:4 3;stroke-width:1"/><path class="w" d="M180 30V170" style="stroke-dasharray:4 3;stroke-width:1.2"/>`+
+`<path class="w" d="M180 30L250 151" style="stroke-width:1.6"/><circle class="o c3" cx="250" cy="151" r="12"/><circle class="w" cx="110" cy="151" r="12" style="stroke-dasharray:3 3;stroke-width:1.2"/>`+
+A(180,186,250,186)+T(215,202,"Amplitude",0,"ts")+L(180,30,120,14,"Pivot")+L(215,90,262,84,"String")+L(262,151,284,138,"Bob")+L(180,170,120,190,"Rest position")+
+T(180,226,"One oscillation: left → right → left.",0,"ts")+T(180,240,"Period T = time for one oscillation.",0,"ts"),252)},
+lever:{t:"The three classes of lever",re:/\blevers?\b|fulcrum|principle of moments|turning effect/i,s:()=>{
+const row=(b,n,fx,lx,ld,ex,ed)=>`<path class="w" d="M40 ${b}H320" style="stroke-width:4"/><path class="o c9" d="M${fx-10} ${b+22}L${fx} ${b+2}L${fx+10} ${b+22}z"/>`+T(10,b-40,"Class "+n,"start","tb")+
+(ld?A(lx,b-34,lx,b-4,"r")+T(lx,b-40,"Load",0,"ts"):A(lx,b+36,lx,b+6,"r")+T(lx,b+48,"Load",0,"ts"))+(ed?A(ex,b-34,ex,b-4,"b")+T(ex,b-40,"Effort",0,"ts"):A(ex,b+36,ex,b+6,"b")+T(ex,b+48,"Effort",0,"ts"))+T(fx,b+36,"Fulcrum",0,"ts");
+return X(row(40,1,180,100,1,270,1)+row(140,2,60,170,1,300,0)+row(240,3,60,300,1,170,0)+T(180,296,"1: fulcrum in the middle (seesaw, scissors)",0,"ts")+T(180,310,"2: load in the middle (wheelbarrow)",0,"ts")+T(180,324,"3: effort in the middle (tweezers, fishing rod)",0,"ts"),336)}},
+pulley:{t:"Fixed and movable pulleys",re:/pulleys?|inclined plane|simple machines?|mechanical advantage|velocity ratio/i,s:()=>X(
+`<path class="w" d="M30 20H150M200 20H340" style="stroke-width:4"/><path class="w" d="M90 20V40"/><circle class="o c7" cx="90" cy="60" r="20"/><path class="w" d="M70 150V60A20 20 0 0 1 110 60V120" style="stroke-width:1.6"/>`+A(110,100,110,130,"b")+`<rect class="o c8" x="55" y="150" width="30" height="26"/>`+T(70,167,"Load",0,"ts in")+T(134,118,"Effort","start","ts")+
+`<path class="w" d="M232 20V110A18 18 0 0 0 268 110V70" style="stroke-width:1.6"/><circle class="o c7" cx="250" cy="110" r="18"/><path class="w" d="M250 128V150"/><rect class="o c8" x="235" y="150" width="30" height="26"/>`+T(250,167,"Load",0,"ts in")+A(268,72,268,40,"b")+T(278,58,"Effort","start","ts")+
+T(90,206,"Fixed pulley",0,"tb")+T(90,220,"Changes direction of force",0,"ts")+T(260,206,"Movable pulley",0,"tb")+T(260,220,"Effort = half the load,",0,"ts")+T(260,234,"rope moves twice as far",0,"ts"),246)},
+hydr:{t:"The hydraulic press",re:/hydraulic|liquid pressure|pressure in (a )?liquids?|pascal.?s (law|principle)/i,s:()=>X(
+`<path class="o c4" d="M40 90V210H320V90H200V170H100V90z"/><rect class="o c8" x="42" y="78" width="56" height="12"/><rect class="o c8" x="202" y="78" width="116" height="12"/><rect class="o c7" x="232" y="52" width="56" height="26"/>`+T(260,70,"Load",0,"ts in")+
+A(70,40,70,74,"r")+T(70,28,"F₁ (small)",0,"tb")+A(215,76,215,40,"g")+T(228,34,"F₂ (large)","start","tb")+A(112,194,188,194,"b")+T(150,186,"Pressure",0,"ts in")+
+T(70,226,"Small piston",0,"ts")+T(70,240,"area A₁",0,"ts")+T(260,226,"Large piston",0,"ts")+T(260,240,"area A₂ (bigger)",0,"ts")+
+T(180,262,"Pressure = force ÷ area, the same everywhere in the fluid.",0,"ts")+T(180,276,"F₂ = F₁ × A₂ ÷ A₁",0,"tb"),288)},
+graphs:{t:"Motion graphs",re:/distance.?time|velocity.?time|speed.?time|motion graphs?|acceleration graph/i,s:()=>X(
+`<path class="w" d="M40 30V150H165M215 30V150H340"/><path class="w" d="M40 150L90 80H120L160 140" style="stroke:#e53935"/><path class="w" d="M215 150L250 70H290L325 150" style="stroke:#1e88e5"/>`+
+T(100,12,"Distance–time",0,"tb")+T(275,12,"Velocity–time",0,"tb")+T(44,26,"Distance","start","ts")+T(219,26,"Velocity","start","ts")+T(102,166,"Time",0,"ts")+T(277,166,"Time",0,"ts")+
+T(58,112,"A",0,"tb")+T(105,72,"B",0,"tb")+T(152,112,"C","start","tb")+T(222,112,"A",0,"tb")+T(270,62,"B",0,"tb")+T(318,112,"C","start","tb")+
+T(180,192,"Distance–time: A steady speed, B at rest, C returning",0,"ts")+T(180,206,"Velocity–time: A speeding up, B steady, C slowing down",0,"ts")+T(180,220,"Slope of d–t = speed; slope of v–t = acceleration.",0,"ts"),232)},
+cmirror:{t:"Concave mirror ray diagram",re:/concave mirrors?|convex mirrors?|curved mirrors?|principal focus|centre of curvature/i,s:()=>X(
+`<path class="w" d="M20 130H310" style="stroke-width:1.2"/><path class="w" d="M280 40Q320 130 280 220" style="stroke:#546e7a;stroke-width:4"/>`+A(60,130,60,90)+A(60,90,296,90,"r")+A(296,90,181,150,"r")+A(60,90,287,203,"b")+A(181,130,181,150)+
+[[140,"C"],[220,"F"]].map(p=>`<circle class="k" cx="${p[0]}" cy="130" r="2.5"/>`+T(p[0],122,p[1],0,"ts")).join("")+T(60,80,"Object",0,"ts")+T(181,172,"Image",0,"ts")+T(305,122,"P",0,"ts")+T(300,30,"Concave mirror",0,"tb")+
+T(180,232,"Parallel ray reflects through the focus F.",0,"ts")+T(180,246,"Ray through the centre of curvature C returns on itself.",0,"ts")+T(180,260,"Object beyond C: image real, inverted, smaller.",0,"ts"),272)},
+pinhole:{t:"The pinhole camera",re:/pinhole camera|camera obscura/i,s:()=>X(
+`<path class="w" d="M30 110H300" style="stroke-dasharray:4 3;stroke-width:1"/><path class="w" d="M170 30V105M170 115V190M290 40V180" style="stroke-width:4"/>`+A(50,150,50,70)+A(50,70,170,110,"r")+A(170,110,290,150,"r")+A(50,150,170,110,"b")+A(170,110,290,70,"b")+A(302,70,302,150)+
+T(50,60,"Object",0,"ts")+L(170,36,200,24,"Pinhole screen")+L(290,176,312,200,"Screen")+T(325,100,"Image",0,"ts")+
+T(180,224,"Light travels in straight lines.",0,"ts")+T(180,238,"The image on the screen is upside down.",0,"ts")+T(180,252,"Smaller hole: sharper but dimmer image.",0,"ts"),264)},
+sight:{t:"Short sight and long sight",re:/short.?sight|long.?sight|myopia|hypermetropia|defects? of (the )?eye|eye defects?/i,s:()=>{
+const eye=(cx,pts,fx,fe)=>`<ellipse class="o c1" cx="${cx}" cy="100" rx="45" ry="35"/><ellipse class="o c4" cx="${cx-35}" cy="100" rx="6" ry="18"/><path class="w" d="M${cx+40} 82Q${cx+50} 100 ${cx+40} 118" style="stroke:#e53935;stroke-width:3"/>`+pts;
+const r=(a,b,c,d)=>`<path class="w" d="M${a} ${b}L${c} ${d}" style="stroke:#f57c00;stroke-width:1.8"/>`;
+return X(eye(90,r(10,75,60,88)+r(60,88,105,100)+r(105,100,132,116)+r(10,125,60,112)+r(60,112,105,100)+r(105,100,132,84))+
+eye(270,r(190,75,240,88)+r(240,88,315,98)+r(190,125,240,112)+r(240,112,315,102)+`<path class="w" d="M315 98L330 100L315 102" style="stroke:#f57c00;stroke-dasharray:3 2;stroke-width:1.5"/>`)+
+T(90,40,"Short sight",0,"tb")+T(270,40,"Long sight",0,"tb")+T(105,92,"focus",0,"ts")+L(135,100,152,64,"Retina")+T(332,92,"focus",0,"ts")+
+T(90,160,"Image forms in front of the retina",0,"ts")+T(90,174,"Corrected with a concave lens",0,"ts")+T(270,160,"Image forms behind the retina",0,"ts")+T(270,174,"Corrected with a convex lens",0,"ts"),190)}},
+ohm:{t:"Ohm’s law: current–voltage graph",re:/ohm.?s law|v.?i graph|current.?voltage|resistance of a (wire|conductor)|resistors?/i,s:()=>X(
+`<path class="w" d="M50 30V170H320"/><path class="w" d="M50 170L300 112" style="stroke:#1e88e5"/><path class="w" d="M50 170Q120 80 300 62" style="stroke:#e53935"/>`+
+T(300,52,"Filament lamp","end","ts")+T(300,100,"Ohmic conductor","end","ts")+T(185,192,"Voltage V (volts)",0,"ts")+T(50,24,"Current I (amps)","start","ts")+
+T(180,216,"Ohm’s law: V = I × R",0,"tb")+T(180,230,"Ohmic conductor: straight line, so R is constant.",0,"ts")+T(180,244,"Lamp: the line curves as the filament heats and R rises.",0,"ts"),256)},
+plug:{t:"Wiring a three-pin plug",re:/three.?pin plug|plug wiring|\blive wire|neutral wire|earth wire|domestic (wiring|electricity)|\bfuses?\b/i,s:()=>X(
+`<rect class="o c1" x="100" y="40" width="160" height="150" rx="14"/><rect class="o c8" x="160" y="186" width="40" height="14"/><rect class="o c8" x="168" y="200" width="24" height="20"/>`+
+`<path class="w" d="M180 186V79" style="stroke:#8bc34a;stroke-width:3"/><path class="w" d="M180 186L135 140" style="stroke:#1e88e5;stroke-width:3"/><path class="w" d="M180 186L225 140V125" style="stroke:#8d6e63;stroke-width:3"/>`+
+`<circle class="o" style="fill:#8bc34a" cx="180" cy="70" r="9"/><circle class="o" style="fill:#1e88e5" cx="135" cy="140" r="9"/><circle class="o" style="fill:#8d6e63" cx="225" cy="140" r="9"/><rect class="o c7" x="215" y="98" width="20" height="27"/>`+
+L(180,70,230,50,"Green/yellow: earth")+L(135,140,92,150,"Blue: neutral")+L(225,140,268,150,"Brown: live")+L(235,110,268,96,"Fuse")+L(160,193,108,214,"Cable grip")+
+T(180,246,"The fuse is in the live wire; earth joins the metal case.",0,"ts")+T(180,260,"The fuse melts if the current is too high.",0,"ts"),272)},
+motor:{t:"A simple d.c. motor",re:/d\.?c\.? motor|electric motors?|motor effect|fleming.?s left/i,s:()=>X(
+`<rect class="o c3" x="50" y="60" width="40" height="100"/><rect class="o c4" x="270" y="60" width="40" height="100"/>`+T(70,115,"N",0,"tb in")+T(290,115,"S",0,"tb in")+
+`<path class="w" d="M120 110H250"/><rect class="o" style="stroke:#b87333;stroke-width:2.5" x="140" y="80" width="80" height="60"/>`+
+`<path class="o c7" d="M238 110A12 12 0 0 1 262 110z"/><path class="o c7" d="M238 114A12 12 0 0 0 262 114z"/><rect class="o c8" x="244" y="88" width="12" height="10"/><rect class="o c8" x="244" y="126" width="12" height="10"/>`+
+`<path class="w" d="M256 92H310V222H178V210M250 136V200H190" style="stroke-width:1.6"/><path class="w" d="M178 190V210M190 195V205" style="stroke-width:3"/>`+
+A(150,80,150,52,"r")+T(150,44,"F",0,"tb")+A(210,140,210,168,"r")+T(210,182,"F",0,"tb")+L(180,140,130,170,"Coil")+L(262,106,292,66,"Commutator")+L(190,205,232,226,"Cell")+
+T(180,252,"Current + magnetic field = turning force on the coil.",0,"ts")+T(180,266,"The commutator reverses the current every half turn.",0,"ts"),278)},
+baro:{t:"The mercury barometer",re:/barometers?|atmospheric pressure|manometer|mercury column/i,s:()=>X(
+`<rect x="101" y="205" width="138" height="24" style="fill:#b0bec5"/><path class="o" d="M100 195V230H240V195"/><rect x="161" y="90" width="38" height="125" style="fill:#b0bec5"/><path class="o" d="M160 40V215M200 40V215M160 40Q180 28 200 40"/>`+
+`<path class="w" d="M200 90H275M240 205H275" style="stroke-dasharray:3 3;stroke-width:1"/>`+A(262,205,262,92)+A(262,92,262,205)+T(270,152,"760 mm","start","tb")+
+A(125,160,125,198,"r")+A(235,160,235,198,"r")+T(120,148,"Air pressure",0,"ts")+L(190,64,240,40,"Vacuum")+L(190,140,212,128,"Mercury")+L(160,100,100,92,"Glass tube")+
+T(170,248,"Dish of mercury",0,"ts")+T(180,266,"Air pressure supports a 760 mm column of mercury.",0,"ts")+T(180,280,"Pressure falls with height: the column gets shorter.",0,"ts"),292)},
+therm:{t:"A liquid-in-glass thermometer",re:/thermometers?|fixed points?|clinical thermometer|celsius scale|thermal expansion/i,s:()=>{
+let k="";for(let i=0;i<=10;i++)k+=`M195 ${40+i*14}H${i%5?200:206}`;
+return X(`<rect class="o c1" x="170" y="30" width="20" height="165" rx="10"/><circle class="o" style="fill:#e53935" cx="180" cy="207" r="18"/><rect x="176" y="110" width="8" height="90" style="fill:#e53935"/><path class="w" d="${k}" style="stroke-width:1.4"/>`+
+T(212,44,"100 °C (steam)","start","ts")+T(212,184,"0 °C (ice)","start","ts")+T(212,114,"Liquid level: 50 °C","start","ts")+L(180,60,120,52,"Glass stem")+L(178,150,120,146,"Liquid thread")+L(166,210,110,232,"Bulb of mercury")+
+T(180,252,"Fixed points: 0 °C (melting ice), 100 °C (boiling water).",0,"ts")+T(180,266,"The liquid expands when warm and rises up the narrow stem.",0,"ts"),278)}},
+float:{t:"Upthrust: sinking and floating",re:/archimedes|upthrust|buoyancy|floating and sinking|hydrometer|law of flotation/i,s:()=>X(
+`<rect class="o c4" x="20" y="100" width="320" height="110"/><path class="w" d="M20 100H340" style="stroke:#1e88e5;stroke-width:1.5"/>`+
+`<rect class="o c8" x="45" y="168" width="50" height="36"/><rect class="o c7" x="150" y="85" width="60" height="40"/><rect class="o c9" x="275" y="130" width="50" height="40"/>`+
+A(60,184,60,206,"r")+A(80,186,80,170,"b")+A(170,105,170,135,"r")+A(190,105,190,75,"b")+A(290,150,290,172,"r")+A(310,150,310,108,"b")+
+T(20,18,"Weight W (red)","start","ts")+T(340,18,"Upthrust U (blue)","end","ts")+T(70,228,"Sinks",0,"tb")+T(70,242,"weight > upthrust",0,"ts")+T(180,228,"Floats",0,"tb")+T(180,242,"weight = upthrust",0,"ts")+T(300,228,"Rises",0,"tb")+T(300,242,"upthrust > weight",0,"ts")+
+T(180,264,"Upthrust = weight of liquid displaced (Archimedes).",0,"ts"),276)},
+radio:{t:"Alpha, beta and gamma radiation",re:/radioactiv|alpha (particles?|rays?|decay)|beta (particles?|decay)|half.?life|penetrating power|nuclear radiation|alpha,? beta/i,s:()=>X(
+T(180,16,"Penetrating power of radiation",0,"tb")+`<rect class="o" style="fill:#fff" x="130" y="30" width="4" height="180"/><rect class="o" style="fill:#b0bec5" x="200" y="30" width="10" height="180"/><rect class="o" style="fill:#546e7a" x="260" y="30" width="24" height="180"/>`+
+[[60,"α"],[120,"β"],[180,"γ"]].map(r=>`<circle class="k" cx="46" cy="${r[0]}" r="4"/>`+T(22,r[0]+4,r[1],0,"tb")).join("")+
+A(52,60,126,60,"r")+A(52,120,196,120,"b")+A(52,180,256,180,"g")+T(132,226,"Paper",0,"ts")+T(205,226,"Aluminium",0,"ts")+T(272,226,"Lead",0,"ts")+
+T(180,250,"α (alpha): stopped by paper",0,"ts")+T(180,264,"β (beta): stopped by a few mm of aluminium",0,"ts")+T(180,278,"γ (gamma): reduced by thick lead",0,"ts"),290)}
 };
 return D})();
 function dgClean(src){try{const d=new DOMParser().parseFromString(src,"image/svg+xml"),r=d.documentElement;if(!r||r.nodeName!=="svg"||d.querySelector("parsererror"))return"";
@@ -1084,7 +1405,10 @@ function md(t){t=dgPre(t);t=esc(t);let o="",m=null,tb=[];
  const cl=()=>{if(m=="table"){const R=tb;tb=[];let h="";R.forEach((r,k)=>{const hd=r.hd;h+="<tr>"+r.c.map(c=>{const num=/^[-+]?(UGX\s)?[\d,.\s]+(%|\s?[a-zA-Z\u00b2\u00b3\/]{0,4})?$/.test(mthLite(c).replace(/<[^>]+>/g,"").trim())&&!hd;return"<"+(hd?"th":"td")+(num?' class="nm"':"")+">"+il(c)+"</"+(hd?"th":"td")+">"}).join("")+"</tr>"});o+='<div class="tw"><table>'+h+"</table></div>";m=null;return}
   if(m=="mb"){o+="</div>";m=null;return}
   if(m){o+="</"+m+">";m=null}},
- il=x=>mthLite(x).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/`(.+?)`/g,"<code>$1</code>");
+ il=x=>{const S=[],IT=h=>h.split(/(<[^>]+>)/).map((q,i)=>i%2?q:q.replace(/(?<![A-Za-z\u00a0])([a-zA-Z])(?![A-Za-z])/g,"<i>$1</i>")).join("");
+  x=x.replace(/\$(?=\S)[^$\n]*=[^$\n]*\S\$(?:\s*(?:,\s*and|and|,|;)\s*\$(?=\S)[^$\n]*=[^$\n]*\S\$)+\.?/g,m0=>{const R=(m0.match(/\$(?=\S)([^$\n]*?\S)\$/g)||[]).map(z=>z.slice(1,-1).trim());S.push('<span class="mb">'+IT(R.map(q=>mrow(q)).join("").replace(/<div class="mr">/g,'<span class="mr">').replace(/<\/div>/g,"</span>"))+"</span>");return"\u0001"+(S.length-1)+"\u0001"});
+  x=x.replace(/\$(?=\S)([^$\n]*?\S)\$/g,(m0,e)=>{const h=IT(mth(e.trim()));S.push('<span class="mi">'+h+"</span>");return"\u0001"+(S.length-1)+"\u0001"});
+  return mthLite(x).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/`(.+?)`/g,"<code>$1</code>").replace(/\u0001(\d+)\u0001/g,(m0,i)=>S[i])};
  const lines=t.split("\n");
  for(let k=0;k<lines.length;k++){const l=lines[k];
   if(/^\|/.test(l)){if(/^\|[-| :]+\|?$/.test(l)){if(tb.length==1)tb[0].hd=true;continue}if(m!="table"){cl();m="table"}tb.push({c:l.split("|").slice(1,-1).map(c=>c.trim()),hd:false});continue}
@@ -3436,7 +3760,7 @@ function bub(m,i,last){
  const A=[["copy","Copy"],["bm",m.bm?"Saved":"Save",m.bm],["up","Helpful",m.fb==1],["dn","Not helpful",m.fb==-1],["share","Share"]];
  const NQ=(!m.stream&&!m.quiz&&!m.note)?nqSplit(m.t):{t:m.t,nq:false};
  let h=`<div class="b i ai" data-i="${i}">${m.mdl?`<div class="mdltag">${esc(m.mdl)}</div>`:""}${exHtml(m,i)||`<div class="md">${last&&!m.stream&&!m.quiz?hlWrap(md(NQ.t)):md(NQ.t)}</div>${dgAuto(m)}`}`;
- if(m.quiz){h+=m.quiz[1].map((o,k)=>`<button class="opt ${m.pick!=null?(k==m.quiz[2]?"ok":k==m.pick?"bad":""):""}" data-act="pick" data-i="${i}" data-k="${k}">${esc(o)}</button>`).join("")+(m.pick!=null?`<p>${m.pick==m.quiz[2]?"Correct, well done.":"Not quite. The correct answer is highlighted."}</p>`+(m.qz?(m.qz.n<m.qz.list.length-1?`<div class="chips"><button data-act="nq" data-i="${i}">Next question</button></div>`:`<p><b>Quiz finished: ${m.qz.score} out of ${m.qz.list.length}.</b></p>`):""):"")}
+ if(m.quiz){h+=m.quiz[1].map((o,k)=>`<button class="opt ${m.pick!=null?(k==m.quiz[2]?"ok":k==m.pick?"bad":""):""}" data-act="pick" data-i="${i}" data-k="${k}">${md(o).replace(/^<p>|<\/p>$/g,"")}</button>`).join("")+(m.pick!=null?`<p>${m.pick==m.quiz[2]?"Correct, well done.":"Not quite. The correct answer is highlighted."}</p>`+(m.qz?(m.qz.n<m.qz.list.length-1?`<div class="chips"><button data-act="nq" data-i="${i}">Next question</button></div>`:`<p><b>Quiz finished: ${m.qz.score} out of ${m.qz.list.length}.</b></p>`):""):"")}
  let act="";
  if(last&&!m.stream&&!m.quiz){const P=abPlan(m.t),cb=(x,c)=>x.map(y=>`<button${c?` class="${c}"`:""} data-st="${stAttr(y.q)}">${esc(y.lab)}</button>`).join("");
   if(NQ.nq)h+=`<div class="nqx"><div class="abl">Next questions to investigate</div><div class="chips">${cb(P.all.slice(0,3))}</div></div>`;

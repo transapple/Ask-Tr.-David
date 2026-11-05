@@ -207,6 +207,15 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 .b.ai{max-width:100%}.md h3{font-size:1.1em;margin:2px 0 4px}.md h4{margin:8px 0 2px;color:var(--green)}.md p{margin:3px 0}.md ul,.md ol{margin:3px 0 3px 20px}
 .md table{border-collapse:collapse;margin:6px 0;width:100%}.md td{border:1px solid var(--line);padding:4px 8px;font-size:.9em}.md tr:first-child td{font-weight:600}.md code{background:var(--wall);padding:1px 5px;border-radius:4px}
 .act,.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.act button{border:0;background:none;color:var(--sub);font:inherit;font-size:12px;cursor:pointer;padding:3px 8px;border-radius:10px}.act{clear:both}.act button{padding:14px 14px 8px;display:grid;place-items:center}.act button svg{width:23px;height:23px}.act.out{align-self:flex-start;margin:-6px 0 8px 0;gap:4px}.act .on{background:none;border:0;color:var(--green)}.act .on svg{fill:currentColor}.act button:active{background:var(--wall)}
+/* maths layout */
+.md .mb{display:grid;grid-template-columns:auto auto 1fr;column-gap:.55em;row-gap:.3em;align-items:baseline;justify-content:start;margin:6px 0 8px;padding:8px 12px;background:var(--wall);border-left:3px solid var(--green);border-radius:6px;font-family:"Cambria Math","STIX Two Math","Times New Roman",serif;font-size:1.06em;line-height:1.5;overflow-x:auto;max-width:100%}
+.md .mr{display:contents}.md .ml{text-align:right;white-space:nowrap}.md .me{text-align:center}.md .mv{white-space:nowrap}.md .mf{grid-column:1/-1;white-space:normal}
+.md .fr{display:inline-block;vertical-align:middle;text-align:center;margin:0 .15em;line-height:1.15}.md .fr .nu{display:block;padding:0 .2em;border-bottom:1.5px solid currentColor}.md .fr .de{display:block;padding:0 .2em}
+.md .rt{white-space:nowrap}.md .rt .rx{border-top:1.5px solid currentColor;padding:0 .15em;margin-left:1px}
+.md sup,.md sub{font-size:.72em;line-height:0}
+.md .ans{margin:8px 0;padding:8px 12px;border:1.5px solid var(--green);border-radius:8px;font-weight:700;background:rgba(47,128,237,.07)}
+.md .tw{overflow-x:auto;margin:6px 0}.md .tw table{margin:0}.md th{border:1px solid var(--line);padding:4px 8px;font-size:.9em;background:var(--wall);text-align:left}.md td.nm{text-align:right;font-variant-numeric:tabular-nums}
+.md tr:nth-child(even) td{background:rgba(127,127,127,.06)}
 .md b.hl{cursor:pointer;background:rgba(47,128,237,.13);border-bottom:1px dashed var(--green);border-radius:3px;padding:0 2px}.md b.hl:active{background:rgba(47,128,237,.3)}
 .abx{margin-top:8px;border-top:1px solid var(--line);padding-top:6px}.abx .abt{border:1px solid var(--green);background:none;color:var(--green);border-radius:14px;padding:5px 12px;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer}.abx .abt.on{background:var(--green);color:#fff}
 .rtx{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}.rtx .rtq{font-weight:700;font-size:14px}.rtx .rtn{color:var(--sub);font-size:12.5px;line-height:1.45;margin:3px 0 8px}.rtx .rtb{display:flex;gap:8px}.rtx .rtb button{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 6px;border:1px solid var(--line);border-radius:18px;background:none;color:var(--text);font:inherit;font-size:13px;font-weight:600;cursor:pointer}.rtx .rtb button svg{width:18px;height:18px}.rtx .rtb button.up.on{background:var(--green);border-color:var(--green);color:#fff}.rtx .rtb button.dn.on{background:#ff453a;border-color:#ff453a;color:#fff}.rtx .rtb.rtr button.rep{background:var(--green);border-color:var(--green);color:#fff}.rtx .rts{margin-top:7px;font-size:12.5px;color:var(--sub);line-height:1.4}.nqx .abl{font-size:13px;font-weight:700;margin:10px 0 4px}.abp .chips button.top{background:var(--green);color:#fff;border-color:var(--green)}
@@ -518,7 +527,7 @@ function render(){
  D.msgs.forEach((m,i)=>{if(q&&!m.t.toLowerCase().includes(q))return;n++;const d=dl(m.ts);if(d!=last){h+=`<div class="day">${d}</div>`;last=d}
  if(m.s=="i"){h+=bub(m,i,i==lb);return}
  h+=`<div class="b ${m.s}" data-i="${i}">${m.img?'<img src="'+m.img+'">':""}${hl(m.t)}<small>${m.ed?"edited ":""}${hm(m.ts)}${m.s=="o"?`<span class="${m.st==2?"rd":""}" style="display:inline-flex">${m.st?K2:K1}</span>`:""}</small></div>`});
- if(!D.msgs.length&&!q)h=empty();$("cnt").textContent=q?n+" found":"";if(q&&!n)h='<div class="day">No messages found</div>';
+ if(D.msgs.length)HQC={};if(!D.msgs.length&&!q)h=empty();$("cnt").textContent=q?n+" found":"";if(q&&!n)h='<div class="day">No messages found</div>';
  $("msgs").innerHTML=h;if(typeof thinkBub=="function")thinkBub();$("msgs").scrollTop=1e9;subs()}
 function stopEdit(){ei=null;$("inp").value="";$("editing").style.display="none"}
 function send(){
@@ -946,15 +955,44 @@ const gen=x=>["Explain the main ideas of "+x,"Give me a revision summary for "+x
 const STARTS={General:["How do I study better for exams?","What is photosynthesis?","Explain fractions simply"],Mathematics:["How do I solve 2x + 5 = 11?","What is the Pythagoras theorem?","Explain percentages"],Science:["How do plants make food?","What are the states of matter?","How is rain formed?"],English:["What is a noun?","How do I write a good essay?","Explain the past tense"],History:["What caused World War 1?","Who built the pyramids?","What was the Industrial Revolution?"]};
 const SEND=$("send").innerHTML,STOP='<svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" style="fill:currentColor"/></svg>';
 let stream=null,sm=null,stamps=[];
-function md(t){t=esc(t);let o="",m=null;const cl=()=>{if(m){o+="</"+m+">";m=null}},il=x=>x.replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/`(.+?)`/g,"<code>$1</code>");
- for(const l of t.split("\n")){
-  if(/^\|/.test(l)){if(/^\|[-| :]+\|?$/.test(l))continue;if(m!="table"){cl();o+="<table>";m="table"}o+="<tr>"+l.split("|").slice(1,-1).map(c=>"<td>"+il(c.trim())+"</td>").join("")+"</tr>";continue}
+/* ===== MATHS FORMATTING: fractions, powers, roots, units, UGX. Works on text that is already HTML-escaped. ===== */
+const MG=n=>String(n).replace(/\B(?=(\d{3})+(?!\d))/g,",");
+function mthLite(x){
+ x=x.replace(/\b(?:U?Shs?|USh|Ugx)\.?\s*(?=\d)/g,"UGX ").replace(/\bUGX\s?(\d{4,})(?![\d,.])/g,(a,n)=>"UGX "+MG(n));
+ x=x.replace(/\\(?:left|right)\b/g,"").replace(/\\times\b/g,"\u00d7").replace(/\\div\b/g,"\u00f7").replace(/\\cdot\b/g,"\u00b7").replace(/\\pi\b/g,"\u03c0").replace(/\\therefore\b/g,"\u2234").replace(/\\(?:le|leq)\b/g,"\u2264").replace(/\\(?:ge|geq)\b/g,"\u2265").replace(/\\neq?\b/g,"\u2260");
+ x=x.replace(/\\sqrt\{([^{}]+)\}/g,"sqrt($1)").replace(/sqrt\(([^()]+)\)/g,'<span class="rt">\u221a<span class="rx">$1</span></span>');
+ x=x.replace(/\^(-?\d+(?:\.\d+)?|-?[a-zA-Z]\b|\{[^}]+\}|\([^)]+\))/g,(a,e)=>"<sup>"+e.replace(/^[{(]|[})]$/g,"")+"</sup>");
+ x=x.replace(/(\d|\))\s?(mm|cm|km|m|ha)([23])\b/g,"$1 $2<sup>$3</sup>").replace(/\b(m\/s|km\/h\/s)2\b/g,"$1<sup>2</sup>");
+ x=x.replace(/([\w)])\s?\*\s?(?=[\w(])/g,"$1 \u00d7 ").replace(/&lt;=/g,"\u2264").replace(/&gt;=/g,"\u2265").replace(/!=/g,"\u2260").replace(/\+-/g,"\u00b1");
+ return x}
+function mth(x){
+ x=mthLite(x);
+ const N="\\d+(?:\\.\\d+)?",V="[a-z](?![a-z])",A="(?:"+N+"|"+V+")";
+ x=x.replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g,"($1)/($2)");
+ x=x.replace(/\(([^()]+)\)\/\(([^()]+)\)/g,'<span class="fr"><span class="nu">$1</span><span class="de">$2</span></span>');
+ x=x.replace(new RegExp("(?<![\\w.\\/>])("+N+"|"+V+")\\/("+N+"|"+V+")(?![\\w\\/<])","g"),(a,n,d)=>/^[a-z]$/.test(n)&&/^[a-z]$/.test(d)?a:'<span class="fr"><span class="nu">'+n+'</span><span class="de">'+d+'</span></span>');
+ x=x.replace(/ - /g," \u2212 ").replace(/_(\{[^}]+\}|\w+)/g,(a,e)=>"<sub>"+e.replace(/^\{|\}$/g,"")+"</sub>").replace(/\bpi\b/g,"\u03c0");
+ return x}
+function mrow(l){let lb="";const lm=l.match(/^([A-Za-z][A-Za-z ]{2,24}):\s+(.*)$/);if(lm){lb='<div class="mr"><span class="mf"><i>'+lm[1]+':</i></span></div>';l=lm[2]}
+ const q=l.match(/^(?:(.*?)\s)?=\s(.*)$/);
+ if(q)return lb+'<div class="mr"><span class="ml">'+mth(q[1]||"")+'</span><span class="me">=</span><span class="mv">'+mth(q[2])+'</span></div>';
+ return lb+'<div class="mr"><span class="mf">'+mth(l)+'</span></div>'}
+function md(t){t=esc(t);let o="",m=null,tb=[];
+ const cl=()=>{if(m=="table"){const R=tb;tb=[];let h="";R.forEach((r,k)=>{const hd=r.hd;h+="<tr>"+r.c.map(c=>{const num=/^[-+]?(UGX\s)?[\d,.\s]+(%|\s?[a-zA-Z\u00b2\u00b3\/]{0,4})?$/.test(mthLite(c).replace(/<[^>]+>/g,"").trim())&&!hd;return"<"+(hd?"th":"td")+(num?' class="nm"':"")+">"+il(c)+"</"+(hd?"th":"td")+">"}).join("")+"</tr>"});o+='<div class="tw"><table>'+h+"</table></div>";m=null;return}
+  if(m=="mb"){o+="</div>";m=null;return}
+  if(m){o+="</"+m+">";m=null}},
+ il=x=>mthLite(x).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/`(.+?)`/g,"<code>$1</code>");
+ const lines=t.split("\n");
+ for(let k=0;k<lines.length;k++){const l=lines[k];
+  if(/^\|/.test(l)){if(/^\|[-| :]+\|?$/.test(l)){if(tb.length==1)tb[0].hd=true;continue}if(m!="table"){cl();m="table"}tb.push({c:l.split("|").slice(1,-1).map(c=>c.trim()),hd:false});continue}
+  const mm=l.match(/^::\s?(.*)$/)||l.match(/^\$\$\s*(.+?)\s*\$\$$/);
+  if(mm){if(m!="mb"){cl();o+='<div class="mb">';m="mb"}o+=mrow(mm[1]);continue}
   const b=l.match(/^(\d+)\. (.*)/),u=l.match(/^- (.*)/);
   if(b){if(m!="ol"){cl();o+="<ol>";m="ol"}o+="<li>"+il(b[2])+"</li>"}
   else if(u){if(m!="ul"){cl();o+="<ul>";m="ul"}o+="<li>"+il(u[1])+"</li>"}
-  else{cl();if(/^## /.test(l))o+="<h4>"+il(l.slice(3))+"</h4>";else if(/^# /.test(l))o+="<h3>"+il(l.slice(2))+"</h3>";else if(l.trim())o+="<p>"+il(l)+"</p>"}}
+  else{cl();if(/^## /.test(l))o+="<h4>"+il(l.slice(3))+"</h4>";else if(/^# /.test(l))o+="<h3>"+il(l.slice(2))+"</h3>";else if(/^\*\*(Final answer|Answer|Therefore)\b/i.test(l))o+='<div class="ans">'+il(l)+"</div>";else if(l.trim())o+="<p>"+il(l)+"</p>"}}
  cl();return o}
-/* ===== WORKED SOLUTIONS: real step-by-step working, shown a little at a time ===== */
+/* ===== WORKED SOLUTIONS: real step-by-step working, shown in full at once ===== */
 const gcd=(a,b)=>{a=Math.abs(a);b=Math.abs(b);while(b){const t=a%b;a=b;b=t}return a};
 const FR=(n,d=1)=>{if(d<0){n=-n;d=-d}const g=gcd(n,d)||1;return{n:n/g,d:d/g}};
 const fa=(x,y)=>FR(x.n*y.d+y.n*x.d,x.d*y.d),fng=x=>FR(-x.n,x.d),fs=(x,y)=>fa(x,fng(y)),fm=(x,y)=>FR(x.n*y.n,x.d*y.d),fd=(x,y)=>FR(x.n*y.d,x.d*y.n),fz=x=>x.n===0,fab=x=>FR(Math.abs(x.n),x.d),fe=(x,y)=>x.n===y.n&&x.d===y.d;
@@ -1024,11 +1062,12 @@ function solveLin(E){
    P.push({h:"Check your answer",t:"Left side: "+sub(L)+" = "+fstr(lv)+"\nRight side: "+sub(R)+" = "+fstr(rv)+"\nBoth sides are equal, so "+v+" = "+fstr(X)+" is correct.",more:"To be sure, put your answer back into the original equation in place of "+v+". If both sides give the same number, the answer is correct. If they are different, go back and look for a mistake."})}
   end="**Answer: "+v+" = "+fstr(X)+(X.d===1?"":" ("+fdec(X)+")")+"**"}
  return{title:"Solving "+eq0,parts:P,end}}
-function wBuild(m){const w=m.w;let o="# "+w.title+"\n"+w.intro+"\n";for(let i=0;i<w.shown;i++){const p=w.parts[i];o+="## Step "+(i+1)+": "+p.h+"\n"+p.t+"\n";if(w.open[i])o+="**Why we do this:** "+p.more+"\n"}if(w.shown>=w.parts.length)o+=w.end;return o}
+const wIsMath=l=>{const t=l.trim();if(!t)return false;if(/^::/.test(t))return true;const words=(t.replace(/\*\*/g,"").match(/[A-Za-z]{3,}/g)||[]).filter(x=>!/^(UGX|cm|km|kg|sqrt|mm|ha|mL)$/i.test(x));return(/=/.test(t)||/^[\d\s+\-\u2212\u00d7\u00f7().,x^\/]+$/.test(t))&&words.length<=2&&t.length<=90};
+const wLines=t=>String(t).split("\n").map(l=>wIsMath(l)?(/^::/.test(l.trim())?l.trim():":: "+l.trim()):l).join("\n");
+function wBuild(m){const w=m.w;let o="# "+w.title+"\n"+w.intro+"\n";w.parts.forEach((p,i)=>{o+="## Step "+(i+1)+": "+p.h+"\n"+wLines(p.t)+"\n"+(p.more?"**Why we do this:** "+p.more+"\n":"")});return o+w.end}
 function work(q){const E=eqOf(q);if(!E)return null;const S=solveLin(E);if(!S||!S.parts.length)return null;
- const w={title:S.title,intro:(D.pname?"Hi "+D.pname+". ":"")+"Here is the full working, a little at a time. Tap **Next step** to continue, or **Break this step down** if a step is not clear.",parts:S.parts,end:S.end,shown:Math.min(2,S.parts.length),open:{}};
+ const w={title:S.title,intro:(D.pname?"Hi "+D.pname+". ":"")+"Here is the full working, step by step, with the reason for each step.",parts:S.parts,end:S.end,shown:S.parts.length,open:{}};
  return{t:wBuild({w}),w}}
-function wBtns(m,i){const w=m.w,c=w.shown-1,p=w.parts[c];return'<div class="chips"><button data-act="next" data-i="'+i+'">Next step</button>'+(p&&p.more&&!w.open[c]?'<button data-act="brk" data-i="'+i+'">Break this step down</button>':"")+'<button data-act="all" data-i="'+i+'">Show all steps</button></div>'}
 const TOP0=[
 {re:/\bnouns?\b/,n:"Noun",a:"How to use it",b:"Where it is used",
 d:"A **noun** is a word that names a person, place, animal, thing or idea.",
@@ -2696,7 +2735,7 @@ const clLine=T=>{if(!T)return"";if(T.cl){const tm=[...new Set(T.cl.flatMap(x=>x[
 const clSec=T=>T&&!T.cl&&T.p&&SNAME[T.p]?"\n## Where it is taught\n- **"+SNAME[T.p]+":** "+T.n+" is taught in "+SNAME[T.p]+" in the NCDC Lower Secondary "+((T.S&&T.S[0])||"Mathematics")+" syllabus.\n":T&&T.cl?"\n## Where it is taught\n"+T.cl.map(x=>"- **"+PCN[x[0]]+", "+TERMTXT(x[1])+":** "+x[2]).join("\n")+"\n":"";
 const MSTART=["What topics are in Primary 4?","Explain place value","Solve 345 + 278","What is 3/4 + 1/8?"];
 const ESTART=["What topics are in Primary 4?","What is a noun?","Explain the past tense","How do I write a letter?"];
-const startsFor=()=>D.sub=="Mathematics"&&lvKey()=="PLE"?MSTART:D.sub=="English"&&lvKey()=="PLE"?ESTART:(STARTS[D.sub]||gen(D.sub));
+const startsFor=()=>{if(D.sub=="Mathematics"&&lvKey()=="PLE")return MSTART;if(D.sub=="English"&&lvKey()=="PLE")return ESTART;const x=hqPick(3);return x.length?x:(STARTS[D.sub]||gen(D.sub))};
 const pn=n=>String(n).replace(/\B(?=(\d{3})+(?!\d))/g," ");
 const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
 const PL=["ones","tens","hundreds","thousands","ten thousands","hundred thousands","millions","ten millions","hundred millions","billions"];
@@ -2872,7 +2911,7 @@ function arithSolve(q){
 function mathWork(q){
  const s=syllabusReply(q);if(s)return s;
  const S=arithSolve(q);if(!S||!S.parts.length)return null;
- const w={title:S.title,intro:(D.pname?"Hi "+D.pname+". ":"")+"**Class:** "+S.cls+".\nHere is the full working, a little at a time. Tap **Next step** to continue, or **Break this step down** if a step is not clear.",parts:S.parts,end:S.end,shown:Math.min(2,S.parts.length),open:{}};
+ const w={title:S.title,intro:(D.pname?"Hi "+D.pname+". ":"")+"**Class:** "+S.cls+".\nHere is the full working, step by step, with the reason for each step.",parts:S.parts,end:S.end,shown:S.parts.length,open:{}};
  return{t:wBuild({w}),w}}
 
 TOP0.forEach(t=>{if(t.n=='Pythagoras theorem')t.L=['UCE','UACE']});
@@ -3072,7 +3111,7 @@ async function aiAnswer(q,FUx,loose){
  AIWHY="";const c=new AbortController(),tm=setTimeout(()=>c.abort(),loose?25000:58000);
  try{
   const sub=loose==2?"General":(D.sub=="General"?(detectSub(q)||"General"):D.sub);
-  const bd=JSON.stringify({question:String(q).slice(0,300),level:D.lvl,class:loose==2?"":String(D.cls||"").replace(/^Primary /,"P").replace(/^Senior /,"S"),subject:sub,topics:curHint(q),plan:planName(),curriculum:"Uganda NCDC",strict_subject:!loose,retry:loose?true:undefined,brief:!wantFull()||modelName()=="malumalu",...svMe(),follow:FUx&&!FUx.local?{kind:FUx.kind,topic:FUx.topic,step:FUx.step||0,instruction:FUx.hint||"",previous:lastAnsText()}:undefined});
+  const bd=JSON.stringify({question:String(q).slice(0,300),level:D.lvl,class:loose==2?"":String(D.cls||"").replace(/^Primary /,"P").replace(/^Senior /,"S"),subject:sub,topics:curHint(q),plan:planName(),curriculum:"Uganda NCDC",strict_subject:!loose,retry:loose?true:undefined,brief:!wantFull()||modelName()=="malumalu",...svMe(),blueprint:bpCtx(q),follow:FUx&&!FUx.local?{kind:FUx.kind,topic:FUx.topic,step:FUx.step||0,instruction:FUx.hint||"",previous:lastAnsText()}:undefined});
   const hd={apikey:SBK,"Content-Type":"application/json"};
   let r=await fetch(AIU,{method:"POST",signal:c.signal,headers:hd,body:bd});
   if(!r.ok&&(r.status==404||r.status>=500)){try{const r2=await fetch(AIU1,{method:"POST",signal:c.signal,headers:hd,body:bd});if(r2.ok)r=r2}catch(e){}}
@@ -3286,9 +3325,10 @@ function exHtml(m,i){
    h.push('</div>')});
   h.push('</div>');return h.join("")}).join("")}
 function bub(m,i,last){
- if(m.note)return `<div class="b i ai" data-i="${i}"><div class="md">${md(m.t)}</div>${m.up?`<div class="chips"><button data-act="plans" data-i="${i}">See plans</button></div>`:""}${m.opts&&last?`<div class="chips">${m.opts.map(x=>`<button data-st="${esc(x).replace(/"/g,"&quot;")}">${esc(x)}</button>`).join("")}</div>`:""}<small>${hm(m.ts)}</small></div>`;
+ if(m.note)return `<div class="b i ai" data-i="${i}"><div class="md">${md(m.t)}</div>${m.up?`<div class="chips"><button data-act="plans" data-i="${i}">See plans</button></div>`:""}${m.ok?`<div class="chips"><button data-act="okn" data-i="${i}" style="background:var(--green);color:#fff;border-color:var(--green);font-weight:700;padding:6px 22px">OK</button></div>`:""}${m.opts&&last?`<div class="chips">${m.opts.map(x=>`<button data-st="${esc(x).replace(/"/g,"&quot;")}">${esc(x)}</button>`).join("")}</div>`:""}<small>${hm(m.ts)}</small></div>`;
  if(m.lim)return `<div class="b i ai" data-i="${i}"><div style="display:flex;gap:10px;align-items:flex-start"><span style="flex:none;width:34px;height:34px;border-radius:50%;background:rgba(245,158,11,.16);color:#d97706;display:grid;place-items:center"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></span><div style="font-weight:700;font-size:16px;line-height:1.3;color:#d97706;padding-top:1px">${LIM1}</div></div>${rtime()?`<div style="display:flex;gap:8px;align-items:center;margin-top:10px;color:var(--sub);font-size:14px"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#2f80ed" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Your free plan resets at <b style="color:#2f80ed">${rtime()}</b></span></div>`:""}<button data-act="plans" data-i="${i}" style="display:block;width:100%;margin-top:12px;padding:12px 14px;border:0;border-radius:22px;background:var(--green);color:#fff;font:inherit;font-weight:700;cursor:pointer;text-align:center">${LIM2}</button><small>${hm(m.ts)}</small></div>`;
  if(m.err)return `<div class="b i err" data-i="${i}">${esc(m.t)}<div class="act"><button data-act="retry" data-i="${i}">Retry</button></div></div>`;
+ if(m.w&&m.w.parts&&!m.stream)m.t=wBuild(m);
  const A=[["copy","Copy"],["bm",m.bm?"Saved":"Save",m.bm],["up","Helpful",m.fb==1],["dn","Not helpful",m.fb==-1],["share","Share"]];
  const NQ=(!m.stream&&!m.quiz&&!m.note)?nqSplit(m.t):{t:m.t,nq:false};
  let h=`<div class="b i ai" data-i="${i}">${m.mdl?`<div class="mdltag">${esc(m.mdl)}</div>`:""}${exHtml(m,i)||`<div class="md">${last&&!m.stream&&!m.quiz?hlWrap(md(NQ.t)):md(NQ.t)}</div>`}`;
@@ -3298,8 +3338,7 @@ function bub(m,i,last){
   if(NQ.nq)h+=`<div class="nqx"><div class="abl">Next questions to investigate</div><div class="chips">${cb(P.all.slice(0,3))}</div></div>`;
   h+=`<div class="abx"><button class="abt${m.ab?" on":""}" data-act="ab" data-i="${i}">${m.ab?"Hide":"Ask about this"}</button>${m.ab?`<div class="abp">${P.top?`<div class="abl">Best place to start</div><div class="chips">${cb([P.top],"top")}</div>`:""}${P.hl.length?`<div class="abl">Highlighted</div><div class="chips">${cb(P.hl)}</div>`:""}${P.more.length?`<div class="abl">Also important</div><div class="chips">${cb(P.more)}</div>`:""}${P.gen.length?`<div class="abl">You can ask</div><div class="chips">${cb(P.gen)}</div>`:""}<div class="abl">Or type your own question below. It will follow on from this answer.</div></div>`:""}</div>`;
   if(!m.rdone)h+=m.rs=="thanks"?`<div class="rtx"><div class="rts">Thank you, we are glad it helped.</div></div>`:m.rs=="sorry"?`<div class="rtx"><div class="rts">We are sorry it did not help. Please report here. You can also ignore.</div><div class="rtb rtr"><button class="rep" data-act="rep" data-i="${i}">Report</button><button class="ign" data-act="ign" data-i="${i}">Ignore</button></div></div>`:`<div class="rtx"><div class="rtq">Did this answer your question?</div><div class="rtn">Tap Like if it did. If anything is wrong, tap Unlike. It will be reported to us immediately for review.</div><div class="rtb"><button class="up" data-act="up" data-i="${i}">${AI.up}<span>Like</span></button><button class="dn" data-act="dn" data-i="${i}">${AI.dn}<span>Unlike</span></button></div></div>`}
- if(!m.stream){act=`<div class="act out">${A.map(a=>`<button class="${a[2]?"on":""}" data-act="${a[0]}" data-i="${i}" aria-label="${a[1]}" title="${a[1]}">${AI[a[0]]}</button>`).join("")}${last?`<button data-act="regen" data-i="${i}" aria-label="Regenerate" title="Regenerate">${AI.regen}</button>`:""}</div>`;
-  if(last&&m.w&&m.w.shown<m.w.parts.length)h+=wBtns(m,i)}
+ if(!m.stream){act=`<div class="act out">${A.map(a=>`<button class="${a[2]?"on":""}" data-act="${a[0]}" data-i="${i}" aria-label="${a[1]}" title="${a[1]}">${AI[a[0]]}</button>`).join("")}${last?`<button data-act="regen" data-i="${i}" aria-label="Regenerate" title="Regenerate">${AI.regen}</button>`:""}</div>`;}
  return h+`<small>${hm(m.ts)}</small></div>${act}`}
 /* ===== FREE PLAN: random word limit (2000 to 3000) per account, kept on this phone ===== */
 const LIM1="You have hit the maximum limit of the free plan.",LIM2="Upgrade to enjoy Unlimitedly.",LIM=LIM1+" "+LIM2,
@@ -3330,9 +3369,9 @@ const PTAG={Free:"",Basic:"TEACHING & LESSONS",Standard:"EXAMINATIONS & REVISION
 PMOD={Free:["malumalu"],Basic:["teacher","examiner"],Standard:["teacher","examiner"],Premium:["teacher","examiner","philosopher"]},
 PSPEC={
  Free:{malumalu:["1.0",["Always brief and short","Doesn't provide detailed information; for quick short responses only","Limited to a specific rate"]]},
- Basic:{teacher:["1.2",["Explains lessons and teaches concepts"]],examiner:["1.0",["Exams questions, scenarios and marking guides"]]},
- Standard:{teacher:["1.3",["Explains lessons and teaches concepts","Personal help with difficult topics and detailed instructions"]],examiner:["1.2",["Exams questions, scenarios and detailed marking guides"]]},
- Premium:{teacher:["1.3",["Advanced explanations and lesson concepts","Advanced personal help with difficult topics and detailed instructions"]],examiner:["1.2",["Advanced exams questions, scenarios and detailed marking guides","Exams prediction guides and revisions"]],philosopher:["1.1",["Research questions, evidence and write-up","Finds and organizes learning resources","Deep thinking reasoning and analysis"]]}},
+ Basic:{teacher:["1.2",["Explains lessons and teaches concepts"]],examiner:["1.0",["Exams questions, scenarios and marking guides","Sets questions to the UCE elements of construct"]]},
+ Standard:{teacher:["1.3",["Explains lessons and teaches concepts","Personal help with difficult topics and detailed instructions"]],examiner:["1.2",["Exams questions, scenarios and detailed marking guides","Sets questions to the UCE elements of construct"]]},
+ Premium:{teacher:["1.3",["Advanced explanations and lesson concepts","Advanced personal help with difficult topics and detailed instructions"]],examiner:["1.2",["Advanced exams questions, scenarios and detailed marking guides","Exams prediction guides and revisions","Sets questions to the UCE elements of construct"]],philosopher:["1.1",["Research questions, evidence and write-up","Finds and organizes learning resources","Deep thinking reasoning and analysis"]]}},
 mver=(k,pl)=>((PSPEC[pl||planName()]||{})[k]||[MODELS[k].v])[0],
 mdesc=(k,pl)=>((PSPEC[pl||planName()]||{})[k]||[0,[MODELS[k].d]])[1];
 const MGROUPS=["Teaching & Lessons","Examinations & Revision","Research & Academic Writing"],GCOL={"Quick Answers":"#6b7c85","Teaching & Lessons":"#00a884","Examinations & Revision":"#2f80ed","Research & Academic Writing":"#8b5cf6"},
@@ -4015,7 +4054,7 @@ function activatePlan(){uiAlert("Your plan is set by the admin after payment.")}
 const PLAN_TEST_MODE=false;
 document.getElementById("psl").onclick=()=>modelPicker();document.getElementById("psr").onclick=()=>plans(1);
 function limitMsg(){D.msgs.push({s:"i",lim:1,t:"**"+LIM+"**",ts:Date.now()});save();render()}
-function freeReset(){FQW({v:2,cap:newCap(),used:0,left:null,seen:Date.now()});const rm=a=>{for(let i=a.length;i--;)if(a[i].lim)a.splice(i,1)};rm(D.msgs);D.chats.forEach(c=>rm(c.msgs));D.msgs.push({s:"i",note:1,t:"Your free plan has been reset. You can continue asking.",ts:Date.now()});save();render();const h=document.getElementById("plh");if(h){const l=h.querySelector(".cpl");if(l)l.innerHTML="Your free words have been reset."}}
+function freeReset(){FQW({v:2,cap:newCap(),used:0,left:null,seen:Date.now()});const rm=a=>{for(let i=a.length;i--;)if(a[i].lim)a.splice(i,1)};rm(D.msgs);D.chats.forEach(c=>rm(c.msgs));D.msgs.push({s:"i",note:1,ok:1,t:"Your free plan has been reset. You can continue asking.",ts:Date.now()});save();render();const h=document.getElementById("plh");if(h){const l=h.querySelector(".cpl");if(l)l.innerHTML="Your free words have been reset."}}
 let _pn=performance.now();
 setInterval(()=>{const n=performance.now(),d=n-_pn;_pn=n;if(!(window.AK&&AK.me()))return;const q=FQ();if(q.left==null){if(q.used>=q.cap)capped();return}
  const w=Date.now()-q.seen;q.left-=(w>3000?w:d);q.seen=Date.now();if(q.left<=0){freeReset();return}FQW(q)},1000);
@@ -4102,7 +4141,7 @@ function planGate(q){
  const kind=h(RX_QZ)?"quiz":h(RX_SI)?"simpler":h(RX_DE)?"detail":h(RX_EX)?"example":null;
  if(!kind)return null;
  const bare=isBare(q),cl=reqQ(q),G={kind,bare};
- if(rk<PRANK[GATE[kind][1]]){G.block=1;G.note=GATE[kind][0]+" are available on the "+GATE[kind][1]+" plan and above. You are on the "+pl+" plan.";G.q=cl;G.mode=null;return G}
+ if(rk<PRANK[GATE[kind][1]]){G.block=1;G.note=GATE[kind][0]+" are available on the "+GATE[kind][1]+" plan and above. You are on the "+pl+" plan. Upgrade your plan now to enjoy "+GATE[kind][0].toLowerCase()+".";G.q=cl;G.mode=null;return G}
  if(kind=="detail")return null;
  if(kind=="example"&&h(RX_EXPL))return null;
  G.mode=kind=="quiz"?"Quiz me":kind=="simpler"?"Explain simpler":"Give an example";
@@ -4315,7 +4354,7 @@ async function askScenario(q){
  D.msgs.push(m);sm=m;stream=setTimeout(()=>{},9e5);render();
  let j=null;const c=new AbortController(),tm=setTimeout(()=>c.abort(),50000);
  try{const r=await fetch(SBU.replace("/rest/v1/","/functions/v1/")+"scenario_answer",{method:"POST",signal:c.signal,headers:{apikey:SBK,"Content-Type":"application/json"},
-   body:JSON.stringify({text:raw,level:D.lvl,class:String(D.cls||"").replace(/^Primary /,"P").replace(/^Senior /,"S"),subject_hint:D.sub=="General"?"":D.sub,plan:planName(),curriculum:"Uganda NCDC"})});
+   body:JSON.stringify({text:raw,level:D.lvl,class:String(D.cls||"").replace(/^Primary /,"P").replace(/^Senior /,"S"),subject_hint:D.sub=="General"?"":D.sub,plan:planName(),curriculum:"Uganda NCDC",blueprint:bpCtx(raw)})});
   if(r.ok)j=await r.json()}catch(e){j=null}finally{clearTimeout(tm)}
  /* the learner pressed stop, or asked something else while we waited */
  if(stream==null||tok!=AN){D.msgs=D.msgs.filter(x=>x!==m);save();render();return}
@@ -4445,8 +4484,139 @@ function fileAsk(q){const t=String(q||"").trim();if(t.length<4||t.length>220||FQ
 const FQ_MSG="**Thank you for asking.** Ask Tr. David does not create, send or share files. That means no PDF, no PNG or JPG image, no video or audio, and no Word or PowerPoint document, and there is nothing to download here.\n\nThis is a place for learners to **read, revise, research and ask questions**. Everything you need is already here on the screen, so you do not need to download anything.\n\nPlease type your question and I will explain it clearly, give you revision notes, or test you with a short quiz.";
 function fileNote(q){const ch=D.chats.find(c=>c.id==D.cur);if(ch&&(ch.title=="New chat"||ch.title=="Chat"))ch.title=String(q).slice(0,32);
  D.msgs.push({s:"i",note:1,up:0,t:FQ_MSG,ts:Date.now()});save();render()}
+/* ===== UCE ELEMENTS OF CONSTRUCT (UNEB 2024 blueprint, 14 O-Level subjects) v1.0 =====
+ Source: "Uganda UCE Item-by-Item Assessment Blueprint" (UNEB Report on Work of Candidates UCE 2024 + NCDC/UNEB sample papers).
+ Used for (1) learner questions about the elements of construct (item tables), (2) Examiner question-setting and scenario marking context.
+ RULE: item numbers, topics, compulsory / optional choices and counts come ONLY from this table. Marks are never invented.
+ Plan: Basic, Standard and Premium. Free plan sees an upgrade message. To change a subject, edit its row below and raise BPV. */
+const BPV="1.0",BPC="Compulsory";
+const BP=[
+{k:"English",rx:/\benglish\b/,code:"112/1",ans:"3 items",comp:"Items 1 and 2",ch:"One of Items 3 or 4",
+ lay:"Section A has 2 compulsory items. Section B has 2 scenario items and you choose 1.",
+ it:[["1","Summary writing","Reading and comprehension: selecting and condensing the relevant points of a text",BPC],
+  ["2","Other comprehension aspects","Understanding, interpretation, inference and use of text evidence",BPC],
+  ["3 or 4","Composition and functional writing","Writing in response to a scenario","Choose 1 of 2"]],
+ mk:"Item marks are not stated in the UNEB report extract. Use the official scoring guide.",src:"UNEB Report on Work of Candidates, UCE 2024, 112/1 English."},
+{k:"Mathematics",rx:/\b(maths?|mathematics)\b/,code:"456/1",time:"2 h 15 min",ans:"4 items",comp:"Items 1 and 2",ch:"Section B: one of Items 3 or 4 (Part I), and one of Items 5 or 6 (Part II)",
+ lay:"Section A has 2 compulsory scenario items. Section B has Part I and Part II, each with 2 scenario items, and you answer 1 from each part. Scenarios come from Numbers, Patterns and Algebra, Data and Probability, and Geometry and Measures.",
+ it:[["1","Numbers","Ratios, fractions, converting words to figures, LCM, time and timetables (2024)",BPC],
+  ["2","Cross-topic scenario","Section A scenario; the topic mix depends on the paper",BPC],
+  ["3 or 4","Section B, Part I","One scenario from the four themes above","Choose 1 of 2"],
+  ["5 or 6","Section B, Part II","One scenario from the four themes above","Choose 1 of 2"]],
+ mk:"Item marks are not stated in the report. Do not assume equal marks. Use the official scoring guide.",src:"UNEB Report on Work of Candidates, UCE 2024, 456/1 Mathematics; UCE Mathematics Elements of Construct 2024."},
+{k:"Physics",rx:/\bphysics\b/,code:"535/1, 535/2, 535/3",ans:"Check the paper",comp:"Not published here",ch:"Check the paper",
+ lay:"The 2024 report analyses theory items 1 to 7. The complete topic list and choice rules for every item are not published in the extract, so confirm them in the official paper.",
+ it:[["1","Waves, light and electromagnetic spectrum","Rainbow identification and formation; properties of the electromagnetic spectrum; wave-form calculations (2024)","Reported item"],
+  ["2 to 7","Various Physics syllabus areas","Topic and choice rules not published in the extract","Check the paper"],
+  ["Practical","Investigation and manipulation","Apparatus, measurements, observations and analysis (see the practical scoring guide)","Separate paper"]],
+ mk:"No verified per-item marks. Use the official scoring guide.",src:"UNEB Report on Work of Candidates, UCE 2024, 535/1 to 535/3 Physics."},
+{k:"Chemistry",rx:/\b(chemistry|chem)\b/,code:"545/1",ans:"4 items",comp:"Items 1 and 2",ch:"Section B: one of Items 3 or 4 (Part I), and one of Items 5 or 6 (Part II)",
+ lay:"Section A has 2 compulsory items. Section B has Part I and Part II with 4 scenario items in total (Items 3 to 6), and you answer 1 from each part.",
+ it:[["1","Nuclear energy and nuclear processes","Classify the type of nuclear bomb; functions and uses of nuclear energy; side effects and how to reduce them (2024)",BPC],
+  ["2","Scenario-based chemistry","Compulsory scenario; the exact topic depends on the paper",BPC],
+  ["3 to 6","Section B alternatives","Chemistry in the economy; chemistry in daily life; diversity and interactions of substances; natural resources; science process skills","Choose 1 from each part"]],
+ mk:"Item totals are not stated. Example rubric for the economy construct: raw materials up to 2, production process up to 3, side effects and mitigation up to 3, social benefits up to 3. These are criteria, not a total for every item.",src:"UNEB Report on Work of Candidates, UCE 2024, 545/1 Chemistry; HeLP/2024/CHE/1."},
+{k:"Biology",rx:/\b(biology|bio)\b/,code:"553/1 (theory), 553/2 and 553/3 (practical)",ans:"5 items",comp:"Items 1, 2 and 3",ch:"Section B: one of Items 4 or 5 (Part I), and one of Items 6 or 7 (Part II)",
+ lay:"Section A has 3 compulsory items. Section B has 2 parts with 2 items each, and you answer 1 from each part.",
+ it:[["1","Plant processes and functioning","Processes affected in pumpkin plants; how village conditions affected plant functioning; how the plants survived (2024)",BPC],
+  ["2","Human health, coordination and response","Consequences of drug abuse; body response to hearing gunshots and returning home (2024)",BPC],
+  ["3","Third Section A item","Topic depends on the paper",BPC],
+  ["4 to 7","Section B alternatives","Four items across two parts; use the seven constructs and the current paper","Choose 1 from each part"],
+  ["Practical","Papers 553/2 and 553/3","See the practical scoring guide","Separate papers"]],
+ mk:"Item marks are not stated. The seven-construct handout is not a fixed yearly item-topic list.",src:"UNEB Report on Work of Candidates, UCE 2024, 553/1 to 553/3; Biology elements of construct handout."},
+{k:"Agriculture",rx:/\b(agriculture|agric)\b/,code:"527/1 (theory), 527/2 (practical)",ans:"Check the paper",comp:"Section A: Items 1 and 2",ch:"Section B: one item from each part (crop, animal)",
+ lay:"Section A has 2 items (value addition and soil science). Section B covers crop production and animal production, and you answer 1 item from each part as described in the report. Confirm in the paper.",
+ it:[["1","Value addition and agricultural enterprise","Improve a fish business: customer care, fish processing, credit and profit maximisation (2024)","Section A"],
+  ["2","Soil science","Justified soil-improvement practices linked to a scenario (2024)","Section A"],
+  ["3","Animal production","Rabbit housing, ecto- and endoparasites, tools, harvesting and general care (2024)","Section B choice"],
+  ["4","Crop production","Crop-production alternative; check the full paper for the 2024 details","Section B choice"],
+  ["Practical","Paper 527/2","Revision guidance: 2 compulsory items on soil and farm structures (not a guaranteed format)","Separate paper"]],
+ mk:"Item totals are not stated. Do not copy marks from a sample paper to other years.",src:"UNEB Report on Work of Candidates, UCE 2024, 527/1 to 527/2; SHAPTA 2024 guide (revision guidance only)."},
+{k:"Geography",rx:/\b(geography|geo)\b/,code:"273/1",ans:"4 items",comp:"Items 1 and 2",ch:"One of Items 3 or 4, and one of Items 5 or 6",
+ lay:"One paper with 6 items. Items 1 and 2 are compulsory. Items 3 and 4 are alternatives, and Items 5 and 6 are alternatives. You answer 1 from each pair.",
+ it:[["1","Map skills","Map extract interpretation, measurement and distance, and related map-use tasks",BPC],
+  ["2","Photograph and geographical skills","Compulsory skills item; support materials depend on the paper",BPC],
+  ["3 or 4","Physical or human geography scenario","Topic depends on that year's paper","Choose 1 of 2"],
+  ["5 or 6","Physical or human geography scenario","Topic depends on that year's paper","Choose 1 of 2"]],
+ mk:"Item marks are not stated. Do not assume equal marks.",src:"UNEB Report on Work of Candidates, UCE 2024, 273/1; 2024 Geography sample paper."},
+{k:"History and Political Education",rx:/\bhistory\b|\bhpe\b|political education/,code:"241/1",ans:"3 items",comp:"Items 1 and 2",ch:"One of Items 3 or 4",
+ lay:"Items 1 and 2 are compulsory. Items 3 and 4 are alternatives, and you answer 1.",
+ it:[["1","Pre-colonial history of East Africa","Historical explanation using sources and context (2024 sample scoring guide)",BPC],
+  ["2","Colonial history of East Africa","Topic and tasks depend on the paper",BPC],
+  ["3 or 4","Political Education and post-colonial history","Example: operation of district local government and the role of the LC V speaker","Choose 1 of 2"]],
+ mk:"Item marks are not stated. Use the 2024 scoring guide.",src:"UNEB Report on Work of Candidates, UCE 2024, 241/1; 2024 History sample paper and scoring guide."},
+{k:"Christian Religious Education",rx:/\bcre\b|christian religious/,code:"223/1",time:"2 h 30 min",ans:"Check the paper",comp:"Not published here",ch:"Check the paper",
+ lay:"The paper assessed 4 elements of construct. The item-choice table is not in the extract, so confirm compulsory and optional items in the official paper.",
+ it:[["1","Bible text: forms of worship","Identify and explain 4 Christian worship practices shown in a Bible text, with evidence; relate Traditional African worship practices to the text","Analysed by UNEB"],
+  ["Other items","Other CRE constructs","Harmonious living; contemporary approaches to social harmony","See the paper"]],
+ mk:"Item marks are not stated.",src:"UNEB Report on Work of Candidates, UCE 2024, 223/1 CRE."},
+{k:"Islamic Religious Education",rx:/\bire\b|islamic religious/,code:"225/1",time:"2 h 30 min",ans:"Check the paper",comp:"Item 1 (reported)",ch:"Check the paper",
+ lay:"The paper assessed 4 elements of construct. Item 1 is compulsory. The full schedule must be read from the official paper.",
+ it:[["1","Islamic teachings on ceremonies","Explain Islamic teachings on ceremonies in the scenario and relate them to ceremonies in Traditional African Society",BPC],
+  ["Other items","Remaining IRE constructs","Do not predict a fixed item-to-topic map","Check the paper"]],
+ mk:"Item marks are not stated.",src:"UNEB Report on Work of Candidates, UCE 2024, 225/1 IRE."},
+{k:"Physical Education",rx:/\bphysical education\b|\bpe\b/,code:"555/1 (theory), 555/2 (performance)",ans:"Theory: 3 items; Performance: gymnastics plus 1 activity",comp:"Theory Items 1 and 2; Gymnastics",ch:"Theory Item 3 or 4; one of aerobics, swimming, athletics or games",
+ lay:"Theory: Section A has 2 compulsory items; Section B has 2 items and you choose 1. Performance: Section A is 1 compulsory gymnastics item; Section B needs 1 choice from aerobics, swimming, athletics or games.",
+ it:[["Theory 1","Safety and injury management","Impacts of the challenges in the scenario; effective injury-prevention measures",BPC],
+  ["Theory 2","Fitness, training and nutrition","Fitness challenges; training and nutrition responses; design a fitness programme using training principles",BPC],
+  ["Theory 3 or 4","Physical activity and society","Effects of harmful behaviours such as drug abuse; how PE helps solve community challenges","Choose 1 of 2"],
+  ["Performance 1","Gymnastics","Specified individual skills; plan and perform a group display",BPC],
+  ["Performance choice","Aerobics, swimming, athletics or games","Skill set specified for the chosen activity","Choose 1"]],
+ mk:"Theory and performance item marks are not stated. The performance scoring guide is needed.",src:"UNEB Report on Work of Candidates, UCE 2024, 555/1 to 555/2."},
+{k:"ICT",rx:/\bict\b|information and communication/,code:"840/1 (theory), 840/2 (practical)",time:"2 h 15 min (theory)",ans:"3 items",comp:"Item 1",ch:"Section B: one of Items 2 or 3 (Part I), and one of Items 4 or 5 (Part II)",
+ lay:"Section A has 1 compulsory scenario item. Section B has Part I and Part II, each with 2 scenario items, and you answer 1 from each part.",
+ it:[["1","ICT tools and communication","Describe the ICTs a head teacher should use and how to use them for a successful school assembly (2024)",BPC],
+  ["2 or 3","Section B, Part I","Theory scenario; topic depends on the paper","Choose 1 of 2"],
+  ["4 or 5","Section B, Part II","Theory scenario; topic depends on the paper","Choose 1 of 2"],
+  ["Practical","Paper 840/2","Software tasks and output requirements (see the practical scoring guide)","Separate paper"]],
+ mk:"Item marks are not stated. The practical scoring guide is needed.",src:"UNEB Report on Work of Candidates, UCE 2024, 840/1 to 840/2."},
+{k:"Art and Design",rx:/\bart and design\b|\bart\b/,code:"612/1 (Art History and Studio Technology), 612/2 (Art Making)",ans:"2 items",comp:"None",ch:"One item from each section",
+ lay:"Section A and Section B each have 2 parallel optional items. You answer 1 from each section. The 2024 report states the end-of-cycle exam counted 80% and Continuous Assessment 20%.",
+ it:[["1 or 2","Section A: art history, appreciation and interpretation","Analyse a Greek sculpture: theme, materials, technique, characteristics and purpose, linked to a Ugandan cultural or tourism scenario (2024)","Choose 1 of 2"],
+  ["3 or 4","Section B: art interpretation and studio technology","Interpretation of artworks, materials, techniques, production processes and contextual application (2024)","Choose 1 of 2"],
+  ["Art Making","Paper 612/2","Prescribed production task (see its scoring guide)","Separate paper"]],
+ mk:"The 80% and 20% split is reported. It is not the mark value of each item.",src:"UNEB Report on Work of Candidates, UCE 2024, 612/1 to 612/2."},
+{k:"Entrepreneurship Education",rx:/\bentrepreneur\w*/,code:"845/1",time:"2 h 30 min",ans:"4 items",comp:"Items 1, 2 and 3",ch:"One of Items 4 or 5",
+ lay:"Section A has 3 compulsory items. Section B has 2 optional items and you answer 1.",
+ it:[["1","Business relationships and marketing","Guide business partners to avoid conflicts; prepare a marketing plan for business products",BPC],
+  ["2","Business equipment and promotion","Select a suitable grinding machine; design an advert; advise on attracting more customers",BPC],
+  ["3","Entrepreneurial or business scenario","Third compulsory item; check the paper for the exact task",BPC],
+  ["4 or 5","Business scenario alternatives","In 2024 Item 4 was unpopular and poorly done; Item 5 was popular","Choose 1 of 2"]],
+ mk:"Item marks are not stated. See the NCDC Entrepreneurship Education Assessment Guidelines and the UNEB scoring guide.",src:"UNEB Report on Work of Candidates, UCE 2024, 845/1; NCDC Entrepreneurship Assessment Guidelines."}
+];
+const BP_RX=/\belements? of (the )?construct|\bconstructs? (table|guide|map|blueprint)|\bassessment blueprint|\bblueprint\b|\bitem (by|per) item|\bpaper (structure|format|pattern|layout)|\b(exam|examination|uce|uneb) (structure|format|pattern|layout)|\bwhich items? (are|is) (compulsory|optional)|\bcompulsory (items|questions)|\bwhat (is|are) (tested|examined|set) (in|under) items?\b/;
+const BP_SET=/\b(set|prepare|make|create|generate|write|draft|give me)\b.*\b(uce|uneb|exam|examination|paper|mock|scenario|test|questions?)\b/;
+function bpNorm(q){return" "+String(q||"").toLowerCase().replace(/[^a-z0-9\/\s]/g," ").replace(/\s+/g," ")+" "}
+function bpSubj(t,useChat){let s=BP.find(x=>x.rx.test(t));if(!s&&useChat){const c=String(D.sub||"").toLowerCase();if(c&&c!="general")s=BP.find(x=>x.rx.test(c))}return s||null}
+function bpRows(S){const R=[];S.it.forEach(r=>{const m=r[0].match(/^((?:Theory |Performance )?)(\d) or (\d)$/),g=r[0].match(/^(\d) to (\d)$/),ch=/^Choose/.test(r[3]);
+ if(m&&ch){const pt=(r[1].match(/Part (I{1,2})\b/)||[])[1],st=(pt?"Section B, Part "+pt+": c":"Optional: c")+"hoose 1 of "+(m[1]?m[1].trim()+" ":"Items ")+m[2]+" or "+m[3];[m[2],m[3]].forEach(n=>R.push([m[1]+n,r[1],r[2],st]))}
+ else if(g&&ch&&+g[2]-+g[1]==3){for(let i=0;i<4;i++){const n=+g[1]+i,pt=i<2?"I":"II",a=+g[1]+(i<2?0:2);R.push([String(n),r[1].replace("Section B","Section B, Part "+pt),r[2],"Optional: choose 1 of Items "+a+" or "+(a+1)])}}
+ else R.push(r)});return R}
+function bpText(S){let o="# "+S.k+" (UCE): elements of construct\n";
+ o+="**Paper "+S.code+(S.time?", "+S.time:"")+"**\n"+S.lay+"\n**You answer:** "+S.ans+"\n\n";
+ o+="| Item | Area | Topics tested | Status |\n|---|---|---|---|\n";
+ bpRows(S).forEach(r=>{o+="| "+r.join(" | ")+" |\n"});
+ o+="\n**Marks:** "+S.mk+"\nNote: this shows what past UNEB items tested. It is evidence from past papers, not a fixed prediction. Always check the latest paper and its scoring guide.\nSource: "+S.src+"\nAsk for another subject, for example: elements of construct for Physics.";return o}
+function bpMaster(){let o="# UCE elements of construct: all 14 subjects\nPick a subject to see its item-by-item table. Ask, for example: elements of construct for Chemistry.\n\n";
+ o+="| Subject | You answer | Compulsory | Choose |\n|---|---|---|---|\n";
+ BP.forEach(S=>{o+="| "+S.k+" | "+S.ans+" | "+S.comp+" | "+S.ch+" |\n"});
+ o+="\nNote: marks are not published per item. This is based on the UNEB 2024 report and is not a fixed prediction of future papers.";return o}
+/* Examiner context: sent with AI requests so questions are set strictly by the blueprint (item count, topics, compulsory and optional choices) */
+function bpCtx(q){try{if(PRANK[planName()]<1)return undefined;const t=bpNorm(q);if(!(modelName()=="examiner"||BP_SET.test(t)||BP_RX.test(t)))return undefined;const S=bpSubj(t,1);if(!S)return undefined;
+ return{version:BPV,exam:"UCE",subject:S.k,paper:S.code,answer:S.ans,compulsory:S.comp,choice:S.ch,layout:S.lay,items:S.it.map(r=>({item:r[0],area:r[1],topics:r[2],status:r[3]})),
+  rule:"Set, guide and mark strictly by this blueprint: same number of items, topics for each item, compulsory and optional items and choices. Do not invent marks. Use scenario-based tasks."}}catch(e){return undefined}}
+function bpHandle(q){const s=String(q||"");if(s.length>400)return false;const t=bpNorm(s);const S0=bpSubj(t,0);
+ let hit=BP_RX.test(t);
+ if(!hit&&S0&&/\bitems? ?\d/.test(t)&&/(topic|tested|set|compulsory|option|choose|come)/.test(t))hit=true;
+ if(!hit&&/\bhow many (items|questions)\b/.test(t)&&/(uce|uneb|exam|paper|compulsory|optional|choose)/.test(t))hit=true;
+ if(!hit)return false;
+ const ch=D.chats.find(c=>c.id==D.cur);if(ch&&(ch.title=="New chat"||ch.title=="Chat"))ch.title=s.slice(0,32);
+ const push=o=>{o.s="i";o.ts=Date.now();o.q=s.slice(0,300);D.msgs.push(o);save();render()};
+ if(PRANK[planName()]<1){push({note:1,up:1,t:"**Elements of construct are available on the Basic, Standard and Premium plans.** You are on the Free plan. Upgrade now to see the item-by-item exam blueprint for all 14 UCE subjects and to unlock full features."});return true}
+ const S=S0||bpSubj(t,1);push({t:S?bpText(S):bpMaster(),bp:1});return true}
 function ask(q,mode){
  if(stream!=null||INTP)return;
+ if(!mode){let b=false;try{b=bpHandle(q)}catch(e){b=false}if(b)return}
  if(!mode&&fileAsk(q)){fileNote(q);return}
  if(!mode&&looksScenario(q))return askScenario(q);
  if(!mode){let k=null;try{k=coreAsk(q)}catch(e){}if(k)q=k}
@@ -4510,7 +4680,7 @@ function askCore(q,mode,I){
 $("msgs").addEventListener("click",e=>{
 
  const st=e.target.closest("[data-st]");if(st){$("inp").value=st.dataset.st;send();return}
- const b=e.target.closest("[data-act]");if(!b)return;const i=+b.dataset.i,m=D.msgs[i],a=b.dataset.act;if(a=="plans"){plans();return}if(a=="activate"){activatePlan();return}
+ const b=e.target.closest("[data-act]");if(!b)return;const i=+b.dataset.i,m=D.msgs[i],a=b.dataset.act;if(a=="plans"){plans();return}if(a=="okn"){if(m&&m.note){D.msgs.splice(i,1);HQC={};save();render()}return}if(a=="activate"){activatePlan();return}
  if((a=="xa"||a=="xe"||a=="xm")&&m){const sc=$("msgs").scrollTop,k=b.dataset.k;m.xs=m.xs||{};const o=m.xs[k]=m.xs[k]||{};if(a=="xa")o.a=o.a?0:1;else if(a=="xm")o.m=o.m?0:1;else o.e=o.e?0:1;save();render();$("msgs").scrollTop=sc;return}
  {const _x={copy:"copy",share:"share",regen:"redo",bm:m&&m.bm?"save_off":"save",up:m&&m.fb==1?"like_off":"like",dn:m&&m.fb==-1?"dislike_off":"dislike"}[a];if(_x&&m&&!m.err)logAct(_x,m)}
  if(a=="copy"){navigator.clipboard&&navigator.clipboard.writeText(m.t.replace(/[#*`|]/g,""));ownerAct("copy",m);return}
@@ -4518,7 +4688,6 @@ $("msgs").addEventListener("click",e=>{
   const sheet=()=>{const E=encodeURIComponent,u=E(L),t=E(T+L),P=[["wa","WhatsApp","https://wa.me/?text="+t],["tg","Telegram","https://t.me/share/url?url="+u+"&text="+E(m.q||"Answer")],["fb","Facebook","https://www.facebook.com/sharer/sharer.php?u="+u],["x","X (Twitter)","https://twitter.com/intent/tweet?text="+E(m.q||"Answer")+"&url="+u],["sms","Messages (SMS)","sms:?&body="+t],["em","Email","mailto:?subject="+E("Ask Tr. David")+"&body="+t]];
    showP("Share answer",P.map(x=>`<div class="row" data-p="${x[0]}"><div>${x[1]}</div></div>`).join("")+'<div class="row" data-p="cp"><div>Copy link</div></div>',closeP,e=>{const k=e.target.closest(".row")?.dataset.p;if(!k)return;if(k=="cp"){try{navigator.clipboard.writeText(L)}catch(x){}closeP();uiAlert("Link copied.");return}const f=P.find(x=>x[0]==k);closeP();window.open(f[2],"_blank")})};
   if(navigator.share){try{await navigator.share({title:"Ask Tr. David",text:T,url:L})}catch(e){if(e&&e.name!="AbortError")sheet()}}else sheet()})();return}
- if(m.w){if(a=="next"){m.w.shown=Math.min(m.w.shown+1,m.w.parts.length);m.t=wBuild(m)}if(a=="all"){m.w.shown=m.w.parts.length;m.t=wBuild(m)}if(a=="brk"){m.w.open[m.w.shown-1]=1;m.t=wBuild(m)}}
  if(a=="ab")m.ab=!m.ab;if(a=="bm"){m.bm=!m.bm;ownerAct(m.bm?"save":"unsave",m)}if(a=="up"){m.fb=1;m.rs="thanks";sendFb(m);setTimeout(()=>{m.rdone=1;try{save();render()}catch(e){}},2500)}if(a=="dn"){m.fb=-1;m.rs="sorry";sendFb(m)}if(a=="ign"){m.rdone=1}if(a=="rep"){m.rdone=1;setTimeout(()=>supportOpen("complaint","About this answer: "),0)}
   if(a=="pick"&&m.pick==null){m.pick=+b.dataset.k;if(m.qz&&m.pick==m.quiz[2])m.qz.score++}
  if(a=="nq"&&m.qz&&m.pick!=null&&m.qz.n<m.qz.list.length-1){const z=m.qz;z.n++;m.quiz=["q",z.list[z.n][1],z.list[z.n][2]];m.pick=null;m.t=qText(z.t,z)}
@@ -4571,15 +4740,25 @@ UACE:{"General Paper":["How do I write a good essay for General Paper?","What is
 "Kiswahili":["Eleza dhima ya fasihi simulizi","Andika insha ya kujadili","Eleza aina za tungo","Maana ya semi ni nini?","Eleza sifa za ushairi"],
 "Technical Drawing":["What is orthographic projection?","How do I draw an isometric view?","Explain the types of lines used in drawings","What is a sectional view?","How do I use drawing instruments?"],
 "Food and Nutrition":["What are the functions of proteins?","Explain food preservation methods","What is a balanced diet?","Explain deficiency diseases","How do I plan a meal?"]}};
-const HQC={};
-function homeQs(){const lv=lvKey(),levels=lv=="UACE"?["UACE","UCE","PLE"]:lv=="UCE"?["UCE","PLE"]:["PLE"],key=lv+"|"+D.sub;if(HQC[key])return HQC[key];
- const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
- const by={};levels.forEach(l=>{const b=HOMEQ[l]||{};Object.keys(b).forEach(k=>{(by[k]=by[k]||[]).push(...b[k])})});
- const pick=k=>by[k][Math.floor(Math.random()*by[k].length)];
- let out;
- if(D.sub&&D.sub!=="General"&&by[D.sub])out=shuf(by[D.sub]).slice(0,3);
- else if(D.lock&&D.sub!=="General")out=startsFor().slice(0,3);
- else out=shuf(Object.keys(by)).slice(0,3).map(pick);
+let HQC={};const HQLAST={};
+const HQT=["Explain {n}","Tell me about {n}","Help me understand {n}","How do I study {n}?"];
+function hqPool(lv,sub){const out=[],seen={},add=q=>{const k=q.toLowerCase();if(!seen[k]){seen[k]=1;out.push(q)}};
+ const subs=sub&&sub!=="General"?(typeof relSubs=="function"?relSubs(sub):[sub]):null,bank=HOMEQ[lv]||{};
+ (subs?subs:Object.keys(bank)).forEach(k=>(bank[k]||[]).forEach(add));
+ TOP.forEach(t=>{if(!t||!t.n||t.ai!=null||t.nd||t.n.length>42)return;
+  if(t.L?!t.L.includes(lv):lv!=="PLE")return;
+  if(subs&&!(t.S&&t.S.some(x=>subs.includes(x))))return;
+  add(HQT[Math.floor(Math.random()*HQT.length)].replace("{n}",t.n))});
+ return out}
+const hqShuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+function hqPick(n){const lv=lvKey(),sub=D.sub,key=lv+"|"+sub;
+ let out=[];
+ if(sub&&sub!=="General"){const P=hqShuf(hqPool(lv,sub)),old=HQLAST[key]||[],fresh=P.filter(x=>!old.includes(x));out=(fresh.length>=n?fresh:P).slice(0,n)}
+ else{const bank=HOMEQ[lv]||{},ks=hqShuf(Object.keys(bank));ks.forEach(k=>{if(out.length>=n)return;const P=hqShuf(hqPool(lv,k)),old=HQLAST[key]||[],f=P.filter(x=>!old.includes(x));if((f[0]||P[0]))out.push(f[0]||P[0])})}
+ HQLAST[key]=out;return out}
+function homeQs(){const key=lvKey()+"|"+D.sub;if(HQC[key])return HQC[key];
+ let out=hqPick(3);
+ if(!out.length)out=(STARTS[D.sub]||gen(D.sub)).slice(0,3);
  return HQC[key]=out}
 function greetNow(){const h=new Date().getHours();return h<12?"Good morning":h<17?"Good afternoon":"Good evening"}
 function empty(){return`<div class="empty"><b style="font-size:1.25em">${greetNow()}${D.pname?", "+esc(D.pname):""}. ${D.lock&&D.sub!=="General"?"What would you like to learn in "+esc(D.sub)+"?":"What do you want to learn?"}</b><p style="margin:6px 0 12px">${esc(D.cls||lvKey())} · ${D.lock&&D.sub!=="General"?esc(D.sub)+" only · ":""}Pick a question or type your own.</p>${homeQs().map(x=>`<button class="st" data-st="${esc(x)}">${esc(x)}</button>`).join("")}</div>`}
@@ -5140,7 +5319,7 @@ const HANDOFF={
    "Worked solutions",
    [
     [
-     "Real step-by-step working for equations such as 2x + 5 = 11, with Next step, Break this step down and Show all steps buttons",
+     "Real step-by-step working for equations such as 2x + 5 = 11, with every step and its reason shown at once, laid out like written mathematics",
      1
     ],
     [

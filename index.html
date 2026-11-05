@@ -4547,15 +4547,45 @@ function payBind(){const f=$("pyf"),b=$("pyb"),sb=$("pys");if(!f||!b||!sb)return
   if(j&&j.ok){PAYIMG="";$("pyv").innerHTML="";f.value="";b.textContent="Choose screenshot";$("pym").textContent="Screenshot sent. We will confirm your payment and activate your plan."}
   else{sb.disabled=false;uiAlert(j&&j.err=="too many"?"You have sent many screenshots today. Please contact us on WhatsApp.":j&&j.err=="login"?"Please log in again, then send the screenshot.":"Could not send. Check your internet and try again.")}}}
 function expLine(){try{const pn=planName();if(pn=="Free")return"";const e=localStorage.getItem(PK()+"_exp");if(!e)return"";const d=new Date(e);if(isNaN(d))return"";const fa=freeAccess();return `<div style="margin-top:12px;padding:9px 12px;border-radius:10px;background:rgba(0,0,0,.32);color:#fff;font-size:15px;font-weight:600;line-height:1.4;text-shadow:0 1px 2px rgba(0,0,0,.35)">${fa?"Free "+esc(fa.plan)+" access ends":"Your plan ends"} <b style="color:#fff;font-weight:800">${esc(d.toLocaleString())}</b></div>`}catch(x){return""}}
+/* ===== MTN MOBILE MONEY PROMPT (server: momo-collections). The browser never sends an amount or activates a plan; the server prices the plan, asks MTN, and activates only after MTN says SUCCESSFUL. ===== */
+const MOMOU=SBU.replace("/rest/v1/","/functions/v1/")+"momo-collections",MOMOP={Basic:{daily:"500",weekly:"2,800",monthly:"9,000"},Standard:{daily:"750",weekly:"4,550",monthly:"16,500"},Premium:{daily:"1,100",weekly:"6,650",monthly:"24,000"}};
+let MOMOT=null;
+const momoCall=b=>fetch(MOMOU,{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify(Object.assign({token:tokNow()},b))}).then(r=>r.json());
+function MOMOBOX(){const sty='width:100%;padding:11px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--text);font:inherit;box-sizing:border-box';
+ return `<div class="sec">PAY WITH MTN MOBILE MONEY PROMPT</div>
+ <div style="padding:0 18px;color:var(--sub);line-height:1.5">Choose a plan and enter your MTN number. A payment prompt is sent to your phone. Approve it with your PIN and your plan turns on by itself.</div>
+ <div style="margin:12px 18px 0;display:flex;gap:8px"><select id="mmp" style="${sty}"><option>Basic</option><option>Standard</option><option>Premium</option></select><select id="mmd" style="${sty}"><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select></div>
+ <div style="margin:8px 18px 0"><input id="mmn" type="tel" inputmode="numeric" autocomplete="tel" placeholder="MTN number, e.g. 0772 123 456" style="${sty}"></div>
+ <div id="mma" style="margin:8px 18px 0;font-weight:700"></div>
+ <button class="btn" id="mmb" type="button">Pay with Mobile Money</button>
+ <div id="mms" style="margin:0 18px 6px;line-height:1.5;font-weight:600"></div>`}
+function momoBind(){const b=$("mmb");if(!b)return;const pl=$("mmp"),pd=$("mmd"),ph=$("mmn"),am=$("mma"),st=$("mms");
+ const cur=()=>{try{return planName()}catch(e){return"Free"}};
+ const RK={Free:0,Basic:1,Standard:2,Premium:3};[...pl.options].forEach(o=>{if(RK[o.value||o.text]<RK[cur()])o.disabled=true});
+ if(pl.options[pl.selectedIndex].disabled){const o=[...pl.options].find(x=>!x.disabled);if(o)pl.value=o.value||o.text}
+ const lab=()=>{am.textContent="UGX "+MOMOP[pl.value][pd.value]};pl.onchange=pd.onchange=lab;lab();
+ const say=(t,c)=>{st.textContent=t;st.style.color=c||"var(--sub)"};
+ const stop=()=>{if(MOMOT){clearTimeout(MOMOT);MOMOT=null}};
+ const poll=(ref,n)=>{stop();if(!$("mms"))return;
+  momoCall({action:"status",reference_id:ref}).then(j=>{if(!$("mms"))return;
+   if(!j||!j.ok){say(j&&j.message||"Could not check the payment. Check your internet.","var(--red,#d33)");b.disabled=false;return}
+   if(j.status==="successful"){say((j.message||"Payment confirmed.")+(j.expires_at?" Valid until "+new Date(j.expires_at).toLocaleString()+".":""),"var(--green)");b.disabled=false;try{syncPlan()}catch(e){}setTimeout(()=>{try{plans(fs0)}catch(e){}},2500);return}
+   if(j.status==="pending"){if(n>=60){say("We have not received your approval yet. If you approved, wait a minute and tap Pay again to check.","var(--red,#d33)");b.disabled=false;return}
+    say("Waiting for you to approve the payment on your phone…");MOMOT=setTimeout(()=>poll(ref,n+1),4000);return}
+   say(j.message||"The payment did not go through.","var(--red,#d33)");b.disabled=false}).catch(()=>{if(n<60)MOMOT=setTimeout(()=>poll(ref,n+1),5000);else{say("Could not check the payment. Check your internet.","var(--red,#d33)");b.disabled=false}})};
+ let fs0=0;
+ b.onclick=async()=>{const num=ph.value.trim();if(!num){say("Enter your MTN number first.","var(--red,#d33)");return}
+  b.disabled=true;say("Sending the payment request…");
+  try{const j=await momoCall({action:"pay",plan:pl.value,period:pd.value,phone:num});
+   if(j&&j.ok&&j.reference_id){say(j.message||"Check your phone and approve the payment.");poll(j.reference_id,0)}
+   else{say(j&&j.message||"Could not start the payment. Try again.","var(--red,#d33)");b.disabled=false}}
+  catch(e){say("Could not reach the server. Check your internet and try again.","var(--red,#d33)");b.disabled=false}}}
 function plans(fs){
  const q=FQ(),P=[["Basic","500","2,800","9,000","Teacher 1.2, Examiner 1.0","#2f80ed"],["Standard","750","4,550","16,500","Teacher 1.3, Examiner 1.2","#00a884"],["Premium","1,100","6,650","24,000","Teacher 1.3, Examiner 1.2, Philosopher 1.1","#8b5cf6"]],
- cur=planName(),RK={Free:0,Basic:1,Standard:2,Premium:3},UP=P.filter(x=>RK[x[0]]>RK[cur]||(cur=="Premium"&&x[0]=="Premium")),
- ST=['Tap <b>Subscribe</b> under the amount you want (daily, weekly or monthly). It dials the code with the merchant code and amount already in it.','Confirm the ID name is <b>Alfred</b>.','Enter your <b>PIN</b> to confirm.'];
+ cur=planName(),RK={Free:0,Basic:1,Standard:2,Premium:3},UP=P.filter(x=>RK[x[0]]>RK[cur]||(cur=="Premium"&&x[0]=="Premium"));
  showP("Upgrade plans",curPlan(q)+(UP.length?`<div class="sec">${cur=="Premium"?"YOUR PLAN":"UPGRADE PLANS"}</div>`:"")+
- UP.map(x=>`<div class="pc" style="--a:${x[5]}"><div class="pch"><i>${PIC[x[0]]}</i><b>${x[0]}</b>${x[0]==cur?'<span style="margin-left:auto;font-size:12px;font-weight:700;background:rgba(255,255,255,.25);padding:3px 10px;border-radius:12px">YOUR PLAN</span>':""}</div><div class="ptag">${x[4]}</div><div class="pst"><div><b>${x[1]}</b><span>Daily</span></div><div><b>${x[2]}</b><span>Weekly</span></div><div><b>${x[3]}</b><span>Monthly</span></div></div></div><div class="psb" style="--a:${x[5]}">${[1,2,3].map(k=>`<a href="tel:*165*3*06124096*${x[k].replace(/,/g,"")}*1%23" aria-label="Subscribe ${x[0]} ${["daily","weekly","monthly"][k-1]}, ${x[k]}">Subscribe</a>`).join("")}</div>`).join("")+
- `<div class="sec">PAYMENT METHOD</div><div class="pay"><div class="pl">MTN Mobile Money · Merchant Code</div><div class="pcode">06124096</div><div class="pid">ID: <b>Alfred</b></div><button class="pcp" data-cp="06124096">Copy code</button></div>`+
- `<div class="sec">HOW TO PAY</div>`+ST.map((t,k)=>`<div class="stp"><i>${k+1}</i><div>${t}</div></div>`).join("")+
- PAYPROOF(),fs?settings:closeP,e=>{const c=e.target.closest("[data-cp]");if(c){const t=c.dataset.cp,ok=()=>{c.textContent="Copied"};if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(ok,ok);else ok()}});payBind()}
+ UP.map(x=>`<div class="pc" style="--a:${x[5]}"><div class="pch"><i>${PIC[x[0]]}</i><b>${x[0]}</b>${x[0]==cur?'<span style="margin-left:auto;font-size:12px;font-weight:700;background:rgba(255,255,255,.25);padding:3px 10px;border-radius:12px">YOUR PLAN</span>':""}</div><div class="ptag">${x[4]}</div><div class="pst"><div><b>${x[1]}</b><span>Daily</span></div><div><b>${x[2]}</b><span>Weekly</span></div><div><b>${x[3]}</b><span>Monthly</span></div></div></div>`).join("")+
+ MOMOBOX(),fs?settings:closeP,e=>{const c=e.target.closest("[data-cp]");if(c){const t=c.dataset.cp,ok=()=>{c.textContent="Copied"};if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(ok,ok);else ok()}});momoBind()}
 /* ===== WAITING AND TYPING STATUS =====
    While the answer is being found: a bubble in the chat and the header both show changing words (pondering, searching, retrieving...).
    When the answer starts to appear: header says typing with dots counting 1, 2, 3 until it finishes. */

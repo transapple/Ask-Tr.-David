@@ -1175,7 +1175,7 @@ addEventListener('resize',fit);fit();start(0);
 <button id="jump" aria-label="Scroll to latest"><svg viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></svg></button>
 <div id="editing">Editing message. Tap here to cancel.</div>
 <div id="live" aria-live="polite"></div>
-<div id="cmp"><div id="iw"><button class="ic" id="mic" aria-label="Voice question"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg></button><div id="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><input id="inp" placeholder="Ask questions, make research" autocomplete="off"><button id="send" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button></div></div>
+<div id="cmp"><div id="iw"><button class="ic" id="mic" aria-label="Voice question"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg></button><div id="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><textarea id="inp" rows="1" placeholder="Ask questions, make research" autocomplete="off" autocapitalize="sentences" enterkeyhint="enter"></textarea><button id="send" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button></div></div>
 <div id="ps"><button id="psl" type="button" aria-label="Your plan"></button><button id="pss" type="button" aria-label="Choose subject"></button><span id="psr"></span></div>
 </div>
 <div id="dlgx" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);place-items:center;z-index:120;padding:20px"><div style="background:var(--sheet,#fff);color:var(--text,#111);border-radius:14px;padding:20px;width:100%;max-width:320px;box-shadow:0 4px 18px rgba(0,0,0,.3)"><div id="dlgm" style="font-size:16px;line-height:1.4;margin-bottom:14px;white-space:pre-wrap"></div><input id="dlgi" autocomplete="off" style="display:none;width:100%;box-sizing:border-box;margin-bottom:14px;padding:10px;font-size:16px;border:1px solid var(--line,#ccc);border-radius:8px;background:var(--wall,#fff);color:inherit"><div style="display:flex;justify-content:flex-end;gap:8px"><button id="dlgc" style="background:none;border:0;padding:8px 14px;font-size:15px;color:inherit;cursor:pointer">Cancel</button><button id="dlgo" style="background:var(--green,#00a884);color:#fff;border:0;border-radius:8px;padding:8px 18px;font-size:15px;cursor:pointer">OK</button></div></div></div>
@@ -1491,9 +1491,9 @@ function usagePage(){HBACK=null;const q=FQ(),pn=planName(),rk={Free:0,Basic:1,St
  const pct=Math.min(100,Math.round(q.used/Math.max(1,q.cap)*100));
  h_page("Usage and limits",curPlan(q)+(pn=="Free"?`<div style="padding:4px 24px 8px"><div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:8px"><span>Words used</span><b>${q.used.toLocaleString()} of ${q.cap.toLocaleString()}</b></div><div style="height:10px;border-radius:10px;background:var(--line);overflow:hidden"><i style="display:block;height:100%;width:${pct}%;background:var(--green)"></i></div></div>`:`<div class="t" style="padding:4px 24px 8px">No word limit on your plan.</div>`)+h_hd("What your plan includes")+h_grp(F.map(f=>h_row("x",f[1]<=rk?h_svg('<path d="M5 12.5l4.5 4.5L19 7.5"/>'):h_svg('<path d="M6 6l12 12M18 6L6 18"/>'),f[0],{v:f[1]<=rk?"Included":"Needs "+NM[f[1]],n:1,x:1})).join(""))+(pn=="Premium"?"":h_grp(h_row("up",HI.up,"Upgrade plan",{c:"var(--green)"}))),hub,e=>{if(e.target.closest("[data-a=up]")){HBACK=usagePage;plans(1)}})}
 function generalPage(){HBACK=null;
- h_page("General",h_grp(h_row("tx",HI.eye,"Text size and contrast")+h_row("fo",HI.font,"Font style")+h_row("md",HI.star,"Teaching styles",{s:"Which model is best for lessons, exams and research"})+h_row("up",HI.gen,"Update app",{s:"Reload to get the latest version"})+(isOwner()?h_row("wk",HI.star,"Preview rating pop-up",{s:"See what learners get (nothing is sent)"}):"")),hub,e=>{
+ h_page("General",h_grp(h_row("tx",HI.eye,"Text size and contrast")+h_row("fo",HI.font,"Font style")+h_row("md",HI.star,"Teaching styles",{s:"Which model is best for lessons, exams and research"})+h_row("amd",HI.gen,"Automatic Model Detection",{n:1,v:'<span class="amsw'+(D.amd!==false?" on":"")+'" role="switch" aria-checked="'+(D.amd!==false?"true":"false")+'"></span>',s:"Automatically identify the best AI model for your question and recommend or switch to it for better responses."+(planName()=="Premium"?"":"<br>Standard asks you first; Premium can switch for you.")})+(isOwner()?h_row("qb",HI.star,"Question bank",{s:"Coverage and questions waiting for your check"}):"")+h_row("up",HI.gen,"Update app",{s:"Reload to get the latest version"})+(isOwner()?h_row("wk",HI.star,"Preview rating pop-up",{s:"See what learners get (nothing is sent)"}):"")),hub,e=>{
   const a=e.target.closest("[data-a]")?.dataset.a;if(!a)return;HBACK=generalPage;
-  if(a=="tx")access();if(a=="fo")fontStyle();if(a=="md")modelsGuide();if(a=="up")updateApp();if(a=="wk")wkShow(1)})}
+  if(a=="tx")access();if(a=="fo")fontStyle();if(a=="md")modelsGuide();if(a=="amd")amdToggle();if(a=="qb")QBX.bankAdmin();if(a=="up")updateApp();if(a=="wk")wkShow(1)})}
 function notifPage(){HBACK=null;
  h_page("Notifications",h_grp(h_row("nt",HI.bell,"Away alerts",{v:D.notif?"Always on":"Off",s:"Phone alert for new announcements and updates"})+h_row("wn",HI.star,"What's new",{v:D.notes.filter(x=>!x.r).length?D.notes.filter(x=>!x.r).length+" new":""})+h_row("pm",HI.sf,"Permissions",{s:"Notifications, microphone, camera"})),hub,e=>{
   const a=e.target.closest("[data-a]")?.dataset.a;if(!a)return;HBACK=notifPage;
@@ -5516,7 +5516,7 @@ async function askScenario(q){
  if(j&&j.ok&&j.is_scenario===false){drop();return askCore(q,null,null)}
  if(!j||!j.ok||!Array.isArray(j.tasks)||!j.tasks.length){const busy=j&&j.status=="busy";drop();
   return err(busy?"Many learners are asking right now. Please try again in a little while.":"I could not read and answer this question just now. Check your network and send it again.")}
- m.t=scnRender(j,raw);if(j.subject&&typeof subsList=="function"&&subsList().includes(j.subject))m.tsub=j.subject;
+ try{QBX.learn(raw,j)}catch(e){}m.t=scnRender(j,raw);if(j.subject&&typeof subsList=="function"&&subsList().includes(j.subject))m.tsub=j.subject;
  stopS();logAct("ask",m,m.t)}
 /* ===== READING WHAT THE LEARNER REALLY MEANS =====
    1. A long message with a small request ("Good morning teacher, yesterday in class we were learning about plants and my friend said ... so please explain
@@ -7429,7 +7429,7 @@ async function admThread(t){
    Push: a few seconds after any change, when the app is hidden, and before logout. Pull: at login, when the app comes back, every 45 s.
    Two phones: each chat has an update time (ut); the newer copy of a chat wins, chats deleted on one phone stay deleted (D.gone). */
 (function(){
-const LS=localStorage,SETK=["sub","lvl","cls","lock","theme","fs","acc","font","hc","lang","pname","annSeen","annInit"],KEEP=["theme","fs","acc","font","hc"];
+const LS=localStorage,SETK=["sub","lvl","cls","lock","theme","fs","acc","font","hc","lang","pname","annSeen","annInit","amd"],KEEP=["theme","fs","acc","font","hc"];
 let serverAt=null,ready=false,busy=false,again=false,dirty=false,dirtyT=0,setSig="",pulling=false,lastPull=0;
 const tk=()=>{try{return tokNow()}catch(e){return""}},uname=()=>{const m=window.AK&&AK.me();return m&&m.username||""},xk=n=>"ask_"+n+"_"+uname();
 const call=(f,b,ms)=>{const c=new AbortController(),t=setTimeout(()=>c.abort(),ms||15000);return fetch(SBU+"rpc/"+f,{method:"POST",signal:c.signal,headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify(b)}).then(r=>r.json()).catch(()=>({ok:false,net:1})).finally(()=>clearTimeout(t))};
@@ -7504,6 +7504,209 @@ if(window.ServiceWorkerRegistration){var P=ServiceWorkerRegistration.prototype,s
 }catch(e){}})();
 function init(){wrap(document.body)}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
+})();
+</script>
+<script>
+/* ===== INTELLIGENT LEARNING v1: smart input, model detection and switching, exam question bank =====
+   1. Smart input: #inp is a textarea that grows to 6 lines, then scrolls (newest text stays visible).
+   2. Model router: finds which model (Teacher, Examiner, Philosopher) a request belongs to, then follows the plan:
+      Free and Basic = answer as usual (never blocked) plus a soft upgrade tip; Standard = OK/Cancel popup;
+      Premium = popup, or automatic switch when Settings > General > Automatic Model Detection is ON (saved in D.amd, synced to the account).
+   3. Question bank (table exam_bank, functions bank_*): scenario questions learners send are filed once; sample-question requests search the bank first,
+      then Gemini (exam_gen) when the bank is short. Gemini output is validated, never marked approved: only the owner approves.
+   Answers stay hidden: items use the same Task/Guide layout as before, so Show Answer / Explain / Marking Guide still decide when answers appear. */
+(function(){
+"use strict";
+const $$=id=>document.getElementById(id);
+const FN=n=>SBU.replace("/rest/v1/","/functions/v1/")+n;
+const post=(url,b,ms)=>{const c=new AbortController(),t=setTimeout(()=>c.abort(),ms||15000);return fetch(url,{method:"POST",signal:c.signal,headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify(b)}).then(r=>r.json()).catch(()=>({ok:false,net:1})).finally(()=>clearTimeout(t))};
+const rpc=(f,b,ms)=>post(SBU+"rpc/"+f,b,ms),fnc=(n,b,ms)=>post(FN(n),b,ms);
+const tok=()=>{try{return tokNow()}catch(e){return""}};
+const clsCode=()=>String(D.cls||"").replace(/^Primary /,"P").replace(/^Senior /,"S");
+const rxEsc=x=>String(x).replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+
+/* ---------- 1. SMART INPUT ---------- */
+const inp=$$("inp");
+if(inp&&inp.tagName==="TEXTAREA"){
+ const st=document.createElement("style");
+ st.textContent="#inp,#ap #inp{resize:none;overflow-y:hidden;line-height:1.4;box-sizing:border-box;height:auto;scrollbar-width:thin;overscroll-behavior:contain}#iw{align-items:flex-end}#iw .ic,#iw #send{align-self:flex-end}#iw.rec{align-items:center}"+
+ ".amsw{display:inline-block;width:42px;height:24px;border-radius:12px;background:var(--line,#c9d1d6);position:relative;transition:background .15s;flex:none}.amsw:after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .15s;box-shadow:0 1px 2px rgba(0,0,0,.3)}.amsw.on{background:var(--green,#00a884)}.amsw.on:after{left:20px}";
+ document.head.appendChild(st);
+ const d=Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,"value");
+ const fit=()=>{inp.style.height="auto";const cs=getComputedStyle(inp),fs=parseFloat(cs.fontSize)||15,lh=parseFloat(cs.lineHeight)||fs*1.4,pad=(parseFloat(cs.paddingTop)||0)+(parseFloat(cs.paddingBottom)||0),max=Math.round(lh*6+pad),sh=inp.scrollHeight;
+  inp.style.height=Math.min(sh,max)+"px";const over=sh>max+1;inp.style.overflowY=over?"auto":"hidden";
+  if(over&&inp.selectionStart>=inp.value.length-1)inp.scrollTop=inp.scrollHeight};
+ Object.defineProperty(inp,"value",{get(){return d.get.call(this)},set(v){d.set.call(this,v);fit()},configurable:true});
+ ["input","focus"].forEach(e=>inp.addEventListener(e,fit));window.addEventListener("resize",fit);window.addEventListener("orientationchange",()=>setTimeout(fit,200));
+ const touch=()=>window.matchMedia&&matchMedia("(pointer:coarse)").matches;
+ inp.onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing&&!touch()){e.preventDefault();send()}};
+ fit();window.QI={fit};
+}
+
+/* ---------- 2. MODEL DETECTION ---------- */
+const RX={
+ prod:/\b(give|set|make|create|generate|prepare|write|compile|draw up|send|show|provide|i (want|need)|can (i|you) (get|have|give)|let me (have|get))\b/,
+ assess:/\b(exams?|examinations?|mocks?|mock (exam|paper|test)s?|tests?|quiz(zes)?|past papers?|practice papers?|revision papers?|assessments?|questions?|scenarios?|scenario[- ]based|uneb|end of term|paper (1|2|one|two))\b/,
+ sure:/\b(mock|marking guides?|mark(ing)? schemes?|answer sheets?|answer keys?|past papers?|exam(ination)?s?|exam paper|practice test|scenario[- ]based)\b/,
+ mark:/\b(mark|grade|check|correct) (my|the) (answers?|work|paper|script|attempt)\b|\bmark my\b|\b(marking guide|mark scheme|answer sheet|answer key|rubric)\b|\b(give|show|reveal) (me )?(the )?(correct )?answers?\b/,
+ solve:/\b(explain|show|give) (me )?(the )?(solutions?|working|workings|marking)\b/,
+ prep:/\b(test me|quiz me|examine me|exam (tips|technique|preparation|prep|strategy)|how (do|can) i (pass|prepare for)|prepare for (my |the )?(exam|test|uneb|ple|uce|uace)|predict(ed|ion)? (exam|questions|paper)|likely (exam )?questions|revision questions)\b/,
+ teach:/\b(explain|teach|teach me|show me how|help me understand|understand|what (is|are|was|were)|how (does|do|did|is|are)|why (does|do|did|is|are)|define|describe|simplif(y|ied)|make it simple|step by step|lesson|notes on|i (do not|don't|dont) understand|meaning of|difference between|illustrate|example of)\b/,
+ philo:/\b(research|investigate|investigation|origins? of|philosoph\w*|meaning of life|ethic(s|al)|morality|moral (dilemma|question)|critical(ly)? (think|analy[sz]e|discuss|evaluate)|debate|different (views|perspectives|ideas|theories)|theor(y|ies) (of|about)|consciousness|free will|nature of (reality|existence|truth|knowledge)|big bang|origin of the universe|purpose of (life|existence)|general knowledge|beyond (the )?syllabus|literature review|why (do|does) (humans|people|we) )\b/,
+ pstrong:/\b(philosoph\w*|meaning of life|ethic(s|al)|origins? of the universe|free will|consciousness|research)\b/
+};
+function norm(q){return " "+String(q||"").toLowerCase().replace(/[\u2018\u2019`]/g,"'").replace(/[^a-z0-9'\s-]/g," ").replace(/\s+/g," ").trim()+" "}
+/* reads what the learner is asking FOR (produce an assessment, be taught, investigate an idea), not single words */
+function detect(q){
+ const T=norm(q),w=T.trim().split(" ").length;
+ if(w<4||T.length>1400)return null;                       /* short follow-ups ("more", "why?") stay with the current model */
+ try{if(looksScenario(String(q)))return null}catch(e){}   /* a pasted paper question is answered where it is */
+ let e=0,t=0,p=0;
+ const prodNear=RX.prod.test(T)&&RX.assess.test(T);
+ if(prodNear)e+=3;if(prodNear&&/\b(scenario|mock|exam|examination|past paper|test|quiz)\b/.test(T))e+=1;
+ if(RX.sure.test(T))e+=2;if(RX.mark.test(T))e+=4;if(RX.solve.test(T)&&(RX.sure.test(T)||RX.mark.test(T)||/\b(answers?|solutions?|marking)\b/.test(T)))e+=3;if(RX.prep.test(T))e+=4;
+ const pS=RX.pstrong.test(T);if(RX.philo.test(T))p+=3;if(pS)p+=2;
+ const tw=(e>=3||pS)?1:3;if(RX.teach.test(T))t+=tw;if(/\b(teach me|help me understand|step by step|simplif|i (do not|don't|dont) understand)\b/.test(T))t+=1;
+ if(/^ (give|show|make|set) me (the )?answers? /.test(T)&&!RX.assess.test(T))e=Math.max(e,3);
+ const R=[["examiner",e],["teacher",t],["philosopher",p]].sort((a,b)=>b[1]-a[1]);
+ if(R[0][1]<3||R[0][1]-R[1][1]<2)return null;
+ return{model:R[0][0],score:R[0][1]};
+}
+const MN=k=>(MODELS[k]&&MODELS[k].n)||k;
+/* what to do for this plan: pass | upsell | ask | auto */
+function decide(q){
+ const r=detect(q),cur=modelName();if(!r||r.model===cur)return{act:"pass"};
+ const pl=planName(),al=PMOD[pl]||PMOD.Free;
+ if(pl==="Free"||pl==="Basic")return{act:"upsell",to:r.model};   /* never blocked, never forced */
+ if(!al.includes(r.model))return{act:"pass"};                     /* never recommend a model the plan does not include */
+ if(pl==="Premium"&&D.amd!==false)return{act:"auto",to:r.model};
+ return{act:"ask",to:r.model};
+}
+function switchTo(k){try{localStorage.setItem(MK(),k)}catch(e){}try{updPlan()}catch(e){}try{save()}catch(e){}}
+function confirm2(msg,okFn,noFn){
+ uiDlg({msg,ok:"OK",onOk:okFn});
+ const d=$$("dlgx"),shut=f=>{d.style.display="none";try{dlgCancel=null}catch(e){}f&&f()};
+ $$("dlgc").onclick=()=>shut(noFn);d.onclick=ev=>{if(ev.target===d)shut(noFn)};
+ try{dlgCancel=()=>shut(noFn)}catch(e){}
+}
+function upsellTip(to){
+ try{const k="ask_ups_"+to,last=+localStorage.getItem(k)||0;if(Date.now()-last<108e5)return;localStorage.setItem(k,Date.now())}catch(e){}
+ const pl=planName(),need=(MODELS[to]&&MODELS[to].p)||"Premium";
+ const nx=pl==="Free"?"a paid plan":(need==="Premium"?"Premium":"Standard or Premium");
+ setTimeout(()=>{D.msgs.push({s:"i",note:1,up:1,t:"Tip: this kind of request suits the "+MN(to)+" model. Upgrade to "+nx+" for more specialised answers and smarter model selection.",ts:Date.now()});save();render()},2500);
+}
+const _ask=window.ask;
+window.ask=function(q,mode){
+ if(mode||typeof q!=="string")return _ask.apply(this,arguments);
+ let d;try{d=decide(q)}catch(e){d={act:"pass"}}
+ const go=()=>_ask.call(this,q,mode);
+ if(d.act==="auto"){switchTo(d.to);D.msgs.push({s:"i",note:1,t:"Switched to "+MN(d.to)+" for this question.",ts:Date.now()});save();render();return go()}
+ if(d.act==="ask"){
+  if(stream!=null||INTP)return go();
+  confirm2("Your request is better handled by the "+MN(d.to)+" model. Would you like to switch to "+MN(d.to)+" for a better response?",()=>{switchTo(d.to);go()},go);return}
+ if(d.act==="upsell")upsellTip(d.to);
+ return go();
+};
+
+/* ---------- 3. QUESTION BANK ---------- */
+const stat=t=>{try{$$("stat").textContent=t}catch(e){}};
+const IDLE="Anything about your studies";
+const scrub=t=>!/@|\b\d{9,}\b/.test(t);   /* never file text with emails or phone numbers */
+function carve(raw,labels){
+ const L=raw.replace(/\r/g,""),pos=[];let from=0;
+ for(const lb0 of labels){const lb=String(lb0||"").trim();if(!lb)return null;
+  const bare=lb.replace(/[()]/g,"").trim(),alts=[rxEsc(lb),"\\(?"+rxEsc(bare)+"[\\).:]","task\\s*"+rxEsc(bare)+"\\b"];
+  let hit=-1;for(const a of alts){const m=new RegExp("(^|\\n|\\s)("+a+")","i").exec(L.slice(from));if(m){hit=from+m.index+m[1].length;break}}
+  if(hit<0)return null;pos.push(hit);from=hit+1}
+ const stem=L.slice(0,pos[0]).trim(),tasks=pos.map((p,i)=>L.slice(p,i+1<pos.length?pos[i+1]:L.length).trim());
+ return{stem,tasks}}
+function fmtOf(raw,sub){const t=raw.toLowerCase();
+ if(/read the (following )?(passage|text)|comprehension/.test(t))return"comprehension";
+ if(/\bcase study\b|\bmap\b|climatic|settlement/.test(t)&&sub==="Geography")return"case_study";
+ if(/experiment|apparatus|practical|record your|measure /.test(t))return"practical";
+ if(/\b(essay|composition|speech|letter|article|report)\b/.test(t)&&!/calculate|find/.test(t))return"essay";
+ if(/\b[a-d][.)]\s.+\b[b-d][.)]\s/.test(t)&&/choose|which one|select/.test(t))return"mcq";
+ return"scenario"}
+function diffOf(raw,n){const t=raw.toLowerCase();let s=n+raw.length/450+(/calculate|determine|work out/.test(t)?1:0)+(/evaluate|justify|design|analy[sz]e|recommend/.test(t)?1.5:0);return s<=3?"easy":s<=5.5?"medium":"hard"}
+/* a learner sent a scenario question and the server answered it: file it once, in the right category */
+function learn(raw,j){
+ if(!j||!j.ok||j.is_scenario===false||!Array.isArray(j.tasks)||!j.tasks.length||!tok())return;
+ const sub=(j.subject&&subsList().includes(j.subject))?j.subject:(D.sub&&D.sub!=="General"?D.sub:"");if(!sub||!lvKey()||!D.cls)return;
+ raw=String(raw||"").replace(/[ \t]+\n/g,"\n").trim();if(!scrub(raw)||raw.length<120)return;
+ let genuine=false;try{genuine=looksScenario(raw)}catch(e){}
+ const c=carve(raw,j.tasks.map(t=>t.label));if(!c||c.stem.length<60)return;
+ if(!genuine&&j.tasks.length<2)return;                      /* not exam-style enough */
+ let topic=String(j.topic||"").trim();if(!topic){try{const T=topicOf(raw);topic=T&&T.n||""}catch(e){}}if(!topic)topic=sub;
+ const item={source:"learner",level:lvKey(),class:clsCode(),subject:sub,topic:topic.slice(0,120),category:lvKey()==="PLE"?"PLE":"UNEB",format:fmtOf(raw,sub),difficulty:diffOf(raw,j.tasks.length),stem:c.stem,
+  tasks:c.tasks.map((q,i)=>({label:String(j.tasks[i].label||"").slice(0,12),question:q.slice(0,900),marks:1})),
+  marking:j.tasks.map(t=>({label:String(t.label||"").slice(0,12),answer:String(t.answer||"").slice(0,1500),working:String(t.why||"").slice(0,2500),marks:String(t.marks||"").slice(0,200),alternatives:""}))};
+ rpc("bank_save",{p_t:tok(),p_item:item}).catch(()=>{});
+}
+const L26="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+function guideLines(m){const o=[];if(m.answer)o.push("- Worked answer: "+String(m.answer).replace(/\s*\n+\s*/g," "));
+ String(m.working||"").split(/\n+|(?<=[.;])\s+(?=[A-Z0-9])/).map(x=>x.trim()).filter(Boolean).slice(0,6).forEach(x=>o.push("- "+x.replace(/^[-*\d.)\s]+/,"")));
+ if(m.marks)o.push("- Marks: "+m.marks);if(m.alternatives)o.push("- Accept "+String(m.alternatives).replace(/^accept\s+/i,"").replace(/\s*\n+\s*/g," "));return o.join("\n")}
+function render1(it,k){
+ const tasks=(it.tasks||[]).slice(0,26),mk=it.marking||[];
+ const tk=tasks.map((t,i)=>"**Task "+L26[i]+":** "+String(t.question).replace(/\s*\n+\s*/g," ").replace(/^\(?(?:task\s*)?[a-zA-Z0-9]{1,4}[\).:]\s+/i,"")+(t.marks>1?" ("+t.marks+" marks)":"")).join("\n");
+ const g=tasks.map((t,i)=>"**Task "+L26[i]+":**\n"+guideLines(mk[i]||{})).join("\n")+"\n- Accept any other correct answer that fits the item.";
+ return"\n## Item "+(k+1)+"\n**Item:**\n"+String(it.stem).replace(/\n+/g," ")+"\n"+tk+"\n\n**Guide:**\n"+g}
+const seenIds=()=>{const a=[];D.msgs.forEach(m=>{if(m.bank)m.bank.forEach(x=>a.push(x))});return a.slice(-60)};
+async function genFresh(ctx,n,avoid){
+ const r=await fnc("exam_gen",{mode:"generate",level:lvKey(),class:String(D.cls||""),subject:ctx.sub,topic:ctx.topic,category:lvKey()==="PLE"?"PLE":"UNEB",format:"scenario",n,avoid},50000);
+ return r&&r.ok&&Array.isArray(r.items)?r.items:[]}
+async function saveItem(it,ctx,src,parent){
+ const r=await rpc("bank_save",{p_t:tok(),p_item:Object.assign({},it,{source:src,level:lvKey(),class:clsCode(),subject:ctx.sub,topic:it.topic||ctx.topic,category:lvKey()==="PLE"?"PLE":"UNEB",parent:parent||undefined})});
+ return r&&r.ok?r:null}
+/* sample-question request for one topic: bank first, Gemini when the bank is short, variants so a reused question is never shown twice the same */
+async function serve(T0,n,raw){
+ const sub=(D.sub&&D.sub!=="General")?D.sub:(T0.S&&T0.S[0])||"";if(!sub||!tok()||!navigator.onLine||!D.cls||!lvKey())return false;
+ const ctx={sub,topic:String(T0.n||"").slice(0,120)};stat("preparing questions…");
+ try{
+  const f=await rpc("bank_find",{p_t:tok(),p_subject:sub,p_class:clsCode(),p_topic:ctx.topic,p_n:n,p_exclude:seenIds().filter(x=>/^[0-9a-f-]{36}$/i.test(x))},12000);
+  let found=f&&f.ok&&Array.isArray(f.items)?f.items:[];
+  /* alternative versions of reused questions: new names, figures and situation, same objective and difficulty */
+  const vs=await Promise.all(found.map(async b=>{const r=await fnc("exam_gen",{mode:"variant",level:lvKey(),class:String(D.cls||""),subject:sub,topic:ctx.topic,base:{stem:b.stem,tasks:b.tasks}},35000);
+   const v=r&&r.ok&&r.items&&r.items[0];if(!v)return Object.assign({},b,{ids:[b.id]});
+   const s=await saveItem(v,ctx,"variant",b.id);return Object.assign({},v,{status:"validated",ids:[s&&s.id||b.id]})}));
+  let items=vs;
+  if(items.length<n){const avoid=items.map(x=>String(x.stem).slice(0,150));const fresh=await genFresh(ctx,n-items.length,avoid);
+   for(const it of fresh){const s=await saveItem(it,ctx,"gemini");if(s&&s.dup)continue;items.push(Object.assign({},it,{status:"validated",ids:[s&&s.id].filter(Boolean)}))}}
+  items=items.slice(0,n);if(!items.length)return false;
+  for(let i=items.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[items[i],items[j]]=[items[j],items[i]]}
+  const allOk=items.every(x=>x.status==="approved");
+  let o="# Practice items: "+ctx.topic+"\nThese practice items come from our growing question bank, in the UNEB exam format. They are not official UNEB questions"+(allOk?"":" and have not all been checked by a teacher yet")+". Marks and layout are practice guidance. Under each task, tap Show Answer to see its answer, Explain Answer to see how it is worked, or Marking Guide to see practice scoring.";
+  items.forEach((it,k)=>{o+=render1(it,k)});
+  const ch=D.chats.find(c=>c.id==D.cur);if(ch&&(ch.title==="New chat"||ch.title==="Chat"))ch.title=("Sample questions: "+ctx.topic).slice(0,32);
+  const m={s:"i",t:o,ts:Date.now(),q:String(raw||"").slice(0,300),tq:ctx.topic,tsub:sub,sq:1,bank:[].concat.apply([],items.map(x=>x.ids||[]))};
+  D.msgs.push(m);try{logAct("ask",m,"sample questions: "+ctx.topic)}catch(e){}try{useW(o)}catch(e){}save();render();return true;
+ }catch(e){return false}finally{stat(IDLE)}
+}
+const _sqMake=window.sqMake;
+window.sqMake=function(T0,n,raw){
+ if(capped()){limitMsg();return}
+ serve(T0,n,raw).then(ok=>{if(!ok)_sqMake(T0,n,raw)},()=>_sqMake(T0,n,raw));
+};
+/* periodic top-up: at most once in 12 hours per device, one weak topic of the learner's own class and subject */
+async function topup(){
+ try{const K="ask_qb_top",last=+localStorage.getItem(K)||0;if(Date.now()-last<432e5||!tok()||!navigator.onLine||!D.cls||!lvKey()||!D.sub||D.sub==="General")return;
+  localStorage.setItem(K,Date.now());const tp=sqTopics().slice(0,4);
+  for(const name of tp){const f=await rpc("bank_find",{p_t:tok(),p_subject:D.sub,p_class:clsCode(),p_topic:name,p_n:1},10000);
+   if(f&&f.ok&&f.total<3){const ctx={sub:D.sub,topic:name},fresh=await genFresh(ctx,2,[]);for(const it of fresh)await saveItem(it,ctx,"gemini");return}}}catch(e){}}
+setTimeout(topup,45000);
+
+/* ---------- owner: question bank page ---------- */
+async function bankAdmin(){
+ if(!isOwner())return;showP("Question bank",'<div class="empty">Loading…</div>',HBACK||settings,null);
+ const [s,r]=await Promise.all([rpc("bank_stats",{p_t:tok()}),rpc("bank_review",{p_t:tok(),p_n:8})]);
+ const rows=(s&&s.rows)||[],rev=(r&&r.rows)||[],E=x=>esc(String(x==null?"":x));
+ let h='<div class="sec">COVERAGE</div>'+(rows.length?rows.map(x=>'<div class="row" style="cursor:default"><div><b>'+E(x.subject_name)+' · '+E(x.class_label)+'</b><small>'+E(x.status)+' · '+E(x.source)+'</small></div><span class="rv">'+E(x.n)+'</span></div>').join(""):'<div class="empty">No questions saved yet</div>');
+ h+='<div class="sec">WAITING FOR YOUR CHECK</div>'+(rev.length?rev.map(x=>'<div class="row" style="display:block;cursor:default"><b>'+E(x.subject_name)+' · '+E(x.class_label)+' · '+E(x.topic)+'</b><small style="display:block;margin:4px 0">'+E(x.source)+' · '+E(x.difficulty)+'</small><div style="font-size:14px;line-height:1.4">'+E(x.stem)+'</div><div style="margin-top:8px;display:flex;gap:8px"><button class="pcp" data-ap="'+E(x.id)+'">Approve</button><button class="pcp" data-rj="'+E(x.id)+'" style="background:#e03131">Reject</button></div></div>').join(""):'<div class="empty">Nothing waiting</div>');
+ showP("Question bank",h,HBACK||settings,async e=>{const a=e.target.closest("[data-ap]"),b=e.target.closest("[data-rj]");if(!a&&!b)return;
+  const id=(a||b).dataset.ap||(a||b).dataset.rj;await rpc("bank_set_status",{p_t:tok(),p_id:id,p_status:a?"approved":"rejected"});bankAdmin()});
+}
+window.QBX={learn,serve,detect,decide,topup,bankAdmin};
+window.amdToggle=function(){D.amd=!(D.amd!==false);D.mt=Date.now();try{save()}catch(e){}try{generalPage()}catch(e){}};
 })();
 </script>
 </body></html>

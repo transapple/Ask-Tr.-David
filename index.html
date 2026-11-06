@@ -15,9 +15,7 @@
   try {
     var m = function (q) { return window.matchMedia && window.matchMedia(q).matches; };
     var standalone = m("(display-mode: standalone)") || m("(display-mode: fullscreen)") || m("(display-mode: minimal-ui)") || window.navigator.standalone === true;
-    var skip = false;
-    try { skip = sessionStorage.getItem("ask_pgContinue") === "1"; } catch (e) {}
-    if (!standalone && !skip) document.documentElement.classList.add("pg-on");
+    if (!standalone) document.documentElement.classList.add("pg-on");
   } catch (e) {}
 })();
 </script>
@@ -159,6 +157,9 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 #adm .an{display:flex;border-top:1px solid var(--line);background:var(--bar);padding-bottom:env(safe-area-inset-bottom,0px)}
 #adm .an button{flex:1;border:0;background:none;color:var(--sub);font:inherit;font-size:13px;font-weight:600;padding:13px 2px;cursor:pointer;border-top:3px solid transparent}
 #adm .an button.on{color:var(--green);border-top-color:var(--green)}
+#adm .as{display:none;gap:6px;padding:8px 12px;overflow-x:auto;background:var(--bar);border-bottom:1px solid var(--line);flex-shrink:0}
+#adm .as button{flex:0 0 auto;border:0;border-radius:18px;padding:8px 14px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;background:var(--wall);color:var(--text);position:relative;white-space:nowrap}
+#adm .as button.on{background:var(--green);color:#fff}
 .ag{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 14px}
 .ac{background:var(--sheet);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
 .ac b{display:block;font-size:26px;line-height:1.15}.ac span{color:var(--sub);font-size:13px}.ac small{display:block;color:var(--sub);font-size:12px;margin-top:3px}
@@ -349,7 +350,6 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       <span>Install</span>
     </button>
-    <a href="#" id="pgContinue" class="pg-continue">Continue in browser</a>
     <p id="pgMsg" class="pg-msg" role="status" aria-live="polite" hidden></p>
   </div>
 </div>
@@ -360,7 +360,6 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
   var root = document.documentElement;
   var btn = document.getElementById("pgInstall");
   var label = btn.querySelector("span");
-  var cont = document.getElementById("pgContinue");
   var msg = document.getElementById("pgMsg");
   var logo = document.querySelector("#pgGate .pg-logo");
   var fab = document.getElementById("pwaInstallBtn"); // small floating button, used after "Continue in browser"
@@ -452,12 +451,6 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 
   btn.addEventListener("click", doInstall);
   if (fab) fab.addEventListener("click", doInstall);
-  cont.addEventListener("click", function (e) {
-    e.preventDefault();
-    try { sessionStorage.setItem("ask_pgContinue", "1"); } catch (err) {}
-    root.classList.remove("pg-on");
-    syncFab();
-  });
 
   // If the bundled icon file is missing, fall back to the logo embedded in this page.
   logo.addEventListener("error", function () {
@@ -601,7 +594,7 @@ function settings0(){
 `,closeP,e=>{
   const a=e.target.closest(".row")?.dataset.a;
   if(a=="th"){D.theme=isDark()?"light":"dark";applyTheme();save();settings()}
-  if(a=="ct")chatTheme();if(a=="nt")toggleNotif();if(a=="wn")notifs();if(a=="ho"&&isOwner())handoff();if(a=="sv"&&isOwner())voiceRoom("q","draft");if(a=="md")modelsGuide();if(a=="pl")plans(1);if(a=="pf")profile();if(a=="ak")AK.open();if(a=="ac")access();if(a=="vl")voiceLang();if(a=="up")updateApp();if(a=="sp")supportOpen();if(a=="cu")contactUs();if(a=="wk")wkShow(1);
+  if(a=="ct")chatTheme();if(a=="nt")toggleNotif();if(a=="wn")notifs();if(a=="ho"&&isOwner())handoff();if(a=="md")modelsGuide();if(a=="pl")plans(1);if(a=="pf")profile();if(a=="ak")AK.open();if(a=="ac")access();if(a=="vl")voiceLang();if(a=="up")updateApp();if(a=="sp")supportOpen();if(a=="cu")contactUs();if(a=="wk")wkShow(1);
   if(a=="ex"){const t=D.msgs.map(m=>"["+new Date(m.ts).toLocaleString()+"] "+(m.s=="o"?"You":D.name)+": "+m.t).join("\n");const u=URL.createObjectURL(new Blob([t||"No messages"],{type:"text/plain"}));const l=document.createElement("a");l.href=u;l.download="chat-history.txt";l.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
   if(a=="tr"){sel.clear();trash()}})}
 
@@ -3572,7 +3565,13 @@ async function aiAnswer(q,FUx,loose){
   return f
 
  }catch(e){AIWHY=e&&e.name=="AbortError"?"timeout":(navigator.onLine?"net":"offline");return null}finally{clearTimeout(tm)}}
-function logAct(act,m,ans){try{const t=tokNow();if(!t||!m)return;fetch(SBU+"rpc/log_user_action",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_t:t,p_action:act,p_q:String(m.q||"").slice(0,200),p_ref:String(m.tid||m.aid||"").slice(0,60),p_ans:String(ans!=null?ans:m.t||"").replace(/\s+/g," ").slice(0,200),p_lvl:String(D.lvl||""),p_sub:String(m.sub||(D.sub=="General"?(typeof detectSub=="function"&&detectSub(m.q))||"General":D.sub)||"").slice(0,60)})}).catch(()=>{})}catch(e){}}
+/* READING TIME: from the moment an answer is shown until the learner asks the next question, leaves the app or locks the screen. Only time with the app on screen counts, each stretch is capped at 10 minutes, and the server stores it per question. */
+let RDM=null,RDT=0,RDS=0;
+function rdSend(){if(!RDM)return;if(RDT){RDS+=Date.now()-RDT;RDT=0}const m=RDM,secs=Math.min(600,Math.round(RDS/1000));RDM=null;RDS=0;if(secs<3)return;try{const t=tokNow();if(!t)return;fetch(SBU+"rpc/log_read_time",{method:"POST",keepalive:true,headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_t:t,p_q:m.q,p_sub:m.sub,p_lvl:m.lvl,p_secs:secs})}).catch(()=>{})}catch(e){}}
+function rdStart(m){rdSend();const q=String(m&&m.q||"").trim().slice(0,200);if(!q)return;let sb="";try{sb=String(m.sub||(D.sub=="General"?(typeof detectSub=="function"&&detectSub(m.q))||"General":D.sub)||"").slice(0,60)}catch(e){}RDM={q:q,sub:sb,lvl:String(D.lvl||"")};RDS=0;RDT=document.hidden?0:Date.now()}
+document.addEventListener("visibilitychange",()=>{if(!RDM)return;if(document.hidden){if(RDT){RDS+=Date.now()-RDT;RDT=0}}else if(!RDT)RDT=Date.now()});
+addEventListener("pagehide",()=>{try{rdSend()}catch(e){}});
+function logAct(act,m,ans){try{const t=tokNow();if(!t||!m)return;if(act=="ask")try{rdStart(m)}catch(e){}fetch(SBU+"rpc/log_user_action",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_t:t,p_action:act,p_q:String(m.q||"").slice(0,200),p_ref:String(m.tid||m.aid||"").slice(0,60),p_ans:String(ans!=null?ans:m.t||"").replace(/\s+/g," ").slice(0,200),p_lvl:String(D.lvl||""),p_sub:String(m.sub||(D.sub=="General"?(typeof detectSub=="function"&&detectSub(m.q))||"General":D.sub)||"").slice(0,60)})}).catch(()=>{})}catch(e){}}
 /* ===== REPLY BUTTONS: each one has a server job.
    DAVID (owner): Copy, Share, Save, Like, Unlike and Redo go to the database function owner_reply_action, which checks the login again, so nobody else can use it.
      Like = keep the reply for good. Unlike = remove the stored reply (and its extra versions) at once. Copy, Share, Save and Redo are counted on the reply.
@@ -3614,7 +3613,7 @@ function logUn(q){try{q=String(q).trim().slice(0,300);if(q.length<3)return;fetch
  When the database says "published" the label goes away and the answer is used for later related questions. */
 function sendFb(m){try{
  /* DAVID (owner): Like keeps the reply for good, Unlike removes it from the database at once. The database checks the login again, so no one else can do this. */
- if(typeof isOwner=="function"&&isOwner()&&(m.fb==1||m.fb==-1)){const oa=m.fb==1?"like":"unlike";ownerAct(oa,m).then(j=>ownerResult(m,oa,j))}
+ 
  if(m.tid){
   const tok=localStorage.getItem("ask_tok")||sessionStorage.getItem("ask_tok")||"";
   fetch(SBU+"rpc/rate_ai_topic",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_topic_id:m.tid,p_vote:m.fb||0,p_t:tok})})
@@ -4180,202 +4179,6 @@ const svWho=x=>String((x&&(x.asker_name||x.asked_by_name||x.learner_name||x.aske
 svName=k=>(MODELS[k]?MODELS[k].n:k),svOk=()=>SVK=="q"?"published":"approved";
 const svTopic=x=>"# "+x.name+"\n"+x.definition+"\n\n## How it works\n"+x.steps+"\n\n## Where it is used\n"+x.uses+"\n\n## In simple words\n"+x.simple+"\n\n## Examples\n"+x.examples+"\n\n## Mistakes and tips\n"+x.more;
 const svBtn=(on,l,a,v)=>`<button ${a}="${v}" style="flex:1;padding:10px 4px;border:0;border-radius:18px;font:inherit;font-weight:600;cursor:pointer;background:${on?"var(--green)":"var(--wall)"};color:${on?"#fff":"var(--text)"}">${l}</button>`;
-async function voiceRoom(kind,st){
- if(!isOwner())return;if(kind)SVK=kind;if(st)SVT=st;
- showP("Learner answers",'<div style="padding:22px 18px;color:var(--sub)">Loading…</div>',SVBACK);
- const want=SVT=="draft"?"draft":svOk();
- let j=null;try{j=await svRpc(SVK=="q"?"topic_review_list":"style_review_list",{p_t:tokNow(),p_status:want})}catch(e){}
- if(!j||!j.ok){$("pbody").innerHTML='<div class="pbn" style="margin:14px 18px;line-height:1.5">'+(j&&j.err=="not allowed"?"This room is only for the owner account.":j&&j.err=="login"?"Please log in again.":"Could not load. Check your connection and try again.")+'</div>';return}
- SVL=j.items||[];SVC=j.counts||{};
- const cn=s=>(SVC[s=="approved"?svOk():s]||0);
- let h=`<div style="padding:12px 18px;color:var(--sub);line-height:1.5">Only you see this room. Learners get their answers straight away, with no label. Here you see what they asked and decide what is kept for good.</div>
- <div style="display:flex;gap:6px;padding:4px 18px 8px">${svBtn(SVK=="q","New questions","data-kind","q")}${svBtn(SVK=="r","Style rewrites","data-kind","r")}</div>
- <div style="display:flex;gap:6px;padding:4px 18px 12px">${["draft","approved"].map(s=>svBtn(s==SVT,SVLBL[s]+" "+cn(s),"data-tab",s)).join("")}</div>`;
- if(!SVL.length)h+=`<div style="padding:18px;color:var(--sub);line-height:1.5">${SVT=="draft"?(SVK=="q"?"No new questions are waiting.":"No rewrites are waiting. They appear here after a learner (or you) asks a question with a model selected."):"Nothing here yet."}</div>`;
- SVL.forEach((x,i)=>{const q=SVK=="q"?x.source_question:x.question;h+=`<div class="row" data-it="${i}"><div><b>${esc(q?"“"+q+"”":(x.title||x.name||"Untitled"))}</b><small><b>${esc(svWho(x)||"Name not recorded")}</b> · ${SVK=="q"?"":""}${SVK=="q"?esc(x.name||"")+" · "+esc(x.level_code||"")+" · "+esc(x.subject_name||""):esc(x.title||"")+" · "+esc(svName(x.model))+" · "+esc(x.level)+" · "+esc(x.plan||"Free")+" plan"} · ${new Date(x.created_at).toLocaleDateString()}</small></div></div>`});
- showP("Learner answers",h,SVBACK,e=>{
-  const k=e.target.closest("[data-kind]");if(k){voiceRoom(k.dataset.kind);return}
-  const t=e.target.closest("[data-tab]");if(t){voiceRoom(null,t.dataset.tab);return}
-  const r=e.target.closest("[data-it]");if(r)voiceItem(+r.dataset.it)})}
-function voiceItem(i,showOrig){
- const x=SVL[i];if(!x)return;const T=SVK=="q",cur=T?svTopic(x):(x.final_md||x.styled_md),shown=showOrig?x.source_md:cur,q=T?x.source_question:x.question;
- const bt=(a,l,c)=>`<button data-a="${a}" style="flex:1;min-width:30%;padding:12px 8px;border:0;border-radius:22px;font:inherit;font-weight:700;cursor:pointer;color:#fff;background:${c}">${l}</button>`;
- showP(esc(x.title||x.name||"Answer"),`${svWhoH(x)}<div style="padding:4px 18px 4px;color:var(--sub);line-height:1.5">Learner asked: <b style="color:var(--text)">${q?esc(q):"not recorded"}</b><br>${T?esc(x.level_code||"")+" · "+esc(x.subject_name||""):esc(svName(x.model))+" · "+esc(x.level)+" · "+esc(x.plan||"Free")+" plan"} · <b>${SVLBL[x.status]||x.status}</b></div>
- ${T?"":`<div style="display:flex;gap:6px;padding:8px 18px">${svBtn(!showOrig,"Rewrite","data-v","n")}${svBtn(!!showOrig,"Original answer","data-v","o")}</div>`}
- <div class="md" style="padding:8px 18px 12px;line-height:1.55">${md(shown)}</div>
- ${T?"":`<div style="padding:0 18px 4px;color:var(--sub);font-size:13px">Edit the rewrite if needed (first line must start with #):</div>
- <textarea id="svt" style="display:block;width:calc(100% - 36px);margin:6px 18px;min-height:190px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit;font-size:14px;line-height:1.5;box-sizing:border-box">${esc(cur)}</textarea>`}
- <div id="svm" style="padding:2px 18px;min-height:20px;color:var(--sub)"></div>
- <div style="display:flex;gap:8px;flex-wrap:wrap;padding:6px 18px 10px">${bt("ok","Approve (keep for good)","#00a884")}${bt("no","Reject (delete)","#ff453a")}${x.status!="draft"?bt("dr","Move back to waiting","#6b7280"):""}</div>
- ${T?"":`<div style="display:flex;gap:8px;flex-wrap:wrap;padding:0 18px 28px">${bt("rg","Write it again","#8b5cf6")}</div>`}`,()=>voiceRoom(),e=>{
-  const v=e.target.closest("[data-v]");if(v){const ta=$("svt");if(ta)x.final_md=ta.value.trim()||x.final_md;voiceItem(i,v.dataset.v=="o");return}
-  const b=e.target.closest("[data-a]");if(!b)return;const a=b.dataset.a,ta=$("svt"),m=$("svm"),txt=(ta?ta.value:"").trim();
-  const done=async(st,fin)=>{m.textContent="Saving…";let j=null;
-   try{j=T?await svRpc("topic_review_set",{p_t:tokNow(),p_id:x.id,p_status:st}):await svRpc("style_review_set",{p_t:tokNow(),p_id:x.id,p_status:st,p_final:fin})}catch(er){}
-   if(j&&j.ok){try{Object.keys(localStorage).forEach(k=>{if(k.indexOf("ask_sty3_")==0)localStorage.removeItem(k)})}catch(er){}for(const k in svNo)delete svNo[k];
-    if(T&&st=="published")try{TOP.forEach(t=>{if(t.tid==x.id)t.ai=0})}catch(er){}
-    voiceRoom()}
-   else m.textContent=j&&j.err=="bad text"?"The text must start with # and be between 20 and 8000 characters.":"Could not save. Try again."};
-  if(a=="ok")done(T?"published":"approved",!T&&txt&&txt!=x.styled_md?txt:null);
-  else if(a=="no")done("rejected",null);
-  else if(a=="dr")done("draft",null);
-  else if(a=="rg"&&!T){m.textContent="Writing it again… this can take up to 20 seconds.";b.disabled=true;
-   fetch(STU,{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({text:x.source_md,model:x.model,level:x.level,plan:x.plan||"Free",depth:(MODELS[x.model]||{r:1}).r+(PBONUS[x.plan||"Free"]||0),t:tokNow(),regen:true,q:x.question||""})}).then(r=>r.json()).then(j=>{
-    if(j&&j.status=="ok"){voiceRoom(null,"draft")}else{b.disabled=false;m.textContent=j&&j.status=="busy"?"Gemini is busy. Try again in a minute.":"Could not write it again. The old text is kept."}}).catch(()=>{b.disabled=false;m.textContent="Could not reach the server. The old text is kept."})}})}
-
-
-/* ===== VERIFICATION QUEUE (Training 08, owner only: Admin > Review > Verification queue) =====
- New Gemini answers are saved as PENDING candidates (knowledge_pending). They are not trusted and never reused as knowledge.
- Here the owner reads each one, edits the text if needed, then approves (needs a source, goes to the permanent verified store) or rejects (needs a reason).
- Every decision is checked again in the database (owner login only). The older drafts in the topics table can be added to the queue with one tap. */
-const KBLBL={open:"Waiting",promoted:"Approved",rejected:"Rejected"};
-const KBFIELDS=[["name","Title",2],["definition","Definition",3],["steps","How it works",5],["uses","Where it is used",4],["simple","In simple words",4],["examples","Examples",5],["more","Mistakes and tips",5]];
-let KBT="open",KBL=[],KBC={},KBS=[];
-const kbErr=j=>j&&j.err=="not allowed"?"This room is only for the owner account.":j&&j.err=="net"?"No internet. Check your connection and try again.":"Could not load. Try again.";
-const kbOrig=o=>o=="import"?"Older draft":o=="admin"?"Written by you":"AI (Gemini)";
-const kbStat=s=>s=="under_review"?"Under review":s=="promoted"?"Approved":s=="rejected"?"Rejected":"Waiting";
-async function kbRoom(st,msg){
- if(!isOwner())return;if(st)KBT=st;
- showP("Verification queue",'<div style="padding:22px 18px;color:var(--sub)">Loading…</div>',SVBACK);
- const j=await admCall("admin_pending_list",{p_status:KBT});
- if(!j.ok){$("pbody").innerHTML='<div class="pbn" style="margin:14px 18px;line-height:1.5">'+kbErr(j)+'</div>';return}
- KBL=j.items||[];KBC=j.counts||{};const n=admN;
- let h=`<div style="padding:12px 18px;color:var(--sub);line-height:1.5">New AI answers wait here. Nothing in this list is trusted or reused until you approve it with a source. Learners already got their answer straight away.</div>
- <div style="display:flex;gap:6px;padding:4px 18px 12px">${["open","promoted","rejected"].map(s=>svBtn(s==KBT,KBLBL[s]+" "+n(KBC[s]),"data-tab",s)).join("")}</div>
- <div id="kbm" style="padding:0 18px 6px;min-height:18px;color:var(--sub)">${esc(msg||"")}</div>`;
- if(KBT=="open"&&n(KBC.old_drafts)>0)h+=`<div class="row" data-imp="1"><div><b>Add ${n(KBC.old_drafts)} older AI drafts to this queue</b><small>Drafts saved before the queue existed. Safe to tap twice. Nothing is approved by this.</small></div></div>`;
- if(!KBL.length)h+=`<div style="padding:18px;color:var(--sub);line-height:1.5">${KBT=="open"?"Nothing is waiting.":"Nothing here yet."}</div>`;
- KBL.forEach((x,i)=>{h+=`<div class="row" data-it="${i}"><div><b>${esc("“"+x.question+"”")}</b><small><b>${esc(svWho(x)||"Name not recorded")}</b> · ${esc((x.candidate&&x.candidate.name)||"")} · ${esc(x.level_code||"")} · ${esc(x.subject_name||"")} · ${kbOrig(x.origin)}${x.was_edited?" · edited":""}${KBT=="open"&&x.status=="under_review"?" · under review":""} · ${admDate(x.created_at)}</small></div></div>`});
- showP("Verification queue",h,SVBACK,async e=>{
-  const t=e.target.closest("[data-tab]");if(t){kbRoom(t.dataset.tab);return}
-  if(e.target.closest("[data-imp]")){const m=$("kbm");if(m)m.textContent="Adding…";const r=await admCall("admin_import_old_drafts");
-   if(r.ok)kbRoom("open","Added "+n(r.queued)+" older drafts"+(r.skipped?" ("+n(r.skipped)+" skipped as duplicates)":"")+".");else if(m)m.textContent="Could not add them. Try again.";return}
-  const r=e.target.closest("[data-it]");if(r)kbItem(+r.dataset.it)})}
-async function kbItem(i,msg,keep,dup){
- const x=KBL[i];if(!x)return;const c=x.candidate||{},open=x.status=="pending"||x.status=="under_review";
- if(open&&!KBS.length){const s=await admCall("admin_sources_list");if(s.ok)KBS=s.items||[]}
- const T=k=>String(c[k]==null?"":c[k]),sec=(l,k)=>T(k)?`<div style="padding:6px 18px 0"><b>${l}</b></div><div class="md" style="padding:0 18px 4px;line-height:1.55">${md(T(k))}</div>`:"";
- const quiz=Array.isArray(c.quiz)?c.quiz.map((q,j)=>{try{return `<div style="padding:4px 18px;line-height:1.5"><b>${j+1}. ${esc(q[0])}</b><br>${q[1].map((o,k)=>(k==q[2]?"✔ ":"– ")+esc(o)).join("<br>")}</div>`}catch(er){return""}}).join(""):"";
- const warn=[];if(c.confidence_checked===false||c.confidence=="not checked")warn.push("Confidence: "+esc(c.confidence||"not checked")+" (the AI's own rating, not checked by anyone)");
- if(c.curriculum_link)warn.push("Syllabus link: "+esc(c.curriculum_link.title||"")+" (unverified)");if(c.removed_topic)warn.push("Removed from the 2025 syllabus: "+esc(c.removed_topic));
- if(c.not_sure_note)warn.push("The AI is unsure: "+esc(c.not_sure_note));
- const sel=`<select id="kbs" class="ain" style="margin:6px 18px;width:calc(100% - 36px)"><option value="">Choose the source…</option>${KBS.map(s=>`<option value="${s.id}">${esc(s.title)}${s.version_label?" · "+esc(s.version_label):""}</option>`).join("")}</select>`;
- const ed=KBFIELDS.map(f=>`<div style="padding:6px 18px 0;color:var(--sub);font-size:13px">${f[1]}</div><textarea id="kbf_${f[0]}" data-k="${f[0]}" style="display:block;width:calc(100% - 36px);margin:4px 18px;min-height:${f[2]*22}px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit;font-size:14px;line-height:1.5;box-sizing:border-box">${esc(T(f[0]))}</textarea>`).join("");
- const bt=(a,l,col)=>`<button data-a="${a}" style="flex:1;min-width:30%;padding:12px 8px;border:0;border-radius:22px;font:inherit;font-weight:700;cursor:pointer;color:#fff;background:${col}">${l}</button>`;
- showP(esc(c.name||"Answer"),`${svWhoH(x)}<div style="padding:4px 18px 4px;color:var(--sub);line-height:1.5">Learner asked: <b style="color:var(--text)">${esc(x.question)}</b><br>${esc(x.level_code||"")} · ${esc(x.subject_name||"")} · ${kbOrig(x.origin)}${x.model?" · "+esc(x.model):""}${x.prompt_version?" · "+esc(x.prompt_version):""} · <b>${kbStat(x.status)}</b>${x.was_edited?" · edited "+x.edit_count+"×":""}</div>
- ${warn.length?`<div style="margin:8px 18px;padding:10px 12px;border-radius:10px;background:var(--wall);line-height:1.5;font-size:13px">${warn.join("<br>")}</div>`:""}
- ${x.review_note?`<div style="padding:4px 18px;color:var(--sub);font-size:13px">Note: ${esc(x.review_note)}</div>`:""}
- ${sec("Definition","definition")}${sec("How it works","steps")}${sec("Where it is used","uses")}${sec("In simple words","simple")}${sec("Examples","examples")}${sec("Mistakes and tips","more")}
- ${quiz?`<div style="padding:8px 18px 0"><b>Quiz</b> (✔ is the answer the AI marked)</div>${quiz}`:""}
- ${open?`<details style="padding:8px 0"${keep?" open":""}><summary style="padding:6px 18px;font-weight:600">Edit the text</summary>${ed}</details>
- <div style="padding:6px 18px 0;color:var(--sub);font-size:13px">Source (needed to approve)</div>${sel}
- <details style="padding:0 18px 6px;color:var(--sub);font-size:13px"><summary>Add a new source</summary><input id="kbst" class="ain" placeholder="Title, e.g. NCDC Biology syllabus 2025" style="margin:6px 0;width:100%;box-sizing:border-box"><select id="kbsy" class="ain" style="margin:0 0 6px;width:100%"><option value="ncdc_syllabus">NCDC syllabus</option><option value="uneb_guideline">UNEB guideline</option><option value="textbook">Textbook</option><option value="other">Other</option></select>${bt("src","Save source","#6b7280")}</details>`:""}
- <div style="padding:6px 18px 0;color:var(--sub);font-size:13px">${open?"Note (a reason is needed to reject)":"Note"}</div>
- <textarea id="kbn" style="display:block;width:calc(100% - 36px);margin:4px 18px;min-height:60px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit;font-size:14px;box-sizing:border-box" ${open?"":"disabled"}>${esc(open?"":(x.review_note||""))}</textarea>
- <div id="kbm" style="padding:2px 18px;min-height:20px;color:var(--sub)">${esc(msg||"")}</div>
- <div style="display:flex;gap:8px;flex-wrap:wrap;padding:6px 18px 28px">${open?bt("ok","Approve","#00a884")+bt("no","Reject","#ff453a")+bt("sv","Save edit","#3b82f6")+(x.status=="pending"?bt("ur","Mark under review","#6b7280"):bt("wt","Back to waiting","#6b7280"))+(dup?bt("nv","Add as new version of the existing answer","#8b5cf6"):""):x.status=="rejected"?bt("ro","Reopen","#6b7280"):""}</div>`,()=>kbRoom(),async e=>{
-  const b=e.target.closest("[data-a]");if(!b)return;const a=b.dataset.a,m=()=>$("kbm"),say=t=>{const z=m();if(z)z.textContent=t},note=()=>($("kbn")?$("kbn").value.trim():"");
-  const changed=()=>{const o={};KBFIELDS.forEach(f=>{const t=$("kbf_"+f[0]);if(t&&t.value.trim()!=T(f[0]).trim())o[f[0]]=t.value.trim()});return o};
-  const saveEdit=async()=>{const o=changed();if(!Object.keys(o).length)return true;say("Saving the edit…");const r=await admCall("admin_pending_edit",{p_id:x.id,p_candidate:o});
-   if(r.ok){x.candidate=Object.assign({},x.candidate,o);x.status="under_review";x.was_edited=true;x.edit_count=(x.edit_count||0)+1;return true}
-   say(r.err=="bad text"?"The text is not valid: "+(r.detail||""):r.err&&r.err.indexOf("already")==0?"This item was already decided.":"Could not save the edit. Try again.");return false};
-  const after=async(r,okMsg)=>{if(r.err=="duplicate"){kbItem(i,"A verified answer for this question already exists. Add this one as a new version of it (the old version stays in its history), or reject this one.",1,1);return}if(r.ok){try{if(a=="ok")TOP.forEach(t=>{if(t.tid==x.legacy_topic_id)t.ai=0})}catch(er){}kbRoom(null,okMsg)}else say(r.err=="a source is required"?"Choose the source first.":r.err=="reason needed"?"Write the reason in the note box.":r.err&&r.err.indexOf("already")==0?"This item was already decided.":r.err=="same question already waiting"?"The same question is already waiting.":"Could not save. Try again.")};
-  b.disabled=true;
-  try{
-   if(a=="sv"){if(!Object.keys(changed()).length){say("Nothing was changed.")}else if(await saveEdit())kbItem(i,"Edit saved. The first version is kept.",1)}
-   else if(a=="ok"){const src=$("kbs")?$("kbs").value:"";if(!src){say("Choose the source first.")}else if(await saveEdit()){say("Approving…");after(await admCall("admin_pending_approve",{p_id:x.id,p_source:src,p_note:note()||null}),"Approved and moved to the permanent store.")}}
-   else if(a=="nv"){const src=$("kbs")?$("kbs").value:"";if(!src){say("Choose the source first.")}else if(await saveEdit()){say("Adding the new version…");after(await admCall("admin_pending_approve",{p_id:x.id,p_source:src,p_note:note()||null,p_mode:"version"}),"Added as a new version of the existing answer.")}}
-   else if(a=="no"){if(note().length<3){say("Write the reason in the note box.")}else{say("Rejecting…");after(await admCall("admin_pending_reject",{p_id:x.id,p_note:note()}),"Rejected.")}}
-   else if(a=="ur"||a=="wt"||a=="ro"){after(await admCall("admin_pending_mark",{p_id:x.id,p_status:a=="ur"?"under_review":"pending"}),a=="ro"?"Reopened.":"Updated.")}
-   else if(a=="src"){const t=$("kbst")?$("kbst").value.trim():"";if(t.length<3){say("Write the source title first.")}else if(await saveEdit()){say("Saving the source…");const r=await admCall("admin_source_add",{p_title:t,p_publisher:null,p_doc_type:$("kbsy").value,p_version:null,p_reference:null});
-     if(r.ok){const s=await admCall("admin_sources_list");if(s.ok)KBS=s.items||[];kbItem(i,"Source saved. Choose it above.",1)}else say(r.err||"Could not save the source.")}}
-  }finally{b.disabled=false}})}
-
-/* ===== VERIFIED KNOWLEDGE (Training 09, owner only: Admin > Review > Verified knowledge) =====
- The permanent store. Every item has a version number, a source and a full history (who changed what, when and why).
- The owner can correct an item (new version), retire it (learners stop getting it) or restore it. Nothing is ever deleted or overwritten:
- the database keeps every earlier version. Each change is checked again in the database (owner login only). */
-let VKT="verified",VKL=[],VKQ="",VKC={};
-const vkWhen=d=>{try{return new Date(d).toLocaleString()}catch(e){return""}};
-const vkAct={promoted:"Approved",edited:"Corrected",retired:"Retired",restored:"Restored"};
-async function vkRoom(st,msg){
- if(!isOwner())return;if(st){VKT=st;VKQ=""}
- showP("Verified knowledge",'<div style="padding:22px 18px;color:var(--sub)">Loading…</div>',SVBACK);
- const j=await admCall("admin_items_list",{p_status:VKT,p_q:VKQ||null});
- if(!j.ok){$("pbody").innerHTML='<div class="pbn" style="margin:14px 18px;line-height:1.5">'+kbErr(j)+'</div>';return}
- VKL=j.items||[];VKC=j.counts||{};const n=admN;
- let h=`<div style="padding:12px 18px;color:var(--sub);line-height:1.5">The permanent store. Each item keeps every version and who changed it. Retiring hides it from learners; nothing is deleted.</div>
- <div style="display:flex;gap:6px;padding:4px 18px 8px">${svBtn(VKT=="verified","Verified "+n(VKC.verified),"data-tab","verified")}${svBtn(VKT=="retired","Retired "+n(VKC.retired),"data-tab","retired")}</div>
- <div style="display:flex;gap:6px;padding:0 18px 8px"><input id="vkq" class="ain" placeholder="Search title, subject or question" value="${esc(VKQ)}" style="flex:1;min-width:0"><button data-go="1" style="padding:0 16px;border:0;border-radius:18px;background:var(--green);color:#fff;font:inherit;font-weight:700;cursor:pointer">Find</button></div>
- <div id="vkm" style="padding:0 18px 6px;min-height:18px;color:var(--sub)">${esc(msg||"")}</div>
- <details style="padding:0 18px 8px"><summary style="font-weight:600;padding:4px 0">Test question matching</summary>
-  <div style="color:var(--sub);font-size:13px;line-height:1.5;padding:4px 0">Type a question the way a learner might. It shows whether verified knowledge would answer it. Only a strong match is used; weak matches go to the AI as before.</div>
-  <input id="vkt" class="ain" placeholder="e.g. what is osmossis" style="width:100%;box-sizing:border-box;margin:4px 0">
-  <div style="display:flex;gap:6px"><select id="vkl" class="ain" style="flex:1"><option value="PLE">PLE</option><option value="UCE" selected>UCE</option><option value="UACE">UACE</option></select><button data-tm="1" style="flex:1;padding:10px;border:0;border-radius:18px;background:var(--green);color:#fff;font:inherit;font-weight:700;cursor:pointer">Try it</button></div>
-  <div id="vkx" style="padding:8px 0;line-height:1.5"></div></details>
- <details style="padding:0 18px 10px"><summary style="font-weight:600;padding:4px 0" data-syl="1">Synonyms (words that mean the same)</summary>
-  <div style="color:var(--sub);font-size:13px;line-height:1.5;padding:4px 0">Teach the matcher that two words mean the same, for example “tummy” means “stomach”. One word on the left, the word it should become on the right.</div>
-  <div style="display:flex;gap:6px"><input id="vks1" class="ain" placeholder="word" style="flex:1;min-width:0"><input id="vks2" class="ain" placeholder="means" style="flex:1;min-width:0"><button data-sya="1" style="padding:0 14px;border:0;border-radius:18px;background:#6b7280;color:#fff;font:inherit;font-weight:700;cursor:pointer">Add</button></div>
-  <div id="vksl" style="padding:8px 0;color:var(--sub);font-size:13px;line-height:1.6">Tap “Synonyms” to load the list.</div></details>`;
- if(!VKL.length)h+=`<div style="padding:18px;color:var(--sub);line-height:1.5">${VKQ?"Nothing matches.":VKT=="verified"?"Nothing has been approved yet. Approve an item in the Verification queue and it appears here.":"Nothing is retired."}</div>`;
- VKL.forEach((x,i)=>{h+=`<div class="row" data-it="${i}"><div><b>${esc(x.title||"")}</b><small>${esc(x.level_code||"")} · ${esc(x.subject_name||"")} · version ${n(x.version)} · ${esc(x.source_title||"")} · ${admDate(x.updated_at)}</small></div></div>`});
- showP("Verified knowledge",h,SVBACK,e=>{
-  const t=e.target.closest("[data-tab]");if(t){vkRoom(t.dataset.tab);return}
-  if(e.target.closest("[data-go]")){VKQ=($("vkq")?$("vkq").value:"").trim();vkRoom();return}
-  if(e.target.closest("[data-tm]")){vkTry();return}
-  if(e.target.closest("[data-syl]")){vkSyn();return}
-  if(e.target.closest("[data-sya]")){vkSynAdd();return}
-  const r=e.target.closest("[data-it]");if(r){const x=VKL[+r.dataset.it];if(x)vkItem(x.id)}})}
-async function vkTry(){
- const o=$("vkx"),q=($("vkt")?$("vkt").value:"").trim();if(!o)return;if(q.length<3){o.textContent="Type a question first.";return}
- o.textContent="Checking…";const j=await admCall("admin_match_test",{p_question:q,p_level:$("vkl").value,p_subject:null});
- if(!j.ok){o.textContent=j.err=="bad question"?"The question is too short or too long.":kbErr(j);return}
- const m=j.matches||[],lab=b=>b=="strong"?"strong: would be answered from verified knowledge":"weak: not used, the AI would answer";
- o.innerHTML="Words used: <b>"+esc((j.words||[]).join(", ")||"none")+"</b><br>"+(m.length?m.map(x=>"• <b>"+esc(x.title)+"</b> ("+esc(x.level_code)+" · "+esc(x.subject_name||"")+") "+Math.round(x.score*100)+"% — "+lab(x.band)).join("<br>"):"No verified item matches. The AI would answer.")}
-async function vkSyn(){
- const o=$("vksl");if(!o)return;const j=await admCall("admin_synonyms_list");
- if(!j.ok){o.textContent=kbErr(j);return}
- o.innerHTML=(j.items||[]).map(x=>esc(x.term)+" → "+esc(x.canonical)).join("<br>")||"None yet."}
-async function vkSynAdd(){
- const o=$("vksl"),a=($("vks1")?$("vks1").value:"").trim(),b=($("vks2")?$("vks2").value:"").trim();if(!o)return;
- if(a.length<2||b.length<2){o.textContent="Write both words.";return}
- const r=await admCall("admin_synonym_add",{p_term:a,p_canonical:b});
- if(r.ok){$("vks1").value="";$("vks2").value="";await vkSyn();o.insertAdjacentHTML("afterbegin","<b>Added: "+esc(r.term)+" → "+esc(r.canonical)+"</b><br>")}
- else o.textContent=r.err=="bad words"?"Use letters and numbers only.":r.err=="same word"?"The two words are the same.":kbErr(r)}
-async function vkItem(id,msg,keep){
- showP("Verified item",'<div style="padding:22px 18px;color:var(--sub)">Loading…</div>',()=>vkRoom());
- const j=await admCall("admin_item_get",{p_id:id});
- if(!j.ok){$("pbody").innerHTML='<div class="pbn" style="margin:14px 18px;line-height:1.5">'+kbErr(j)+'</div>';return}
- const it=j.item,src=j.source||{},c=it.content||{},hist=j.history||[],live=it.status=="verified";
- const T=k=>String(c[k]==null?"":c[k]),sec=(l,k)=>T(k)?`<div style="padding:6px 18px 0"><b>${l}</b></div><div class="md" style="padding:0 18px 4px;line-height:1.55">${md(T(k))}</div>`:"";
- const quiz=Array.isArray(c.quiz)?c.quiz.map((q,k)=>{try{return `<div style="padding:4px 18px;line-height:1.5"><b>${k+1}. ${esc(q[0])}</b><br>${q[1].map((o,m)=>(m==q[2]?"✔ ":"– ")+esc(o)).join("<br>")}</div>`}catch(er){return""}}).join(""):"";
- const ed=KBFIELDS.map(f=>`<div style="padding:6px 18px 0;color:var(--sub);font-size:13px">${f[1]}</div><textarea id="vkf_${f[0]}" style="display:block;width:calc(100% - 36px);margin:4px 18px;min-height:${f[2]*22}px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit;font-size:14px;line-height:1.5;box-sizing:border-box">${esc(T(f[0]))}</textarea>`).join("");
- const hh=hist.map(x=>`<div style="padding:6px 18px;line-height:1.45;border-top:1px solid var(--line)"><b>Version ${admN(x.version)} · ${vkAct[x.action]||esc(x.action)}</b><br><span style="color:var(--sub);font-size:13px">${vkWhen(x.changed_at)} · ${esc(x.changed_by||"")}${(x.changed_fields||[]).length?" · changed: "+esc(x.changed_fields.join(", ")):""}${x.reason?"<br>Reason: "+esc(x.reason):""}</span></div>`).join("");
- const bt=(a,l,col)=>`<button data-a="${a}" style="flex:1;min-width:30%;padding:12px 8px;border:0;border-radius:22px;font:inherit;font-weight:700;cursor:pointer;color:#fff;background:${col}">${l}</button>`;
- showP(esc(it.title||"Item"),`<div style="padding:12px 18px 4px;color:var(--sub);line-height:1.5">${it.question?"First asked: <b style=\"color:var(--text)\">"+esc(it.question)+"</b><br>":""}${esc(it.level_code||"")} · ${esc(it.subject_name||"")} · <b>${live?"Verified":"Retired"}</b> · version ${admN(it.version)}<br>Source: ${esc(src.title||"")}${src.version_label?" · "+esc(src.version_label):""}<br>Last change by ${esc(it.verified_by||"")} on ${vkWhen(it.verified_at)}</div>
- ${sec("Definition","definition")}${sec("How it works","steps")}${sec("Where it is used","uses")}${sec("In simple words","simple")}${sec("Examples","examples")}${sec("Mistakes and tips","more")}
- ${quiz?`<div style="padding:8px 18px 0"><b>Quiz</b></div>${quiz}`:""}
- ${live?`<details style="padding:8px 0"${keep?" open":""}><summary style="padding:6px 18px;font-weight:600">Correct the text (makes a new version)</summary>${ed}</details>`:""}
- <div style="padding:6px 18px 0;color:var(--sub);font-size:13px">Reason (needed for every change)</div>
- <textarea id="vkr" style="display:block;width:calc(100% - 36px);margin:4px 18px;min-height:60px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit;font-size:14px;box-sizing:border-box"></textarea>
- <div id="vkm" style="padding:2px 18px;min-height:20px;color:var(--sub)">${esc(msg||"")}</div>
- <div style="display:flex;gap:8px;flex-wrap:wrap;padding:6px 18px 10px">${live?bt("cor","Save correction","#3b82f6")+bt("ret","Retire","#ff453a"):bt("res","Restore","#00a884")}</div>
- <div style="padding:10px 18px 0"><b>History</b> (every version is kept)</div>${hh}<div style="height:28px"></div>`,()=>vkRoom(),async e=>{
-  const b=e.target.closest("[data-a]");if(!b)return;const a=b.dataset.a,say=t=>{const z=$("vkm");if(z)z.textContent=t},why=()=>($("vkr")?$("vkr").value.trim():"");
-  const bad=r=>r.err=="changed"?"Someone changed this item meanwhile. It was reloaded.":r.err=="reason needed"?"Write the reason first.":r.err=="bad text"?"The text is not valid: "+(r.detail||""):r.err=="nothing changed"?"Nothing was changed.":r.err=="duplicate"?"Another verified item already answers this question. Retire that one first.":r.err&&r.err.indexOf("item is")==0?"This item is already "+r.err.slice(8)+".":"Could not save. Try again.";
-  if(why().length<3){say("Write the reason first.");return}
-  b.disabled=true;
-  try{
-   if(a=="cor"){const o={};KBFIELDS.forEach(f=>{const t=$("vkf_"+f[0]);if(t&&t.value.trim()!=T(f[0]).trim())o[f[0]]=t.value.trim()});
-    if(!Object.keys(o).length){say("Nothing was changed.");return}
-    say("Saving…");const r=await admCall("admin_item_correct",{p_id:id,p_candidate:o,p_reason:why(),p_expected:it.version});
-    if(r.ok)vkItem(id,"Saved as version "+admN(r.version)+". The earlier version is kept in the history.");else{say(bad(r));if(r.err=="changed")vkItem(id)}}
-   else if(a=="ret"){say("Retiring…");const r=await admCall("admin_item_retire",{p_id:id,p_reason:why(),p_expected:it.version});
-    if(r.ok)vkItem(id,"Retired as version "+admN(r.version)+". Learners no longer get it.");else{say(bad(r));if(r.err=="changed")vkItem(id)}}
-   else if(a=="res"){say("Restoring…");const r=await admCall("admin_item_restore",{p_id:id,p_reason:why(),p_expected:it.version});
-    if(r.ok)vkItem(id,"Restored as version "+admN(r.version)+".");else{say(bad(r));if(r.err=="changed")vkItem(id)}}
-  }finally{b.disabled=false}})}
-
 /* ===== ANNOUNCEMENTS AND UPDATES: What's new + Away alerts (phone alerts) =====
  The owner posts in Admin > Post. Everyone sees it in What's new (red dot on the avatar). When Away alerts is ON the phone is alerted:
  by a real push alert (push-sw.js + ann_push, works when the app is closed) and, as a back-up, by the app itself while it is open in the background. */
@@ -5348,9 +5151,10 @@ $("jump").onclick=()=>$("msgs").scrollTo({top:1e9,behavior:"smooth"});
 /* ===== ADMIN PANEL (owner only) =====
  One app, two modes for the owner account DAVID. Switch: Settings > Learner profile > Update account > Switch to Admin panel.
  Every admin database function checks the login token again (username DAVID with the owner phone), so other accounts are refused even if they find this code. */
-const ADMT=[["home","Home"],["inbox","Inbox"],["users","Users"],["asked","Asked"],["review","Review"],["ai","AI"],["news","Post"],["stats","Stats"],["free","Free days"],["pay","Pay"],["rate","Rate"]];
-const ADMMAIN=["home","inbox","users","pay"];
-let ADMON=false,ADMTAB="home",ADMSEQ=0,ADMUQ="",ADMUL=[],ADMAS="open",ADMAL=[],ADMPL=[],ADMPR=[];
+const ADMS=[["over","Overview",[["home","Summary"],["stats","Statistics"]]],["people","People",[["users","Learners"],["inbox","Inbox"],["rate","Ratings"]]],["money","Money",[["pay","Payments"],["free","Free days"],["proofs","Old proofs"]]],["learn","Learning",[["asks","Most asked"],["asked","Not understood"],["react","Likes and Unlikes"]]],["news","Post",[["news","Announcements"]]]];
+const ADMPG={home:()=>admHome(),stats:()=>admStats(),users:()=>admUsers(),inbox:()=>admInbox(),rate:()=>admRate(),pay:()=>admMomo(),free:()=>admFree(),proofs:()=>admPay(),asked:()=>admAsked(),react:()=>admReact(),asks:()=>admAsks(),news:()=>admNews()};
+let ADMON=false,ADMTAB="home",ADMSEQ=0,ADMUQ="",ADMUL=[],ADMAS="open",ADMAL=[],ADMPL=[],ADMPR=[],ADMUNR=0;
+const admSec=t=>ADMS.find(x=>x[2].some(y=>y[0]==t))||ADMS[0];
 const admCall=async(fn,a)=>{try{const j=await svRpc(fn,Object.assign({p_t:tokNow()},a||{}));return j&&typeof j.ok=="boolean"?j:{ok:false,err:"fail"}}catch(e){return{ok:false,err:"net"}}};
 const admMsg=j=>j&&j.err=="not allowed"?"This panel is only for the owner account.":j&&j.err=="net"?"No internet. Check your connection and try again.":"Could not load. Try again.";
 const admFail=(j,retry)=>'<div class="pbn" style="margin:14px 18px;line-height:1.5">'+admMsg(j)+'</div>'+(retry?'<div class="row" data-r="1"><div>Try again</div></div>':"");
@@ -5365,13 +5169,15 @@ function admHide(){ADMON=false;const a=$("adm");if(a)a.style.display="none"}
 function admClose(){admHide();try{localStorage.setItem("ask_mode_DAVID","user")}catch(e){}closeP()}
 function admOpen(){if(!isOwner())return;ADMON=true;try{localStorage.setItem("ask_mode_DAVID","admin")}catch(e){}
  const a=$("adm");a.style.display="flex";
- a.innerHTML=`<header class="ah"><div><b>Admin panel</b><small>Ask Tr. David · only you see this</small></div><button id="ax">Learner app</button></header><div id="abody"></div><nav class="an">${ADMT.filter(t=>ADMMAIN.includes(t[0])).map(t=>`<button data-t="${t[0]}">${t[1]}</button>`).join("")}<button data-t="more">More</button></nav>`;
- a.onclick=e=>{if(e.target.id=="ax"){admClose();return}const t=e.target.closest(".an button");if(t){if(t.dataset.t=="more")admMore();else admGo(t.dataset.t)}};
+ a.innerHTML=`<header class="ah"><div><b>Admin panel</b><small id="ahs">Ask Tr. David · only you see this</small></div><button id="ax">Learner app</button></header><div class="as" id="asub"></div><div id="abody"></div><nav class="an">${ADMS.map(x=>`<button data-s="${x[0]}">${x[1]}</button>`).join("")}</nav>`;
+ a.onclick=e=>{if(e.target.id=="ax"){admClose();return}const n=e.target.closest(".an button");if(n){admGo(ADMS.find(x=>x[0]==n.dataset.s)[2][0][0]);return}const t=e.target.closest(".as button");if(t)admGo(t.dataset.t)};
  admGo(ADMTAB);try{admPollUn()}catch(e){}}
-function admMore(){const L={stats:"Day by day installs, usage, sign-ups and questions",asked:"Questions learners asked that have no answer yet",review:"Approve or reject AI-written answers",ai:"Edit the voice of each model",news:"Post announcements to learners",free:"Open a plan free for everyone on set days and hours",rate:"Learner ratings and reviews"};
- showP("More",ADMT.filter(t=>!ADMMAIN.includes(t[0])).map(t=>'<div class="row" data-t="'+t[0]+'"><div><b>'+t[1]+'</b>'+(L[t[0]]?'<small>'+L[t[0]]+'</small>':'')+'</div></div>').join(""),closeP,e=>{const r=e.target.closest("[data-t]");if(!r)return;closeP();admGo(r.dataset.t)})}
-function admGo(t){ADMTAB=t;ADMSEQ++;document.querySelectorAll("#adm .an button").forEach(b=>b.classList.toggle("on",b.dataset.t==t||(b.dataset.t=="more"&&!ADMMAIN.includes(t))));
- ({home:admHome,inbox:admInbox,users:admUsers,asked:()=>admAsked(),review:admReview,ai:admAi,news:admNews,free:admFree,stats:()=>admStats(),pay:admPay,rate:()=>admRate()})[t]()}
+function admBadge(){const sp=document.querySelector('#adm .an button[data-s="people"]'),pi=document.querySelector('#adm .as button[data-t="inbox"]'),b=ADMUNR>0?'<i class="spn">'+ADMUNR+'</i>':"";if(sp)sp.innerHTML="People"+b;if(pi)pi.innerHTML="Inbox"+b}
+function admGo(t){if(!ADMPG[t])t="home";ADMTAB=t;ADMSEQ++;const S=admSec(t);
+ document.querySelectorAll("#adm .an button").forEach(b=>b.classList.toggle("on",b.dataset.s==S[0]));
+ const sb=$("asub");if(sb){sb.style.display=S[2].length>1?"flex":"none";sb.innerHTML=S[2].map(y=>`<button data-t="${y[0]}" class="${y[0]==t?"on":""}">${y[1]}</button>`).join("")}
+ const hs=$("ahs");if(hs)hs.textContent=S[1]+" · "+S[2].find(y=>y[0]==t)[1];
+ admBadge();const bd=$("abody");if(bd)bd.scrollTop=0;ADMPG[t]()}
 
 /* FREE DAYS: schedule windows when everyone gets a plan free. The database decides who gets what and when; this screen only edits the schedule. Times are East Africa Time (Kampala). */
 const FWD=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],FWP=["Basic","Standard","Premium"];
@@ -5473,26 +5279,23 @@ async function admStatsX(){const s=ADMSEQ,b=$("abody");b.innerHTML=admSeg()+admL
  b.innerHTML=h}
 async function admHome(){const s=ADMSEQ,b=$("abody");b.innerHTML=admLd();const j=await admCall("admin_stats");if(s!==ADMSEQ)return;
  if(!j.ok){b.innerHTML=admFail(j,1);b.onclick=e=>{if(e.target.closest("[data-r]"))admHome()};return}
- const kq=await admCall("admin_pending_counts");if(s!==ADMSEQ)return;const KQ=kq.ok?kq:{open:0,promoted:0,old_drafts:0,verified:0,retired:0};
- const rx=await admCall("admin_reactions",{p_kind:"dislike",p_limit:1});if(s!==ADMSEQ)return;const RX=rx.ok?(rx.counts||{}):{};
+ const [rx,mm,un]=await Promise.all([admCall("admin_reactions",{p_kind:"dislike",p_limit:1}),admCall("admin_momo_list"),admCall("admin_support_unread")]);if(s!==ADMSEQ)return;
+ const RX=rx.ok?(rx.counts||{}):{},MS=mm.ok?(mm.summary||[]):[],UN=un.ok?admN(un.n):0;
  const P=j.plans||{},n=admN,C=(l,v,sub)=>`<div class="ac"><span>${l}</span><b>${n(v)}</b><small>${sub}</small></div>`;
+ const fm=v=>n(v).toLocaleString();
+ const money=MS.length?MS.map(m=>`<div class="row" data-g="pay"><div><b>${fm(m.paid_month_total)} ${esc(m.currency)}</b> this month${m.environment=="sandbox"?' <span class="apl" style="background:#999">TEST</span>':""}<small>${n(m.paid_month_count)} paid this month · ${n(m.paid_count)} paid in total · ${n(m.pending_count)} waiting · ${n(m.unpaid_count)} not paid</small></div></div>`).join(""):'<div style="padding:6px 18px 10px;color:var(--sub)">No Mobile Money payments yet.</div>';
+ const att=[[UN,"unread messages","Learners wrote to you","inbox"],[j.unanswered_open,"questions not understood","Link them to an answer","asked"],[RX.unlikes_7d,"Unlikes in the last 7 days","See what learners found wrong","react"]].filter(x=>n(x[0])>0);
  b.innerHTML=`<div class="ag">${C("Learners",j.users_total,"+"+n(j.users_new_7d)+" this week")}${C("Signed in",j.logged_in_now,"accounts with a live login")}${C("Installs",j.installs_total,"+"+n(j.installs_7d)+" this week")}${C("Using today",j.devices_today,n(j.devices_7d)+" devices, "+n(j.accounts_7d)+" accounts this week")}</div>
  <div style="padding:0 18px 4px;color:var(--sub);font-size:12px;line-height:1.4">Installs and usage are counted from this version of the app onward.</div>
- <div class="row" data-g="stats"><div><b>Daily statistics</b><small>Installs, usage, sign-ups and questions, day by day</small></div></div>
+ <div class="asec">Needs your attention</div>${att.length?att.map(x=>`<div class="row" data-g="${x[3]}"><div><b>${n(x[0])}</b> ${x[1]}<small>${x[2]}</small></div></div>`).join(""):'<div style="padding:6px 18px 10px;color:var(--sub)">Nothing is waiting. All clear.</div>'}
+ <div class="asec">Money</div>${money}
  <div class="asec">Plans</div><div style="display:flex;flex-wrap:wrap;gap:8px;padding:6px 18px 10px">${PLANS4.map(p=>`<span class="apl" style="background:${PCOL[p]}">${p} ${n(P[p])}</span>`).join("")}</div>
- <div class="asec">Waiting for you</div>
- <div class="row" data-g="asked"><div><b>${n(j.unanswered_open)}</b> questions not understood<small>Asked ${n(j.asked_unanswered)} times in total. Tap to teach the system</small></div></div>
- <div class="row" data-g="kb"><div><b>${n(KQ.open)}</b> answers in the verification queue<small>AI answers waiting for your approval and a source. ${n(KQ.promoted)} approved into the permanent store${KQ.old_drafts?". "+n(KQ.old_drafts)+" older drafts can be added":""}</small></div></div>
- <div class="row" data-g="vk"><div><b>${n(KQ.verified)}</b> in the permanent store<small>Verified answers with their versions and history. ${n(KQ.retired)} retired</small></div></div>
- <div class="row" data-g="rq"><div><b>${n(j.topics_waiting)}</b> AI answers to check<small>${n(j.topics_published)} approved so far</small></div></div>
- <div class="row" data-g="rr"><div><b>${n(j.styles_waiting)}</b> model rewrites to check<small>${n(j.styles_approved)} approved so far</small></div></div>
- <div class="row" data-g="rx"><div><b>${n(RX.unlikes)}</b> answers marked Unlike by learners<small>${n(RX.unlikes_7d)} in the last 7 days. ${n(RX.likes)} Likes. Tap to see who and what they asked</small></div></div>
  <div class="asec">Library</div>
- <div class="row" style="cursor:default"><div><b>${n(j.questions_total)}</b> questions, <b>${n(j.answers_published)}</b> answers published<small>AI requests in the last 24 hours: ${n(j.gemini_today)}</small></div></div>
- <div class="asec">Project</div>
+ <div class="row" style="cursor:default"><div><b>${n(j.questions_total)}</b> questions, <b>${n(j.answers_published)}</b> answers<small>AI requests in the last 24 hours: ${n(j.gemini_today)}</small></div></div>
+ <div class="asec">Tools</div>
  <div class="row" data-g="ho"><div>Project handoff<small>Notes and files for the next Claude. Only you see this</small></div></div>
- <div class="row" data-g="rf"><div>Refresh</div></div>`;
- b.onclick=e=>{const g=e.target.closest("[data-g]")?.dataset.g;if(!g)return;if(g=="asked"||g=="stats")admGo(g);else if(g=="kb")kbRoom("open");else if(g=="vk")vkRoom("verified");else if(g=="rx")rxRoom("dislike");else if(g=="rq")voiceRoom("q","draft");else if(g=="rr")voiceRoom("r","draft");else if(g=="ho")handoff();else if(g=="rf")admHome()}}
+ <div class="row" data-g="rf"><div>Refresh this page</div></div>`;
+ b.onclick=e=>{const g=e.target.closest("[data-g]")?.dataset.g;if(!g)return;if(g=="ho")handoff();else if(g=="rf")admHome();else admGo(g)}}
 
 /* LEARNER REACTIONS: every Like / Unlike a learner tapped, with the learner's name, the question and the start of the answer. Unlikes are the ones to review first. */
 async function rxRoom(kind){
@@ -5555,16 +5358,74 @@ async function admActs(u,k){const s=++ADMSEQ,b=$("abody"),T=ACT_T.find(t=>t[0]==
 async function admPay(){const s=ADMSEQ,b=$("abody");b.innerHTML=admLd();const j=await admCall("admin_proof_list");if(s!==ADMSEQ)return;
  if(!j.ok){b.innerHTML=admFail(j,1);b.onclick=e=>{if(e.target.closest("[data-r]"))admPay()};return}
  ADMPR=j.items||[];
- b.innerHTML=`<div class="asec">Payment screenshots (${ADMPR.length})</div>`+(ADMPR.length?"":'<div style="padding:18px;color:var(--sub);line-height:1.5">No screenshots yet. Learners who pay send them from the Upgrade plans screen.</div>')
+ b.innerHTML=`<div class="asec">Old payment screenshots (${ADMPR.length})</div><div style="padding:0 18px 8px;color:var(--sub);line-height:1.5">Kept as a record only. Learners now pay with the Mobile Money prompt.</div>`+(ADMPR.length?"":'<div style="padding:18px;color:var(--sub);line-height:1.5">No old screenshots.</div>')
   +ADMPR.map((x,i)=>`<div class="row" data-i="${i}"><div style="flex:1;min-width:0"><b>${esc(x.names||x.username||"Learner")}</b><small>${esc(x.username||"")} · ${esc(x.phone||"")} · ${esc(x.plan_wanted||"")} · ${esc(new Date(x.created_at).toLocaleString())}</small></div></div>`).join("");
  b.onclick=e=>{const r=e.target.closest("[data-i]");if(r)admPayOne(ADMPR[+r.dataset.i])}}
 async function admPayOne(x){if(!x)return;const s=++ADMSEQ,b=$("abody");b.innerHTML=admLd();const j=await admCall("admin_proof_get",{p_id:x.id});if(s!==ADMSEQ)return;
- b.innerHTML=`<div class="row" data-b="1"><div>‹ Back to screenshots</div></div><div style="padding:12px 18px;line-height:1.6"><b style="font-size:18px">${esc(x.names||x.username)}</b><br>${esc(x.username||"")} · ${esc(x.phone||"")}<br><small style="color:var(--sub)">Paid for: ${esc(x.plan_wanted||"not stated")} · ${esc(new Date(x.created_at).toLocaleString())}</small></div>`
+ b.innerHTML=`<div class="row" data-b="1"><div>‹ Back to old screenshots</div></div><div style="padding:12px 18px;line-height:1.6"><b style="font-size:18px">${esc(x.names||x.username)}</b><br>${esc(x.username||"")} · ${esc(x.phone||"")}<br><small style="color:var(--sub)">Paid for: ${esc(x.plan_wanted||"not stated")} · ${esc(new Date(x.created_at).toLocaleString())}</small></div>`
   +(j.ok?`<img alt="Payment screenshot" src="${j.image}" style="display:block;width:calc(100% - 36px);margin:6px 18px;border:1px solid var(--line)">`:admFail(j))
   +`<div style="display:flex;gap:8px;padding:14px 18px 24px">${abt("set","Set plan","#00a884")}${abt("del","Delete","#d64545")}</div>`;
  b.onclick=async e=>{if(e.target.closest("[data-b]")){admPay();return}const a=e.target.closest("[data-a]")?.dataset.a;
   if(a=="del")uiConfirm("Delete this screenshot permanently? It is also removed from the database.",async()=>{const r=await admCall("admin_proof_delete",{p_id:x.id});if(r.ok)admPay();else uiAlert(admMsg(r))},"Delete");
   if(a=="set"){const f=await admCall("admin_find_users",{p_q:x.username||""});const u=f.ok&&(f.items||[]).find(i=>i.id==x.user_id);if(u)admUser(u);else uiAlert("Could not find that account.")}}}
+
+/* PAYMENTS: every Mobile Money payment saved by the momo-collections function (read only). A plan is only ever switched on by the server after MTN confirms. */
+let MMF="all",MML=[];
+const MMST={successful:["Paid","#00a884"],pending:["Waiting","#d98e04"],failed:["Not paid","#d64545"],rejected:["Declined","#d64545"],cancelled:["Cancelled","#d64545"],expired:["Expired","#d64545"]};
+async function admMomo(f){if(f)MMF=f;const s=ADMSEQ,b=$("abody");b.innerHTML=admLd();const j=await admCall("admin_momo_list");if(s!==ADMSEQ)return;
+ if(!j.ok){b.innerHTML=admFail(j,1);b.onclick=e=>{if(e.target.closest("[data-r]"))admMomo()};return}
+ MML=j.items||[];const n=admN,fm=v=>n(v).toLocaleString();
+ const sm=(j.summary||[]).map(m=>`<div class="row" style="cursor:default"><div><b>${fm(m.paid_month_total)} ${esc(m.currency)}</b> paid this month${m.environment=="sandbox"?' <span class="apl" style="background:#999">TEST</span>':""}<small>${n(m.paid_month_count)} payments this month · ${fm(m.paid_total)} ${esc(m.currency)} in total (${n(m.paid_count)} payments) · ${n(m.pending_count)} waiting · ${n(m.unpaid_count)} not paid</small></div></div>`).join("");
+ const grp=x=>x.status=="successful"?"paid":x.status=="pending"?"wait":"fail";
+ const cnt={all:MML.length,paid:0,wait:0,fail:0};MML.forEach(x=>cnt[grp(x)]++);
+ const L=MML.filter(x=>MMF=="all"||grp(x)==MMF);
+ b.innerHTML=`<div class="asec">Mobile Money summary</div>${sm||'<div style="padding:6px 18px 10px;color:var(--sub)">No payments yet.</div>'}
+ <div style="display:flex;gap:6px;padding:10px 18px 12px;overflow-x:auto">${[["all","All"],["paid","Paid"],["wait","Waiting"],["fail","Not paid"]].map(k=>svBtn(MMF==k[0],k[1]+" "+cnt[k[0]],"data-f",k[0])).join("")}</div>`
+  +(L.length?"":'<div style="padding:18px;color:var(--sub)">Nothing here.</div>')
+  +L.map((x,i)=>{const st=MMST[x.status]||[x.status,"#888"];return`<div class="row" data-i="${i}"><div style="flex:1;min-width:0"><b>${esc(x.names||x.username||"Learner")}</b><small>${esc(x.username||"")} · ${esc(x.msisdn||"")} · ${esc(x.plan)} ${esc(x.period)} · ${fm(x.amount)} ${esc(x.currency)}${x.environment=="sandbox"?" · TEST":""}</small><small>${esc(new Date(x.created_at).toLocaleString())}${x.status=="successful"&&x.plan_expires_at?" · plan until "+esc(admDate(x.plan_expires_at)):""}${x.mtn_reason&&x.status!="successful"?" · "+esc(String(x.mtn_reason).replace(/_/g," ").toLowerCase()):""}</small></div><span class="apl" style="background:${st[1]}">${st[0]}</span></div>`}).join("");
+ b.onclick=async e=>{const k=e.target.closest("[data-f]");if(k)return admMomo(k.dataset.f);const r=e.target.closest("[data-i]");if(!r)return;const x=L[+r.dataset.i];if(!x||!x.username)return;const f=await admCall("admin_find_users",{p_q:x.username});const u=f.ok&&(f.items||[]).find(i=>i.id==x.user_id);if(u)admUser(u)}}
+
+/* LIKES AND UNLIKES: what learners tapped after an answer, with the learner's name and the question */
+let RXK="dislike";
+async function admReact(k){if(k)RXK=k;const s=ADMSEQ,b=$("abody");b.innerHTML=admLd();const j=await admCall("admin_reactions",{p_kind:RXK,p_limit:100});if(s!==ADMSEQ)return;
+ if(!j.ok){b.innerHTML=admFail(j,1);b.onclick=e=>{if(e.target.closest("[data-r]"))admReact()};return}
+ const C=j.counts||{},L=j.items||[],n=admN;
+ b.innerHTML=`<div style="padding:12px 18px;color:var(--sub);line-height:1.5">After every answer learners tap Like or Unlike. Check the Unlikes first: they show what was wrong.</div>
+ <div style="display:flex;gap:6px;padding:4px 18px 12px">${svBtn(RXK=="dislike","Unlike "+n(C.unlikes),"data-kd","dislike")}${svBtn(RXK=="like","Like "+n(C.likes),"data-kd","like")}</div>`
+ +(L.length?L.map(x=>`<div class="row" style="cursor:default"><div style="flex:1;min-width:0"><b>${esc(x.asker_name||x.asker_username||"Name not recorded")}</b><small>${esc(x.asker_username||"")} · ${esc(new Date(x.created_at).toLocaleString())}</small>${x.question?`<div style="margin-top:4px;line-height:1.4">Asked: <b>“${esc(x.question)}”</b></div>`:""}${x.snippet?`<div style="margin-top:4px;color:var(--sub);font-size:13px;line-height:1.4">${esc(x.snippet)}</div>`:""}</div></div>`).join(""):`<div style="padding:18px;color:var(--sub)">${RXK=="dislike"?"No Unlikes. Nothing is reported.":"No Likes yet."}</div>`);
+ b.onclick=e=>{const k=e.target.closest("[data-kd]");if(k)admReact(k.dataset.kd)}}
+
+/* MOST ASKED: what learners ask, by subject. Subject -> every question in it -> who asked it, how they rated it and how long they read it. */
+let ASKR=30;
+const admFmtT=v=>{v=admN(v);if(!v)return"not recorded";const m=Math.floor(v/60),r=v%60;return m?m+" min"+(r?" "+r+" sec":""):r+" sec"};
+const admRng2=()=>`<div style="display:flex;gap:6px;padding:10px 18px 4px">${[[7,"7 days"],[30,"30 days"],[0,"All time"]].map(x=>svBtn(ASKR==x[0],x[1],"data-rg",x[0])).join("")}</div>`;
+const admLv=l=>l?`<span class="apl" style="background:#6b7280">${esc(l)}</span> `:"";
+const admRx=(l,u)=>`<span style="color:var(--green);font-weight:700">${admN(l)} Like${admN(l)==1?"":"s"}</span> · <span style="color:#d64545;font-weight:700">${admN(u)} Unlike${admN(u)==1?"":"s"}</span>`;
+async function admAsks(){const s=ADMSEQ,b=$("abody");b.innerHTML=admRng2()+admLd();const j=await admCall("admin_ask_stats",{p_mode:"overview",p_days:ASKR});if(s!==ADMSEQ)return;
+ b.onclick=e=>{const k=e.target.closest("[data-rg]");if(k){ASKR=+k.dataset.rg;admAsks()}};
+ if(!j.ok){b.innerHTML=admRng2()+admFail(j,1);b.onclick=e=>{const k=e.target.closest("[data-rg]");if(k){ASKR=+k.dataset.rg;admAsks()}else if(e.target.closest("[data-r]"))admAsks()};return}
+ const n=admN,SJ=j.subjects||[],TQ=j.top_questions||[],C=(l,v,sub)=>`<div class="ac"><span>${l}</span><b>${n(v)}</b><small>${sub}</small></div>`;
+ b.innerHTML=admRng2()+`<div class="ag">${C("Questions asked",j.total_asks,ASKR?"in the last "+ASKR+" days":"all time")}${C("Learners asking",j.total_learners,"different accounts")}</div>
+ <div style="padding:0 18px 4px;color:var(--sub);font-size:12px;line-height:1.4">Reading time is counted from this version of the app onward. ${n(j.read_logged)} reading times recorded so far.</div>
+ <div class="asec">Most used subjects</div>`
+ +(SJ.length?SJ.map((x,i)=>`<div class="row" data-sj="${i}"><div style="flex:1;min-width:0"><b>${admLv(x.level)}${esc(x.subject)}</b><small>${n(x.asks)} questions asked · ${n(x.questions)} different · ${n(x.learners)} learner${n(x.learners)==1?"":"s"}</small><small>${admRx(x.likes,x.unlikes)} · average reading ${admFmtT(x.avg_read_sec)}</small></div></div>`).join(""):'<div style="padding:12px 18px;color:var(--sub)">No questions in this period.</div>')
+ +`<div class="asec">Most asked questions</div>`
+ +(TQ.length?TQ.map((x,i)=>`<div class="row" data-tq="${i}"><div style="flex:1;min-width:0"><b>${esc(x.question)}</b><small>${admLv(x.level)}${esc(x.subject)} · asked ${n(x.asks)} time${n(x.asks)==1?"":"s"} by ${n(x.learners)} learner${n(x.learners)==1?"":"s"}</small><small>${admRx(x.likes,x.unlikes)} · average reading ${admFmtT(x.avg_read_sec)}</small></div></div>`).join(""):'<div style="padding:12px 18px;color:var(--sub)">Nothing yet.</div>');
+ b.onclick=e=>{const k=e.target.closest("[data-rg]");if(k){ASKR=+k.dataset.rg;admAsks();return}const a=e.target.closest("[data-sj]");if(a){const x=SJ[+a.dataset.sj];if(x)admAskSub(x.level,x.subject);return}const q=e.target.closest("[data-tq]");if(q){const x=TQ[+q.dataset.tq];if(x)admAskQ(x.key,"home",x)}}}
+async function admAskSub(lvl,sub){const s=++ADMSEQ,b=$("abody");b.innerHTML=admLd();const j=await admCall("admin_ask_stats",{p_mode:"subject",p_level:lvl||"",p_subject:sub,p_days:ASKR});if(s!==ADMSEQ)return;
+ const back='<div class="row" data-b="1"><div>‹ Back to most asked</div></div>';b.onclick=e=>{if(e.target.closest("[data-b]"))admAsks()};
+ if(!j.ok){b.innerHTML=back+admFail(j);return}
+ const L=j.items||[],n=admN;
+ b.innerHTML=back+`<div style="padding:8px 18px 4px"><b style="font-size:19px">${admLv(lvl)}${esc(sub)}</b><div style="color:var(--sub);margin-top:2px">${L.length} different question${L.length==1?"":"s"}${ASKR?" in the last "+ASKR+" days":", all time"}. Tap one to see who asked it.</div></div>`
+ +(L.length?L.map((x,i)=>`<div class="row" data-q="${i}"><div style="flex:1;min-width:0"><b>${esc(x.question)}</b><small>Asked ${n(x.asks)} time${n(x.asks)==1?"":"s"} by ${n(x.learners)} learner${n(x.learners)==1?"":"s"} · last ${esc(admDate(x.last_asked))}</small><small>${admRx(x.likes,x.unlikes)} · average reading ${admFmtT(x.avg_read_sec)}</small></div></div>`).join(""):'<div style="padding:18px;color:var(--sub)">Nothing here.</div>');
+ b.onclick=e=>{if(e.target.closest("[data-b]")){admAsks();return}const r=e.target.closest("[data-q]");if(r){const x=L[+r.dataset.q];if(x)admAskQ(x.key,"sub",{level:lvl,subject:sub,question:x.question})}}}
+async function admAskQ(key,from,ctx){const s=++ADMSEQ,b=$("abody");b.innerHTML=admLd();const j=await admCall("admin_ask_stats",{p_mode:"question",p_q:key,p_days:ASKR});if(s!==ADMSEQ)return;
+ const back=`<div class="row" data-b="1"><div>‹ Back${from=="sub"?" to "+esc(ctx.subject):" to most asked"}</div></div>`;
+ const go=()=>from=="sub"?admAskSub(ctx.level,ctx.subject):admAsks();b.onclick=e=>{if(e.target.closest("[data-b]"))go()};
+ if(!j.ok){b.innerHTML=back+admFail(j);return}
+ const L=j.items||[],n=admN,rt={like:["Liked","#00a884"],unlike:["Unliked","#d64545"]};
+ b.innerHTML=back+`<div style="padding:8px 18px 6px"><b style="font-size:18px;line-height:1.35">${esc(j.question||(ctx&&ctx.question)||"")}</b>${ctx&&ctx.subject?`<div style="color:var(--sub);margin-top:4px">${admLv(ctx.level)}${esc(ctx.subject)}</div>`:""}</div><div class="asec">Who asked it (${L.length})</div>`
+ +(L.length?L.map(x=>{const r=rt[x.rating];return`<div class="row" style="cursor:default"><div style="flex:1;min-width:0"><b>${esc(x.names||x.username||"Learner")}</b><small>${esc(x.username||"")} · asked ${n(x.times)} time${n(x.times)==1?"":"s"} · last ${esc(new Date(x.last_asked).toLocaleString())}</small><small>Reading time: ${admFmtT(x.read_sec)}</small></div><span class="apl" style="background:${r?r[1]:"#888"}">${r?r[0]:"No rating"}</span></div>`}).join(""):'<div style="padding:18px;color:var(--sub)">Nothing here.</div>');}
 
 /* ASKED: questions the app did not understand */
 async function admAsked(st){if(st)ADMAS=st;const s=ADMSEQ,b=$("abody");b.innerHTML=admLd();const j=await admCall("admin_unanswered_list",{p_status:ADMAS});if(s!==ADMSEQ)return;
@@ -5588,39 +5449,7 @@ function admAskOne(x){if(!x)return;const s=++ADMSEQ,b=$("abody");let R=[];
   const q=e.target.closest("[data-q]");if(q){const r=R[+q.dataset.q];if(r)uiConfirm("Link this question to “"+r.title+"”? Learners who ask it this way will get that answer.",()=>setSt("answered",r.id),"Link");return}
   const a=e.target.closest("[data-a]")?.dataset.a;if(a=="ds")setSt("dismissed");else if(a=="op")setSt("open")}}
 
-/* REVIEW: the existing Learner answers rooms */
-async function admReview(){const s=ADMSEQ,b=$("abody");b.innerHTML=admLd();const j=await admCall("admin_stats");if(s!==ADMSEQ)return;
- if(!j.ok){b.innerHTML=admFail(j,1);b.onclick=e=>{if(e.target.closest("[data-r]"))admReview()};return}
- const n=admN;
- const kq=await admCall("admin_pending_counts");if(s!==ADMSEQ)return;const KQ=kq.ok?kq:{open:0,promoted:0,verified:0,retired:0};
- b.innerHTML=`<div style="padding:12px 18px;color:var(--sub);line-height:1.5">Learners get their answers straight away, with no label. Here you see what they asked and decide what is kept for good: approve, edit or reject.</div>
- <div class="row" data-k="kb"><div><b>${n(KQ.open)}</b> in the verification queue<small>New AI answers are checked here. Approving needs a source. ${n(KQ.promoted)} approved</small></div></div>
- <div class="row" data-k="vk"><div><b>${n(KQ.verified)}</b> verified knowledge<small>The permanent store. Correct, retire or restore items; every version is kept. ${n(KQ.retired)} retired</small></div></div>
- <div class="row" data-k="q"><div><b>${n(j.topics_waiting)}</b> new questions waiting<small>Answers the AI wrote for questions with no saved answer. ${n(j.topics_published)} approved</small></div></div>
- <div class="row" data-k="r"><div><b>${n(j.styles_waiting)}</b> model rewrites waiting<small>Teacher, Tutor, Lecturer and the other models. ${n(j.styles_approved)} approved</small></div></div>`;
- b.onclick=e=>{const k=e.target.closest("[data-k]")?.dataset.k;if(k=="kb")kbRoom("open");else if(k=="vk")vkRoom("verified");else if(k)voiceRoom(k,"draft")}}
 
-/* AI: how each model writes */
-async function admAi(){const s=ADMSEQ,b=$("abody");b.innerHTML=admLd();const j=await admCall("admin_prompts_get");if(s!==ADMSEQ)return;
- if(!j.ok){b.innerHTML=admFail(j,1);b.onclick=e=>{if(e.target.closest("[data-r]"))admAi()};return}
- ADMPL=j.items||[];const by={};ADMPL.forEach((x,i)=>{const g=(MODELS[x.model]||{}).g||"Other";(by[g]=by[g]||[]).push(i)});
- b.innerHTML=`<div style="padding:12px 18px;color:var(--sub);line-height:1.5">Each AI model writes in its own voice. Change the instructions here to improve how a model answers. Learners get the new voice from the next rewrite. To test, ask a question in the Learner app with that model selected, then check Review.</div>`
-  +MGROUPS.concat(Object.keys(by).filter(g=>!MGROUPS.includes(g))).filter(g=>by[g]).map(g=>`<div class="asec">${esc(g)}</div>`+by[g].map(i=>{const x=ADMPL[i],ed=(x.instructions||"").trim()!=(x.default_text||"").trim();return`<div class="row" data-m="${i}"><div><b>${esc((MODELS[x.model]||{}).n||x.model)}</b><small>${ed?"Edited "+admDate(x.updated_at):"Default voice"}</small></div></div>`}).join("")).join("");
- b.onclick=e=>{const r=e.target.closest("[data-m]");if(r)admPrompt(ADMPL[+r.dataset.m])}}
-function admPrompt(x,msg){if(!x)return;ADMSEQ++;const b=$("abody"),M=MODELS[x.model]||{n:x.model,d:""};
- b.innerHTML=`<div class="row" data-b="1"><div>‹ Back to models</div></div><div style="padding:10px 18px 0;line-height:1.5"><b style="font-size:18px">${esc(M.n)}</b><br><small style="color:var(--sub)">${esc(M.d||"")}</small></div>
- <div style="padding:10px 18px 0;color:var(--sub);font-size:13px">How this model writes (40 to 1500 characters). Say who it is, how it structures the answer and how it ends.</div>
- <textarea id="apt" class="ain" style="min-height:230px;line-height:1.5;font-size:14px">${esc(x.instructions)}</textarea><div id="apc" style="padding:0 18px;color:var(--sub);font-size:12px"></div>
- <div id="apm" style="padding:8px 18px;min-height:20px;color:var(--green);font-weight:600">${esc(msg||"")}</div>
- <div style="display:flex;gap:8px;flex-wrap:wrap;padding:4px 18px 10px">${abt("sv","Save","#00a884")}${abt("rs","Back to default","#6b7280")}</div>
- <details style="padding:0 18px 24px;color:var(--sub);font-size:13px"><summary>Show the default text</summary><div style="margin-top:6px;white-space:pre-wrap">${esc(x.default_text)}</div></details>`;
- const t=$("apt"),cnt=()=>{$("apc").textContent=t.value.length+" / 1500"};cnt();t.oninput=cnt;
- b.onclick=e=>{if(e.target.closest("[data-b]")){ADMSEQ++;admAi();return}
-  const a=e.target.closest("[data-a]")?.dataset.a,m=$("apm");if(!a)return;
-  if(a=="sv"){const v=t.value.trim();if(v.length<40||v.length>1500){m.style.color="#e03131";m.textContent="Write between 40 and 1500 characters.";return}
-   m.style.color="var(--green)";m.textContent="Saving…";
-   admCall("admin_prompt_set",{p_model:x.model,p_text:v}).then(j=>{if(j.ok){x.instructions=v;m.textContent="Saved. Learners get this voice from the next rewrite."}else{m.style.color="#e03131";m.textContent=j.err=="bad text"?"Write between 40 and 1500 characters.":admMsg(j)}})}
-  else if(a=="rs")uiConfirm("Go back to the default text for "+M.n+"?",async()=>{const j=await admCall("admin_prompt_reset",{p_model:x.model});if(j.ok){x.instructions=x.default_text;admPrompt(x,"Back to the default voice.")}else uiAlert(admMsg(j))},"Reset")}}
 
 /* PROJECT HANDOFF > Files (owner only, kept in the database, not in this page) */
 async function hoFiles(){const j=await admCall("admin_file_list"),el=$("hof");if(!el)return;
@@ -6287,7 +6116,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden)spPoll()})
 
 /* admin: Inbox tab */
 let SPL=[];
-function admInboxBadge(n){const b=document.querySelector('#adm .an button[data-t="inbox"]');if(b)b.innerHTML="Inbox"+(n>0?'<i class="spn">'+n+'</i>':"")}
+function admInboxBadge(n){ADMUNR=+n||0;admBadge()}
 async function admPollUn(){if(!ADMON)return;const j=await admCall("admin_support_unread");if(j.ok)admInboxBadge(+j.n||0)}
 setInterval(()=>{try{admPollUn()}catch(e){}},20000);
 async function admInbox(){

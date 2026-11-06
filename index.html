@@ -324,6 +324,22 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 #permGate .pm-help.on{display:block}
 #permGate .pm-help b{display:block;margin-bottom:4px}
 
+
+.md .mv,.md .ml{white-space:normal;overflow-wrap:anywhere}
+.md .mb{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.md .mlab{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:.74em;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--green);margin-top:.35em}
+.md .mlab:first-child,.md .mb>.mr:first-child .mlab{margin-top:0}
+.md li{margin:5px 0;line-height:1.5}
+.md li>.mb{margin:4px 0 6px}
+.md .sub{margin:3px 0 3px 2px;color:inherit;opacity:.92}
+.md li>b:first-child{display:inline}
+
+/* Ask Tr. David name: bold + 2px bigger everywhere */
+#nm{font-weight:800!important;font-size:19px!important}
+.pg-name{font-weight:900!important;font-size:36px!important}
+.hnm{font-weight:800!important;font-size:24px!important}
+#spl .sn{font-weight:900!important;font-size:34px!important}
+.atd{font-weight:800;font-size:calc(1em + 2px)}
 </style></head><body>
 <button id="pwaInstallBtn" title="Install App" style="display:none;position:fixed;right:18px;bottom:calc(120px + env(safe-area-inset-bottom));z-index:999;width:52px;height:52px;border-radius:50%;background:#0000b9;color:#fff;border:none;box-shadow:0 6px 18px rgba(0,0,185,.4);align-items:center;justify-content:center;cursor:pointer;">
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -1769,7 +1785,48 @@ let stream=null,sm=null,stamps=[];
 /* ===== MATHS FORMATTING: fractions, powers, roots, units, UGX. Works on text that is already HTML-escaped. ===== */
 const MG=n=>String(n).replace(/\B(?=(\d{3})+(?!\d))/g,",");
 const EL=new Set("H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Mn Fe Cu Zn Br Ag Sn I Ba Au Hg Pb Cr Ni Co".split(" "));
-function chem(x){return x.replace(/(?<![A-Za-z\d&;])((?:[A-Z][a-z]?\d*|\((?:[A-Z][a-z]?\d*)+\)\d*){2,})(?![A-Za-z])/g,a=>{const t=a.match(/[A-Z][a-z]?/g)||[];if(!/\d/.test(a)||t.length<2||!t.every(e=>EL.has(e)))return a;return a.replace(/(\)|[A-Za-z])(\d+)/g,"$1<sub>$2</sub>")}).replace(/(?<![A-Za-z\d])(O|N|H|Cl|Br|I|F)2(?![A-Za-z\d])/g,"$1<sub>2</sub>")}
+function chem(x){return x.replace(/(?<![A-Za-z&;]|\d\d|[.,]\d)((?:[A-Z][a-z]?\d*|\((?:[A-Z][a-z]?\d*)+\)\d*){2,})(?![A-Za-z])/g,a=>{const t=a.match(/[A-Z][a-z]?/g)||[];if(!/\d/.test(a)||t.length<2||!t.every(e=>EL.has(e)))return a;return a.replace(/(\)|[A-Za-z])(\d+)/g,"$1<sub>$2</sub>")}).replace(/(?<![A-Za-z]|\d\d|[.,]\d)(O|N|H|Cl|Br|I|F)2(?![A-Za-z\d])/g,"$1<sub>2</sub>")}
+
+/* ===== ANSWER CLEAN-UP: raw LaTeX / bullets / formula lines become clear, readable working (all subjects) ===== */
+const TXG={alpha:"\u03b1",beta:"\u03b2",gamma:"\u03b3",delta:"\u03b4",Delta:"\u0394",theta:"\u03b8",lambda:"\u03bb",mu:"\u03bc",omega:"\u03c9",Omega:"\u03a9",rho:"\u03c1",sigma:"\u03c3",Sigma:"\u03a3",phi:"\u03c6",epsilon:"\u03b5",eta:"\u03b7",tau:"\u03c4",Pi:"\u03a0"};
+function texClean(x){
+ if(x.indexOf("\\")<0&&x.indexOf("->")<0&&x.indexOf("<=>")<0)return x;
+ x=x.replace(/\\(?:dfrac|tfrac)\b/g,"\\frac").replace(/\\\\(?:\[[^\]]*\])?/g,"\n").replace(/\\begin\{[a-z*]+\}(?:\{[^}]*\})?|\\end\{[a-z*]+\}|\\hline/g,"").replace(/&=/g,"=").replace(/(?<=\S)\s*&\s*(?=[=<>+\u2212-])/g," ");
+ const BR="(?:[^{}]|\\{[^{}]*\\})*";
+ const rx=new RegExp("\\\\(?:text|textbf|textit|textrm|mathrm|mathbf|mathit|mathsf|operatorname|mbox|rm|boxed|underline|overline|bar|ce)\\{("+BR+")\\}","g");
+ for(let i=0;i<4&&rx.test(x);i++){rx.lastIndex=0;x=x.replace(rx,"$1")}
+ x=x.replace(/\^\s*\{?\\circ\}?/g,"\u00b0").replace(/\\circ\b/g,"\u00b0").replace(/\\degree\b/g,"\u00b0")
+  .replace(/\\(?:longrightarrow|rightarrow|to)\b/g,"\u2192").replace(/\\(?:leftarrow)\b/g,"\u2190").replace(/\\(?:Rightarrow|implies)\b/g,"\u21d2")
+  .replace(/\\(?:rightleftharpoons|leftrightarrow|leftrightharpoons)\b/g,"\u21cc").replace(/\\uparrow\b/g,"\u2191").replace(/\\downarrow\b/g,"\u2193")
+  .replace(/\\approx\b/g,"\u2248").replace(/\\pm\b/g,"\u00b1").replace(/\\infty\b/g,"\u221e").replace(/\\propto\b/g,"\u221d").replace(/\\equiv\b/g,"\u2261").replace(/\\angle\b/g,"\u2220").replace(/\\triangle\b/g,"\u25b3").replace(/\\perp\b/g,"\u22a5").replace(/\\parallel\b/g,"\u2225")
+  .replace(/\\(alpha|beta|gamma|delta|Delta|theta|lambda|mu|omega|Omega|rho|sigma|Sigma|phi|epsilon|eta|tau|Pi)\b/g,(a,k)=>TXG[k])
+  .replace(/\\(?:quad|qquad)\b/g,"  ").replace(/\\[,;:!]/g," ").replace(/\\ /g," ").replace(/\\%/g,"%").replace(/\\([{}_#&])/g,"$1");
+ x=x.replace(/ ?<=> ?/g," \u21cc ").replace(/ ?-> ?/g," \u2192 ");
+ return x}
+const TEXLIKE=/\\(?:text|frac|dfrac|times|div|sqrt|rightarrow|to|Delta|cdot|ce|mathrm|begin|boxed)\b/;
+/* turn $$..$$, \[..\], \(..\), nested bullets, "- Label: $$formula$$" into clean lines the renderer understands */
+function mdPrep(t){
+ t=String(t||"");
+ t=t.replace(/\\\[([\s\S]*?)\\\]/g,(a,b)=>"$$"+b.replace(/\n+/g," ").trim()+"$$").replace(/\\\(([\s\S]*?)\\\)/g,(a,b)=>"$"+b.trim()+"$");
+ t=t.replace(/\$\$([\s\S]*?)\$\$/g,(a,b)=>"$$"+b.replace(/\n+/g," ").trim()+"$$");
+ t=texClean(t.replace(/[\u2022\u25cf\u25aa\u2013](?=\s)/g,m=>m=="\u2013"?m:"-"));
+ const out=[];
+ String(t).split("\n").forEach(raw=>{
+  let m=raw.match(/^(\s*)(?:[-*\u2022]\s+|(\d+)[.)]\s+)?(.*)$/),ind=m[1],num=m[2],body=m[3],had=/^\s*(?:[-*\u2022]|\d+[.)])\s/.test(raw);
+  if(/^\s*[-*\u2022]\s*$/.test(raw))return;
+  const pre=(had?(num?num+". ":"- "):"");
+  const dd=body.match(/^(.*?)\$\$\s*(.+?)\s*\$\$\s*(.*)$/);
+  if(dd){const bf=dd[1].trim(),mt=dd[2].trim(),af=dd[3].trim();
+   const lab=bf.match(/^(.{1,40}?):$/);
+   if(lab)out.push(ind+":: "+lab[1]+": "+mt);
+   else{if(bf)out.push(ind+pre+bf);out.push(ind+":: "+mt)}
+   if(af)out.push(ind+af);return}
+  if(!/\$/.test(body)&&TEXLIKE.test(raw)&&/[=\u2192]/.test(body)&&body.length<=140){
+   const lab=body.match(/^([A-Za-z][A-Za-z ]{1,24}):\s+(.+)$/);
+   if(lab&&/[=\u2192]/.test(lab[2])){out.push(ind+":: "+lab[1]+": "+lab[2]);return}
+   if((body.match(/[A-Za-z]{4,}/g)||[]).length<=8){out.push(ind+":: "+body);return}}
+  out.push(raw)});
+ return out.join("\n")}
 function mthLite(x){
  x=x.replace(/\b(?:U?Shs?|USh|Ugx)\.?\s*(?=\d)/g,"UGX ").replace(/\bUGX\s?(\d{4,})(?![\d,.])/g,(a,n)=>"UGX "+MG(n));
  x=x.replace(/\\(?:left|right)\b/g,"").replace(/\\times\b/g,"\u00d7").replace(/\\div\b/g,"\u00f7").replace(/\\cdot\b/g,"\u00b7").replace(/\\pi\b/g,"\u03c0").replace(/\\therefore\b/g,"\u2234").replace(/\\(?:le|leq)\b/g,"\u2264").replace(/\\(?:ge|geq)\b/g,"\u2265").replace(/\\neq?\b/g,"\u2260");
@@ -1785,11 +1842,14 @@ function mth(x){
  x=x.replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g,"($1)/($2)");
  x=x.replace(/\(([^()]+)\)\/\(([^()]+)\)/g,'<span class="fr"><span class="nu">$1</span><span class="de">$2</span></span>');
  x=x.replace(new RegExp("(?<![\\w.\\/>])("+N+"|"+V+")\\/("+N+"|"+V+")(?![\\w\\/<])","g"),(a,n,d)=>/^[a-z]$/.test(n)&&/^[a-z]$/.test(d)?a:'<span class="fr"><span class="nu">'+n+'</span><span class="de">'+d+'</span></span>');
- x=x.replace(/ - /g," \u2212 ").replace(/_(\{[^}]+\}|\w+)/g,(a,e)=>"<sub>"+e.replace(/^\{|\}$/g,"")+"</sub>").replace(/\bpi\b/g,"\u03c0");
+ x=x.replace(/ - /g," \u2212 ").replace(/_(\{[^}]+\}|\d+|[A-Za-z](?![A-Za-z]))/g,(a,e)=>"<sub>"+e.replace(/^\{|\}$/g,"")+"</sub>").replace(/\bpi\b/g,"\u03c0");
  return x}
-function mrow(l){let lb="";const lm=l.match(/^([A-Za-z][A-Za-z ]{2,24}):\s+(.*)$/);if(lm){lb='<div class="mr"><span class="mf"><i>'+lm[1]+':</i></span></div>';l=lm[2]}
- const q=l.match(/^(?:(.*?)\s)?=\s(.*)$/);
- if(q)return lb+'<div class="mr"><span class="ml">'+mth(q[1]||"")+'</span><span class="me">=</span><span class="mv">'+mth(q[2])+'</span></div>';
+function mrow(l){let lb="";const lm=l.match(/^([A-Za-z][A-Za-z ]{2,24}):\s+(.*)$/);if(lm){lb='<div class="mr"><span class="mf mlab">'+lm[1]+'</span></div>';l=lm[2]}
+ const P=l.split(/\s=\s/);
+ if(P.length>=2){let h=lb+'<div class="mr"><span class="ml">'+mth(P[0])+'</span><span class="me">=</span><span class="mv">'+mth(P[1])+'</span></div>';
+  for(let i=2;i<P.length;i++)h+='<div class="mr"><span class="ml"></span><span class="me">=</span><span class="mv">'+mth(P[i])+'</span></div>';return h}
+ const q=l.match(/^=\s(.*)$/);
+ if(q)return lb+'<div class="mr"><span class="ml"></span><span class="me">=</span><span class="mv">'+mth(q[1])+'</span></div>';
  return lb+'<div class="mr"><span class="mf">'+mth(l)+'</span></div>'}
 /* ===== DIAGRAMS: labelled SVG pictures drawn inside answers (any subject, any model) =====
    1) The app draws a ready diagram when the question is about it (DG library below).
@@ -2203,25 +2263,29 @@ function dgHtml(k){if(k=="@wait")return'<div class="dgw">Drawing the diagram…<
 function dgAuto(m){try{if(!m||m.stream||m.note||m.err||m.lim||m.quiz||!m.t||/::fig |<svg|```svg/.test(m.t))return"";
  const q=String(m.q||""),hd=(String(m.t).match(/^#\s*(.+)$/m)||[])[1]||"",tp=String(m.tq||"");
  for(const pass of[q,hd,tp])if(pass)for(const k in DG)if(DG[k].re.test(pass))return dgHtml(k)}catch(e){}return""}
-function md(t){t=dgPre(t);t=esc(t);let o="",m=null,tb=[];
+function md(t){t=dgPre(t);t=mdPrep(t);t=esc(t);let o="",m=null,tb=[],li=false,cm=false;
  const cl=()=>{if(m=="table"){const R=tb;tb=[];let h="";R.forEach((r,k)=>{const hd=r.hd;h+="<tr>"+r.c.map(c=>{const num=/^[-+]?(UGX\s)?[\d,.\s]+(%|\s?[a-zA-Z\u00b2\u00b3\/]{0,4})?$/.test(mthLite(c).replace(/<[^>]+>/g,"").trim())&&!hd;return"<"+(hd?"th":"td")+(num?' class="nm"':"")+">"+il(c)+"</"+(hd?"th":"td")+">"}).join("")+"</tr>"});o+='<div class="tw"><table>'+h+"</table></div>";m=null;return}
   if(m=="mb"){o+="</div>";m=null;return}
-  if(m){o+="</"+m+">";m=null}},
+  if(m){if(cm){o+="</div>";cm=false}if(li){o+="</li>";li=false}o+="</"+m+">";m=null}},
  il=x=>{const S=[],IT=h=>h.split(/(<[^>]+>)/).map((q,i)=>i%2?q:q.replace(/(?<![A-Za-z\u00a0])([a-zA-Z])(?![A-Za-z])/g,"<i>$1</i>")).join("");
   x=x.replace(/\$(?=\S)[^$\n]*=[^$\n]*\S\$(?:\s*(?:,\s*and|and|,|;)\s*\$(?=\S)[^$\n]*=[^$\n]*\S\$)+\.?/g,m0=>{const R=(m0.match(/\$(?=\S)([^$\n]*?\S)\$/g)||[]).map(z=>z.slice(1,-1).trim());S.push('<span class="mb">'+IT(R.map(q=>mrow(q)).join("").replace(/<div class="mr">/g,'<span class="mr">').replace(/<\/div>/g,"</span>"))+"</span>");return"\u0001"+(S.length-1)+"\u0001"});
   x=x.replace(/\$(?=\S)([^$\n]*?\S)\$/g,(m0,e)=>{const h=IT(mth(e.trim()));S.push('<span class="mi">'+h+"</span>");return"\u0001"+(S.length-1)+"\u0001"});
   return mthLite(x).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/`(.+?)`/g,"<code>$1</code>").replace(/\u0001(\d+)\u0001/g,(m0,i)=>S[i])};
  const lines=t.split("\n");
- for(let k=0;k<lines.length;k++){const l=lines[k];
+ for(let k=0;k<lines.length;k++){const raw=lines[k],ind=(raw.match(/^[ \t]*/)[0].replace(/\t/g,"  ")).length,l=raw.trim()?raw.replace(/^[ \t]+/,""):"";
   if(/^\|/.test(l)){if(/^\|[-| :]+\|?$/.test(l)){if(tb.length==1)tb[0].hd=true;continue}if(m!="table"){cl();m="table"}tb.push({c:l.split("|").slice(1,-1).map(c=>c.trim()),hd:false});continue}
   const fg=l.match(/^::fig (\S+)$/);if(fg){cl();o+=dgHtml(fg[1]);continue}
   const dd=l.match(/^::diagram (.{3,600})$/);if(dd){cl();o+='<figure class="dg"><figcaption style="text-align:left;font-weight:400">'+"<b>Diagram to draw:</b> "+il(dd[1])+"</figcaption></figure>";continue}
   const mm=l.match(/^::\s?(.*)$/)||l.match(/^\$\$\s*(.+?)\s*\$\$$/);
-  if(mm){if(m!="mb"){cl();o+='<div class="mb">';m="mb"}o+=mrow(mm[1]);continue}
-  const b=l.match(/^(\d+)\. (.*)/),u=l.match(/^- (.*)/);
-  if(b){if(m!="ol"){cl();o+="<ol>";m="ol"}o+="<li>"+il(b[2])+"</li>"}
-  else if(u){if(m!="ul"){cl();o+="<ul>";m="ul"}o+="<li>"+il(u[1])+"</li>"}
-  else{cl();if(/^## /.test(l))o+="<h4>"+il(l.slice(3))+"</h4>";else if(/^# /.test(l))o+="<h3>"+il(l.slice(2))+"</h3>";else if(/^\*\*(Final answer|Answer|Therefore)\b/i.test(l))o+='<div class="ans">'+il(l)+"</div>";else if(l.trim())o+="<p>"+il(l)+"</p>"}}
+  if(mm){
+   if(ind>0&&(m=="ul"||m=="ol")&&li){if(!cm){o+='<div class="mb">';cm=true}o+=mrow(mm[1]);continue}
+   if(m!="mb"){cl();o+='<div class="mb">';m="mb"}o+=mrow(mm[1]);continue}
+  if(!l&&(m=="ul"||m=="ol")){let j=k+1;while(j<lines.length&&!lines[j].trim())j++;if(j<lines.length&&(/^\s+\S/.test(lines[j])||/^\s*(?:[-*]|\d+[.)]) /.test(lines[j])||/^\s*::/.test(lines[j])))continue}
+  const b=l.match(/^(\d+)[.)] (.*)/),u=l.match(/^[-*] (.*)/);
+  if((b||u)&&ind==0&&/^\*\*(Final answer|Answer|Therefore)\b/i.test((b||u)[b?2:1])){cl();o+='<div class="ans">'+il((b||u)[b?2:1])+"</div>";continue}
+  if(ind>0&&(m=="ul"||m=="ol")&&li&&l){if(cm){o+="</div>";cm=false}o+=u?'<div class="sub">\u2022 '+il(u[1])+"</div>":b?'<div class="sub">'+b[1]+". "+il(b[2])+"</div>":'<div class="sub">'+il(l)+"</div>";continue}
+  if(b||u){const ty=b?"ol":"ul";if(m!=ty){cl();o+="<"+ty+">";m=ty}if(cm){o+="</div>";cm=false}if(li)o+="</li>";o+="<li>"+il((b||u)[b?2:1]);li=true}
+  else{cl();if(/^#{3,} /.test(l))o+="<h4>"+il(l.replace(/^#+ /,""))+"</h4>";else if(/^## /.test(l))o+="<h4>"+il(l.slice(3))+"</h4>";else if(/^# /.test(l))o+="<h3>"+il(l.slice(2))+"</h3>";else if(/^\*\*(Final answer|Answer|Therefore)\b/i.test(l))o+='<div class="ans">'+il(l)+"</div>";else if(l.trim())o+="<p>"+il(l)+"</p>"}}
  cl();return o}
 /* ===== WORKED SOLUTIONS: real step-by-step working, shown in full at once ===== */
 const gcd=(a,b)=>{a=Math.abs(a);b=Math.abs(b);while(b){const t=a%b;a=b;b=t}return a};
@@ -5928,11 +5992,12 @@ function run(){
  rec.onerror=e=>{
   if(e.error=="not-allowed"||e.error=="service-not-allowed"){stop();uiAlert("Please allow microphone access for this app in your phone settings.")}
   else if(e.error=="network"){stop();uiAlert("Voice needs an internet connection.")}
+  else if(e.error=="audio-capture"){stop();uiAlert("The microphone is busy or not available. Close other apps that use it and try again.")}
   else if(e.error=="language-not-supported"){const k=lang();stop();uiAlert(NAME[k]+" voice is not supported on this phone. You can change the voice language in Settings.")}};
  rec.onend=()=>{if(!on)return;commit();paint();
   if(Date.now()-t0<1500)quick++;else quick=0;
-  if(quick>=3||Date.now()-last>9000){stop();return}
-  setTimeout(()=>{if(on)try{run()}catch(e){stop()}},quick?600:150)};
+  /* Listening ends ONLY when the learner taps the mic again or taps send. If the phone closes its listening by itself (it does after quiet moments), the app opens it again at once and keeps the words already said. */
+  setTimeout(()=>{if(on)try{run()}catch(e){stop()}},quick>=6?1500:quick>=3?600:100)};
  try{rec.start()}catch(e){stop()}}
 function start(){
  if(stream!=null)return;
@@ -6222,10 +6287,30 @@ function admUsers(){const s=ADMSEQ,b=$("abody");
  const run=async()=>{const my=++tk,q=$("auq")?$("auq").value.trim():"";ADMUQ=q;const j=await admCall("admin_find_users",{p_q:q});if(my!==tk||s!==ADMSEQ)return;const L=$("aul");if(!L)return;
   if(!j.ok){L.innerHTML=admFail(j);return}
   ADMUL=j.items||[];
-  L.innerHTML=(ADMUL.length?"":'<div style="padding:18px;color:var(--sub)">No accounts found.</div>')+ADMUL.map((u,i)=>`<div class="row" data-u="${i}"><div style="flex:1;min-width:0"><b>${esc(u.names)}</b><small>${esc(u.username)} · ${esc(u.phone)}</small></div><span class="apl" style="background:${PCOL[u.plan]||"#888"}">${esc(u.plan)}</span></div>`).join("")};
+  L.innerHTML=(ADMUL.length?"":'<div style="padding:18px;color:var(--sub)">No accounts found.</div>')+ADMUL.map((u,i)=>`<div class="row" data-u="${i}"><div style="flex:1;min-width:0"><b>${esc(u.names)}</b><small>${esc(u.username)} · ${esc(u.phone)}${u.free_blocked?" · free days off":""}${u.ref_blocked?" · referral off":""}</small></div><span class="apl" style="background:${PCOL[u.plan]||"#888"}">${esc(u.plan)}</span></div>`).join("")};
  $("auq").oninput=()=>{clearTimeout(tm);tm=setTimeout(run,350)};
  b.onclick=e=>{const r=e.target.closest("[data-u]");if(r)admUser(ADMUL[+r.dataset.u])};
  run()}
+
+/* PER-LEARNER ACCESS: the three ways a learner gets a plan, each controlled for this one learner only.
+   1) Subscription (set or revoke in the Plan list above)  2) Free-days plan  3) Referral plan (saved days; they freeze while disabled). */
+async function admAccess(u,seq){const j=await admCall("admin_user_access",{p_user:u.id});if(seq!==ADMSEQ)return;const e=$("aax");if(!e)return;
+ if(!j.ok){e.innerHTML=admFail(j);return}
+ u.free_blocked=!!j.free_blocked;u.ref_blocked=!!j.ref_blocked;
+ const dt=d=>{try{return new Date(d).toLocaleString()}catch(x){return""}},days=Math.floor(Number(j.bonus_secs||0)/86400),hrs=Math.floor((Number(j.bonus_secs||0)%86400)/3600);
+ const src=j.bonus_until?"the <b>Referral plan</b> (until "+esc(dt(j.bonus_until))+")":j.free_access?"the <b>Free-days plan</b> (until "+esc(dt(j.free_access.ends_at))+")":j.plan!="Free"?"the <b>Subscription</b>"+(j.plan_expires_at?" (ends "+esc(dt(j.plan_expires_at))+")":" (no expiry)"):"the <b>Free plan</b> only";
+ const bt=(k,on,l,c)=>'<button data-bk="'+k+'" data-on="'+on+'" style="padding:9px 16px;border:0;border-radius:18px;font:inherit;font-weight:700;cursor:pointer;color:#fff;background:'+c+';flex:none">'+l+'</button>';
+ const row=(t,st,b)=>'<div class="row" style="cursor:default;align-items:center"><div style="flex:1;min-width:0"><b>'+t+'</b><small>'+st+'</small></div>'+b+'</div>';
+ e.innerHTML='<div style="padding:4px 18px 8px;line-height:1.5">Right now '+esc(u.names)+' has <b>'+esc(j.effective)+'</b> from '+src+'.</div>'
+  +row("Subscription",j.plan!="Free"?esc(j.plan)+(j.plan_expires_at?" · ends "+esc(dt(j.plan_expires_at)):" · no expiry"):"None (Free plan)",j.plan!="Free"?'<button data-rv="1" style="padding:9px 16px;border:0;border-radius:18px;font:inherit;font-weight:700;cursor:pointer;color:#fff;background:#d93025;flex:none">Revoke</button>':"")
+  +row("Free-days plan",j.free_blocked?"<span style=\"color:#d93025;font-weight:700\">Disabled for this learner</span>":"Allowed (when you schedule free days)",j.free_blocked?bt("free",0,"Allow","#00a884"):bt("free",1,"Disable","#d93025"))
+  +row("Referral plan",(j.ref_blocked?"<span style=\"color:#d93025;font-weight:700\">Disabled for this learner</span> · ":"Allowed · ")+(days||hrs?days+" days "+hrs+" h saved":"no saved days"),j.ref_blocked?bt("referral",0,"Allow","#00a884"):bt("referral",1,"Disable","#d93025"))
+  +'<div style="padding:8px 18px;color:var(--sub);font-size:13px;line-height:1.4">These only change this one learner. Disabling the referral plan freezes the saved days, and they continue when you allow it again. To put the learner on any plan you want, tap that plan in the Plan list above.</div>'}
+function admBlock(u,k,on){const nm=k=="free"?"Free-days plan":"Referral plan";
+ uiConfirm((on?"Disable the "+nm+" for ":"Allow the "+nm+" for ")+u.username+"?"+(on?" Other learners are not affected.":""),async()=>{
+  const j=await admCall("admin_set_user_block",{p_user:u.id,p_kind:k,p_on:on});
+  if(j.ok){if(k=="free")u.free_blocked=on;else u.ref_blocked=on;if(u.username==="DAVID")syncPlan();admUser(u);const m=$("aum");if(m)m.textContent=nm+(on?" disabled":" allowed")+" for "+u.names+"."}
+  else uiAlert(admMsg(j))},on?"Disable":"Allow")}
 const admDur=h=>h%720==0?(h/720==1?"30 days":(h/24)+" days"):h%168==0?(h/168==1?"1 week":(h/168)+" weeks"):h%24==0?(h/24==1?"24 hours (daily)":(h/24)+" days"):h+(h==1?" hour":" hours");
 function admUser(u){if(!u)return;ADMSEQ++;const b=$("abody");
  const apply=async(p,h)=>{const j=await admCall("admin_set_plan_timed",{p_user:u.id,p_plan:p,p_hours:h||null});
@@ -6243,9 +6328,11 @@ function admUser(u){if(!u)return;ADMSEQ++;const b=$("abody");
  const ex=u.plan!="Free"&&u.plan_expires_at?"Ends "+new Date(u.plan_expires_at).toLocaleString():(u.plan!="Free"?"No expiry":"");
  b.innerHTML=`<div class="row" data-b="1"><div>‹ Back to users</div></div><div style="padding:12px 18px;line-height:1.6"><b style="font-size:18px">${esc(u.names)}</b><br>${esc(u.username)} · ${esc(u.phone)}<br><small style="color:var(--sub)">Joined ${admDate(u.created_at)}</small></div><div class="asec">Activity</div><div id="aus">${admLd()}</div><div class="asec">Plan</div>`
   +PLANS4.map(p=>`<div class="row" data-p="${p}"><span style="width:10px;height:10px;border-radius:50%;background:${PCOL[p]};flex:none"></span><div><b>${p}</b>${p==u.plan?"<small>Current plan"+(ex?" · "+ex:"")+"</small>":""}</div></div>`).join("")
-  +'<div style="padding:8px 18px;color:var(--sub);font-size:13px;line-height:1.4">Tap a paid plan to choose how long it lasts. It ends by itself when the time is over.</div><div id="aum" style="padding:6px 18px 10px;color:var(--green);font-weight:600;min-height:20px"></div>';
- admUserStats(u,ADMSEQ);
- b.onclick=e=>{if(e.target.closest("[data-b]")){ADMSEQ++;admUsers();return}const kk=e.target.closest("[data-k]")?.dataset.k;if(kk){admActs(u,kk);return}const p=e.target.closest("[data-p]")?.dataset.p;if(!p)return;
+  +'<div style="padding:8px 18px;color:var(--sub);font-size:13px;line-height:1.4">Tap a paid plan to choose how long it lasts. It ends by itself when the time is over.</div><div id="aum" style="padding:6px 18px 10px;color:var(--green);font-weight:600;min-height:20px"></div><div class="asec">Where this learner gets access</div><div id="aax">'+admLd()+'</div>';
+ admUserStats(u,ADMSEQ);admAccess(u,ADMSEQ);
+ b.onclick=e=>{if(e.target.closest("[data-b]")){ADMSEQ++;admUsers();return}const kk=e.target.closest("[data-k]")?.dataset.k;if(kk){admActs(u,kk);return}
+  const bk=e.target.closest("[data-bk]");if(bk){admBlock(u,bk.dataset.bk,bk.dataset.on=="1");return}
+  if(e.target.closest("[data-rv]")){uiConfirm("Revoke the subscription of "+u.username+"? They go back to the Free plan.",()=>apply("Free",0),"Revoke");return}const p=e.target.closest("[data-p]")?.dataset.p;if(!p)return;
   if(p=="Free"){if(u.plan!="Free")uiConfirm("Change "+u.username+" to the Free plan?",()=>apply("Free",0),"Change plan")}else pick(p)}}
 
 /* USER ACTIVITY: counts shown at once on the user screen; tap a count to see what the learner did. Counts start from the day this was published. */
@@ -7393,6 +7480,30 @@ window.addEventListener("online",()=>{if(tk())pull()});
 window.addEventListener("pagehide",()=>{if(ready&&dirty)push()});
 setInterval(()=>{if(!tk()||document.hidden)return;if(!ready)pull();else if(dirty)push();else if(Date.now()-lastPull>45000)pull()},15000);
 window.__sync={pull,push,snap,mergeIn,state:()=>({ready,dirty,serverAt})};
+})();
+</script>
+<script>
+/* Ask Tr. David: wrap every visible mention so it is bold and 2px larger, including text added later (chat, pages, toasts) */
+(function(){var RE=/Ask (?:Tr\.?|Teacher) David/g,TST=/Ask (?:Tr\.?|Teacher) David/,SKIP=/^(SCRIPT|STYLE|TEXTAREA|INPUT|TITLE|NOSCRIPT|OPTION)$/,NO="#nm,.hnm,.pg-name,#spl,.atd";
+function ok(n){var p=n.parentNode;if(!p||SKIP.test(p.nodeName)||p.isContentEditable)return false;if(p.closest&&p.closest(NO))return false;return TST.test(n.nodeValue)}
+function wrap(root){if(!root)return;var L=[];if(root.nodeType===3){if(ok(root))L.push(root)}else if(root.nodeType===1){if(SKIP.test(root.nodeName))return;var w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:function(n){return ok(n)?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT}}),n;while(n=w.nextNode())L.push(n)}
+ L.forEach(function(n){var f=document.createDocumentFragment(),s=n.nodeValue,i=0,m;RE.lastIndex=0;while(m=RE.exec(s)){if(m.index>i)f.appendChild(document.createTextNode(s.slice(i,m.index)));var sp=document.createElement("span");sp.className="atd";sp.textContent=m[0];f.appendChild(sp);i=m.index+m[0].length}if(i<s.length)f.appendChild(document.createTextNode(s.slice(i)));if(n.parentNode)n.parentNode.replaceChild(f,n)})}
+var q=[],t=0;function run(){t=0;var a=q;q=[];a.forEach(wrap)}
+function go(x){q.push(x);if(!t)t=requestAnimationFrame(run)}
+try{new MutationObserver(function(ms){ms.forEach(function(m){if(m.type==="characterData")go(m.target);else m.addedNodes.forEach(function(n){go(n)})})}).observe(document.body,{childList:true,subtree:true,characterData:true})}catch(e){}
+
+/* Notifications: phones draw them in their own font, so the name is written in bold letters (size cannot be changed there) */
+(function(){try{
+var RE=/Ask (?:Tr\.?|Teacher) David/g;
+function B(s){return typeof s==="string"?s.replace(RE,function(m){return Array.from(m).map(function(c){var k=c.charCodeAt(0);return k>=65&&k<=90?String.fromCodePoint(0x1D5D4+k-65):k>=97&&k<=122?String.fromCodePoint(0x1D5EE+k-97):c}).join("")}):s}
+function O(o){if(o&&typeof o==="object"&&o.body){o=Object.assign({},o);o.body=B(o.body)}return o}
+if(window.Notification&&!window.Notification.__atd){var NB=window.Notification;
+ var N2=class extends NB{constructor(t,o){super(B(t),O(o))}};N2.__atd=1;window.Notification=N2}
+if(window.ServiceWorkerRegistration){var P=ServiceWorkerRegistration.prototype,sn=P.showNotification;
+ if(sn&&!sn.__atd){P.showNotification=function(t,o){return sn.call(this,B(t),O(o))};P.showNotification.__atd=1}}
+}catch(e){}})();
+function init(){wrap(document.body)}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 })();
 </script>
 </body></html>

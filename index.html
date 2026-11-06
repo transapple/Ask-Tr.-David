@@ -340,6 +340,11 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 .hnm{font-weight:800!important;font-size:22px!important}
 #spl .sn{font-weight:900!important;font-size:32px!important}
 .atd{font-weight:800;font-size:1em}
+/* exam task cards: keep every panel and note inside the card border */
+.exq .ext,.exa,.exe,.exm{display:flow-root;overflow-wrap:anywhere}
+.b .exa small,.b .exe small,.b .exm small,#ap .b .exa small,#ap .b .exe small,#ap .b .exm small{float:none;display:block;margin:6px 0 0}
+.exq .exn,#ap .exq .exn{display:block;float:none;clear:both;margin-top:10px;padding-top:7px;border-top:1px solid var(--line);font-size:11.5px;line-height:1.4;color:var(--sub)}
+.exa p{margin:4px 0 0}.exm .exs,.exe .exs{margin:0 0 9px}.exm .exs:last-child,.exe .exs:last-child{margin-bottom:0}.exm .exs b,.exe .exs b{display:block;margin-bottom:2px}.exm ol,.exm ul{margin:3px 0 3px 18px;padding:0}
 </style></head><body>
 <button id="pwaInstallBtn" title="Install App" style="display:none;position:fixed;right:18px;bottom:calc(120px + env(safe-area-inset-bottom));z-index:999;width:52px;height:52px;border-radius:50%;background:#0000b9;color:#fff;border:none;box-shadow:0 6px 18px rgba(0,0,185,.4);align-items:center;justify-content:center;cursor:pointer;">
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -1424,7 +1429,7 @@ function guidePage(fromChat){
  D_("8. Mistakes to avoid",
  `<ul class="gdx"><li><b>Asking with one word only.</b> Add what you want: the meaning, the steps, or an example.</li><li><b>Cutting a long question.</b> A missing part or number gives a wrong or incomplete answer.</li><li><b>Mixing many topics in one question.</b> Ask them one by one.</li><li><b>Using the wrong class.</b> Check your class in Account so the answer fits your level.</li><li><b>Stopping when you do not understand.</b> Say \"I do not understand\" or \"explain again\". That is what follow-ups are for.</li><li><b>Copying answers without trying.</b> Try the work first. Then ask me to check it.</li><li><b>Trusting every answer without checking.</b> Answers can sometimes have mistakes. Check important work with your teacher or textbook.</li><li><b>Typing private details.</b> Never type passwords or private information in the chat.</li><li><b>Asking me to do your exam.</b> I help you learn. I do not replace your own work.</li><li><b>Spelling in a rush.</b> I understand many spelling mistakes, but clear words give better answers.</li></ul>`)+
  D_("9. Practice and exams",
- `<p>Ask for practice on a topic, for example \"Give me exam practice on electricity\" or \"Quiz me on fractions\".</p><p>Exams and scoring guides in this app are <b>written by our system in the UNEB exam format</b>. They are <b>not official UNEB exams</b>, and the marks are practice marks. Use them to train. For the real exam rules and papers, check with your teacher and UNEB.</p><p>When you open the tasks, use <b>Show answer</b> or <b>Explain answer</b> after you try each task yourself.</p>`)+
+ `<p>Ask for practice on a topic, for example \"Give me exam practice on electricity\" or \"Quiz me on fractions\".</p><p>Exams and scoring guides in this app are <b>written by the Ask Tr. David Academic Intelligence System in the UNEB exam format</b>. They are <b>not official UNEB exams</b>, and the marks are practice marks. Use them to train. For the real exam rules and papers, check with your teacher and UNEB.</p><p>When you open the tasks, use <b>Show answer</b> or <b>Explain answer</b> after you try each task yourself.</p>`)+
  D_("10. If an answer is not clear or seems wrong",
  `<ul class="gdx"><li>Say <b>\"I do not understand\"</b> or <b>\"explain simply\"</b>.</li><li>Ask about the exact part: <b>\"What do you mean by...?\"</b></li><li>Tap <b>Redo</b> for a new way of explaining.</li><li>Ask <b>\"Are you sure?\"</b> and I will check the facts again.</li><li>Rewrite your question with more detail: topic, class, and what you want.</li><li>Tap the dislike button if the answer is wrong, so it can be checked.</li><li>Check with your teacher or textbook for anything important.</li></ul>`)+
  D_("11. Ready-to-use examples",
@@ -4568,22 +4573,30 @@ const EX_CMD=[[/\b(find|calculate|determine|solve|work out)\b/i,"find","work out
  [/\b(explain|describe|outline|discuss)\b/i,"explain","give each point together with its reason or detail"],
  [/\b(state|identify|define|name|list|give)\b/i,"state","write the answer clearly and briefly"]];
 const exClean=x=>String(x||"").replace(/^(Worked answer|Point drawn from information \([ivx]+\)|Idea to draw on|Watch for this error|A strength|A limit):\s*/i,"").replace(/\*\*/g,"").trim();
-/* the six parts of one task's explanation */
+/* sort one task's guide lines: the direct answer, ideas behind it, links to the item, marks, mistakes */
+function exSplit(s,ti){
+ const pts=(s.guide[s.tasks[ti].lab]||[]).filter(x=>x),ans=[],idea=[],link=[],marks=[],warn=[],other=[];
+ pts.forEach(x=>{const t=String(x).trim();
+  if(/^(Worked answer|Point drawn from information \([ivx]+\)|A strength|A limit|Answer):/i.test(t))ans.push(exClean(t));
+  else if(/^Link:/i.test(t))link.push(t.replace(/^Link:\s*/i,"").replace(/\.$/,""));
+  else if(/^Marks?:/i.test(t))marks.push(t.replace(/^Marks?:\s*/i,""));
+  else if(/^Watch for this error:/i.test(t))warn.push(t.replace(/^Watch for this error:\s*/i,"").replace(/\*\*/g,""));
+  else if(/^Idea to draw on:/i.test(t))idea.push(exClean(t));
+  else other.push(exClean(t))});
+ if(!ans.length&&other.length)ans.push(other.shift());
+ return{ans,idea,link,marks,warn,other}}
+const exFmt=x=>esc(x).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>");
+const EX_NOTE='<div class="exn">Written by the Ask Tr. David Academic Intelligence System in the UNEB exam format. It is not an official UNEB exam.</div>';
+/* SHOW ANSWER: the answer only, nothing else */
+function exAnsHtml(s,ti){const c=exSplit(s,ti),tk=s.tasks[ti],a=c.ans;
+ return '<div class="exa"><b>Answer for Task '+tk.lab+'</b>'+(a.length>1?'<ul>'+a.map(x=>'<li>'+exFmt(x)+'</li>').join("")+'</ul>':a.length?'<p>'+exFmt(a[0])+'</p>':'<p>No answer was written for this task. Open the Marking Guide to see how to approach it.</p>')+'</div>'}
+/* EXPLAIN ANSWER: what each part of the answer means (the concepts), not how to write it */
 function exExplain(s,ti){
- const tk=s.tasks[ti],pts=(s.guide[tk.lab]||[]).filter(x=>x),acc=s.accept?[s.accept]:[],
-  link=pts.filter(x=>/^Link:/i.test(x)).map(x=>x.replace(/^Link:\s*/i,"")),core=pts.filter(x=>!/^Link:/i.test(x));
- let cw=null,cwAt=1e9;EX_CMD.forEach(c=>{const x=c[0].exec(tk.text);if(x&&x.index<cwAt){cwAt=x.index;cw=c}});cw=cw||[null,"answer","answer exactly as the task asks"];
- const refs=[];(tk.text.match(/\((?:iv|iii|ii|i)\)/gi)||[]).forEach(r=>{r=r.toLowerCase();if(!refs.includes(r))refs.push(r)});
- const used=refs.length?s.info.filter(x=>refs.includes(x.k.toLowerCase())):s.info,
-  refTxt=used.length?used.map(x=>"information "+x.k).join(" and "):"the item",
-  topic=s.topic||"the topic";
- const out=[];
- out.push(["What the question requires","The command word is \""+(((tk.text.match(cw[0]||/$^/)||[])[0])||cw[1]).toLowerCase()+"\": "+cw[2]+". The task says: "+tk.text]);
- out.push(["Relevant information from the scenario",(s.setting?"Setting: "+s.setting+"\n":"")+(used.length?used.map(x=>"Information "+x.k+": "+x.text).join("\n"):"No numbered information is given for this task, so use the whole item.")]);
- out.push(["Knowledge applied","Topic: "+topic+"."+(core.length?"\n"+core.slice(0,3).map(x=>"- "+exClean(x)).join("\n"):"\nUse what you have learnt about "+topic+".")]);
- out.push(["Reasoning","1. Read "+refTxt+" and find the fact that matches the idea of "+topic+".\n2. Decide what the command word asks you to do: "+cw[2]+".\n3. Join the fact to the idea, so that each point you write has a reason."+(link.length?"\nWhat the marker checks: "+link[0].replace(/\.$/,"")+".":"")]);
- out.push(["How the answer was obtained",core.length?core.map((x,k)=>"Step "+(k+1)+": "+exClean(x)).join("\n"):"Take the facts from "+refTxt+", apply the idea of "+topic+" and write each point with a reason."]);
- out.push(["Why the answer is appropriate","It uses details given in "+refTxt+", it applies "+topic+", and it does what the command word asks."+(acc.length?" "+acc[0].replace(/^Accept\s+/i,"").replace(/\.$/,"").replace(/^./,c=>c.toUpperCase())+" is also accepted.":"")]);
+ const c=exSplit(s,ti),topic=s.topic||"",out=[],parts=c.other.concat(c.idea);
+ out.push(["The answer",c.ans.length?c.ans.join("\n"):"The answer is in the Marking Guide."]);
+ out.push(["What the answer means",parts.length?parts.map(x=>"\u2022 "+x).join("\n"):"The answer applies "+(topic?"the idea of "+topic:"the idea in the task")+" to the facts given in the item."]);
+ out.push(["Why the answer is correct",c.link.length?c.link.map(x=>"\u2022 "+x).join("\n"):"It uses the details given in the item and applies "+(topic||"the idea being tested")+", so every part of the answer has a reason."]);
+ if(c.warn.length)out.push(["Mistake to avoid",c.warn.map(x=>"\u2022 "+x).join("\n")]);
  return out}
 /* ===== STEP 7: MARKING AND SCORING GUIDE for one task. Built from the task's command word and its guide points.
    Shows: competency assessed, expected response with scoring points and suggested marks, performance levels, acceptable alternatives.
@@ -4600,14 +4613,35 @@ function exMark(s,ti){
  if(part>0&&part<full)lv.push(["Partly achieved",rg(part,full-1),"some correct points, but a reason or a detail from the item is missing"]);
  lv.push(["Not yet achieved",part>0?rg(0,part-1):rg(0,full-1),"few correct points, or the item is not used"]);
  return{comp,pts,T,lv,generic,alt:s.accept||"Accept any other correct point that uses details from the item."}}
-function exMarkHtml(s,ti){const m=exMark(s,ti),E=x=>esc(x);
- return '<div class="exm"><b>Marking guide for Task '+s.tasks[ti].lab+'</b>'+
-  '<div class="exs"><b>Competency assessed</b>'+E(m.comp)+'</div>'+
-  '<div class="exs"><b>Expected response and scoring points</b><ul>'+m.pts.map(x=>'<li>'+E(x[0])+' <em>('+x[1]+' mark)</em></li>').join("")+'</ul>'+(m.generic?'<small>No set points were written for this task, so general points are shown.</small>':'')+'</div>'+
-  '<div class="exs"><b>Suggested marks</b>'+m.T+' mark'+(m.T==1?'':'s')+' for this task.</div>'+
-  '<div class="exs"><b>Performance indicators</b><ul>'+m.lv.map(x=>'<li><b>'+x[0]+'</b> ('+x[1]+'): '+E(x[2])+'.</li>').join("")+'</ul></div>'+
-  '<div class="exs"><b>Acceptable alternative responses</b>'+E(m.alt)+'</div>'+
-  '<small>Practice scoring guide written by our system in the UNEB exam format. It is not an official UNEB marking scheme.</small></div>'}
+const EX_APP={find:["Read the task and write down what is given, with units.","Pick the rule or formula that links what is given to what you must find.","Substitute the values and work step by step.","State the final answer with its unit and check that it makes sense."],
+ evaluate:["Say what is good about the idea or option (a strength).","Say what is weak about it (a limit).","Use facts from the item for both.","Finish with a clear judgement."],
+ justify:["Choose one option clearly.","Give a reason that uses a fact from the item.","Say why the other option is weaker."],
+ advise:["Give one clear recommendation.","Support it with facts from the item.","Say what result to expect."],
+ explain:["Find each point the task asks for.","Give the point, then the reason (because ...).","Use facts from the item or the topic."],
+ state:["Find exactly what is asked.","Write it as a short, clear statement.","Leave out extra explanation."],
+ answer:["Read the task twice.","Find what is asked and what the item gives.","Answer exactly that."]};
+const EX_WRITE={find:"Write the formula, then the substitution, then the answer with its unit. Put each step on its own line so the marker can give method marks.",
+ evaluate:"Write a strength and a limit as full sentences, each with a fact from the item, then end with \"Therefore ...\" and your judgement.",
+ justify:"Begin with your choice, then write \"because ...\" and a fact from the item.",
+ advise:"Begin with \"I advise ...\", then give the reason using facts from the item.",
+ explain:"Write each point as a full sentence followed by its reason.",
+ state:"Write one short, direct statement for each point asked. No long explanation.",
+ answer:"Write a clear answer that does exactly what the task asks."};
+/* MARKING GUIDE: what the question asks, how to approach it, how to write it, the right answer, where marks are earned */
+function exMarkHtml(s,ti){
+ const tk=s.tasks[ti],c=exSplit(s,ti),E=x=>esc(x);
+ let cw=null,cwAt=1e9;EX_CMD.forEach(x=>{const m=x[0].exec(tk.text);if(m&&m.index<cwAt){cwAt=m.index;cw=x}});
+ const key=cw?cw[1]:"answer",word=cw?((tk.text.match(cw[0])||[])[0]||cw[1]).toLowerCase():"answer",
+  sec=(t,b)=>'<div class="exs"><b>'+t+'</b>'+b+'</div>',
+  mk=(/\((\d+)\s*marks?\)/i.exec(tk.text)||/(\d+)\s*marks?/i.exec(c.marks[0]||"")||[])[1];
+ return '<div class="exm"><b>Marking guide for Task '+tk.lab+'</b>'
+  +sec("What the question is asking",'The command word is "'+E(word)+'": you must '+E(cw?cw[2]:"answer exactly as the task asks")+'.'+(s.topic?' The item is about '+E(s.topic)+'.':'')+'<br>The task says: '+E(tk.text))
+  +sec("How to approach it",'<ol>'+(EX_APP[key]||EX_APP.answer).map(x=>'<li>'+E(x)+'</li>').join("")+'</ol>')
+  +sec("How to write the answer",E(EX_WRITE[key]||EX_WRITE.answer))
+  +sec("The right answer",c.ans.length?'<ul>'+c.ans.map(x=>'<li>'+exFmt(x)+'</li>').join("")+'</ul>':'No answer was written for this task.')
+  +sec("Where the marks are earned",(c.marks.length?'<ul>'+c.marks.map(x=>'<li>'+E(x)+'</li>').join("")+'</ul>':'Each correct, clearly written point earns a mark.')+(mk?'Total for this task: '+mk+' mark'+(mk=="1"?"":"s")+'.':''))
+  +(s.accept?sec("Also accepted",E(s.accept.replace(/^Accept\s+/i,"").replace(/^./,x=>x.toUpperCase()))):"")
+  +'</div>'}
 function exBlock(t){return md(t)}
 function exHtml(m,i){
  if(m.s!="i"||m.note||m.err||m.quiz)return null;
@@ -4623,9 +4657,10 @@ function exHtml(m,i){
    h.push('<div class="ext">'+md("**Task "+tk.lab+":** "+tk.text));
    if(done){
     h.push('<div class="exb"><button class="'+(o.a?"on":"")+'" data-act="xa" data-i="'+i+'" data-k="'+key+'">'+(o.a?"Hide Answer":"Show Answer")+'</button><button class="'+(o.e?"on":"")+'" data-act="xe" data-i="'+i+'" data-k="'+key+'">'+(o.e?"Hide Explanation":"Explain Answer")+'</button><button class="'+(o.m?"on":"")+'" data-act="xm" data-i="'+i+'" data-k="'+key+'">'+(o.m?"Hide Marking Guide":"Marking Guide")+'</button></div>');
-    if(o.a)h.push('<div class="exa"><b>Answer for Task '+tk.lab+'</b>'+(pts.length?'<ul>'+pts.map(x=>'<li>'+esc(x).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>")+'</li>').join("")+'</ul>':'<p>No marking points were written for this task. Use Explain Answer to see how to work it out.</p>')+(acc.length?'<small>'+esc(acc[0])+'</small>':'')+'<small>Practice answer written by our system in the UNEB exam format. It is not an official UNEB answer.</small></div>');
+    if(o.a)h.push(exAnsHtml(s,ti));
+    if(o.e)h.push('<div class="exe">'+exExplain(s,ti).map(r=>'<div class="exs"><b>'+r[0]+'</b>'+esc(r[1]).replace(/\n/g,"<br>")+'</div>').join("")+'</div>');
     if(o.m)h.push(exMarkHtml(s,ti));
-    if(o.e)h.push('<div class="exe">'+exExplain(s,ti).map((r,k)=>'<div class="exs"><b>'+(k+1)+'. '+r[0]+'</b>'+esc(r[1]).replace(/\n/g,"<br>")+'</div>').join("")+'<small>Practice explanation written by our system in the UNEB exam format. It is not an official UNEB explanation.</small></div>')}
+    if(o.a||o.e||o.m)h.push(EX_NOTE)}
    h.push('</div>')});
   h.push('</div>');return h.join("")}).join("")}
 function bub(m,i,last){
@@ -4843,7 +4878,7 @@ examiner:(N,d,c)=>{const T=c.T,bd=clBand(),cn=String(D.cls||""),EX=bd=="P13"?"Pr
  H1=bd=="P13"?"Learning Area Activity":bd=="P47"?"Situation":bd=="S56"?"Advanced Secondary Scenario":"Integrated Scenario",
  NT={P13:"*Primary 1 to 3 follow the thematic, learning-area curriculum. These are short oral or written activities, not an examination.*",P47:"*Primary 4 to 7: short situation tasks. They are not yet matched to the official Primary Leaving Examination paper layout.*",S14:"",S56:"*Advanced Secondary: this layout is general. It is not yet matched to the assessment guideline of this subject.*"}[bd],
  CA={P13:"say what the topic means and give a simple example from the item.",P47:"identify, explain and apply the idea, using details from the item.",S14:"identify, explain, apply and evaluate, using details from the item.",S56:"identify, explain, apply, evaluate and justify, using details from the item."}[bd];
- let o="# "+EX+": "+SB+(bd=="P13"?" Practice":" Exam Practice")+"\n*Exam written by our system in the UNEB exam format. It is not an official UNEB exam. Marks and layout are practice guidance.*"+(NT?"\n"+NT:"")+"\n## "+H1+"\n"+s1.item+"\n"+s1.tk;
+ let o="# "+EX+": "+SB+(bd=="P13"?" Practice":" Exam Practice")+"\n*Written by the Ask Tr. David Academic Intelligence System in the UNEB exam format. It is not an official UNEB exam. Marks and layout are practice guidance.*"+(NT?"\n"+NT:"")+"\n## "+H1+"\n"+s1.item+"\n"+s1.tk;
  if(s2)o+="\n## "+H1+" 2\n"+s2.item+"\n"+s2.tk;
  o+="\n## Marking guide\nA competent answer shows that the learner can "+CA+"\n"+s1.guide;
  if(s2)o+="\n\n**Scenario 2**\n"+s2.guide;
@@ -5494,7 +5529,7 @@ function scnRender(j,raw){const cl=x=>String(x==null?"":x).trim(),T=Array.isArra
   if(cl(t.marks)){marks=true;o+="\n\n**Marks (practice):** "+cl(t.marks)}});
  const g=(Array.isArray(j.gaps)?j.gaps:[]).map(cl).filter(Boolean);
  if(g.length)o+="\n\n## Gaps flagged\n"+g.map(x=>"- "+x).join("\n");
- o+="\n\n*This practice answer was written by our system in the UNEB exam format. It is not an official UNEB answer."+(marks?" Marks shown are practice scoring, not official UNEB scoring.":"")+"*";
+ o+="\n\n*Written by the Ask Tr. David Academic Intelligence System in the UNEB exam format. It is not an official UNEB exam."+(marks?" Marks shown are practice scoring, not official UNEB scoring.":"")+"*";
  return o}
 async function askScenario(q){
  if(capped())return limitMsg();
@@ -5579,7 +5614,7 @@ function sqMake(T0,n,raw){
  if(keep=="General"&&T0.S&&T0.S[0]&&subsList().includes(T0.S[0]))D.sub=T0.S[0];
  let o="";
  try{const c={T:T.n,P:T.pts.length?T.pts:(T.d?[T.d]:[]),L:lvKey(),cw:["State","Explain"]},d=Math.max(3,modelDepth(modelName()));
-  o="# Practice items: "+T.n+"\nThese practice items were written by our system in the UNEB exam format. They are not official UNEB questions. Marks and layout are practice guidance, not an official paper format. Under each task, tap Show Answer to see its answer, Explain Answer to see how it is worked, or Marking Guide to see practice scoring.";
+  o="# Practice items: "+T.n+"\nThese practice items were written by the Ask Tr. David Academic Intelligence System in the UNEB exam format. They are not an official UNEB exam. Marks and layout are practice guidance, not an official paper format. Under each task, tap Show Answer to see its answer, Explain Answer to see how it is worked, or Marking Guide to see practice scoring.";
   for(let k=0;k<n;k++){const q=cbaBuild(T,d,c,k);o+="\n## Item "+(k+1)+"\n"+q.item+"\n"+q.tk+"\n\n**Guide:**\n"+q.guide}}
  finally{D.sub=keep}
  const ch=D.chats.find(c=>c.id==D.cur);if(ch&&(ch.title=="New chat"||ch.title=="Chat"))ch.title=("Sample questions: "+T.n).slice(0,32);
@@ -5823,7 +5858,7 @@ function askCore(q,mode,I){
    if(a2&&a2.t)f=a2;else{const w=AIWHY;logUn(q);stopS();
     return err(w=="net"||w=="offline"||!navigator.onLine?"No internet connection. Please connect to the internet and tap Retry.":"The answer is taking longer than expected. Please tap Retry."+(isOwner()?" ("+(w||"unknown")+")":""))}}
   if(f.un&&!mode&&!FU)logUn(q);
-  if(f.fmt&&!f.un&&!mode&&f.t!==window.DIRECT_T){const st=await styleAnswer(f.t,q);if(stream==null||tok!=AN)return;if(st){f.sty={t:f.t,k:modelName(),L:lvKey(),pl:planName()};f.t=st.md+(modelName()=="examiner"?"\n\n*Exam written by our system in the UNEB exam format. It is not an official UNEB exam.*":"")}}
+  if(f.fmt&&!f.un&&!mode&&f.t!==window.DIRECT_T){const st=await styleAnswer(f.t,q);if(stream==null||tok!=AN)return;if(st){f.sty={t:f.t,k:modelName(),L:lvKey(),pl:planName()};f.t=st.md+(modelName()=="examiner"?"\n\n*Written by the Ask Tr. David Academic Intelligence System in the UNEB exam format. It is not an official UNEB exam.*":"")}}
   if(!f.part&&!f.ai&&!f.un){const Tm=topicOf(q);if(Tm&&Tm.ai)f.ai=1}
   if(!f.part&&f.ai&&!f.tid){const Tm=topicOf(q);if(Tm&&Tm.tid)f.tid=Tm.tid}
   if(!f.part&&!f.lv&&!f.un){const Tm=topicOf(q);if(Tm&&Tm.sl){f.lv=Tm.sl;f.cls=Tm.cls}}
@@ -6072,7 +6107,7 @@ $("jump").onclick=()=>$("msgs").scrollTo({top:1e9,behavior:"smooth"});
  Every admin database function checks the login token again (username DAVID with the owner phone), so other accounts are refused even if they find this code. */
 const ADMS=[["over","Overview",[["home","Summary"],["stats","Statistics"]]],["people","People",[["users","Learners"],["inbox","Inbox"],["rate","Ratings"]]],["money","Money",[["pay","Payments"],["free","Free days"],["refs","Referrals"],["proofs","Old proofs"]]],["learn","Learning",[["asks","Most asked"],["asked","Not understood"],["react","Likes and Unlikes"]]],["news","Post",[["news","Announcements"]]]];
 const ADMPG={home:()=>admHome(),stats:()=>admStats(),users:()=>admUsers(),inbox:()=>admInbox(),rate:()=>admRate(),pay:()=>admMomo(),free:()=>admFree(),refs:()=>admRefs(),proofs:()=>admPay(),asked:()=>admAsked(),react:()=>admReact(),asks:()=>admAsks(),news:()=>admNews()};
-let ADMON=false,ADMTAB="home",ADMSEQ=0,ADMUQ="",ADMUL=[],ADMAS="open",ADMAL=[],ADMPL=[],ADMPR=[],ADMUNR=0;
+let ADMON=false,ADMTAB="home",ADMSEQ=0,ADMUQ="",ADMUF="",ADMUL=[],ADMAS="open",ADMAL=[],ADMPL=[],ADMPR=[],ADMUNR=0;
 const admSec=t=>ADMS.find(x=>x[2].some(y=>y[0]==t))||ADMS[0];
 const admCall=async(fn,a)=>{try{const j=await svRpc(fn,Object.assign({p_t:tokNow()},a||{}));return j&&typeof j.ok=="boolean"?j:{ok:false,err:"fail"}}catch(e){return{ok:false,err:"net"}}};
 const admMsg=j=>j&&j.err=="not allowed"?"This panel is only for the owner account.":j&&j.err=="net"?"No internet. Check your connection and try again.":"Could not load. Try again.";
@@ -6260,13 +6295,15 @@ async function admHome(){const s=ADMSEQ,b=$("abody");b.innerHTML=admLd();const j
  <div style="padding:0 18px 4px;color:var(--sub);font-size:12px;line-height:1.4">Installs and usage are counted from this version of the app onward.</div>
  <div class="asec">Needs your attention</div>${att.length?att.map(x=>`<div class="row" data-g="${x[3]}"><div><b>${n(x[0])}</b> ${x[1]}<small>${x[2]}</small></div></div>`).join(""):'<div style="padding:6px 18px 10px;color:var(--sub)">Nothing is waiting. All clear.</div>'}
  <div class="asec">Money</div>${money}
- <div class="asec">Plans</div><div style="display:flex;flex-wrap:wrap;gap:8px;padding:6px 18px 10px">${PLANS4.map(p=>`<span class="apl" style="background:${PCOL[p]}">${p} ${n(P[p])}</span>`).join("")}</div>
+ <div class="asec">Plans right now</div><div style="display:flex;flex-wrap:wrap;gap:8px;padding:6px 18px 4px">${PLANS4.map(p=>`<span class="apl" style="background:${PCOL[p]}">${p} ${n(P[p])}</span>`).join("")}</div>
+ <div style="padding:0 18px 6px;color:var(--sub);font-size:12px;line-height:1.4">This is what each learner has right now, including free days and referral days.</div>
+ <div class="asec">Where plans come from (tap to see and cancel)</div><div style="display:flex;flex-wrap:wrap;gap:8px;padding:6px 18px 10px">${[["subscription","Subscription"],["free_days","Free days"],["referral","Referral"],["free","Free only"]].map(x=>`<span class="apl" data-pf="${x[0]}" style="background:#444;cursor:pointer">${x[1]} ${n((j.access||{})[x[0]])}</span>`).join("")}</div>
  <div class="asec">Library</div>
  <div class="row" style="cursor:default"><div><b>${n(j.questions_total)}</b> questions, <b>${n(j.answers_published)}</b> answers<small>AI requests in the last 24 hours: ${n(j.gemini_today)}</small></div></div>
  <div class="asec">Tools</div>
  <div class="row" data-g="ho"><div>Project handoff<small>Notes and files for the next Claude. Only you see this</small></div></div>
  <div class="row" data-g="rf"><div>Refresh this page</div></div>`;
- b.onclick=e=>{const g=e.target.closest("[data-g]")?.dataset.g;if(!g)return;if(g=="ho")handoff();else if(g=="rf")admHome();else admGo(g)}}
+ b.onclick=e=>{const pf=e.target.closest("[data-pf]");if(pf){ADMUF=pf.dataset.pf;ADMUQ="";admGo("users");return}const g=e.target.closest("[data-g]")?.dataset.g;if(!g)return;if(g=="ho")handoff();else if(g=="rf")admHome();else admGo(g)}}
 
 /* LEARNER REACTIONS: every Like / Unlike a learner tapped, with the learner's name, the question and the start of the answer. Unlikes are the ones to review first. */
 async function rxRoom(kind){
@@ -6281,27 +6318,38 @@ async function rxRoom(kind){
  showP("Learner reactions",h,()=>{closeP();admGo("home")},e=>{const k=e.target.closest("[data-kd]");if(k)rxRoom(k.dataset.kd)})}
 
 /* USERS: find by username or phone, change plan */
+const ADMSRC={subscription:"Subscription",free_days:"Free days",referral:"Referral",free:"Free only"};
+function admCancelLearner(u,after){const src=u.eff_src||(u.plan!="Free"?"subscription":"free");
+ const msg=src=="subscription"?"Cancel the "+u.plan+" subscription of "+u.username+"? They go back to Free.":src=="free_days"?"Cancel the free-days plan for "+u.username+"? Other learners keep it. You can allow it again on the learner's page.":src=="referral"?"Cancel the referral plan for "+u.username+"? Saved days freeze until you allow it again.":"";
+ if(!msg){uiAlert(u.username+" is on the Free plan only. Nothing to cancel.");return}
+ uiConfirm(msg,async()=>{let j;
+  if(src=="subscription")j=await admCall("admin_set_plan_timed",{p_user:u.id,p_plan:"Free",p_hours:null});
+  else j=await admCall("admin_set_user_block",{p_user:u.id,p_kind:src=="free_days"?"free":"referral",p_on:true});
+  if(j.ok){if(u.username==="DAVID")try{syncPlan()}catch(e){}if(after)after()}else uiAlert(admMsg(j))},"Cancel plan")}
 function admUsers(){const s=ADMSEQ,b=$("abody");
- b.innerHTML=`<input class="ain" id="auq" placeholder="Search username, phone or name" value="${esc(ADMUQ)}" autocomplete="off" autocapitalize="off"><div id="aul">${admLd()}</div>`;
+ const chip=(k,l)=>`<button data-f="${k}" style="border:0;border-radius:16px;padding:7px 13px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;flex:none;color:${ADMUF==k?"#fff":"var(--text)"};background:${ADMUF==k?"#00a884":"var(--line)"}">${l}</button>`;
+ b.innerHTML=`<input class="ain" id="auq" placeholder="Search username, phone or name" value="${esc(ADMUQ)}" autocomplete="off" autocapitalize="off"><div style="display:flex;gap:6px;padding:0 18px 8px;overflow-x:auto">${chip("","All")}${chip("subscription","Subscription")}${chip("free_days","Free days")}${chip("referral","Referral")}</div><div id="aul">${admLd()}</div>`;
  let tm=0,tk=0;
- const run=async()=>{const my=++tk,q=$("auq")?$("auq").value.trim():"";ADMUQ=q;const j=await admCall("admin_find_users",{p_q:q});if(my!==tk||s!==ADMSEQ)return;const L=$("aul");if(!L)return;
+ const run=async()=>{const my=++tk,q=$("auq")?$("auq").value.trim():"";ADMUQ=q;const j=await admCall("admin_find_users",{p_q:q,p_filter:ADMUF});if(my!==tk||s!==ADMSEQ)return;const L=$("aul");if(!L)return;
   if(!j.ok){L.innerHTML=admFail(j);return}
   ADMUL=j.items||[];
-  L.innerHTML=(ADMUL.length?"":'<div style="padding:18px;color:var(--sub)">No accounts found.</div>')+ADMUL.map((u,i)=>`<div class="row" data-u="${i}"><div style="flex:1;min-width:0"><b>${esc(u.names)}</b><small>${esc(u.username)} · ${esc(u.phone)}${u.free_blocked?" · free days off":""}${u.ref_blocked?" · referral off":""}</small></div><span class="apl" style="background:${PCOL[u.plan]||"#888"}">${esc(u.plan)}</span></div>`).join("")};
+  L.innerHTML=(ADMUL.length?"":'<div style="padding:18px;color:var(--sub)">No accounts found.</div>')+ADMUL.map((u,i)=>{const ep=u.eff_plan||u.plan,sr=u.eff_src||"";return `<div class="row" data-u="${i}"><div style="flex:1;min-width:0"><b>${esc(u.names)}</b><small>${esc(u.username)} · ${esc(u.phone)}${sr&&sr!="free"?" · "+ADMSRC[sr]:""}${u.free_blocked?" · free days off":""}${u.ref_blocked?" · referral off":""}</small></div><span class="apl" style="background:${PCOL[ep]||"#888"}">${esc(ep)}</span>${sr&&sr!="free"?`<button data-cx="${i}" style="margin-left:8px;padding:6px 12px;border:0;border-radius:16px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;color:#fff;background:#d93025;flex:none">Cancel</button>`:""}</div>`}).join("")};
  $("auq").oninput=()=>{clearTimeout(tm);tm=setTimeout(run,350)};
- b.onclick=e=>{const r=e.target.closest("[data-u]");if(r)admUser(ADMUL[+r.dataset.u])};
+ b.onclick=e=>{const f=e.target.closest("[data-f]");if(f){ADMUF=f.dataset.f;admUsers();return}
+  const c=e.target.closest("[data-cx]");if(c){e.stopPropagation();admCancelLearner(ADMUL[+c.dataset.cx],()=>run());return}
+  const r=e.target.closest("[data-u]");if(r)admUser(ADMUL[+r.dataset.u])};
  run()}
 
 /* PER-LEARNER ACCESS: the three ways a learner gets a plan, each controlled for this one learner only.
    1) Subscription (set or revoke in the Plan list above)  2) Free-days plan  3) Referral plan (saved days; they freeze while disabled). */
 async function admAccess(u,seq){const j=await admCall("admin_user_access",{p_user:u.id});if(seq!==ADMSEQ)return;const e=$("aax");if(!e)return;
  if(!j.ok){e.innerHTML=admFail(j);return}
- u.free_blocked=!!j.free_blocked;u.ref_blocked=!!j.ref_blocked;
+ u.free_blocked=!!j.free_blocked;u.ref_blocked=!!j.ref_blocked;u.plan=j.plan;u.eff_plan=j.effective;u.eff_src=j.bonus_until?"referral":j.free_access?"free_days":j.plan!="Free"?"subscription":"free";
  const dt=d=>{try{return new Date(d).toLocaleString()}catch(x){return""}},days=Math.floor(Number(j.bonus_secs||0)/86400),hrs=Math.floor((Number(j.bonus_secs||0)%86400)/3600);
  const src=j.bonus_until?"the <b>Referral plan</b> (until "+esc(dt(j.bonus_until))+")":j.free_access?"the <b>Free-days plan</b> (until "+esc(dt(j.free_access.ends_at))+")":j.plan!="Free"?"the <b>Subscription</b>"+(j.plan_expires_at?" (ends "+esc(dt(j.plan_expires_at))+")":" (no expiry)"):"the <b>Free plan</b> only";
  const bt=(k,on,l,c)=>'<button data-bk="'+k+'" data-on="'+on+'" style="padding:9px 16px;border:0;border-radius:18px;font:inherit;font-weight:700;cursor:pointer;color:#fff;background:'+c+';flex:none">'+l+'</button>';
  const row=(t,st,b)=>'<div class="row" style="cursor:default;align-items:center"><div style="flex:1;min-width:0"><b>'+t+'</b><small>'+st+'</small></div>'+b+'</div>';
- e.innerHTML='<div style="padding:4px 18px 8px;line-height:1.5">Right now '+esc(u.names)+' has <b>'+esc(j.effective)+'</b> from '+src+'.</div>'
+ e.innerHTML='<div style="padding:4px 18px 8px;line-height:1.5">Right now '+esc(u.names)+' has <b>'+esc(j.effective)+'</b> from '+src+'.</div>'+(u.eff_src!="free"?'<div style="padding:0 18px 8px"><button data-cp="1" style="padding:11px 20px;border:0;border-radius:20px;font:inherit;font-weight:700;cursor:pointer;color:#fff;background:#d93025">Cancel this learner\'s plan</button></div>':"")
   +row("Subscription",j.plan!="Free"?esc(j.plan)+(j.plan_expires_at?" · ends "+esc(dt(j.plan_expires_at)):" · no expiry"):"None (Free plan)",j.plan!="Free"?'<button data-rv="1" style="padding:9px 16px;border:0;border-radius:18px;font:inherit;font-weight:700;cursor:pointer;color:#fff;background:#d93025;flex:none">Revoke</button>':"")
   +row("Free-days plan",j.free_blocked?"<span style=\"color:#d93025;font-weight:700\">Disabled for this learner</span>":"Allowed (when you schedule free days)",j.free_blocked?bt("free",0,"Allow","#00a884"):bt("free",1,"Disable","#d93025"))
   +row("Referral plan",(j.ref_blocked?"<span style=\"color:#d93025;font-weight:700\">Disabled for this learner</span> · ":"Allowed · ")+(days||hrs?days+" days "+hrs+" h saved":"no saved days"),j.ref_blocked?bt("referral",0,"Allow","#00a884"):bt("referral",1,"Disable","#d93025"))
@@ -6331,6 +6379,7 @@ function admUser(u){if(!u)return;ADMSEQ++;const b=$("abody");
   +'<div style="padding:8px 18px;color:var(--sub);font-size:13px;line-height:1.4">Tap a paid plan to choose how long it lasts. It ends by itself when the time is over.</div><div id="aum" style="padding:6px 18px 10px;color:var(--green);font-weight:600;min-height:20px"></div><div class="asec">Where this learner gets access</div><div id="aax">'+admLd()+'</div>';
  admUserStats(u,ADMSEQ);admAccess(u,ADMSEQ);
  b.onclick=e=>{if(e.target.closest("[data-b]")){ADMSEQ++;admUsers();return}const kk=e.target.closest("[data-k]")?.dataset.k;if(kk){admActs(u,kk);return}
+  const cp=e.target.closest("[data-cp]");if(cp){admCancelLearner(u,()=>admUser(u));return}
   const bk=e.target.closest("[data-bk]");if(bk){admBlock(u,bk.dataset.bk,bk.dataset.on=="1");return}
   if(e.target.closest("[data-rv]")){uiConfirm("Revoke the subscription of "+u.username+"? They go back to the Free plan.",()=>apply("Free",0),"Revoke");return}const p=e.target.closest("[data-p]")?.dataset.p;if(!p)return;
   if(p=="Free"){if(u.plan!="Free")uiConfirm("Change "+u.username+" to the Free plan?",()=>apply("Free",0),"Change plan")}else pick(p)}}
@@ -7559,7 +7608,10 @@ function norm(q){return " "+String(q||"").toLowerCase().replace(/[\u2018\u2019`]
 /* reads what the learner is asking FOR (produce an assessment, be taught, investigate an idea), not single words */
 function detect(q){
  const T=norm(q),w=T.trim().split(" ").length;
- if(w<4||T.length>1400)return null;                       /* short follow-ups ("more", "why?") stay with the current model */
+ if(w<4){ /* very short: only a clear exam word counts ("question exams", "mock test", "quiz") */
+  if(RX.assess.test(T)&&!RX.teach.test(T)&&!RX.philo.test(T))return{model:"examiner",score:5};
+  return null}
+ if(T.length>1400)return null;
  try{if(looksScenario(String(q)))return{model:"examiner",score:9}}catch(e){}   /* a pasted paper/scenario question belongs to the Examiner */
  let e=0,t=0,p=0;
  const prodNear=RX.prod.test(T)&&RX.assess.test(T);
@@ -7598,6 +7650,10 @@ function upsellTip(to){
 const _ask=window.ask;
 window.ask=function(q,mode){
  if(mode||typeof q!=="string")return _ask.apply(this,arguments);
+ /* "question exams" with no topic named: use the topic already on screen (e.g. Photosynthesis) so the Examiner sets questions on it */
+ try{const T0=norm(q),w0=T0.trim().split(" ").length;
+  if(w0<=6&&RX.assess.test(T0)&&!RX.mark.test(T0)&&!RX.teach.test(T0)){let tp=null;try{tp=topicOf(q)}catch(e){}
+   const c=ctxGet();if(!tp&&c&&c.tq)q="Give me 2 sample exam questions on "+c.tq}}catch(e){}
  let d;try{d=decide(q)}catch(e){d={act:"pass"}}
  const go=()=>_ask.call(this,q,mode);
  if(d.act==="auto"){switchTo(d.to);D.msgs.push({s:"i",note:1,t:"Switched to "+MN(d.to)+" for this question.",ts:Date.now()});save();render();return go()}
@@ -7675,7 +7731,7 @@ async function serve(T0,n,raw){
   items=items.slice(0,n);if(!items.length)return false;
   for(let i=items.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[items[i],items[j]]=[items[j],items[i]]}
   const allOk=items.every(x=>x.status==="approved");
-  let o="# Practice items: "+ctx.topic+"\nThese practice items come from our growing question bank, in the UNEB exam format. They are not official UNEB questions"+(allOk?"":" and have not all been checked by a teacher yet")+". Marks and layout are practice guidance. Under each task, tap Show Answer to see its answer, Explain Answer to see how it is worked, or Marking Guide to see practice scoring.";
+  let o="# Practice items: "+ctx.topic+"\nThese practice items come from our growing question bank, written by the Ask Tr. David Academic Intelligence System in the UNEB exam format. They are not an official UNEB exam"+(allOk?"":" and have not all been checked by a teacher yet")+". Marks and layout are practice guidance. Under each task, tap Show Answer to see its answer, Explain Answer to see how it is worked, or Marking Guide to see practice scoring.";
   items.forEach((it,k)=>{o+=render1(it,k)});
   const ch=D.chats.find(c=>c.id==D.cur);if(ch&&(ch.title==="New chat"||ch.title==="Chat"))ch.title=("Sample questions: "+ctx.topic).slice(0,32);
   const m={s:"i",t:o,ts:Date.now(),q:String(raw||"").slice(0,300),tq:ctx.topic,tsub:sub,sq:1,bank:[].concat.apply([],items.map(x=>x.ids||[]))};

@@ -334,12 +334,12 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 .md .sub{margin:3px 0 3px 2px;color:inherit;opacity:.92}
 .md li>b:first-child{display:inline}
 
-/* Ask Tr. David name: bold + 2px bigger everywhere */
-#nm{font-weight:800!important;font-size:19px!important}
-.pg-name{font-weight:900!important;font-size:36px!important}
-.hnm{font-weight:800!important;font-size:24px!important}
-#spl .sn{font-weight:900!important;font-size:34px!important}
-.atd{font-weight:800;font-size:calc(1em + 2px)}
+/* Ask Tr. David name: bold, normal size everywhere */
+#nm{font-weight:800!important;font-size:17px!important}
+.pg-name{font-weight:900!important;font-size:34px!important}
+.hnm{font-weight:800!important;font-size:22px!important}
+#spl .sn{font-weight:900!important;font-size:32px!important}
+.atd{font-weight:800;font-size:1em}
 </style></head><body>
 <button id="pwaInstallBtn" title="Install App" style="display:none;position:fixed;right:18px;bottom:calc(120px + env(safe-area-inset-bottom));z-index:999;width:52px;height:52px;border-radius:50%;background:#0000b9;color:#fff;border:none;box-shadow:0 6px 18px rgba(0,0,185,.4);align-items:center;justify-content:center;cursor:pointer;">
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -1491,7 +1491,7 @@ function usagePage(){HBACK=null;const q=FQ(),pn=planName(),rk={Free:0,Basic:1,St
  const pct=Math.min(100,Math.round(q.used/Math.max(1,q.cap)*100));
  h_page("Usage and limits",curPlan(q)+(pn=="Free"?`<div style="padding:4px 24px 8px"><div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:8px"><span>Words used</span><b>${q.used.toLocaleString()} of ${q.cap.toLocaleString()}</b></div><div style="height:10px;border-radius:10px;background:var(--line);overflow:hidden"><i style="display:block;height:100%;width:${pct}%;background:var(--green)"></i></div></div>`:`<div class="t" style="padding:4px 24px 8px">No word limit on your plan.</div>`)+h_hd("What your plan includes")+h_grp(F.map(f=>h_row("x",f[1]<=rk?h_svg('<path d="M5 12.5l4.5 4.5L19 7.5"/>'):h_svg('<path d="M6 6l12 12M18 6L6 18"/>'),f[0],{v:f[1]<=rk?"Included":"Needs "+NM[f[1]],n:1,x:1})).join(""))+(pn=="Premium"?"":h_grp(h_row("up",HI.up,"Upgrade plan",{c:"var(--green)"}))),hub,e=>{if(e.target.closest("[data-a=up]")){HBACK=usagePage;plans(1)}})}
 function generalPage(){HBACK=null;
- h_page("General",h_grp(h_row("tx",HI.eye,"Text size and contrast")+h_row("fo",HI.font,"Font style")+h_row("md",HI.star,"Teaching styles",{s:"Which model is best for lessons, exams and research"})+h_row("amd",HI.gen,"Automatic Model Detection",{n:1,v:'<span class="amsw'+(D.amd!==false?" on":"")+'" role="switch" aria-checked="'+(D.amd!==false?"true":"false")+'"></span>',s:"Automatically identify the best AI model for your question and recommend or switch to it for better responses."+(planName()=="Premium"?"":"<br>Standard asks you first; Premium can switch for you.")})+(isOwner()?h_row("qb",HI.star,"Question bank",{s:"Coverage and questions waiting for your check"}):"")+h_row("up",HI.gen,"Update app",{s:"Reload to get the latest version"})+(isOwner()?h_row("wk",HI.star,"Preview rating pop-up",{s:"See what learners get (nothing is sent)"}):"")),hub,e=>{
+ h_page("General",h_grp(h_row("tx",HI.eye,"Text size and contrast")+h_row("fo",HI.font,"Font style")+h_row("md",HI.star,"Teaching styles",{s:"Which model is best for lessons, exams and research"})+h_row("amd",HI.gen,"Automatic Model Detection",{n:1,v:'<span class="amsw'+(D.amd!==false?" on":"")+'" role="switch" aria-checked="'+(D.amd!==false?"true":"false")+'"></span>',s:"Automatically identify the best AI model for your question and recommend or switch to it for better responses."+(planName()=="Premium"||planName()=="Standard"?"":"<br>Standard and Premium switch for you; Basic keeps your model.")})+(isOwner()?h_row("qb",HI.star,"Question bank",{s:"Coverage and questions waiting for your check"}):"")+h_row("up",HI.gen,"Update app",{s:"Reload to get the latest version"})+(isOwner()?h_row("wk",HI.star,"Preview rating pop-up",{s:"See what learners get (nothing is sent)"}):"")),hub,e=>{
   const a=e.target.closest("[data-a]")?.dataset.a;if(!a)return;HBACK=generalPage;
   if(a=="tx")access();if(a=="fo")fontStyle();if(a=="md")modelsGuide();if(a=="amd")amdToggle();if(a=="qb")QBX.bankAdmin();if(a=="up")updateApp();if(a=="wk")wkShow(1)})}
 function notifPage(){HBACK=null;
@@ -7483,7 +7483,7 @@ window.__sync={pull,push,snap,mergeIn,state:()=>({ready,dirty,serverAt})};
 })();
 </script>
 <script>
-/* Ask Tr. David: wrap every visible mention so it is bold and 2px larger, including text added later (chat, pages, toasts) */
+/* Ask Tr. David: wrap every visible mention so it is bold at normal size, including text added later (chat, pages, toasts) */
 (function(){var RE=/Ask (?:Tr\.?|Teacher) David/g,TST=/Ask (?:Tr\.?|Teacher) David/,SKIP=/^(SCRIPT|STYLE|TEXTAREA|INPUT|TITLE|NOSCRIPT|OPTION)$/,NO="#nm,.hnm,.pg-name,#spl,.atd";
 function ok(n){var p=n.parentNode;if(!p||SKIP.test(p.nodeName)||p.isContentEditable)return false;if(p.closest&&p.closest(NO))return false;return TST.test(n.nodeValue)}
 function wrap(root){if(!root)return;var L=[];if(root.nodeType===3){if(ok(root))L.push(root)}else if(root.nodeType===1){if(SKIP.test(root.nodeName))return;var w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:function(n){return ok(n)?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT}}),n;while(n=w.nextNode())L.push(n)}
@@ -7552,7 +7552,7 @@ const RX={
  solve:/\b(explain|show|give) (me )?(the )?(solutions?|working|workings|marking)\b/,
  prep:/\b(test me|quiz me|examine me|exam (tips|technique|preparation|prep|strategy)|how (do|can) i (pass|prepare for)|prepare for (my |the )?(exam|test|uneb|ple|uce|uace)|predict(ed|ion)? (exam|questions|paper)|likely (exam )?questions|revision questions)\b/,
  teach:/\b(explain|teach|teach me|show me how|help me understand|understand|what (is|are|was|were)|how (does|do|did|is|are)|why (does|do|did|is|are)|define|describe|simplif(y|ied)|make it simple|step by step|lesson|notes on|i (do not|don't|dont) understand|meaning of|difference between|illustrate|example of)\b/,
- philo:/\b(research|investigate|investigation|origins? of|philosoph\w*|meaning of life|ethic(s|al)|morality|moral (dilemma|question)|critical(ly)? (think|analy[sz]e|discuss|evaluate)|debate|different (views|perspectives|ideas|theories)|theor(y|ies) (of|about)|consciousness|free will|nature of (reality|existence|truth|knowledge)|big bang|origin of the universe|purpose of (life|existence)|general knowledge|beyond (the )?syllabus|literature review|why (do|does) (humans|people|we) )\b/,
+ philo:/\b(research|investigate|investigation|origins? of|philosoph\w*|meaning of life|ethic(s|al)|morality|moral (dilemma|question)|critical(ly)? (think|analy[sz]e|discuss|evaluate)|debate|different (views|perspectives|ideas|theories)|theor(y|ies) (of|about)|consciousness|free will|nature of (reality|existence|truth|knowledge)|big bang|origin of the universe|purpose of (life|existence)|general knowledge|beyond (the )?syllabus|literature review|why (do|does) (humans|people|we) |do you think|does god exist|why are we here|is it (right|wrong|fair|ethical)|should (we|people|humans)|what if |how did (the universe|life|humans|everything) )\b/,
  pstrong:/\b(philosoph\w*|meaning of life|ethic(s|al)|origins? of the universe|free will|consciousness|research)\b/
 };
 function norm(q){return " "+String(q||"").toLowerCase().replace(/[\u2018\u2019`]/g,"'").replace(/[^a-z0-9'\s-]/g," ").replace(/\s+/g," ").trim()+" "}
@@ -7560,7 +7560,7 @@ function norm(q){return " "+String(q||"").toLowerCase().replace(/[\u2018\u2019`]
 function detect(q){
  const T=norm(q),w=T.trim().split(" ").length;
  if(w<4||T.length>1400)return null;                       /* short follow-ups ("more", "why?") stay with the current model */
- try{if(looksScenario(String(q)))return null}catch(e){}   /* a pasted paper question is answered where it is */
+ try{if(looksScenario(String(q)))return{model:"examiner",score:9}}catch(e){}   /* a pasted paper/scenario question belongs to the Examiner */
  let e=0,t=0,p=0;
  const prodNear=RX.prod.test(T)&&RX.assess.test(T);
  if(prodNear)e+=3;if(prodNear&&/\b(scenario|mock|exam|examination|past paper|test|quiz)\b/.test(T))e+=1;
@@ -7569,7 +7569,7 @@ function detect(q){
  const tw=(e>=3||pS)?1:3;if(RX.teach.test(T))t+=tw;if(/\b(teach me|help me understand|step by step|simplif|i (do not|don't|dont) understand)\b/.test(T))t+=1;
  if(/^ (give|show|make|set) me (the )?answers? /.test(T)&&!RX.assess.test(T))e=Math.max(e,3);
  const R=[["examiner",e],["teacher",t],["philosopher",p]].sort((a,b)=>b[1]-a[1]);
- if(R[0][1]<3||R[0][1]-R[1][1]<2)return null;
+ if(R[0][1]<3||R[0][1]-R[1][1]<1)return null;
  return{model:R[0][0],score:R[0][1]};
 }
 const MN=k=>(MODELS[k]&&MODELS[k].n)||k;
@@ -7579,10 +7579,10 @@ function decide(q){
  const pl=planName(),al=PMOD[pl]||PMOD.Free;
  if(pl==="Free"||pl==="Basic")return{act:"upsell",to:r.model};   /* never blocked, never forced */
  if(!al.includes(r.model))return{act:"pass"};                     /* never recommend a model the plan does not include */
- if(pl==="Premium"&&D.amd!==false)return{act:"auto",to:r.model};
+ if((pl==="Premium"||pl==="Standard")&&D.amd!==false)return{act:"auto",to:r.model};
  return{act:"ask",to:r.model};
 }
-function switchTo(k){try{localStorage.setItem(MK(),k)}catch(e){}try{updPlan()}catch(e){}try{save()}catch(e){}}
+function switchTo(k){try{localStorage.setItem(MK(),k)}catch(e){}try{updPlan()}catch(e){}try{save()}catch(e){}setTimeout(function(){try{updPlan()}catch(e){}},0)}
 function confirm2(msg,okFn,noFn){
  uiDlg({msg,ok:"OK",onOk:okFn});
  const d=$$("dlgx"),shut=f=>{d.style.display="none";try{dlgCancel=null}catch(e){}f&&f()};

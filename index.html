@@ -61,6 +61,7 @@ html.pg-on #spl{display:none}
 #spl .sn .sp{width:.3em}
 #spl .st2{margin-top:10px;font-size:13px;font-weight:500;letter-spacing:1.6px;text-transform:uppercase;color:#ffd800;opacity:0;animation:splFade .8s ease 1.6s forwards}
 #spl .sb{margin-top:34px;width:56px;height:3px;border-radius:3px;background:rgba(255,255,255,.2);overflow:hidden}
+#spl .sv3,#ap #spl .sv3{position:absolute;left:0;right:0;bottom:calc(22px + env(safe-area-inset-bottom,0px));font-size:12px;font-weight:600;letter-spacing:1px;color:#ffd800;opacity:.9}
 #spl .sb i{display:block;height:100%;width:100%;background:#ffd800;transform:translateX(-100%);animation:splBar 3s ease-in-out .3s forwards}
 @keyframes splLogo{to{opacity:1;transform:scale(1)}}
 @keyframes splUp{to{opacity:1;transform:none}}
@@ -328,7 +329,7 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
 </button>
 
-<div id="spl" role="presentation" aria-hidden="true"><img id="splLogo" alt="" width="136" height="136"><div class="sn" id="splName"></div><div class="st2">Everything About Your Studies</div><div class="sb"><i></i></div></div>
+<div id="spl" role="presentation" aria-hidden="true"><img id="splLogo" alt="" width="136" height="136"><div class="sn" id="splName"></div><div class="st2">Everything About Your Studies</div><div class="sb"><i></i></div><div class="sv3">v3</div></div>
 <script>
 (function(){
   var el=document.getElementById("spl");if(!el)return;
@@ -1324,8 +1325,8 @@ function hub(){HUB=true;HBACK=null;
  const apO=HO=="ap"?`<div class="dd">${[["","System"],["light","Light"],["dark","Dark"]].map(o=>`<div data-o="ap:${o[0]}" class="${(D.theme||"")==o[0]?"on":""}">${o[1]}<span>✓</span></div>`).join("")}</div>`:"";
  const acO=HO=="ak"?`<div class="dd">${ACC.map(o=>`<div data-o="ak:${o[0]}" class="${D.acc==o[0]?"on":""}"><b class="dot" style="background:${o[0]}"></b>${o[1]}<span>✓</span></div>`).join("")}</div>`:"";
  showP("Account",`<div class="hh"><div class="hav"><div class="hpic" style="background:url(${AVATAR}) center/cover"></div><button class="hpe" data-a="pf" aria-label="Edit profile">${HI.pen}</button></div><div class="hnm">${esc(D.name)}</div><div class="hsub">${m.username?"@"+esc(m.username)+" · ":""}${pn} plan</div></div>
- ${h_hd("My Ask Tr. David")}${h_grp(h_row("lib",HI.lib,"My library",{s:(()=>{const L=libAll();return L.sv.length+" saved · "+L.lk.length+" liked · "+L.sh.length+" shared"})()})+h_row("gd",HI.ab,"How to use Ask Tr. David",{s:"How to ask, follow up and get the best answers"})+h_row("pz",HI.pz,"Personalization")+h_row("mem",HI.mem,"Memory"))}
- ${h_hd("Account")}${h_grp(h_row("up",HI.up,"Upgrade plan",{c:"var(--green)"})+h_row("rf",HI.star,"Refer and earn",{s:"Get 2 free Premium days for each friend"})+h_row("us",HI.us,"Usage and limits")+h_row("cl",HI.cls,"Class",{v:D.cls?esc(D.cls):"Not chosen"})+(m.username?h_row("un",HI.user,"Username",{v:esc(m.username),n:1,x:1}):""))}
+ ${h_hd("My Ask Tr. David")}${h_grp(h_row("lib",HI.lib,"My library")+h_row("gd",HI.ab,"How to use Ask Tr. David")+h_row("pz",HI.pz,"Personalization")+h_row("mem",HI.mem,"Memory"))}
+ ${h_hd("Account")}${h_grp(h_row("up",HI.up,"Upgrade plan",{c:"var(--green)"})+h_row("rf",HI.star,"Refer and earn")+h_row("us",HI.us,"Usage and limits")+h_row("cl",HI.cls,"Class",{v:D.cls?esc(D.cls):"Not chosen"})+(m.username?h_row("un",HI.user,"Username",{v:esc(m.username),n:1,x:1}):""))}
  ${h_grp(h_row("ap",HI.sun,"Appearance",{v:apv,d:1})+apO+h_row("ak",HI.pal,"Accent color",{v:`<b class="dot" style="background:${D.acc||"#00a884"}"></b>${acn}`,d:1})+acO)}
  ${h_grp(h_row("gn",HI.gen,"General")+h_row("nf",HI.bell,"Notifications")+h_row("vo",HI.vo,"Voice")+h_row("sf",HI.sf,"Safety")+h_row("sl",HI.sl,"Security and login")+h_row("pc",HI.sf,"Privacy center")+h_row("hd",HI.hd,"History and data")+h_row("rb",HI.bug,"Report bug",{c:"var(--green)",n:1})+h_row("ab",HI.ab,"About us"))}
  ${h_grp(h_row("lo",HI.lo,"Log out",{c:"#e5173f",n:1}))}<div style="height:110px"></div>`,closeP,e=>{
@@ -1345,6 +1346,8 @@ function hub(){HUB=true;HBACK=null;
   b.querySelectorAll(".gc").forEach(g=>g.style.display=[...g.querySelectorAll(".row")].some(r=>r.style.display!="none")?"":"none");
   b.querySelectorAll(".gh,.hh,.dd").forEach(h=>h.style.display=q?"none":"")};
  $("pbody").scrollTop=sv}
+/* guide: only one heading open at a time */
+document.addEventListener("toggle",e=>{const d=e.target;if(!d||d.tagName!="DETAILS"||!d.open||!d.closest||!d.closest(".gd"))return;d.closest(".gd").querySelectorAll("details[open]").forEach(x=>{if(x!==d)x.removeAttribute("open")})},true);
 function guidePage(fromChat){
  try{gdMark("opened")}catch(e){}
  const D_=(t,b)=>`<details><summary>${t}</summary><div class="gdb">${b}</div></details>`;
@@ -5006,6 +5009,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden)annSync()}
 let REF_BUSY=0;
 async function refSync(){
  if(REF_BUSY||!(window.AK&&AK.me()))return;REF_BUSY=1;
+ try{const pm=localStorage.getItem("ask_ref_msg");if(pm){localStorage.removeItem("ask_ref_msg");uiAlert("Your account is ready. "+pm)}}catch(e){}
  try{const j=await svRpc("ref_poll",{p_t:tokNow()});
   if(!j||!j.ok||!Array.isArray(j.items)||!j.items.length)return;
   const nm=j.items.map(x=>x.name||"A friend"),d=j.items.reduce((a,x)=>a+(x.days||2),0),
@@ -5977,7 +5981,7 @@ function referPage(){
    link=base+"?ref="+j.code,
    stt=(n,l)=>`<div style="flex:1;text-align:center;padding:14px 4px"><b style="font-size:22px">${n}</b><div class="t" style="margin-top:2px">${l}</div></div>`,
    dt=x=>new Date(x).toLocaleDateString([],{day:"numeric",month:"short"}),
-   list=(j.items||[]).length?`<div class="gc">${j.items.map(x=>`<div class="row" style="cursor:default"><div>${esc(x.name||"Learner")}<small>Joined ${dt(x.joined)} · ${x.asked}/2 questions${x.done?" · done "+dt(x.completed_at):""}</small></div><span class="rv" style="${x.done?"color:var(--green);font-weight:600":""}">${x.done?"Earned ✓":"Waiting"}</span></div>`).join("")}</div>`:`<div class="empty" style="padding:24px 28px">No referrals yet. Share your link to start.</div>`;
+   list=(j.items||[]).length?`<div class="gc">${j.items.map(x=>`<div class="row" style="cursor:default"><div>${esc(x.name||"Learner")}<small>Joined ${dt(x.joined)}${x.cancelled?" · cancelled":" · "+x.asked+"/2 questions"+(x.done?" · done "+dt(x.completed_at):"")}</small></div><span class="rv" style="${x.cancelled?"color:#ff453a;font-weight:600":x.done?"color:var(--green);font-weight:600":""}">${x.cancelled?"Cancelled":x.done?"Earned ✓":"Waiting"}</span></div>`).join("")}</div>`:`<div class="empty" style="padding:24px 28px">No referrals yet. Share your link to start.</div>`;
   showP(hd,`<div class="doc" style="padding-bottom:4px"><p>Share your link. When a friend signs up with it and asks 2 questions, you get <b>2 free days of Premium</b>. You can refer as many friends as you like.</p></div>
 <div class="gc" style="padding:14px 16px"><div class="t">Your code</div><b style="font-size:26px;letter-spacing:3px">${esc(j.code)}</b><div class="t" style="margin:8px 0 2px;overflow-wrap:anywhere">${esc(link)}</div><div style="display:flex;gap:8px;margin-top:10px"><button class="lk" data-r="copy">Copy link</button><button class="lk" data-r="share">Share</button><button class="lk" data-r="refresh">Refresh</button></div></div>
 <div class="gc" style="display:flex">${stt(j.signed,"Signed up")}${stt(j.completed,"Asked 2 questions")}${stt(j.days,"Free days earned")}</div>
@@ -6001,8 +6005,8 @@ $("jump").onclick=()=>$("msgs").scrollTo({top:1e9,behavior:"smooth"});
 /* ===== ADMIN PANEL (owner only) =====
  One app, two modes for the owner account DAVID. Switch: Settings > Learner profile > Update account > Switch to Admin panel.
  Every admin database function checks the login token again (username DAVID with the owner phone), so other accounts are refused even if they find this code. */
-const ADMS=[["over","Overview",[["home","Summary"],["stats","Statistics"]]],["people","People",[["users","Learners"],["inbox","Inbox"],["rate","Ratings"]]],["money","Money",[["pay","Payments"],["free","Free days"],["proofs","Old proofs"]]],["learn","Learning",[["asks","Most asked"],["asked","Not understood"],["react","Likes and Unlikes"]]],["news","Post",[["news","Announcements"]]]];
-const ADMPG={home:()=>admHome(),stats:()=>admStats(),users:()=>admUsers(),inbox:()=>admInbox(),rate:()=>admRate(),pay:()=>admMomo(),free:()=>admFree(),proofs:()=>admPay(),asked:()=>admAsked(),react:()=>admReact(),asks:()=>admAsks(),news:()=>admNews()};
+const ADMS=[["over","Overview",[["home","Summary"],["stats","Statistics"]]],["people","People",[["users","Learners"],["inbox","Inbox"],["rate","Ratings"]]],["money","Money",[["pay","Payments"],["free","Free days"],["refs","Referrals"],["proofs","Old proofs"]]],["learn","Learning",[["asks","Most asked"],["asked","Not understood"],["react","Likes and Unlikes"]]],["news","Post",[["news","Announcements"]]]];
+const ADMPG={home:()=>admHome(),stats:()=>admStats(),users:()=>admUsers(),inbox:()=>admInbox(),rate:()=>admRate(),pay:()=>admMomo(),free:()=>admFree(),refs:()=>admRefs(),proofs:()=>admPay(),asked:()=>admAsked(),react:()=>admReact(),asks:()=>admAsks(),news:()=>admNews()};
 let ADMON=false,ADMTAB="home",ADMSEQ=0,ADMUQ="",ADMUL=[],ADMAS="open",ADMAL=[],ADMPL=[],ADMPR=[],ADMUNR=0;
 const admSec=t=>ADMS.find(x=>x[2].some(y=>y[0]==t))||ADMS[0];
 const admCall=async(fn,a)=>{try{const j=await svRpc(fn,Object.assign({p_t:tokNow()},a||{}));return j&&typeof j.ok=="boolean"?j:{ok:false,err:"fail"}}catch(e){return{ok:false,err:"net"}}};
@@ -6054,8 +6058,12 @@ function admFreeDraw(j,msg){const b=$("abody"),F=FWF,days=a=>(a.weekdays||[]).sl
  <div style="display:flex;flex-wrap:wrap;gap:6px;padding:4px 18px 8px">${FWD.map((n,i)=>`<button data-d="${i}" style="padding:9px 12px;border:0;border-radius:18px;font:inherit;font-weight:600;cursor:pointer;background:${F.wd.includes(i)?"var(--green)":"var(--wall)"};color:${F.wd.includes(i)?"#fff":"var(--text)"}">${n}</button>`).join("")}</div>
  <div style="padding:0 18px 4px;color:var(--sub);font-size:13px">And/or on a specific date</div>
  <div style="display:flex;gap:8px;align-items:center;padding:0 14px"><input class="ain" id="fwdt" type="date" style="margin:6px 0;flex:1">${abt("adddate","Add","#2f80ed").replace("flex:1;min-width:30%","flex:0 0 auto;min-width:70px")}</div>
+ <div style="padding:6px 18px 4px;color:var(--sub);font-size:13px">Or a range of dates (every day from the first date to the last)</div>
+ <div style="display:flex;gap:10px;padding:0 14px"><div style="flex:1"><div style="padding:0 4px;color:var(--sub);font-size:13px">First date</div><input class="ain" id="fwr1" type="date" style="margin:4px 0;width:100%"></div><div style="flex:1"><div style="padding:0 4px;color:var(--sub);font-size:13px">Last date</div><input class="ain" id="fwr2" type="date" style="margin:4px 0;width:100%"></div></div>
+ <div style="display:flex;padding:4px 18px 6px">${abt("addrange","Add all dates in range","#2f80ed")}</div>
  ${F.dt.length?`<div style="display:flex;flex-wrap:wrap;gap:6px;padding:4px 18px 8px">${F.dt.map((d,i)=>`<button data-rd="${i}" style="padding:8px 12px;border:0;border-radius:18px;font:inherit;cursor:pointer;background:var(--wall);color:var(--text)">${esc(fwD(d))} ✕</button>`).join("")}</div>`:""}
  <div style="display:flex;gap:10px;padding:6px 14px"><div style="flex:1"><div style="padding:0 4px;color:var(--sub);font-size:13px">From</div><input class="ain" id="fws" type="time" value="${fwQ(F.st)}" style="margin:4px 0;width:100%"></div><div style="flex:1"><div style="padding:0 4px;color:var(--sub);font-size:13px">Until</div><input class="ain" id="fwe" type="time" value="${fwQ(F.en)}" style="margin:4px 0;width:100%"></div></div>
+ <div style="padding:0 18px 6px"><button data-a="allday" style="border:0;background:none;color:#2f80ed;font:inherit;font-weight:600;padding:4px 0;cursor:pointer">Use the whole day (12:00 AM to 11:59 PM)</button></div>
  <div style="padding:2px 18px;color:var(--sub);font-size:13px;line-height:1.45">Times are East Africa Time (Kampala). At the end time everyone goes back to the plan they had. Anyone on a higher plan keeps it.</div>
  <div id="fwm" style="padding:6px 18px;min-height:20px;color:var(--sub)">${esc(msg)}</div>
  <div style="display:flex;gap:8px;padding:2px 18px 10px">${abt("save",F.id?"Save changes":"Save schedule","#00a884")}${F.id?abt("clear","Cancel","#6b7c85"):""}</div>
@@ -6065,6 +6073,10 @@ function admFreeDraw(j,msg){const b=$("abody"),F=FWF,days=a=>(a.weekdays||[]).sl
   const p=e.target.closest("[data-p]");if(p){fwRead();FWF.plan=p.dataset.p;admFreeDraw(j,"");return}
   const d=e.target.closest("[data-d]");if(d){fwRead();const k=+d.dataset.d,i=FWF.wd.indexOf(k);if(i<0)FWF.wd.push(k);else FWF.wd.splice(i,1);admFreeDraw(j,"");return}
   if(e.target.closest("[data-a=adddate]")){const v=$("fwdt").value;if(!/^\d{4}-\d{2}-\d{2}$/.test(v)){say("Pick a date first.");return}fwRead();if(!FWF.dt.includes(v))FWF.dt.push(v);FWF.dt.sort();admFreeDraw(j,"");return}
+  if(e.target.closest("[data-a=addrange]")){const a=$("fwr1").value,z=$("fwr2").value;if(!/^\d{4}-\d{2}-\d{2}$/.test(a)||!/^\d{4}-\d{2}-\d{2}$/.test(z)){say("Pick the first date and the last date.");return}if(z<a){say("The last date must not be before the first date.");return}
+   const A=a.split("-").map(Number),Z=z.split("-").map(Number),t0=Date.UTC(A[0],A[1]-1,A[2]),t1=Date.UTC(Z[0],Z[1]-1,Z[2]),add=[];for(let t=t0;t<=t1;t+=864e5){const d=new Date(t).toISOString().slice(0,10);if(!FWF.dt.includes(d))add.push(d)}
+   if(FWF.dt.length+add.length>60){say("That is more than 60 dates in total. Use a shorter range.");return}fwRead();FWF.dt=FWF.dt.concat(add).sort();admFreeDraw(j,add.length?"":"Those dates are already added.");return}
+  if(e.target.closest("[data-a=allday]")){fwRead();FWF.st="00:00";FWF.en="23:59";admFreeDraw(j,"");return}
   const rd=e.target.closest("[data-rd]");if(rd){fwRead();FWF.dt.splice(+rd.dataset.rd,1);admFreeDraw(j,"");return}
   if(e.target.closest("[data-a=clear]")){FWF=fwNew();admFreeDraw(j,"");return}
   const ed=e.target.closest("[data-ed]");if(ed){const x=j.items[+ed.dataset.ed];if(!x)return;FWF={id:x.id,title:x.title,plan:x.plan,wd:(x.weekdays||[]).slice(),dt:(x.on_dates||[]).slice(),st:x.start_time,en:x.end_time,on:x.enabled};admFreeDraw(j,"");scrollTo(0,0);b.scrollTop=0;return}
@@ -6077,6 +6089,50 @@ function admFreeDraw(j,msg){const b=$("abody"),F=FWF,days=a=>(a.weekdays||[]).sl
   const r=await admCall("admin_fw_save",{p_id:FWF.id||null,p_title:FWF.title.trim(),p_plan:FWF.plan,p_weekdays:FWF.wd.slice().sort(),p_on_dates:FWF.dt,p_start:FWF.st,p_end:FWF.en,p_enabled:FWF.on!==false});
   if(!r.ok){sv.disabled=false;say(fwErr(r));return}
   const was=FWF.id;FWF=fwNew();try{syncPlan()}catch(x){}redo(was?"Saved.":"Saved. It runs automatically on those days.")}}
+
+/* REFERRALS (admin): every referral in one list, with Cancel and Restore. The database does the work (admin_ref_list, admin_ref_cancel, admin_ref_restore); this screen only shows the list and sends the owner's choice. */
+let RFF="all",RFQ="",RFX=null,RFJ=null;
+const rfSt=x=>x.cancelled_at?"cancelled":x.completed_at?"done":"waiting";
+const rfDt=d=>{try{return new Date(d).toLocaleDateString([],{day:"numeric",month:"short",year:"numeric"})}catch(e){return""}};
+const rfErr=r=>r&&r.err=="net"?"No internet. Try again.":r&&r.err=="not allowed"?"This is only for the owner account.":r&&r.err&&r.err!="fail"?String(r.err):"Could not save. Try again.";
+async function admRefs(){const s=ADMSEQ,b=$("abody");b.innerHTML=admLd();const j=await admCall("admin_ref_list");if(s!==ADMSEQ)return;
+ if(!j.ok){b.innerHTML=admFail(j,1);b.onclick=e=>{if(e.target.closest("[data-r]"))admRefs()};return}
+ RFJ=j;RFX=null;admRefsDraw("")}
+function admRefsDraw(msg){const j=RFJ,b=$("abody");if(!j)return;
+ const wait=Math.max(0,admN(j.total)-admN(j.done)-admN(j.cancelled)),
+  stt=(n,l,c)=>`<div style="flex:1;text-align:center;padding:12px 2px"><b style="font-size:20px;${c?"color:"+c:""}">${n}</b><div style="color:var(--sub);font-size:12px;margin-top:2px">${l}</div></div>`,
+  F=[["all","All"],["waiting","Waiting"],["done","Earned"],["cancelled","Cancelled"]];
+ b.innerHTML=`<div class="asec">Referrals</div>
+ <div style="display:flex;padding:0 8px">${stt(admN(j.total),"Total")}${stt(wait,"Waiting")}${stt(admN(j.done),"Earned","#00a884")}${stt(admN(j.cancelled),"Cancelled","#ff453a")}</div>
+ <div style="padding:2px 18px 8px;color:var(--sub);font-size:13px;line-height:1.45">A referral is earned when the friend signs up with the code and asks 2 different questions. The learner who referred gets ${"2 free days of Premium"}. Cancel a referral to stop it from counting. ${admN(j.days)} free day${admN(j.days)==1?"":"s"} given in total.</div>
+ <div style="display:flex;gap:6px;padding:4px 18px 8px">${F.map(f=>svBtn(RFF==f[0],f[1],"data-f",f[0])).join("")}</div>
+ <input class="ain" id="rfq" placeholder="Search by name or username" autocomplete="off" value="${fwQ(RFQ)}">
+ <div id="rfm" style="padding:4px 18px;min-height:20px;color:var(--sub)">${esc(msg||"")}</div>
+ <div id="rfl"></div>`;
+ admRefsList();
+ b.onclick=async e=>{
+  const f=e.target.closest("[data-f]");if(f){RFF=f.dataset.f;RFX=null;admRefsDraw("");return}
+  const say=t=>{const m=$("rfm");if(m)m.textContent=t};
+  const cn=e.target.closest("[data-cn]");if(cn){RFX=+cn.dataset.cn;admRefsList();const n=$("rfn");if(n)n.focus();return}
+  if(e.target.closest("[data-keep]")){RFX=null;admRefsList();return}
+  const go=e.target.closest("[data-go]");if(go){const id=+go.dataset.go,x=(RFJ.items||[]).find(y=>y.id==id);if(!x)return;
+   const rv=$("rfv"),nt=$("rfn");go.disabled=true;say("Cancelling…");
+   const r=await admCall("admin_ref_cancel",{p_id:id,p_revoke:rv?rv.checked:true,p_note:nt?nt.value.trim():""});
+   if(!r.ok){go.disabled=false;say(rfErr(r));return}
+   await admRefsReload("Referral cancelled.");return}
+  const rs=e.target.closest("[data-rs]");if(rs){const id=+rs.dataset.rs;
+   uiConfirm("Restore this referral? If free days were taken back when it was cancelled, they are not given back automatically.",async()=>{
+    const r=await admCall("admin_ref_restore",{p_id:id});if(r.ok)await admRefsReload("Referral restored.");else uiAlert(rfErr(r))},"Restore");return}};
+ const q=$("rfq");if(q)q.oninput=()=>{RFQ=q.value;RFX=null;admRefsList()}}
+async function admRefsReload(note){const n=await admCall("admin_ref_list");if(n.ok){RFJ=n;RFX=null;admRefsDraw(note)}else admRefs()}
+function admRefsList(){const j=RFJ,el=$("rfl");if(!el||!j)return;
+ const q=RFQ.trim().toLowerCase(),it=(j.items||[]).filter(x=>(RFF=="all"||rfSt(x)==RFF)&&(!q||[x.referrer,x.referrer_user,x.referred,x.referred_user].some(v=>String(v||"").toLowerCase().includes(q))));
+ if(!it.length){el.innerHTML='<div style="padding:12px 18px;color:var(--sub)">'+(j.items&&j.items.length?"No referrals match.":"No referrals yet.")+'</div>';return}
+ el.innerHTML=it.map(x=>{const st=rfSt(x),col=st=="done"?"#00a884":st=="cancelled"?"#ff453a":"#6b7c85",lab=st=="done"?"Earned":st=="cancelled"?"Cancelled":"Waiting "+admN(x.asked)+"/2",
+  open=RFX==x.id&&st!="cancelled",hasDays=st=="done"&&admN(x.rewarded_days)>0;
+  return `<div class="row" style="display:block"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div style="min-width:0"><b>${esc(String(x.referrer||"A learner"))}</b> <small style="color:var(--sub)">@${esc(String(x.referrer_user||""))}</small><div style="color:var(--sub);font-size:13px;margin-top:2px">invited <b style="color:var(--text);font-weight:600">${esc(String(x.referred||"A learner"))}</b> @${esc(String(x.referred_user||""))}</div></div><span style="flex:none;font-weight:700;color:${col}">${lab}</span></div>
+  <div style="color:var(--sub);font-size:13px;margin-top:4px">Joined ${rfDt(x.joined)}${x.completed_at?" · earned "+rfDt(x.completed_at):""}${hasDays?" · "+admN(x.rewarded_days)+" free days given":""}${x.cancelled_at?" · cancelled "+rfDt(x.cancelled_at):""}${x.cancel_note?" · “"+esc(String(x.cancel_note))+"”":""}</div>
+  ${st=="cancelled"?`<button data-rs="${x.id}" style="margin-top:6px;border:0;background:none;color:#2f80ed;font:inherit;font-weight:600;padding:4px 0;cursor:pointer">Restore</button>`:open?`<div style="margin-top:8px;padding:10px;border-radius:12px;background:var(--wall)"><input class="ain" id="rfn" maxlength="200" placeholder="Reason (optional)" autocomplete="off" style="margin:0 0 8px;width:100%">${hasDays?`<label style="display:flex;gap:8px;align-items:center;font-size:14px;margin-bottom:8px"><input type="checkbox" id="rfv" checked>Also take back the ${admN(x.rewarded_days)} free days</label>`:""}<div style="display:flex;gap:8px">${abt("go","Cancel referral","#ff453a").replace('data-a="go"','data-go="'+x.id+'"')}${abt("keep","Keep it","#6b7c85").replace('data-a="keep"','data-keep="1"')}</div></div>`:`<button data-cn="${x.id}" style="margin-top:6px;border:0;background:none;color:#ff453a;font:inherit;font-weight:600;padding:4px 0;cursor:pointer">Cancel referral</button>`}</div>`}).join("")}
 
 
 /* HOME */
@@ -6867,7 +6923,7 @@ async function done(r,rm){if(r.ok){T=r.token;ME=r.me;const S=rm===false?SS:LS;LS
 function scr(n){const f=$("af"),h=t=>$("ah").textContent=t;$("auth").style.display="block";window.__authScr=n;window.__authGo=scr;try{window.__backSync&&window.__backSync()}catch(e){}
  const FG=(w,id)=>async v=>{const r=await rpc("acct_forgot",{p_what:w,p_user:v.u,p_phone:v.p,p_secret:v.s,p_new:v.n});if(r.ok){scr("login");er((w=="pin"?"Pin":"Password")+" updated. Please login.",1)}return r};
  if(n=="login"){h("Login");form(f,[["i","login","Names / Username"],["p","cpw","Password"]],"Login",async v=>done(await rpc("acct_login",{p_id:v.i,p_pass:v.p}),v.rm),AR(L("fp","Forgot password"),L("create","Create account")),'<label class="rm"><input type="checkbox" id="rm" checked>Remember login</label>')}
- if(n=="create"){h("Create account");form(f,[["n","names","Names"],["u","username","Username"],["p","phone","Phone"],["k","cls","Class or combination"],["w","password","Password"],["c","pin","Pin"]],"Create account",async v=>{const r=await rpc("acct_create",{p_names:v.n,p_user:v.u,p_phone:v.p,p_pass:v.w,p_pin:v.c});if(r.ok){try{LS.setItem("ask_cls_"+((r.me&&r.me.username)||v.u),v.k)}catch(e){}try{const rc=(($("refc")||{}).value||"").trim().toUpperCase();if(rc){await rpc("ref_claim",{p_t:r.token,p_code:rc});LS.removeItem("ask_ref")}}catch(e){}}return done(r)},L("login","I already have an account: Login"),'<div class="fw"><label>Referral code (optional)</label><div class="pw"><input class="fld" id="refc" maxlength="12" autocomplete="off" autocapitalize="characters" placeholder="Leave empty if you have none" value="'+String(LS.getItem("ask_ref")||"").replace(/[^A-Z0-9]/g,"")+'"></div></div>')}
+ if(n=="create"){h("Create account");form(f,[["n","names","Names"],["u","username","Username"],["p","phone","Phone"],["k","cls","Class or combination"],["w","password","Password"],["c","pin","Pin"]],"Create account",async v=>{const r=await rpc("acct_create",{p_names:v.n,p_user:v.u,p_phone:v.p,p_pass:v.w,p_pin:v.c});if(r.ok){try{LS.setItem("ask_cls_"+((r.me&&r.me.username)||v.u),v.k)}catch(e){}try{const rc=(($("refc")||{}).value||"").trim().toUpperCase();if(rc){const cr=await rpc("ref_claim",{p_t:r.token,p_code:rc});LS.removeItem("ask_ref");if(!cr.ok&&!cr.net)LS.setItem("ask_ref_msg",String(cr.err||"The referral code could not be used."))}}catch(e){}}return done(r)},L("login","I already have an account: Login"),'<div class="fw"><label>Referral code (optional)</label><div class="pw"><input class="fld" id="refc" maxlength="12" autocomplete="off" autocapitalize="characters" placeholder="Leave empty if you have none" value="'+String(LS.getItem("ask_ref")||"").replace(/[^A-Z0-9]/g,"")+'"></div></div>')}
  if(n=="fp"){h("Forgot password");form(f,[["u","uname","Username"],["p","phoneo","Phone"],["s","cpin","Pin"],["n","password","New password"]],"Reset password",FG("password"),AR(L("fn","Forgot pin"),L("ct","Forgot password and pin"))+BK)}
  if(n=="fn"){h("Forgot pin");form(f,[["u","uname","Username"],["p","phoneo","Phone"],["s","cpw","Password"],["n","pin","New pin"]],"Reset pin",FG("pin"),L("ct","Forgot password and pin")+BK)}
  if(n=="ct"){h("Contact us");f.innerHTML='<div class="fw" style="line-height:1.5">If you forgot both your password and your pin, contact us and we will help you recover your account.</div>'+`<a class="btn" style="text-align:center;text-decoration:none" href="tel:+256788737517">Call 0788 737 517</a><a class="btn" style="text-align:center;text-decoration:none;background:#25d366;margin-top:10px" href="https://wa.me/256788737517" target="_blank" rel="noopener">WhatsApp</a><a class="btn" style="text-align:center;text-decoration:none;background:var(--sub);margin-top:10px" href="mailto:asktrdavid@gmail.com">Email asktrdavid@gmail.com</a>`+BK;f.onclick=e=>{if(e.target.dataset.go)scr(e.target.dataset.go)};f.oninput=null;f.onfocusin=null}}

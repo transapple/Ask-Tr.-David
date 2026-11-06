@@ -1195,7 +1195,7 @@ const CH='<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>';
 let D={name:"Alex",msgs:[],trash:[],acc:"#00a884"};
 try{const x=JSON.parse(localStorage.getItem("chat_single2"));if(x&&(x.chats||x.msgs)){D=x;if(!D.msgs)D.msgs=[]}}catch(e){}
 D.trash=D.trash||[];if(!D.annSeen)D.annSeen={};/* What's new is OFF until it is connected to the database (see Project handoff). Nothing is added to the list while WN_ON is false. */const WN_ON=true;if(!D.notes||!WN_ON)D.notes=[];D.acc=D.acc||"#00a884";
-const save=()=>{try{localStorage.setItem("chat_single2",JSON.stringify(D,function(k,v){return(this===D&&k=="msgs")||k=="img"?undefined:v}))}catch(e){}};
+const save=()=>{try{localStorage.setItem("chat_single2",JSON.stringify(D,function(k,v){return(this===D&&k=="msgs")||k=="img"?undefined:v}))}catch(e){}try{window.__syncDirty&&__syncDirty()}catch(e){}};
 const hm=t=>new Date(t).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
 const dl=t=>{const d=new Date(t);return d.toDateString()==new Date().toDateString()?"Today":d.toLocaleDateString()};
 const esc=s=>s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
@@ -1267,7 +1267,7 @@ function settings0(){
  showP("Settings",`
  <div class="row" data-a="ex"><span class="ri">${IC.dl}</span><div>Export chat<small>Download as a text file</small></div></div>
  <div class="row" data-a="tr"><span class="ri">${IC.bin}</span><div>Trash<small>${D.trash.length} message${D.trash.length==1?"":"s"}</small></div></div>
- <div class="row" data-a="md"><span class="ri">${IC.star}</span><div>AI models<small>Which model is best for lessons, exams and research</small></div></div>
+ <div class="row" data-a="md"><span class="ri">${IC.star}</span><div>Teaching styles<small>Which model is best for lessons, exams and research</small></div></div>
  ${isOwner()?`<div class="row" data-a="wk"><span class="ri">${IC.star}</span><div>Preview rating pop-up<small>See what learners get when you send it (nothing is sent)</small></div></div>`:""}
  <div class="row" data-a="up"><span class="ri">${IC.refresh}</span><div>Update app<small>Reload to get the latest version</small></div></div>
 `,closeP,e=>{
@@ -1324,7 +1324,7 @@ function hub(){HUB=true;HBACK=null;
  const apO=HO=="ap"?`<div class="dd">${[["","System"],["light","Light"],["dark","Dark"]].map(o=>`<div data-o="ap:${o[0]}" class="${(D.theme||"")==o[0]?"on":""}">${o[1]}<span>✓</span></div>`).join("")}</div>`:"";
  const acO=HO=="ak"?`<div class="dd">${ACC.map(o=>`<div data-o="ak:${o[0]}" class="${D.acc==o[0]?"on":""}"><b class="dot" style="background:${o[0]}"></b>${o[1]}<span>✓</span></div>`).join("")}</div>`:"";
  showP("Account",`<div class="hh"><div class="hav"><div class="hpic" style="background:url(${AVATAR}) center/cover"></div><button class="hpe" data-a="pf" aria-label="Edit profile">${HI.pen}</button></div><div class="hnm">${esc(D.name)}</div><div class="hsub">${m.username?"@"+esc(m.username)+" · ":""}${pn} plan</div></div>
- ${h_hd("My Ask Tr. David")}${h_grp(h_row("lib",HI.lib,"My library",{s:(()=>{const L=libAll();return L.sv.length+" saved · "+L.lk.length+" liked · "+L.sh.length+" shared"})()})+h_row("pz",HI.pz,"Personalization")+h_row("mem",HI.mem,"Memory"))}
+ ${h_hd("My Ask Tr. David")}${h_grp(h_row("lib",HI.lib,"My library",{s:(()=>{const L=libAll();return L.sv.length+" saved · "+L.lk.length+" liked · "+L.sh.length+" shared"})()})+h_row("gd",HI.ab,"How to use Ask Tr. David",{s:"How to ask, follow up and get the best answers"})+h_row("pz",HI.pz,"Personalization")+h_row("mem",HI.mem,"Memory"))}
  ${h_hd("Account")}${h_grp(h_row("up",HI.up,"Upgrade plan",{c:"var(--green)"})+h_row("rf",HI.star,"Refer and earn",{s:"Get 2 free Premium days for each friend"})+h_row("us",HI.us,"Usage and limits")+h_row("cl",HI.cls,"Class",{v:D.cls?esc(D.cls):"Not chosen"})+(m.username?h_row("un",HI.user,"Username",{v:esc(m.username),n:1,x:1}):""))}
  ${h_grp(h_row("ap",HI.sun,"Appearance",{v:apv,d:1})+apO+h_row("ak",HI.pal,"Accent color",{v:`<b class="dot" style="background:${D.acc||"#00a884"}"></b>${acn}`,d:1})+acO)}
  ${h_grp(h_row("gn",HI.gen,"General")+h_row("nf",HI.bell,"Notifications")+h_row("vo",HI.vo,"Voice")+h_row("sf",HI.sf,"Safety")+h_row("sl",HI.sl,"Security and login")+h_row("pc",HI.sf,"Privacy center")+h_row("hd",HI.hd,"History and data")+h_row("rb",HI.bug,"Report bug",{c:"var(--green)",n:1})+h_row("ab",HI.ab,"About us"))}
@@ -1335,7 +1335,7 @@ function hub(){HUB=true;HBACK=null;
    applyTheme();save();HO="";hub();return}
   const a=e.target.closest("[data-a]")?.dataset.a;if(!a)return;HSC=$("pbody").scrollTop;
   if(a=="ap"||a=="ak"){HO=HO==a?"":a;hub();return}
-  ({pf:profile,rf:()=>referPage(),lib:()=>library("sv"),pz:personalPage,mem:memoryPage,up:()=>plans(1),us:usagePage,cl:()=>clsPick(1),gn:generalPage,nf:notifPage,vo:voiceLang,sf:safetyPage,sl:securityPage,pc:privacyCenter,hd:historyPage,rb:supportOpen,ab:aboutPage,
+  ({pf:profile,gd:()=>guidePage(),rf:()=>referPage(),lib:()=>library("sv"),pz:personalPage,mem:memoryPage,up:()=>plans(1),us:usagePage,cl:()=>clsPick(1),gn:generalPage,nf:notifPage,vo:voiceLang,sf:safetyPage,sl:securityPage,pc:privacyCenter,hd:historyPage,rb:supportOpen,ab:aboutPage,
    lo:()=>uiConfirm("Log out of this account?",()=>{HUB=false;out()},"Log out")})[a]?.()});
  const pl=$("panel");pl.firstElementChild.style.display="none";
  pl.insertAdjacentHTML("beforeend",`<button id="hbk" aria-label="Back">${HI.back}</button><div id="hsb">${HI.srch}<input id="hsq" placeholder="Search settings" autocomplete="off"></div>`);
@@ -1345,12 +1345,126 @@ function hub(){HUB=true;HBACK=null;
   b.querySelectorAll(".gc").forEach(g=>g.style.display=[...g.querySelectorAll(".row")].some(r=>r.style.display!="none")?"":"none");
   b.querySelectorAll(".gh,.hh,.dd").forEach(h=>h.style.display=q?"none":"")};
  $("pbody").scrollTop=sv}
+function guidePage(fromChat){
+ try{gdMark("opened")}catch(e){}
+ const D_=(t,b)=>`<details><summary>${t}</summary><div class="gdb">${b}</div></details>`;
+ const ex=a=>'<ul class="gdx">'+a.map(x=>`<li>${x}</li>`).join("")+'</ul>';
+ const no=(a,b)=>`<div class="gdc"><div class="bad">Not so good</div>${a}<div class="good">Better</div>${b}</div>`;
+ h_page("How to use Ask Tr. David",`<style>
+ .gd{padding:6px 14px 120px}.gd .lead{padding:10px 4px 6px;line-height:1.5;color:var(--text)}
+ .gd details{background:var(--wall,rgba(127,127,127,.08));border-radius:14px;margin:10px 0;overflow:hidden}
+ .gd summary{padding:15px 16px;font-weight:700;font-size:16px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px;color:var(--text)}
+ .gd summary::-webkit-details-marker{display:none}.gd summary::after{content:"+";font-size:22px;font-weight:400;color:var(--green)}
+ .gd details[open] summary::after{content:"\\2212"}
+ .gdb{padding:0 16px 14px;line-height:1.5;color:var(--text);font-size:15px}.gdb p{margin:6px 0}.gdb h4{margin:14px 0 4px;font-size:15px;color:var(--green)}
+ .gdx{margin:4px 0 8px;padding-left:20px}.gdx li{margin:4px 0}
+ .gdc{border:1px solid rgba(127,127,127,.25);border-radius:12px;padding:10px 12px;margin:8px 0;font-size:14.5px}
+ .gdc .bad,.gdc .good{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin:4px 0 2px}.gdc .bad{color:#e5173f}.gdc .good{color:var(--green);margin-top:8px}
+ </style><div class="gd"><p class="lead">This guide shows you how to use Ask Tr. David so you get clear answers that help you learn and pass. Tap a heading to open it.</p>`+
+ D_("1. Start here: what I can do for you",
+ `<p>I am your study helper for Uganda school subjects, from Primary to Senior 6. You can ask me to:</p>`+ex(["explain a topic in simple words","show you how to work out a question, step by step, with the full working","give examples, common mistakes and likely exam questions","quiz you, so you can test yourself","write practice exams in the UNEB exam format","explain one part of an answer you did not understand","tell the same answer again in a different way"])+
+ `<p>Ask by typing, or by voice with the microphone. I work best when you tell me <b>what you want</b>, <b>the topic</b>, and <b>your class</b>.</p>`)+
+ D_("2. Three steps to a good answer",
+ `<h4>Step 1: Set your class and subject</h4><p>Choose your class (Account, then Class) and the subject you are studying. I write the answer for your level. A Senior 2 answer is different from a Primary 6 answer.</p>
+ <h4>Step 2: Ask clearly</h4><p>Name the topic and say what you need: the meaning, the steps, an example, the reasons, or a quiz.</p>
+ <h4>Step 3: Follow up</h4><p>Do not stop at the first answer. Ask again in short words until you understand: "Give an example", "Why?", "I do not understand".</p>`)+
+ D_("3. Short questions: how to ask them",
+ `<p>A short question is best when you want one clear idea. Put the <b>topic</b> and the <b>kind of answer</b> in it.</p>`+ex(["What is osmosis?","Define photosynthesis","Explain the causes of soil erosion","State three uses of copper","Differences between a plant cell and an animal cell","How do I find the area of a triangle?","What is a noun? Give examples"])+
+ no("Osmosis","What is osmosis? Give an example from a plant.")+
+ `<p>One word can work, but I may guess what you want. A few more words give you a better answer.</p>`)+
+ D_("4. How to follow up (very important)",
+ `<p>After an answer, you can ask short follow-ups. I know what topic we are on, so you do not need to repeat it. Try these:</p>`+ex(["<b>More detail:</b> \"More details\", \"Go deeper\"","<b>Simple words:</b> \"Explain simply\", \"I do not understand\", \"Explain again\"","<b>Why and how:</b> \"Why?\", \"How does it work?\", \"Show me the steps\"","<b>Examples:</b> \"Give an example\", \"Give another example\"","<b>Use and meaning:</b> \"Where is it used?\", \"What is the formula?\", \"Define it\"","<b>Revision:</b> \"Summary\", \"Common mistakes\", \"Exam tips\", \"Tricks to remember\"","<b>Test yourself:</b> \"Quiz me\"","<b>Compare:</b> \"Compare it with diffusion\""])+
+ `<h4>Point at the part you did not understand</h4><p>You can ask about one piece of an answer:</p>`+ex(["\"What do you mean by <b>\"active transport\"</b>?\"","\"Explain <b>step 3</b> again\"","\"Why is that the answer?\"","\"Are you sure?\""])+
+ `<p>If you ask the same follow-up again, I answer in a new way each time, for example more details, then an example, then steps.</p>
+ <h4>Deeper explanations</h4><p>On the Standard plan and above you can also ask for: <b>"Go deeper"</b> (three layers of understanding), <b>"Causes and consequences"</b>, <b>"Compare X and Y"</b>, and <b>"How is it linked to other topics?"</b></p>`)+
+ D_("5. Long questions: how to get a clear answer",
+ `<p>Long questions are common in exams: a story, some numbers, and then several tasks. I read the <b>whole</b> question. To get the best answer:</p>`+ex(["<b>Paste or type the whole question</b>, from the first line to the last. Do not cut it.","Include every number, unit and name. A missing number means a wrong answer.","Keep the parts as they are: (a), (b), (c) or Task A, Task B. I will answer each part.","Say your class, for example: \"I am in Senior 3.\"","If you need working, say so: \"Show the full working.\"","If you do not understand one part, ask me about that part after the first answer."])+
+ no("A car goes from A to B. How long?","A car left town A at 80 km/h for town B. Another car left town B at 8 am for town A at 120 km/h. After two hours they met. (a) Find the distance between A and B. (b) Find where they met. Show the full working. I am in Senior 4.")+
+ `<p>If an answer looks too big, ask: <b>"Explain part (b) only"</b> or <b>"Show part (a) again, simply."</b></p>`)+
+ D_("6. Tips and tricks for the best answers",
+ `<h4>Say what you want</h4>`+ex(["\"Explain...\" for understanding","\"Give steps to...\" for how to do something","\"Give examples of...\" for examples","\"Compare... and...\" for differences","\"Quiz me on...\" for practice","\"Give likely exam questions on...\" for revision"])+
+ `<h4>Be exact</h4><p>\"Chemical bonding in O-Level\" is better than \"bonding\". \"Photosynthesis, the light stage\" is better than \"plants\".</p>
+ <h4>Say how you want it</h4><p>\"In simple words\", \"in five points\", \"with an example from Uganda\", \"like I am in Primary 5\".</p>
+ <h4>One topic at a time</h4><p>Ask about one topic, finish it, then move on. Mixed questions give mixed answers.</p>
+ <h4>Check yourself</h4><p>After each answer say \"Quiz me\". If you cannot answer, ask for the part you missed.</p>
+ <h4>Save what helps</h4><p>Tap <b>Save</b> under an answer to keep it in My library. Tap <b>Like</b> on answers that helped you.</p>
+ <h4>Use Redo</h4><p>If the answer is hard to follow, tap <b>Redo</b>. I write it again in a new style: a story, steps, questions and answers, an everyday picture, or the exam view. Tap again for another style.</p>
+ <h4>Teaching styles</h4><p>In Account, then General, then Teaching styles, you can choose how I teach: Teacher (simple words), Tutor (step by step), Lecturer (exact terms), Mentor (exam coaching), and more. Pick the one that helps you most.</p>`)+
+ D_("7. How to ask in each subject",
+ `<h4>Mathematics</h4><p>Type the full question with all numbers and units. Say: \"Show the full working.\" Ask \"Check my answer: ...\" to compare yours. Ask \"Show another example like this.\" Write powers as x^2, roots as sqrt(x), fractions as a/b.</p>
+ <h4>Physics</h4><p>Name the law or quantity. Give the numbers and units. Ask: \"State the formula, then solve.\" For experiments ask: \"Describe the experiment and the results.\"</p>
+ <h4>Chemistry</h4><p>Name the substance or reaction. Ask: \"Write the balanced equation\", \"Explain the test and the observation\", or \"Give uses and the effect on the environment.\"</p>
+ <h4>Biology</h4><p>Name the system, process or organism. Ask: \"Explain in steps\", \"Name the parts and their functions\", or \"Compare X and Y in a table\".</p>
+ <h4>Science (Primary)</h4><p>Use short questions: \"What are the parts of a flower?\", \"Why do we boil water before drinking?\". Ask for an example from home or the garden.</p>
+ <h4>English</h4><p>Name the skill. Ask: \"Explain the past perfect tense with examples\", \"Correct this sentence: ...\", \"Give me the steps to write a formal letter\", \"Help me write a composition on...\". Paste your own writing and ask me to show the mistakes.</p>
+ <h4>History and Geography</h4><p>Say the period, place or feature. Ask: \"What were the causes and effects of...?\", \"Describe how fold mountains form\", \"Give the points for and against...\". Ask for dates, places and names to remember.</p>
+ <h4>Agriculture</h4><p>Name the crop, animal or practice. Ask: \"Explain the steps to prepare a seedbed\", \"What are the signs of a sick animal?\", \"Give the advantages and disadvantages of mulching.\"</p>
+ <h4>Religious Education (CRE and IRE)</h4><p>Name the teaching, person or event. Ask for the meaning, the main points and how it applies to life today.</p>
+ <h4>ICT</h4><p>Name the term or tool. Ask: \"Explain with an example\", \"Give the difference between hardware and software\", or \"Give the steps to...\"</p>
+ <h4>Entrepreneurship</h4><p>Name the idea. Ask: \"Explain the qualities of a good entrepreneur\", \"Give the steps of making a business plan\", \"Give an example of a small business in Uganda.\"</p>`)+
+ D_("8. Mistakes to avoid",
+ `<ul class="gdx"><li><b>Asking with one word only.</b> Add what you want: the meaning, the steps, or an example.</li><li><b>Cutting a long question.</b> A missing part or number gives a wrong or incomplete answer.</li><li><b>Mixing many topics in one question.</b> Ask them one by one.</li><li><b>Using the wrong class.</b> Check your class in Account so the answer fits your level.</li><li><b>Stopping when you do not understand.</b> Say \"I do not understand\" or \"explain again\". That is what follow-ups are for.</li><li><b>Copying answers without trying.</b> Try the work first. Then ask me to check it.</li><li><b>Trusting every answer without checking.</b> Answers can sometimes have mistakes. Check important work with your teacher or textbook.</li><li><b>Typing private details.</b> Never type passwords or private information in the chat.</li><li><b>Asking me to do your exam.</b> I help you learn. I do not replace your own work.</li><li><b>Spelling in a rush.</b> I understand many spelling mistakes, but clear words give better answers.</li></ul>`)+
+ D_("9. Practice and exams",
+ `<p>Ask for practice on a topic, for example \"Give me exam practice on electricity\" or \"Quiz me on fractions\".</p><p>Exams and scoring guides in this app are <b>written by our system in the UNEB exam format</b>. They are <b>not official UNEB exams</b>, and the marks are practice marks. Use them to train. For the real exam rules and papers, check with your teacher and UNEB.</p><p>When you open the tasks, use <b>Show answer</b> or <b>Explain answer</b> after you try each task yourself.</p>`)+
+ D_("10. If an answer is not clear or seems wrong",
+ `<ul class="gdx"><li>Say <b>\"I do not understand\"</b> or <b>\"explain simply\"</b>.</li><li>Ask about the exact part: <b>\"What do you mean by...?\"</b></li><li>Tap <b>Redo</b> for a new way of explaining.</li><li>Ask <b>\"Are you sure?\"</b> and I will check the facts again.</li><li>Rewrite your question with more detail: topic, class, and what you want.</li><li>Tap the dislike button if the answer is wrong, so it can be checked.</li><li>Check with your teacher or textbook for anything important.</li></ul>`)+
+ D_("11. Ready-to-use examples",
+ `<p>Copy these and change the topic:</p>`+ex(["Explain [topic] in simple words for Senior 2.","Give the steps to solve [type of question], with one worked example.","What are the common mistakes in [topic]?","Give me five likely exam questions on [topic] with short answers.","Compare [A] and [B] in a table.","Summarise [topic] in five points.","Quiz me on [topic].","Here is my answer: [your answer]. What is right and what is wrong?"])+
+ `<p>You can also ask me: <b>\"How can I use you?\"</b> and I will give you the quick version.</p>`)+
+ `</div>`,fromChat===true?closeP:null)}
+/* ===== GUIDE NUDGE: the app notices when a learner may not know how to use it and offers the guide ===== 
+   It looks at how the learner uses the chat (not at what the subject is): many very short questions, questions with no answer, thumbs down or Redo again and again,
+   or repeated "I do not understand". It shows a small card with "Read the guide" and "Skip". It never shows after the guide was opened or "Do not show again" was tapped,
+   at most 3 times in all, and never twice in 24 hours. It waits while the learner is typing, a pop-up or page is open, or the app is in the background. Only a counter is kept on the phone. */
+const GDK="ask_gdn";
+function gdGet(){try{return Object.assign({opened:0,off:0,shown:0,last:0,nq:0},JSON.parse(localStorage.getItem(GDK)||"{}"))}catch(e){return{opened:0,off:0,shown:0,last:0,nq:0}}}
+function gdPut(o){try{localStorage.setItem(GDK,JSON.stringify(o))}catch(e){}}
+function gdMark(k){const o=gdGet();o[k]=1;gdPut(o);try{const n=$("gdn");if(n)n.style.display="none"}catch(e){}}
+const GDQ=[];let GDU=0,GDD=0,GDR=0,GDC=0,GDP=false,GDWHY="";
+const GDMSG={
+ "new":"New here? Read the short guide on how to ask questions and get the best answers.",
+ "short":"Very short questions are hard to answer well. The guide shows how to ask so you get the answer you need.",
+ "un":"Some of your questions did not get an answer. The guide shows how to ask them so I can help you.",
+ "bad":"Is the answer not clear? The guide shows how to follow up and get a clearer answer.",
+ "confused":"Still not clear? The guide shows how to ask follow-up questions step by step."};
+function gdBusy(){const d=$("dlgx"),a=$("ann"),pn=$("panel"),au=$("auth"),i=$("inp");
+ return document.hidden||(d&&d.style.display!=="none")||(a&&a.style.display=="flex")||(pn&&pn.style.display=="flex")||(au&&au.style.display!=="none")||!!document.getElementById("wkm")||!!(i&&String(i.value||"").trim().length>0)||stream!=null}
+function gdWant(){const o=gdGet();return !o.opened&&!o.off&&o.shown<3&&Date.now()-o.last>864e5}
+function gdTry(why){
+ if(GDP||!gdWant())return;GDP=true;let tries=0;
+ const go=()=>{if(!gdWant()){GDP=false;return}
+  if(gdBusy()){if(++tries>14){GDP=false;return}setTimeout(go,2500);return}
+  GDP=false;gdShow(why)};
+ setTimeout(go,3500)}
+function gdShow(why){
+ if(!gdWant())return;let n=$("gdn");
+ if(!n){n=document.createElement("div");n.id="gdn";
+  n.style.cssText="position:fixed;left:12px;right:12px;bottom:calc(92px + env(safe-area-inset-bottom,0px));max-width:520px;margin:0 auto;z-index:70;background:var(--bg);color:var(--text);border:1px solid var(--line,rgba(127,127,127,.3));border-radius:18px;box-shadow:0 8px 30px rgba(0,0,0,.25);padding:16px;display:none";
+  n.innerHTML='<div id="gdnt" style="font-weight:700;font-size:16px;margin-bottom:6px">How to use Ask Tr. David</div><div id="gdnb" style="line-height:1.45;margin-bottom:12px"></div><div style="display:flex;gap:10px"><button id="gdno" class="lk on" style="flex:1;padding:11px 8px;border:0;border-radius:20px;font:inherit;font-weight:700;cursor:pointer;background:var(--green,#00a884);color:#fff">Read the guide</button><button id="gdns" class="lk" style="flex:1;padding:11px 8px;border:0;border-radius:20px;font:inherit;font-weight:600;cursor:pointer;background:color-mix(in srgb,var(--text) 10%,var(--bg));color:var(--text)">Skip</button></div><div id="gdnx" style="text-align:center;margin-top:10px;font-size:13px;opacity:.7;cursor:pointer;text-decoration:underline">Do not show this again</div>';
+  document.body.appendChild(n);
+  $("gdno").onclick=()=>{n.style.display="none";gdMark("opened");guidePage(true)};
+  $("gdns").onclick=()=>{n.style.display="none"};
+  $("gdnx").onclick=()=>{n.style.display="none";gdMark("off")}}
+ $("gdnb").textContent=GDMSG[why]||GDMSG["new"];
+ const o=gdGet();o.shown++;o.last=Date.now();gdPut(o);GDWHY=why;n.style.display="block"}
+function gdSense(k,x){
+ if(k=="q"){const o=gdGet();o.nq++;gdPut(o);
+  const t=String(x||"").trim().toLowerCase(),w=t.split(/\s+/).filter(Boolean).length;
+  GDQ.push(w);if(GDQ.length>5)GDQ.shift();
+  if(/\b(i (do not|don'?t|dont) (understand|get it)|not understand|explain again|what do you mean|i am confused|i'?m confused|not clear|still (do not|don'?t) (understand|get))\b/.test(t))GDC++;
+  if(o.nq==3)return gdTry("new");
+  if(GDQ.length>=4&&GDQ.filter(n=>n<=2).length>=3){GDQ.length=0;return gdTry("short")}
+  if(GDC>=3){GDC=0;return gdTry("confused")}
+  return}
+ if(k=="un"){if(++GDU>=2){GDU=0;gdTry("un")}return}
+ if(k=="dn"){if(++GDD>=2){GDD=0;gdTry("bad")}return}
+ if(k=="redo"){if(++GDR>=2){GDR=0;gdTry("bad")}return}}
 function personalPage(){HBACK=null;const m=(window.AK&&AK.me())||{},fn={serif:"Serif",rounded:"Rounded",mono:"Typewriter"}[D.font]||"Default";
  h_page("Personalization",h_hd("About you")+h_grp(h_row("nm",HI.user,"Name",{v:esc(m.names||GNm())})+h_row("cl",HI.cls,"Class",{v:D.cls?esc(D.cls):"Not chosen"}))+h_hd("How the app looks")+h_grp(h_row("fo",HI.font,"Font style",{v:fn})+h_row("tx",HI.eye,"Text size and contrast",{v:D.fs==14?"Small":D.fs==20?"Large":"Medium"}))+`<div class="t" style="padding:12px 24px;line-height:1.45">Your name and class help Tr. David give answers that fit your level.</div>`,hub,e=>{
   const a=e.target.closest("[data-a]")?.dataset.a;if(!a)return;
   if(a=="nm")AK.upd("names");if(a=="cl")clsPick(1);if(a=="fo"){HBACK=personalPage;fontStyle()}if(a=="tx"){HBACK=personalPage;access()}})}
 function memoryPage(){HBACK=null;let sv=0;D.chats.forEach(c=>c.msgs.forEach(x=>{if(x.bm)sv++}));
- h_page("Memory",`<div class="doc" style="padding-bottom:4px"><p>Ask Tr. David remembers your name, your class and your subject so answers fit your level. Your chats are kept on this phone, and every new chat starts fresh while the old ones stay in Chat history.</p></div>`+h_grp(h_row("ch",HI.chat,"Chats",{v:D.chats.length,n:1,x:1})+h_row("sv",HI.star,"Saved answers",{v:sv})+h_row("hi",HI.hd,"Chat history")+h_row("tr",HI.bin,"Trash",{v:D.trash.length}))+`<div class="t" style="padding:12px 24px;line-height:1.45">Saved answers are the replies you bookmarked. Deleted messages stay in Trash until you empty it.</div>`,hub,e=>{
+ h_page("Memory",`<div class="doc" style="padding-bottom:4px"><p>Ask Tr. David remembers your name, your class and your subject so answers fit your level. Your chats and saved answers are kept with your account, so they follow you to any phone you log in on. Every new chat starts fresh while the old ones stay in Chat history.</p></div>`+h_grp(h_row("ch",HI.chat,"Chats",{v:D.chats.length,n:1,x:1})+h_row("sv",HI.star,"Saved answers",{v:sv})+h_row("hi",HI.hd,"Chat history")+h_row("tr",HI.bin,"Trash",{v:D.trash.length}))+`<div class="t" style="padding:12px 24px;line-height:1.45">Saved answers are the replies you bookmarked. Deleted messages stay in Trash until you empty it.</div>`,hub,e=>{
   const a=e.target.closest("[data-a]")?.dataset.a;if(!a)return;
   if(a=="sv"){HBACK=memoryPage;saved()}if(a=="hi")chatHistory();if(a=="tr"){HBACK=memoryPage;sel.clear();trash()}})}
 function usagePage(){HBACK=null;const q=FQ(),pn=planName(),rk={Free:0,Basic:1,Standard:2,Premium:3}[pn]||0;
@@ -1358,7 +1472,7 @@ function usagePage(){HBACK=null;const q=FQ(),pn=planName(),rk={Free:0,Basic:1,St
  const pct=Math.min(100,Math.round(q.used/Math.max(1,q.cap)*100));
  h_page("Usage and limits",curPlan(q)+(pn=="Free"?`<div style="padding:4px 24px 8px"><div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:8px"><span>Words used</span><b>${q.used.toLocaleString()} of ${q.cap.toLocaleString()}</b></div><div style="height:10px;border-radius:10px;background:var(--line);overflow:hidden"><i style="display:block;height:100%;width:${pct}%;background:var(--green)"></i></div></div>`:`<div class="t" style="padding:4px 24px 8px">No word limit on your plan.</div>`)+h_hd("What your plan includes")+h_grp(F.map(f=>h_row("x",f[1]<=rk?h_svg('<path d="M5 12.5l4.5 4.5L19 7.5"/>'):h_svg('<path d="M6 6l12 12M18 6L6 18"/>'),f[0],{v:f[1]<=rk?"Included":"Needs "+NM[f[1]],n:1,x:1})).join(""))+(pn=="Premium"?"":h_grp(h_row("up",HI.up,"Upgrade plan",{c:"var(--green)"}))),hub,e=>{if(e.target.closest("[data-a=up]")){HBACK=usagePage;plans(1)}})}
 function generalPage(){HBACK=null;
- h_page("General",h_grp(h_row("tx",HI.eye,"Text size and contrast")+h_row("fo",HI.font,"Font style")+h_row("md",HI.star,"AI models",{s:"Which model is best for lessons, exams and research"})+h_row("up",HI.gen,"Update app",{s:"Reload to get the latest version"})+(isOwner()?h_row("wk",HI.star,"Preview rating pop-up",{s:"See what learners get (nothing is sent)"}):"")),hub,e=>{
+ h_page("General",h_grp(h_row("tx",HI.eye,"Text size and contrast")+h_row("fo",HI.font,"Font style")+h_row("md",HI.star,"Teaching styles",{s:"Which model is best for lessons, exams and research"})+h_row("up",HI.gen,"Update app",{s:"Reload to get the latest version"})+(isOwner()?h_row("wk",HI.star,"Preview rating pop-up",{s:"See what learners get (nothing is sent)"}):"")),hub,e=>{
   const a=e.target.closest("[data-a]")?.dataset.a;if(!a)return;HBACK=generalPage;
   if(a=="tx")access();if(a=="fo")fontStyle();if(a=="md")modelsGuide();if(a=="up")updateApp();if(a=="wk")wkShow(1)})}
 function notifPage(){HBACK=null;
@@ -1408,7 +1522,7 @@ function permsPage(){
  ["microphone","camera"].forEach(k=>{try{navigator.permissions.query({name:k}).then(r=>set(k,r.state),()=>set(k,"prompt"))}catch(e){set(k,"prompt")}})}
 function privacyPage(){showP("Privacy",`<div class="doc"><p>Ask Tr. David helps you study. This page explains what the app keeps and why.</p>
 <h3>What is stored</h3><p>Your name, class level and account details are kept so you can sign in and get answers for your level. Your chats, saved answers and settings are stored on your own phone.</p>
-<h3>Questions and answers</h3><p>When a question has no saved answer, it may be sent to an AI service to write one. Please do not type passwords or private details in the chat.</p>
+<h3>Questions and answers</h3><p>When a question has no saved answer, our system may write one for you and keep it for other learners. Please do not type passwords or private details in the chat.</p>
 <h3>Messages to Tr. David</h3><p>Messages you send from Contact Tr. David are stored so he can read and reply to them.</p>
 <h3>Permissions</h3><p>Microphone is used only when you ask a question by voice. Camera is used only when you choose to ask about a photo. Notifications are used for announcements and updates.</p>
 <h3>Usage counts</h3><p>The app counts installs and opens using an anonymous device number. It is not linked to your name for advertising.</p>
@@ -4174,6 +4288,7 @@ function smallTalk(q){
  if(/^(what time is it|what is the time|what is the date|what is today|what day is it)$/.test(t))return{t:"I cannot see the time or date from here, please check your phone. Let us use your time well to study!"};
  if(/^(tell me a joke|say a joke|joke|make me laugh|something funny)$/.test(t))return{t:"Why did the student eat his homework? Because the teacher said it was a piece of cake! Now, what would you like to study?"};
  if(/^(i do not know|i don t know|dont know|i have no idea)$/.test(t))return{t:"That is okay"+nm+". Tell me what you are studying and I will help you step by step."};
+ if(/^(how (can|do|should|could) i (use|ask|talk to|chat with) (you|this app|the app|this system|ask tr david|tr david)( best| well| properly)?|how to use (you|this app|the app|this system)|how (do|can) i (get|ask for) (the )?(best|better|good) answers?|how (do|can|should) i ask (you )?(questions?|better|well|properly)|tips and tricks|tips for (asking|using)( you| questions)?|how does this (app|system) work|how can you help me|what can you do( for me)?|how do i learn with you)$/.test(t))return{t:"Here is the quick way to use me"+nm+":\n- **Name the topic and what you want.** For example: \"Explain osmosis with an example.\"\n- **Say your class** if it matters: \"I am in Senior 3.\"\n- **Ask short follow-ups:** \"Give an example\", \"Why?\", \"Show the steps\", \"I do not understand\", \"Quiz me\".\n- **For a long question, paste all of it** with every number, then ask me to answer each part.\n- **Point at the part you did not get:** \"What do you mean by...?\" or \"Explain step 3 again.\"\n- **Tap Redo** to get the same answer written in a new way.\n\nFor the full guide with tips for every subject, open your picture at the top, then **How to use Ask Tr. David**."};
  if(/^(how was your day|how is your day|how is school|how are you today)$/.test(t))return{t:"My day is going well, thank you"+nm+". How can I help you with your studies?"};
  return null}
 function mathOK(){return D.sub=="General"||relSubs(D.sub).includes("Mathematics")}
@@ -4274,6 +4389,7 @@ async function redoReply(i){
  const m=D.msgs[i];if(!m||REDOING)return true;
  const q=String(m.q||"").replace(/\s+/g," ").trim(),prev=String(m.t||"");
  if(m.s!="i"||m.err||m.note||m.lim||m.quiz||m.qz||m.w||m.mode||m.stream||prev.length<20||q.length<3||q.length>300||!navigator.onLine)return false;
+ try{gdSense("redo")}catch(e){}
  if(capped()){limitMsg();return true}
  REDOING=1;const st=$("stat"),old=st.textContent;st.textContent="writing another way…";
  ownerAct("redo",m);
@@ -4288,11 +4404,11 @@ async function redoReply(i){
   save();render();return true}
  if(j&&j.status=="busy"){uiAlert("Many learners are asking right now. Please tap Redo again in a little while.");return true}
  return false}
-function logUn(q){try{q=String(q).trim().slice(0,300);if(q.length<3)return;fetch(SBU+"rpc/log_unanswered",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_question:q,p_level:D.lvl,p_subject:D.sub})}).catch(()=>{})}catch(e){}}
+function logUn(q){try{gdSense("un")}catch(e){}try{q=String(q).trim().slice(0,300);if(q.length<3)return;fetch(SBU+"rpc/log_unanswered",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_question:q,p_level:D.lvl,p_subject:D.sub})}).catch(()=>{})}catch(e){}}
 /* Rating an "AI generated, not yet checked" answer. Only the owner account (username DAVID, checked in the database) approves with ONE thumbs up.
  Every other account's thumbs up is counted, and the database approves the answer once 10 different accounts have rated it helpful.
  When the database says "published" the label goes away and the answer is used for later related questions. */
-function sendFb(m){try{
+function sendFb(m){try{if(m&&m.fb==-1)gdSense("dn")}catch(e){}try{
  /* DAVID (owner): Like keeps the reply for good, Unlike removes it from the database at once. The database checks the login again, so no one else can do this. */
  
  if(m.tid){
@@ -4424,7 +4540,7 @@ function exMarkHtml(s,ti){const m=exMark(s,ti),E=x=>esc(x);
   '<div class="exs"><b>Suggested marks</b>'+m.T+' mark'+(m.T==1?'':'s')+' for this task.</div>'+
   '<div class="exs"><b>Performance indicators</b><ul>'+m.lv.map(x=>'<li><b>'+x[0]+'</b> ('+x[1]+'): '+E(x[2])+'.</li>').join("")+'</ul></div>'+
   '<div class="exs"><b>Acceptable alternative responses</b>'+E(m.alt)+'</div>'+
-  '<small>AI-generated practice scoring guide, not an official UNEB marking scheme.</small></div>'}
+  '<small>Practice scoring guide written by our system in the UNEB exam format. It is not an official UNEB marking scheme.</small></div>'}
 function exBlock(t){return md(t)}
 function exHtml(m,i){
  if(m.s!="i"||m.note||m.err||m.quiz)return null;
@@ -4440,9 +4556,9 @@ function exHtml(m,i){
    h.push('<div class="ext">'+md("**Task "+tk.lab+":** "+tk.text));
    if(done){
     h.push('<div class="exb"><button class="'+(o.a?"on":"")+'" data-act="xa" data-i="'+i+'" data-k="'+key+'">'+(o.a?"Hide Answer":"Show Answer")+'</button><button class="'+(o.e?"on":"")+'" data-act="xe" data-i="'+i+'" data-k="'+key+'">'+(o.e?"Hide Explanation":"Explain Answer")+'</button><button class="'+(o.m?"on":"")+'" data-act="xm" data-i="'+i+'" data-k="'+key+'">'+(o.m?"Hide Marking Guide":"Marking Guide")+'</button></div>');
-    if(o.a)h.push('<div class="exa"><b>Answer for Task '+tk.lab+'</b>'+(pts.length?'<ul>'+pts.map(x=>'<li>'+esc(x).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>")+'</li>').join("")+'</ul>':'<p>No marking points were written for this task. Use Explain Answer to see how to work it out.</p>')+(acc.length?'<small>'+esc(acc[0])+'</small>':'')+'<small>AI-generated practice answer, not an official UNEB answer.</small></div>');
+    if(o.a)h.push('<div class="exa"><b>Answer for Task '+tk.lab+'</b>'+(pts.length?'<ul>'+pts.map(x=>'<li>'+esc(x).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>")+'</li>').join("")+'</ul>':'<p>No marking points were written for this task. Use Explain Answer to see how to work it out.</p>')+(acc.length?'<small>'+esc(acc[0])+'</small>':'')+'<small>Practice answer written by our system in the UNEB exam format. It is not an official UNEB answer.</small></div>');
     if(o.m)h.push(exMarkHtml(s,ti));
-    if(o.e)h.push('<div class="exe">'+exExplain(s,ti).map((r,k)=>'<div class="exs"><b>'+(k+1)+'. '+r[0]+'</b>'+esc(r[1]).replace(/\n/g,"<br>")+'</div>').join("")+'<small>AI-generated practice explanation, not an official UNEB explanation.</small></div>')}
+    if(o.e)h.push('<div class="exe">'+exExplain(s,ti).map((r,k)=>'<div class="exs"><b>'+(k+1)+'. '+r[0]+'</b>'+esc(r[1]).replace(/\n/g,"<br>")+'</div>').join("")+'<small>Practice explanation written by our system in the UNEB exam format. It is not an official UNEB explanation.</small></div>')}
    h.push('</div>')});
   h.push('</div>');return h.join("")}).join("")}
 function bub(m,i,last){
@@ -4660,7 +4776,7 @@ examiner:(N,d,c)=>{const T=c.T,bd=clBand(),cn=String(D.cls||""),EX=bd=="P13"?"Pr
  H1=bd=="P13"?"Learning Area Activity":bd=="P47"?"Situation":bd=="S56"?"Advanced Secondary Scenario":"Integrated Scenario",
  NT={P13:"*Primary 1 to 3 follow the thematic, learning-area curriculum. These are short oral or written activities, not an examination.*",P47:"*Primary 4 to 7: short situation tasks. They are not yet matched to the official Primary Leaving Examination paper layout.*",S14:"",S56:"*Advanced Secondary: this layout is general. It is not yet matched to the assessment guideline of this subject.*"}[bd],
  CA={P13:"say what the topic means and give a simple example from the item.",P47:"identify, explain and apply the idea, using details from the item.",S14:"identify, explain, apply and evaluate, using details from the item.",S56:"identify, explain, apply, evaluate and justify, using details from the item."}[bd];
- let o="# "+EX+": "+SB+(bd=="P13"?" Practice":" Exam Practice")+"\n*AI-generated practice items, not UNEB questions. Marks and layout are practice guidance, not an official paper format.*"+(NT?"\n"+NT:"")+"\n## "+H1+"\n"+s1.item+"\n"+s1.tk;
+ let o="# "+EX+": "+SB+(bd=="P13"?" Practice":" Exam Practice")+"\n*Exam written by our system in the UNEB exam format. It is not an official UNEB exam. Marks and layout are practice guidance.*"+(NT?"\n"+NT:"")+"\n## "+H1+"\n"+s1.item+"\n"+s1.tk;
  if(s2)o+="\n## "+H1+" 2\n"+s2.item+"\n"+s2.tk;
  o+="\n## Marking guide\nA competent answer shows that the learner can "+CA+"\n"+s1.guide;
  if(s2)o+="\n\n**Scenario 2**\n"+s2.guide;
@@ -5222,7 +5338,7 @@ function ctxPart(q){
 async function explainPart(q,P){
  const c=new AbortController(),tm=setTimeout(()=>c.abort(),30000);
  try{
-  const r=await fetch(SBU.replace("/rest/v1/","/functions/v1/")+"ai_explain",{method:"POST",signal:c.signal,headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({full_question:fullQ(q),answer_spec:"v3",no_svg:true,question:String(q).slice(0,300),level:D.lvl,subject:P.sub||D.sub,term:String(P.term||"").slice(0,80),brief:!wantFull(),history:ptHist()})});
+  const r=await fetch(SBU.replace("/rest/v1/","/functions/v1/")+"ai_explain",{method:"POST",signal:c.signal,headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({full_question:fullQ(q),answer_spec:"v3",no_svg:true,question:String(q).slice(0,300),level:D.lvl,subject:P.sub||D.sub,term:String(P.term||"").slice(0,80),brief:!wantFull(),history:ptHist(),...svMe()})});
   if(!r.ok)return null;const j=await r.json();
   if(j&&j.status=="busy")return{busy:1};
   if(j&&j.status=="ok"&&j.markdown&&String(j.markdown).length>=20)return{t:String(j.markdown),part:1};
@@ -5257,7 +5373,7 @@ function ctxExpand(q){const x=expandReq(q);if(!x)return null;if((PRANK[planName(
 async function expandPart(q,P){
  const c=new AbortController(),tm=setTimeout(()=>c.abort(),30000),pl=planName();
  try{
-  const r=await fetch(SBU.replace("/rest/v1/","/functions/v1/")+"ai_expand",{method:"POST",signal:c.signal,headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({full_question:fullQ(q),answer_spec:"v3",no_svg:true,question:String(q).slice(0,300),type:P.xt,concept2:String(P.c2||"").slice(0,80),topic:String(P.topic||"").slice(0,120),level:D.lvl,class:String(D.cls||"").replace(/^Primary /,"P").replace(/^Senior /,"S"),subject:P.sub||D.sub,brief:P.xt!="deeper"&&pl!="Premium",history:ptHist()})});
+  const r=await fetch(SBU.replace("/rest/v1/","/functions/v1/")+"ai_expand",{method:"POST",signal:c.signal,headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({full_question:fullQ(q),answer_spec:"v3",no_svg:true,question:String(q).slice(0,300),type:P.xt,concept2:String(P.c2||"").slice(0,80),topic:String(P.topic||"").slice(0,120),level:D.lvl,class:String(D.cls||"").replace(/^Primary /,"P").replace(/^Senior /,"S"),subject:P.sub||D.sub,brief:P.xt!="deeper"&&pl!="Premium",history:ptHist(),...svMe()})});
   if(!r.ok)return null;const j=await r.json();
   if(j&&j.status=="busy")return{busy:1};
   if(j&&j.status=="ok"&&j.markdown&&String(j.markdown).length>=40)return{t:String(j.markdown),part:1};
@@ -5310,7 +5426,7 @@ function scnRender(j,raw){const cl=x=>String(x==null?"":x).trim(),T=Array.isArra
   if(cl(t.marks)){marks=true;o+="\n\n**Marks (practice):** "+cl(t.marks)}});
  const g=(Array.isArray(j.gaps)?j.gaps:[]).map(cl).filter(Boolean);
  if(g.length)o+="\n\n## Gaps flagged\n"+g.map(x=>"- "+x).join("\n");
- o+="\n\n*This is an AI-generated practice answer, not an official UNEB answer."+(marks?" Marks shown are AI-generated practice scoring, not official UNEB scoring.":"")+"*";
+ o+="\n\n*This practice answer was written by our system in the UNEB exam format. It is not an official UNEB answer."+(marks?" Marks shown are practice scoring, not official UNEB scoring.":"")+"*";
  return o}
 async function askScenario(q){
  if(capped())return limitMsg();
@@ -5395,7 +5511,7 @@ function sqMake(T0,n,raw){
  if(keep=="General"&&T0.S&&T0.S[0]&&subsList().includes(T0.S[0]))D.sub=T0.S[0];
  let o="";
  try{const c={T:T.n,P:T.pts.length?T.pts:(T.d?[T.d]:[]),L:lvKey(),cw:["State","Explain"]},d=Math.max(3,modelDepth(modelName()));
-  o="# Practice items: "+T.n+"\nThese are AI-generated practice items, not UNEB questions. Marks and layout are practice guidance, not an official paper format. Under each task, tap Show Answer to see its answer, Explain Answer to see how it is worked, or Marking Guide to see practice scoring.";
+  o="# Practice items: "+T.n+"\nThese practice items were written by our system in the UNEB exam format. They are not official UNEB questions. Marks and layout are practice guidance, not an official paper format. Under each task, tap Show Answer to see its answer, Explain Answer to see how it is worked, or Marking Guide to see practice scoring.";
   for(let k=0;k<n;k++){const q=cbaBuild(T,d,c,k);o+="\n## Item "+(k+1)+"\n"+q.item+"\n"+q.tk+"\n\n**Guide:**\n"+q.guide}}
  finally{D.sub=keep}
  const ch=D.chats.find(c=>c.id==D.cur);if(ch&&(ch.title=="New chat"||ch.title=="Chat"))ch.title=("Sample questions: "+T.n).slice(0,32);
@@ -5586,6 +5702,7 @@ function bpHandle(q){const s=String(q||"");if(s.length>400)return false;const t=
  const S=S0||bpSubj(t,1);push({t:S?bpText(S):bpMaster(),bp:1});return true}
 function ask(q,mode){
  if(stream!=null||INTP)return;
+ if(!mode){try{gdSense("q",q)}catch(e){}}
  if(!mode){let b=false;try{b=bpHandle(q)}catch(e){b=false}if(b)return}
  if(!mode&&fileAsk(q)){fileNote(q);return}
  if(!mode&&looksScenario(q))return askScenario(q);
@@ -5638,7 +5755,7 @@ function askCore(q,mode,I){
    if(a2&&a2.t)f=a2;else{const w=AIWHY;logUn(q);stopS();
     return err(w=="net"||w=="offline"||!navigator.onLine?"No internet connection. Please connect to the internet and tap Retry.":"The answer is taking longer than expected. Please tap Retry."+(isOwner()?" ("+(w||"unknown")+")":""))}}
   if(f.un&&!mode&&!FU)logUn(q);
-  if(f.fmt&&!f.un&&!mode&&f.t!==window.DIRECT_T){const st=await styleAnswer(f.t,q);if(stream==null||tok!=AN)return;if(st){f.sty={t:f.t,k:modelName(),L:lvKey(),pl:planName()};f.t=st.md}}
+  if(f.fmt&&!f.un&&!mode&&f.t!==window.DIRECT_T){const st=await styleAnswer(f.t,q);if(stream==null||tok!=AN)return;if(st){f.sty={t:f.t,k:modelName(),L:lvKey(),pl:planName()};f.t=st.md+(modelName()=="examiner"?"\n\n*Exam written by our system in the UNEB exam format. It is not an official UNEB exam.*":"")}}
   if(!f.part&&!f.ai&&!f.un){const Tm=topicOf(q);if(Tm&&Tm.ai)f.ai=1}
   if(!f.part&&f.ai&&!f.tid){const Tm=topicOf(q);if(Tm&&Tm.tid)f.tid=Tm.tid}
   if(!f.part&&!f.lv&&!f.un){const Tm=topicOf(q);if(Tm&&Tm.sl){f.lv=Tm.sl;f.cls=Tm.cls}}
@@ -5736,7 +5853,53 @@ const R=window.SpeechRecognition||window.webkitSpeechRecognition,inp=$("inp"),mi
 if(!R){mic.onclick=()=>uiAlert("Voice input is not supported in this browser. Try Chrome.");return}
 const L={en:"en-US",sw:"sw-KE"},NAME={en:"English",sw:"Kiswahili"},PH=inp.placeholder;
 const lang=()=>{try{return localStorage.getItem("ask_vlang")=="sw"?"sw":"en"}catch(e){return"en"}};
-let rec=null,on=false,base="",fin="",cur="",last=0;
+/* ===== VOICE TEXT CLEAN-UP: punctuation, capitals, spelling, spoken commands, scratch that ===== */
+const QEN=/^(what|why|how|when|where|who|whom|whose|which|is|are|was|were|do|does|did|can|could|will|would|should|shall|may|might|have|has|had|am)\b/i,
+ QSW=/^(nini|kwa nini|vipi|nani|wapi|lini|je|ni nani|ni nini|gani|ngapi|kwanini)\b/i,
+ CONT=/^(and|but|because|so|which|who|that|or|then|to|of|with|while|although|whereas|if|when|also|plus|including|like)\b/i,
+ INTRO=["first","firstly","second","secondly","third","finally","also","however","therefore","moreover","furthermore","yes","no","okay","well","next","for example","in addition","in conclusion","actually","for instance","meanwhile","hello","hi","please"],
+ FIX={dont:"don't",cant:"can't",wont:"won't",isnt:"isn't",arent:"aren't",wasnt:"wasn't",werent:"weren't",doesnt:"doesn't",didnt:"didn't",couldnt:"couldn't",wouldnt:"wouldn't",shouldnt:"shouldn't",hasnt:"hasn't",havent:"haven't",im:"I'm",ive:"I've",id:"I'd",thats:"that's",whats:"what's",hows:"how's",whos:"who's",theres:"there's",heres:"here's",youre:"you're",theyre:"they're",weve:"we've",youve:"you've",ok:"OK",alot:"a lot",teh:"the",recieve:"receive",seperate:"separate",definately:"definitely",wich:"which",becuase:"because",beacuse:"because",thier:"their",wierd:"weird",untill:"until",tommorow:"tomorrow",tomorow:"tomorrow",goverment:"government",enviroment:"environment",photosythesis:"photosynthesis",photosyntheses:"photosynthesis"},
+ CAPS="uganda kampala entebbe jinja gulu mbarara africa east kenya nairobi tanzania rwanda burundi congo sudan ethiopia europe asia america england china india english kiswahili swahili luganda monday tuesday wednesday thursday friday saturday sunday january february march april june july august september october november december christian christianity islam islamic muslim bible quran god jesus nile victoria buganda bunyoro ankole busoga lango acholi".split(" "),
+ ACR={ple:"PLE",uce:"UCE",uace:"UACE",ict:"ICT",hiv:"HIV",aids:"AIDS",dna:"DNA",rna:"RNA",atp:"ATP",ugx:"UGX",unesco:"UNESCO",ncdc:"NCDC",uneb:"UNEB",ph:"pH",pdf:"PDF",usa:"USA",uk:"UK"},
+ NOCMD=/^(a|an|the|this|that|use|using|used|of|each|every|is|called|between|any|no|one|my|your|our|their|his|her|its|put|add|insert|type|write|with|without|and|or|are|these|those|some|such|as|about|what|define|explain|meaning)$/i,
+ NOCMDNEXT=/^(is|are|was|were|means|mean|in|splice|rules?|marks?|used|or|and)$/i;
+const cap=s=>s?s.charAt(0).toUpperCase()+s.slice(1):s,wc=s=>(s.match(/\S+/g)||[]).length,norm=s=>s.toLowerCase().replace(/[^a-z0-9' ]/g,"").replace(/\s+/g," ").trim();
+function dedupe(a){const o=[];a.forEach(t=>{const l=o[o.length-1];if(l){const n=norm(t),m=norm(l);if(n==m||m.startsWith(n)&&n.length>3||m.endsWith(n)&&wc(n)>2)return;if(n.startsWith(m)){o[o.length-1]=t;return}
+ /* the engine sometimes repeats the last words of the phrase before: cut that repeat */
+ const mw=l.trim().split(/\s+/),tw=t.trim().split(/\s+/);for(let k=Math.min(6,mw.length,tw.length-1);k>=2;k--){if(norm(mw.slice(-k).join(" "))==norm(tw.slice(0,k).join(" "))){o[o.length-1]=l.trim()+(tw.length>k?" "+tw.slice(k).join(" "):"");t="";break}}}
+ if(t)o.push(t)});return o}
+function scratch(a){const o=[],RX=/\b(?:scratch that|delete that|ignore that|cancel that|never ?mind that)\b[,.]?\s*/i;
+ a.forEach(s=>{let t=s,m;while(m=RX.exec(t)){const before=t.slice(0,m.index).trim(),after=t.slice(m.index+m[0].length).trim();
+  if(!before){if(o.length)o.pop()}else{const k=Math.max(before.lastIndexOf(". "),before.lastIndexOf("? "),before.lastIndexOf("! "));t=k>=0?before.slice(0,k+2)+after:after;continue}
+  t=after}
+  t=t.trim();if(t)o.push(t)});return o}
+function cmds(s){return s.replace(/\s*\b(full stop|question mark|exclamation (?:mark|point)|semi-?colon|comma)\b/gi,(m,w,off,str)=>{
+  const pre=(str.slice(0,off).match(/([A-Za-z']+)\s*$/)||[])[1]||"",post=(str.slice(off+m.length).match(/^\s*([A-Za-z']+)/)||[])[1]||"";
+  if(NOCMD.test(pre)||NOCMDNEXT.test(post))return m;
+  const k=w.toLowerCase();return k=="full stop"?".":k=="question mark"?"?":k.startsWith("exclam")?"!":k.startsWith("semi")?";":","})
+  .replace(/\s+([.,?!;])/g,"$1").replace(/([.,?!;])(?=[A-Za-z])/g,"$1 ")}
+function words(s,lg){if(lg!="en")return s.replace(/\s+/g," ").trim();
+ s=s.replace(/\b(\w+)\s+\1\b/gi,(m,w)=>/^(the|a|an|is|to|of|and|in|it|i|we|you|my|what|how|why|so|but|are|was|that's|this|for|on|can|do)$/i.test(w)?w:m);
+ s=s.replace(/\b(?:i)(?=\b)/g,"I").replace(/\bi'(m|ll|ve|d)\b/gi,(m,x)=>"I'"+x.toLowerCase());
+ return s.replace(/[A-Za-z][A-Za-z0-9']*/g,w=>{const k=w.toLowerCase();if(ACR[k])return ACR[k];if(FIX[k]&&!(k=="id"||k=="ok"&&w!=k))return FIX[k];if(CAPS.includes(k)&&w==k)return cap(k);return w})}
+function inner(s,lg){if(lg!="en")return s;
+ s=s.replace(/^(\s*)((?:for example|for instance|in addition|in conclusion|first|firstly|second|secondly|third|finally|also|however|therefore|moreover|furthermore|yes|no|okay|well|next|actually|meanwhile)\b)(?![,.;?!])(?=\s+\S+\s+\S+)/i,"$1$2,");
+ return s.replace(/(\S+(?:\s+\S+){2,})\s+(but|although|whereas)\s/gi,(m,a,b)=>/[,;.?!]$/.test(a)?m:a+", "+b+" ").replace(/(\S+(?:\s+\S+){2,}),?\s+however\s+(?=\S)/gi,(m,a)=>a+", however, ")}
+function isQ(s,lg){const t=s.replace(/^[^A-Za-z]+/,"");return(lg=="sw"?QSW:QEN).test(t)}
+function endMark(s,lg){const k=Math.max(s.lastIndexOf(". "),s.lastIndexOf("? "),s.lastIndexOf("! ")),last=k>=0?s.slice(k+2):s;return isQ(last,lg)?"?":"."}
+/* base = text already in the box, segs = finished phrases, it = phrase still being heard, fin = the person stopped (close with . ? !) */
+function vfmt(base,segs,it,lg,fin){
+ let a=scratch(dedupe(segs.map(x=>String(x).trim()).filter(Boolean)));if(it&&String(it).trim())a=a.concat([String(it).trim()]);
+ let out=String(base||"").trim(),lastIsInterim=!!(it&&String(it).trim());
+ a.forEach((raw,i)=>{let s=words(inner(cmds(raw),lg),lg).trim();if(!s)return;
+  const pm=/^([.,?!;])\s*([\s\S]*)$/.exec(s);if(pm&&out){out=out.replace(/[.,?!;:]$/,"")+pm[1];s=pm[2].trim();if(!s)return}
+  const prevEnds=!out||/[.?!:]$/.test(out);
+  s=s.replace(/(^|[.?!]\s+)([a-z])/g,(m,p,c)=>p+c.toUpperCase());if(prevEnds)s=cap(s);
+  if(out){const ends=/[.?!,;:]$/.test(out);if(!ends){out+=CONT.test(s)&&wc(out.split(/[.?!]\s+/).pop())<8?",":endMark(out,lg)}out+=" "+(ends||/[.?!]$/.test(out)||!CONT.test(s)?s:s.charAt(0).toLowerCase()+s.slice(1))}else out=s});
+ if(fin&&out&&!/[.?!]$/.test(out)){out=out.replace(/[,;:]$/,"");out+=endMark(out,lg)}
+ return out}
+window.__vfmt=vfmt;
+let rec=null,on=false,base="",segs=[],sess=[],cur="",last=0,quick=0,t0=0;
 const iw=$("iw"),bars=[].slice.call(document.querySelectorAll("#wave i")),hs=bars.map(()=>.15),RM=!!(window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches);
 let lvl=0,raf=0,talk=false;
 const bump=v=>{lvl=Math.max(lvl,v)};
@@ -5749,21 +5912,27 @@ function frame(ts){
 function waveOn(){iw.classList.add("rec");if(RM)bars.forEach(b=>b.style.transform="scaleY(.5)");else if(!raf)raf=requestAnimationFrame(frame)}
 function waveOff(){iw.classList.remove("rec");lvl=0;talk=false;if(raf){cancelAnimationFrame(raf);raf=0}bars.forEach((b,i)=>{hs[i]=.15;b.style.transform="scaleY(.15)"})}
 const lv=$("live");
-const paint=()=>{const tx=[base,fin,cur].filter(Boolean).join(" ");if(on){lv.classList.toggle("empty",!tx);lv.textContent=tx||"Listening in "+NAME[lang()]+"…";lv.scrollTop=1e9;return}inp.value=tx;try{inp.scrollLeft=inp.scrollWidth;inp.dispatchEvent(new Event("input"))}catch(e){}};
-function stop(){on=false;try{rec&&rec.stop()}catch(e){}if(cur){fin+=(fin?" ":"")+cur}cur="";lv.classList.remove("on");paint();mic.classList.remove("on");waveOff();inp.placeholder=PH}
+const text=fin=>vfmt(base,segs.concat(sess),cur,lang(),fin);
+const paint=fin=>{const tx=text(!!fin);if(on){lv.classList.toggle("empty",!tx);lv.textContent=tx||"Listening in "+NAME[lang()]+"…";lv.scrollTop=1e9;return}inp.value=tx;try{inp.scrollLeft=inp.scrollWidth;inp.dispatchEvent(new Event("input"))}catch(e){}};
+function commit(){if(sess.length){segs=segs.concat(sess);sess=[]}if(cur){segs.push(cur);cur=""}}
+function stop(){on=false;try{rec&&(rec.onend=null,rec.stop())}catch(e){}commit();lv.classList.remove("on");paint(true);mic.classList.remove("on");waveOff();inp.placeholder=PH}
 function run(){
- rec=new R();rec.lang=L[lang()];rec.continuous=false;rec.interimResults=true;rec.maxAlternatives=1;
+ rec=new R();rec.lang=L[lang()];rec.continuous=true;rec.interimResults=true;rec.maxAlternatives=1;t0=Date.now();
  rec.onspeechstart=()=>{talk=true;bump(.8)};rec.onspeechend=()=>{talk=false};rec.onsoundstart=()=>bump(.5);
- rec.onresult=e=>{last=Date.now();bump(.9);let it="";for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i],t=r[0].transcript.trim();if(r.isFinal){if(t)fin+=(fin?" ":"")+t}else it+=r[0].transcript}cur=it;paint()};
+ /* continuous mode keeps one listening session open across pauses, so the phone's "ding" does not repeat. Each event rebuilds the session from all results, so nothing is doubled. */
+ rec.onresult=e=>{last=Date.now();bump(.9);const f=[];let it="";for(let i=0;i<e.results.length;i++){const r=e.results[i],t=(r[0].transcript||"").trim();if(!t)continue;if(r.isFinal)f.push(t);else it+=(it?" ":"")+t}sess=dedupe(f);cur=it;paint()};
  rec.onerror=e=>{
   if(e.error=="not-allowed"||e.error=="service-not-allowed"){stop();uiAlert("Please allow microphone access for this app in your phone settings.")}
   else if(e.error=="network"){stop();uiAlert("Voice needs an internet connection.")}
   else if(e.error=="language-not-supported"){const k=lang();stop();uiAlert(NAME[k]+" voice is not supported on this phone. You can change the voice language in Settings.")}};
- rec.onend=()=>{if(!on)return;if(Date.now()-last>9000){stop();return}setTimeout(()=>{if(on)try{run()}catch(e){stop()}},120)};
+ rec.onend=()=>{if(!on)return;commit();paint();
+  if(Date.now()-t0<1500)quick++;else quick=0;
+  if(quick>=3||Date.now()-last>9000){stop();return}
+  setTimeout(()=>{if(on)try{run()}catch(e){stop()}},quick?600:150)};
  try{rec.start()}catch(e){stop()}}
 function start(){
  if(stream!=null)return;
- base=inp.value.trim();fin="";cur="";last=Date.now();on=true;
+ base=inp.value.trim();segs=[];sess=[];cur="";quick=0;last=Date.now();on=true;
  mic.classList.add("on");waveOn();lv.classList.add("on");paint();run()}
 mic.onclick=()=>on?stop():start();
 document.addEventListener("visibilitychange",()=>{if(document.hidden&&on)stop()});
@@ -5785,7 +5954,7 @@ function chatSheet(id){const c=D.chats.find(x=>x.id==id),s=$("sheet");
  s.innerHTML='<div data-a="r">Rename</div><div class="dl" data-a="d">Delete</div><div class="x" data-a="x">Cancel</div>';$("scrim").style.display="flex";
  s.onclick=e=>{const a=e.target.dataset.a;if(!a)return;$("scrim").style.display="none";
   if(a=="r"){uiPrompt("Rename chat",c.title,n=>{if(n&&n.trim()){c.title=n.trim();save();hlist()}})}
-  if(a=="d")uiConfirm("Delete this chat?",()=>{D.chats=D.chats.filter(x=>x.id!=id);if(!D.chats.length)D.chats=[{id:Date.now(),title:"New chat",msgs:[]}];if(D.cur==id){sw(D.chats[0].id);chatHistory()}else{save();hlist()}},"Delete")}}
+  if(a=="d")uiConfirm("Delete this chat?",()=>{D.gone=D.gone||{};D.gone[id]=Date.now();D.chats=D.chats.filter(x=>x.id!=id);if(!D.chats.length)D.chats=[{id:Date.now(),title:"New chat",msgs:[]}];if(D.cur==id){sw(D.chats[0].id);chatHistory()}else{save();hlist()}},"Delete")}}
 function saved0(){const L=[];D.chats.forEach(c=>c.msgs.forEach(m=>{if(m.bm)L.push(m)}));showP("Saved answers",L.length?L.map(m=>`<div class="row" style="display:block"><b>${esc(m.q||"Answer")}</b><div class="md">${md(m.t)}</div></div>`).join(""):'<div class="empty">No saved answers yet</div>',closeP)}
 const op=(a,v)=>a.map(x=>`<option ${x==v?"selected":""}>${x}</option>`).join("");
 const LVS=[["PLE","Primary"],["UCE","O-Level"],["UACE","A-Level"]];
@@ -6694,7 +6863,7 @@ function form(el,items,btn,go,extra,pre){
   er("");t.disabled=true;t.textContent="Please wait…";const r=await go(v);t.disabled=false;t.textContent=btn;
   if(r&&!r.ok){const u=items.find(x=>x[1]=="username"),p=items.find(x=>x[1]=="phone");if(r.suggest&&u)fb(u[0],r);else if(/already exist/i.test(r.err||"")&&p)fb(p[0],r);else er(r.err||"Try again.")}}}
 const L=(s,t)=>`<div class="al" data-go="${s}">${t}</div>`,BK='<div class="bk" data-go="login">Back to login</div>',AR=(a,b)=>`<div class="ar">${a}${b}</div>`;
-function done(r,rm){if(r.ok){T=r.token;ME=r.me;const S=rm===false?SS:LS;LS.removeItem("ask_tok");LS.removeItem("ask_me");SS.removeItem("ask_tok");SS.removeItem("ask_me");S.setItem("ask_tok",T);S.setItem("ask_me",JSON.stringify(ME));enter()}return r}
+async function done(r,rm){if(r.ok){T=r.token;ME=r.me;const S=rm===false?SS:LS;LS.removeItem("ask_tok");LS.removeItem("ask_me");SS.removeItem("ask_tok");SS.removeItem("ask_me");S.setItem("ask_tok",T);S.setItem("ask_me",JSON.stringify(ME));await enter()}return r}
 function scr(n){const f=$("af"),h=t=>$("ah").textContent=t;$("auth").style.display="block";window.__authScr=n;window.__authGo=scr;try{window.__backSync&&window.__backSync()}catch(e){}
  const FG=(w,id)=>async v=>{const r=await rpc("acct_forgot",{p_what:w,p_user:v.u,p_phone:v.p,p_secret:v.s,p_new:v.n});if(r.ok){scr("login");er((w=="pin"?"Pin":"Password")+" updated. Please login.",1)}return r};
  if(n=="login"){h("Login");form(f,[["i","login","Names / Username"],["p","cpw","Password"]],"Login",async v=>done(await rpc("acct_login",{p_id:v.i,p_pass:v.p}),v.rm),AR(L("fp","Forgot password"),L("create","Create account")),'<label class="rm"><input type="checkbox" id="rm" checked>Remember login</label>')}
@@ -6702,8 +6871,8 @@ function scr(n){const f=$("af"),h=t=>$("ah").textContent=t;$("auth").style.displ
  if(n=="fp"){h("Forgot password");form(f,[["u","uname","Username"],["p","phoneo","Phone"],["s","cpin","Pin"],["n","password","New password"]],"Reset password",FG("password"),AR(L("fn","Forgot pin"),L("ct","Forgot password and pin"))+BK)}
  if(n=="fn"){h("Forgot pin");form(f,[["u","uname","Username"],["p","phoneo","Phone"],["s","cpw","Password"],["n","pin","New pin"]],"Reset pin",FG("pin"),L("ct","Forgot password and pin")+BK)}
  if(n=="ct"){h("Contact us");f.innerHTML='<div class="fw" style="line-height:1.5">If you forgot both your password and your pin, contact us and we will help you recover your account.</div>'+`<a class="btn" style="text-align:center;text-decoration:none" href="tel:+256788737517">Call 0788 737 517</a><a class="btn" style="text-align:center;text-decoration:none;background:#25d366;margin-top:10px" href="https://wa.me/256788737517" target="_blank" rel="noopener">WhatsApp</a><a class="btn" style="text-align:center;text-decoration:none;background:var(--sub);margin-top:10px" href="mailto:asktrdavid@gmail.com">Email asktrdavid@gmail.com</a>`+BK;f.onclick=e=>{if(e.target.dataset.go)scr(e.target.dataset.go)};f.oninput=null;f.onfocusin=null}}
-function enter(){$("auth").style.display="none";window.__authScr="";try{window.__backSync&&window.__backSync()}catch(e){}if(ME){D.pname=GNm();const c=LS.getItem("ask_cls_"+ME.username);if(c&&CLASSES.includes(c))applyCls(c);else D.cls="";save()}render();link();evLog("open");try{annSync();window.refSync&&refSync();if(D.notif)pushOn()}catch(e){}if(ME&&!D.cls)clsPick();admHide();try{updPlan()}catch(e){}}
-function out(){admHide();rpc("acct_logout",{p_t:T});T="";ME=null;LS.removeItem("ask_tok");LS.removeItem("ask_me");SS.removeItem("ask_tok");SS.removeItem("ask_me");closeP();scr("login")}
+async function enter(){try{if(ME&&window.__syncFirst)await __syncFirst(ME.username)}catch(e){}$("auth").style.display="none";window.__authScr="";try{window.__backSync&&window.__backSync()}catch(e){}if(ME){D.pname=GNm();const c=LS.getItem("ask_cls_"+ME.username);if(c&&CLASSES.includes(c))applyCls(c);else D.cls="";save()}render();link();evLog("open");try{annSync();window.refSync&&refSync();if(D.notif)pushOn()}catch(e){}if(ME&&!D.cls)clsPick();admHide();try{updPlan()}catch(e){}}
+async function out(){admHide();try{await(window.__syncFlush&&__syncFlush())}catch(e){}rpc("acct_logout",{p_t:T});T="";ME=null;LS.removeItem("ask_tok");LS.removeItem("ask_me");SS.removeItem("ask_tok");SS.removeItem("ask_me");closeP();scr("login")}
 const UI={names:[["n","names","New names"],["a","cpw","Confirm password"]],username:[["n","username","New username"],["a","cpw","Confirm password"]],phone:[["n","phone","New phone"],["a","cpw","Confirm password"]],password:[["n","password","New password"],["a","uname","Confirm username"],["b","cpw","Old password"],["c","cpin","Pin"]],pin:[["n","pin","New pin"],["a","uname","Confirm username"],["b","cpw","Password"],["c","cpin","Old pin"]]};
 function upd(w){showP("Update "+w,'<div id="ff"></div>',account);form($("ff"),UI[w],"Save",async v=>{const r=await rpc("acct_change",{p_t:T,p_what:w,p_new:v.n,p_a:v.a,p_b:v.b||"",p_c:v.c||""});if(r.relogin){out();return r}if(r.ok){ME=r.me;stg().setItem("ask_me",JSON.stringify(ME));account();uiAlert("Updated.")}return r})}
 function account(){showP("Update account",`<div class="pcard"><div class="pav">${esc((ME.names||"?").charAt(0).toUpperCase())}</div><div class="pcn">${esc(ME.names)}</div><div class="pcu">${esc(ME.username)} · ${esc(ME.phone)}</div></div>`+[["names","Update names"],["username","Update username"],["phone","Update phone"],["password","Update password"],["pin","Update pin"]].map(x=>`<div class="row" data-w="${x[0]}"><div>${x[1]}</div></div>`).join("")+(isOwner()?'<div class="row" data-w="adm"><div>Switch to Admin panel<small>Only you see this</small></div></div>':"")+'<div class="row danger" data-w="out"><div>Log out</div></div>',profile,e=>{const w=e.target.closest(".row")?.dataset.w;if(w=="out")out();else if(w=="adm"){closeP();admOpen()}else if(w)upd(w)})}
@@ -7109,6 +7278,65 @@ async function admThread(t){
     });
     chain.then(function () { return check(); }).then(function () {}, function () {}).then(function () { busy = false; });
   }
+})();
+</script>
+<script>
+/* ===== ACCOUNT SYNC: chats, saved answers, trash, class, subject, theme and model follow the account to every phone =====
+   Stored in Supabase table user_state (one row per account, read and written only through state_get and state_put with the login token).
+   Push: a few seconds after any change, when the app is hidden, and before logout. Pull: at login, when the app comes back, every 45 s.
+   Two phones: each chat has an update time (ut); the newer copy of a chat wins, chats deleted on one phone stay deleted (D.gone). */
+(function(){
+const LS=localStorage,SETK=["sub","lvl","cls","lock","theme","fs","acc","font","hc","lang","pname","annSeen","annInit"],KEEP=["theme","fs","acc","font","hc"];
+let serverAt=null,ready=false,busy=false,again=false,dirty=false,dirtyT=0,setSig="",pulling=false,lastPull=0;
+const tk=()=>{try{return tokNow()}catch(e){return""}},uname=()=>{const m=window.AK&&AK.me();return m&&m.username||""},xk=n=>"ask_"+n+"_"+uname();
+const call=(f,b,ms)=>{const c=new AbortController(),t=setTimeout(()=>c.abort(),ms||15000);return fetch(SBU+"rpc/"+f,{method:"POST",signal:c.signal,headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify(b)}).then(r=>r.json()).catch(()=>({ok:false,net:1})).finally(()=>clearTimeout(t))};
+function stamp(){const now=Date.now();if(!Array.isArray(D.chats))return;
+ D.chats.forEach(c=>{const ms=c.msgs||[],l=ms[ms.length-1]||{};let sg=ms.length+":"+String(l.t||"").length+":"+(c.title||"");if(c.id==D.cur)sg+=":"+ms.reduce((n,m)=>n+(m.bm?1:0)+(m.like?1:0)+(m.lk?1:0)+(m.dl?1:0)+(m.dis?1:0),0);if(c.sg!==sg){c.sg=sg;c.ut=now}});
+ const ss=JSON.stringify(SETK.map(k=>D[k]))+":"+(D.trash||[]).length;if(ss!==setSig){setSig=ss;D.mt=now}}
+function snap(){const o=JSON.parse(JSON.stringify(D,function(k,v){return(this===D&&(k=="msgs"||k=="notes"||k=="notif"||k=="name"))||k=="img"||k=="stream"?undefined:v}));
+ o.chats=(o.chats||[]).filter(c=>c.msgs&&c.msgs.length);if(o.trash&&o.trash.length>150)o.trash=o.trash.slice(-150);
+ const x={};try{x.model=LS.getItem(xk("model"));x.cls=LS.getItem(xk("cls"))}catch(e){}
+ const p={v:1,D:o,x};if(JSON.stringify(p).length>2400000){o.chats.sort((a,b)=>(b.ut||0)-(a.ut||0));while(JSON.stringify(p).length>2300000&&o.chats.length>1)o.chats.pop()}return p}
+function mergeIn(p){const r={took:false,extra:false};if(!p||!p.D)return r;const s=p.D,x=p.x||{};D.gone=D.gone||{};
+ Object.keys(s.gone||{}).forEach(k=>{if((D.gone[k]||0)<s.gone[k])D.gone[k]=s.gone[k]});
+ const mp=new Map(),sm=new Map();D.chats.forEach(c=>mp.set(String(c.id),c));(s.chats||[]).forEach(c=>sm.set(String(c.id),c));
+ sm.forEach((sc,id)=>{const g=D.gone[id]||0;if(g&&g>=(sc.ut||0))return;const lc=mp.get(id);
+  if(!lc){if(sc.msgs&&sc.msgs.length){mp.set(id,sc);r.took=true}}
+  else if((sc.ut||0)>(lc.ut||0)||((sc.ut||0)==(lc.ut||0)&&(sc.msgs||[]).length>(lc.msgs||[]).length)){mp.set(id,sc);r.took=true}});
+ mp.forEach((c,id)=>{const g=D.gone[id]||0;if(g&&g>=(c.ut||0)){mp.delete(id);r.took=true;return}if(c.msgs&&c.msgs.length){const sc=sm.get(id);if(!sc||(c.ut||0)>(sc.ut||0))r.extra=true}});
+ const cur=mp.get(String(D.cur));let arr=[...mp.values()].filter(c=>c!==cur).sort((a,b)=>(b.ut||0)-(a.ut||0));if(cur)arr.unshift(cur);
+ if(!arr.length){const id=Date.now();arr=[{id,title:"New chat",sub:D.sub,lv:D.lvl,msgs:[]}]}
+ D.chats=arr;if(!arr.some(c=>c.id==D.cur))D.cur=arr[0].id;D.msgs=D.chats.find(c=>c.id==D.cur).msgs;
+ if((s.mt||0)>(D.mt||0)){SETK.forEach(k=>{if(s[k]!==undefined)D[k]=s[k]});if(Array.isArray(s.trash))D.trash=s.trash;D.mt=s.mt;r.took=true;
+  try{if(x.model)LS.setItem(xk("model"),x.model);if(x.cls&&CLASSES.includes(x.cls))LS.setItem(xk("cls"),x.cls)}catch(e){}
+  try{if(typeof lvOf=="function"&&CLASSES.includes(D.cls)){const l=lvOf(D.cls);if(l!=D.lvl)D.lvl=l}fixSub()}catch(e){}}
+ else{if((D.mt||0)>(s.mt||0))r.extra=true;try{if(x.cls&&CLASSES.includes(x.cls)&&!LS.getItem(xk("cls")))LS.setItem(xk("cls"),x.cls);if(x.model&&!LS.getItem(xk("model")))LS.setItem(xk("model"),x.model)}catch(e){}}
+ if(r.took)setSig=JSON.stringify(SETK.map(k=>D[k]))+":"+(D.trash||[]).length;
+ return r}
+function afterMerge(){try{D.msgs=(D.chats.find(c=>c.id==D.cur)||D.chats[0]).msgs;save();if(typeof render=="function")render()}catch(e){}}
+async function pull(first){const t=tk();if(!t||pulling)return false;if(!first&&stream!=null)return false;pulling=true;
+ try{const r=await call("state_get",{p_t:t},12000);if(!r||!r.ok)return false;lastPull=Date.now();
+  if(r.empty){serverAt=null;ready=true;stamp();dirty=true;schedule();return true}
+  serverAt=r.at;const m=mergeIn(r.data);ready=true;if(m.took)afterMerge();if(m.extra){dirty=true;schedule()}return true}
+ catch(e){return false}finally{pulling=false}}
+async function push(){if(!ready||!dirty)return;if(busy){again=true;return}const t=tk();if(!t)return;busy=true;
+ try{stamp();const r=await call("state_put",{p_t:t,p_data:snap(),p_base:serverAt},25000);
+  if(r&&r.ok){serverAt=r.at;dirty=false}
+  else if(r&&r.conflict){serverAt=r.at;const m=mergeIn(r.data);if(m.took)afterMerge();dirty=true;again=true}}
+ catch(e){}busy=false;if(again){again=false;setTimeout(push,400)}}
+function schedule(){clearTimeout(dirtyT);dirtyT=setTimeout(push,5000)}
+window.__syncDirty=function(){try{stamp();dirty=true;if(ready)schedule()}catch(e){}};
+function resetLocal(){const k={};KEEP.forEach(n=>{if(D[n]!==undefined)k[n]=D[n]});Object.keys(D).forEach(n=>delete D[n]);
+ const id=Date.now();Object.assign(D,{name:"Ask Tr. David",msgs:[],trash:[],acc:"#00a884",annSeen:{},notes:[],gone:{},sub:"General",lvl:"UCE",lang:"English",pname:"",fs:16},k);
+ try{fixSub()}catch(e){}D.chats=[{id,title:"New chat",sub:D.sub,lv:D.lvl,msgs:D.msgs}];D.cur=id;setSig="";try{localStorage.setItem("chat_single2",JSON.stringify(D,function(k,v){return(this===D&&k=="msgs")||k=="img"?undefined:v}))}catch(e){}}
+window.__syncFirst=async function(u){try{const owner=LS.getItem("ask_state_owner");if(owner&&owner!==u)resetLocal();LS.setItem("ask_state_owner",u);ready=false;serverAt=null;dirty=false;
+  await Promise.race([pull(true),new Promise(r=>setTimeout(r,5000))])}catch(e){}};
+window.__syncFlush=async function(){try{if(ready&&dirty)await Promise.race([push(),new Promise(r=>setTimeout(r,3000))])}catch(e){}ready=false;serverAt=null;dirty=false;clearTimeout(dirtyT)};
+document.addEventListener("visibilitychange",()=>{if(!tk())return;if(document.hidden){if(ready&&dirty)push()}else pull()});
+window.addEventListener("online",()=>{if(tk())pull()});
+window.addEventListener("pagehide",()=>{if(ready&&dirty)push()});
+setInterval(()=>{if(!tk()||document.hidden)return;if(!ready)pull();else if(dirty)push();else if(Date.now()-lastPull>45000)pull()},15000);
+window.__sync={pull,push,snap,mergeIn,state:()=>({ready,dirty,serverAt})};
 })();
 </script>
 </body></html>

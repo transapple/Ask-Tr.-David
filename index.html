@@ -55,13 +55,14 @@
  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;transition:opacity .45s ease,visibility .45s;padding:24px}
 #spl.out{opacity:0;visibility:hidden}
 html.pg-on #spl{display:none}
+#mic{display:none!important}
 #spl img{width:136px;height:136px;border-radius:50%;display:block;opacity:0;transform:scale(.6);animation:splLogo .7s cubic-bezier(.2,.9,.3,1.2) .05s forwards}
 #spl .sn{margin-top:26px;font-size:32px;font-weight:800;letter-spacing:.3px;line-height:1.15;display:flex;flex-wrap:wrap;justify-content:center}
 #spl .sn span{display:inline-block;opacity:0;transform:translateY(18px);animation:splUp .5s ease forwards}
 #spl .sn .sp{width:.3em}
 #spl .st2{margin-top:10px;font-size:13px;font-weight:500;letter-spacing:1.6px;text-transform:uppercase;color:#ffd800;opacity:0;animation:splFade .8s ease 1.6s forwards}
 #spl .sb{margin-top:34px;width:56px;height:3px;border-radius:3px;background:rgba(255,255,255,.2);overflow:hidden}
-#spl .sv3,#ap #spl .sv3{position:absolute;left:0;right:0;bottom:calc(22px + env(safe-area-inset-bottom,0px));font-size:12px;font-weight:600;letter-spacing:1px;color:#ffd800;opacity:.9}
+#spl .sv3,#ap #spl .sv3{position:absolute;left:0;right:0;bottom:calc(22px + env(safe-area-inset-bottom,0px));font-size:15px;font-weight:600;letter-spacing:1px;color:#ffd800;opacity:.9}
 #spl .sb i{display:block;height:100%;width:100%;background:#ffd800;transform:translateX(-100%);animation:splBar 3s ease-in-out .3s forwards}
 @keyframes splLogo{to{opacity:1;transform:scale(1)}}
 @keyframes splUp{to{opacity:1;transform:none}}
@@ -124,6 +125,46 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 #tb .tbo{flex:none;width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--green),#1c7ed6 55%,#7048e8);animation:tbm 2.4s ease-in-out infinite,tbc 6s linear infinite}
 @keyframes tbm{0%{border-radius:50%;transform:scale(.85) rotate(0)}20%{border-radius:42% 58% 63% 37%/45% 40% 60% 55%;transform:scale(1.1) rotate(70deg)}40%{border-radius:58% 42% 38% 62%/55% 62% 38% 45%;transform:scale(.9) rotate(140deg)}60%{border-radius:35% 65% 55% 45%/60% 40% 60% 40%;transform:scale(1.15) rotate(220deg)}80%{border-radius:60% 40% 45% 55%/40% 58% 42% 60%;transform:scale(.95) rotate(300deg)}100%{border-radius:50%;transform:scale(.85) rotate(360deg)}}
 @keyframes tbc{to{filter:hue-rotate(360deg)}}
+/* searching animations: a different style each time the words change */
+#tb .tbt{transition:opacity .17s}
+#tb.s1 .tbo{width:7px;height:7px;margin:0 24px 0 4px;background:var(--green);box-shadow:12px 0 var(--green),24px 0 var(--green);animation:tbd 1s ease-in-out infinite}
+@keyframes tbd{0%,100%{transform:translateY(0);opacity:.45}50%{transform:translateY(-5px);opacity:1}}
+#tb.s2 .tbo{background:none;border:3px solid rgba(128,128,128,.25);border-top-color:var(--green);animation:tbs .8s linear infinite}
+#tb.s3 .tbo{width:24px;height:20px;border-radius:0;background:linear-gradient(var(--green),var(--green)) 0 100%/4px 30% no-repeat,linear-gradient(#1c7ed6,#1c7ed6) 7px 100%/4px 80% no-repeat,linear-gradient(#7048e8,#7048e8) 14px 100%/4px 50% no-repeat,linear-gradient(#e8590c,#e8590c) 21px 100%/3px 90% no-repeat;animation:tbe .9s ease-in-out infinite alternate}
+@keyframes tbe{0%{background-size:4px 30%,4px 80%,4px 50%,3px 90%}50%{background-size:4px 90%,4px 35%,4px 95%,3px 40%}100%{background-size:4px 55%,4px 100%,4px 30%,3px 75%}}
+#tb.s4 .tbo{background:var(--green);animation:tbp 1.2s ease-out infinite}
+@keyframes tbp{0%{box-shadow:0 0 0 0 rgba(0,168,132,.5);transform:scale(.75)}100%{box-shadow:0 0 0 14px rgba(0,168,132,0);transform:scale(1)}}
+#tb.s5 .tbo{background:none;border:3px dotted var(--green);animation:tbs 1.1s linear infinite}
+#tb.s6 .tbo{border-radius:4px;background:#1c7ed6;animation:tbq 1.6s ease-in-out infinite}
+@keyframes tbq{0%{transform:rotate(0) scale(.8);border-radius:4px}50%{transform:rotate(180deg) scale(1.1);border-radius:50%}100%{transform:rotate(360deg) scale(.8);border-radius:4px}}
+#tb.s7 .tbo{width:38px;height:6px;border-radius:6px;background:linear-gradient(90deg,transparent,var(--green),transparent) 0 0/200% 100%;animation:tbw 1.1s linear infinite}
+@keyframes tbw{0%{background-position:200% 0}100%{background-position:-100% 0}}
+#tb.s8 .tbo{width:18px;height:24px;border-radius:2px 7px 7px 2px;background:#7048e8;animation:tbf 1.3s ease-in-out infinite}
+@keyframes tbf{0%,100%{transform:perspective(70px) rotateY(0)}50%{transform:perspective(70px) rotateY(160deg)}}
+#tb.s9 .tbo{animation:tbm 1.6s ease-in-out infinite,tbc 2.4s linear infinite}
+#tb.s1 .tbt,#tb.s3 .tbt,#tb.s7 .tbt,#tb.s9 .tbt{background:linear-gradient(90deg,var(--sub) 40%,var(--green) 50%,var(--sub) 60%) 0 0/250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;animation:tbx 1.6s linear infinite}
+@keyframes tbx{0%{background-position:100% 0}100%{background-position:-100% 0}}
+#tb.s2 .tbt,#tb.s4 .tbt{animation:tby 1.4s ease-in-out infinite}
+@keyframes tby{0%,100%{opacity:.55;transform:translateX(0)}50%{opacity:1;transform:translateX(4px)}}
+@keyframes tbs{to{transform:rotate(360deg)}}
+
+/* matrices and other workings in their own format */
+.md .mx{display:inline-block;vertical-align:middle;margin:2px .25em;padding:.05em .5em;font-family:"Cambria Math","STIX Two Math","Times New Roman",serif;white-space:nowrap;line-height:1.25}
+.md .mxg{display:inline-grid;grid-template-columns:repeat(var(--c,1),auto);gap:.28em 1.05em;justify-items:center;align-items:center;padding:.18em 0}
+.md .mxc{white-space:nowrap}
+.md .mxc.vb{border-left:1.5px solid currentColor;padding-left:.7em;margin-left:-.35em}
+.md .mxc.hl{border-top:1.5px solid currentColor;padding-top:.15em}
+.md .mx.p{border:2px solid currentColor;border-top-color:transparent;border-bottom-color:transparent;border-radius:.95em/50%}
+.md .mx.b{border-left:2px solid currentColor;border-right:2px solid currentColor;background:linear-gradient(currentColor,currentColor) left top/.38em 2px no-repeat,linear-gradient(currentColor,currentColor) left bottom/.38em 2px no-repeat,linear-gradient(currentColor,currentColor) right top/.38em 2px no-repeat,linear-gradient(currentColor,currentColor) right bottom/.38em 2px no-repeat}
+.md .mx.v{border-left:2px solid currentColor;border-right:2px solid currentColor}
+.md .mx.V{border-left:5px double currentColor;border-right:5px double currentColor}
+.md .mx.n{padding:0 .1em}
+.md .mx.cs{border-left:2px solid currentColor;border-radius:.9em 0 0 .9em/50% 0 0 50%;padding-left:.75em}
+.md .mx.cs .mxg{justify-items:start}
+.md .eqa{display:inline-grid;grid-template-columns:auto auto;column-gap:.35em;row-gap:.4em;align-items:baseline;white-space:nowrap}
+.md .eql{text-align:right}.md .eqr{text-align:left}.md .eqf{grid-column:1/-1;text-align:center}
+.md .mb:has(.mx){align-items:center}
+.md pre.wk{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Courier New",monospace;white-space:pre;overflow-x:auto;-webkit-overflow-scrolling:touch;margin:6px 0 8px;padding:8px 12px;background:var(--wall);border-left:3px solid var(--green);border-radius:6px;font-size:.92em;line-height:1.4;max-width:100%;-webkit-user-select:text;user-select:text}
 #msgs{flex:1;overflow-y:auto;padding:12px 10px;display:flex;flex-direction:column;gap:4px}
 .b{max-width:78%;padding:7px 10px 5px;border-radius:14px;word-wrap:break-word;white-space:pre-wrap;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;box-shadow:0 1px 1px rgba(0,0,0,.1)}
 .b.o{align-self:flex-end;background:var(--out);border-bottom-right-radius:4px}
@@ -255,7 +296,7 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 .lvc{display:flex;flex-wrap:wrap;gap:6px;padding:0 4px 12px}
 .lvc button{border:1px solid var(--text);background:none;color:var(--text);border-radius:8px;padding:6px 10px;font:inherit;font-size:.85em;cursor:pointer}
 .lvc .on{background:var(--text);color:var(--bg)}
-.empty{padding:50px 20px;text-align:center;color:var(--sub)}
+.empty{padding:50px 20px;text-align:center;color:var(--sub)}.empty .st{transition:opacity .2s}
 #clrsel{position:sticky;bottom:0;display:block;width:calc(100% - 28px);margin:14px;padding:14px;border:0;border-radius:12px;background:#ff453a;color:#fff;font:600 16px inherit;cursor:pointer}
 #clrsel:disabled{opacity:.4;cursor:default}
 .sws{display:flex;gap:16px;flex-wrap:wrap;padding:20px 18px}
@@ -367,8 +408,8 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
   }catch(e){}
   var done=false;function go(){if(done)return;done=true;el.classList.add("out");setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el)},600)}
   if(document.documentElement.classList.contains("pg-on")){el.parentNode.removeChild(el);return}
-  el.addEventListener("click",go);
-  setTimeout(go,3500);
+  /* the loading screen stays until the app has built its first screen (and has shown for at least 2 seconds); a 15 second limit stops it hanging */
+  var t0=Date.now(),iv=setInterval(function(){var el2=Date.now()-t0;if((window.__askReady&&el2>=2200)||el2>15000){clearInterval(iv);go()}},120);
 })();
 </script>
 <div id="pgGate" role="dialog" aria-modal="true" aria-label="Ask Tr. David">
@@ -787,7 +828,7 @@ nav{display:flex;align-items:center;gap:12px}nav button{width:40px;height:40px;b
 #ap .lvc{display:flex;flex-wrap:wrap;gap:6px;padding:0 4px 12px}
 #ap .lvc button{border:1px solid var(--text);background:none;color:var(--text);border-radius:8px;padding:6px 10px;font:inherit;font-size:.85em;cursor:pointer}
 #ap .lvc .on{background:var(--text);color:var(--bg)}
-#ap .empty{padding:50px 20px;text-align:center;color:var(--sub)}
+#ap .empty{padding:50px 20px;text-align:center;color:var(--sub)}.empty .st{transition:opacity .2s}
 #ap #clrsel{position:sticky;bottom:0;display:block;width:calc(100% - 28px);margin:14px;padding:14px;border:0;border-radius:12px;background:#ff453a;color:#fff;font:600 16px inherit;cursor:pointer}
 #ap #clrsel:disabled{opacity:.4;cursor:default}
 #ap .sws{display:flex;gap:16px;flex-wrap:wrap;padding:20px 18px}
@@ -1172,7 +1213,7 @@ addEventListener('resize',fit);fit();start(0);
 </script>
 
 <div id="app">
-<header><div id="hd" style="display:flex;align-items:center;gap:10px;flex:1"><div id="avw" role="button" aria-label="Account" style="position:relative;cursor:pointer"><div class="av" id="av">A</div><span id="bdg"></span></div><div><div id="nm">Alex</div><div class="t" id="stat">Anything about your studies</div></div></div><button class="ic" id="dots" aria-label="Menu"><svg viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button></header>
+<header><div id="hd" style="display:flex;align-items:center;gap:10px;flex:1"><div id="avw" role="button" aria-label="Account" style="position:relative;cursor:pointer"><div class="av" id="av"></div><span id="bdg"></span></div><div><div id="nm">Ask Tr. David</div><div class="t" id="stat">Anything about your studies</div></div></div><button class="ic" id="dots" aria-label="Menu"><svg viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button></header>
 <div id="ann" role="dialog" aria-modal="true" aria-labelledby="annt"><div id="anncard"><b id="annt"></b><div id="annb"></div><div id="annrow"><button id="annr" type="button">Mark as read</button><button id="annx" type="button">Hide</button></div></div></div>
 <div id="srch"><input id="sq" placeholder="Search chat history" autocomplete="off"><span id="cnt"></span><button class="ic" id="sx" aria-label="Close search"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
 <div id="subs"></div>
@@ -1214,7 +1255,7 @@ pal:'<svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 100 18c1.1 0 1.6-.8 1.6-1.6 0
 clr:'<svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><path d="M9.5 8.5l5 5M14.5 8.5l-5 5"/></svg>',
 user:'<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg>',eye:'<svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',bin:'<svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v5M14 11v5"/></svg>'};
 const CH='<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>';
-let D={name:"Alex",msgs:[],trash:[],acc:"#00a884"};
+let D={name:"Ask Tr. David",msgs:[],trash:[],acc:"#00a884"};
 try{const x=JSON.parse(localStorage.getItem("chat_single2"));if(x&&(x.chats||x.msgs)){D=x;if(!D.msgs)D.msgs=[]}}catch(e){}
 D.trash=D.trash||[];if(!D.annSeen)D.annSeen={};/* What's new is OFF until it is connected to the database (see Project handoff). Nothing is added to the list while WN_ON is false. */const WN_ON=true;if(!D.notes||!WN_ON)D.notes=[];D.acc=D.acc||"#00a884";
 const save=()=>{try{localStorage.setItem("chat_single2",JSON.stringify(D,function(k,v){return(this===D&&k=="msgs")||k=="img"?undefined:v}))}catch(e){}try{window.__syncDirty&&__syncDirty()}catch(e){}};
@@ -1224,14 +1265,32 @@ const esc=s=>s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
 const isDark=()=>D.theme?D.theme=="dark":matchMedia("(prefers-color-scheme:dark)").matches;
 function applyTheme(){const r=document.documentElement;if(D.theme)r.dataset.theme=D.theme;else delete r.dataset.theme;r.style.setProperty("--green",D.acc);r.style.fontSize=(D.fs||16)+"px";if(D.hc)r.dataset.hc=1;else delete r.dataset.hc;if(D.font)r.dataset.font=D.font;else delete r.dataset.font}
 function hl(t){t=esc(t);if(!q)return t;const e=esc(q).replace(/[.*+?^${}()|[\]\\]/g,"\\$&");return t.replace(new RegExp(e,"gi"),x=>"<mark>"+x+"</mark>")}
+/* scroll rules: the chat only follows the typing answer while the learner is at (or near) the bottom. Scrolling up to read stops the follow, and nothing is pulled back down. */
+const RS={cur:null,n:-1,anc:null};
+const nearBot=m=>m.scrollHeight-m.scrollTop-m.clientHeight<150;
+/* when a question is sent, that question is brought up near the top of the screen and the answer fills in below it. The blank space under it keeps shrinking as the answer grows. */
+function ancFix(M){let sp=M.querySelector("#aspc");if(RS.anc==null){if(sp)sp.remove();return}
+ const a=M.querySelector(':scope > [data-i="'+RS.anc+'"]');if(!a)return;
+ if(!sp){sp=document.createElement("div");sp.id="aspc";sp.style.cssText="flex:none;pointer-events:none";M.appendChild(sp)}
+ sp.style.height="0px";const need=M.clientHeight-(sp.getBoundingClientRect().top-a.getBoundingClientRect().top)-12;sp.style.height=Math.max(0,Math.round(need))+"px"}
+function ancTop(M){const a=M.querySelector(':scope > [data-i="'+RS.anc+'"]');if(a)M.scrollTop=M.scrollTop+a.getBoundingClientRect().top-M.getBoundingClientRect().top-10}
 function render(){
  try{updPlan()}catch(e){}
+ const M0=$("msgs"),near0=nearBot(M0),prev0=M0.scrollTop;
+ /* while an answer is typing, only that one bubble is refreshed (the rest of the chat is not rebuilt, so touch scrolling is not interrupted) */
+ if(sm&&sm.stream&&!q&&RS.cur===D.cur&&RS.n===D.msgs.length){
+  const i=D.msgs.indexOf(sm),el=i>=0&&M0.querySelector(':scope > [data-i="'+i+'"]');
+  if(el){const tp=document.createElement("template");try{tp.innerHTML=bub(sm,i,i==D.msgs.map(x=>x.s).lastIndexOf("i"))}catch(e){tp.innerHTML=""}
+   if(tp.content.children.length==1){el.replaceWith(tp.content.firstElementChild);if(RS.anc!=null){ancFix(M0);M0.scrollTop=prev0}else if(near0)M0.scrollTop=M0.scrollHeight;else M0.scrollTop=prev0;return}}}
+ const lastM=D.msgs[D.msgs.length-1],grew=RS.n>=0&&D.msgs.length>RS.n;let newAnc=false;
+ if(RS.cur!==D.cur)RS.anc=null;else if(grew&&lastM&&lastM.s=="o"){RS.anc=D.msgs.length-1;newAnc=true}
+ const goBottom=RS.anc==null&&(RS.cur!==D.cur||grew||RS.n<0||near0);
  $("nm").textContent=D.name;if(!$("av").firstElementChild)$("av").innerHTML='<img src="'+AVATAR+'" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block">';let h="",last="",n=0;const lb=D.msgs.map(x=>x.s).lastIndexOf("i");
  D.msgs.forEach((m,i)=>{if(q&&!m.t.toLowerCase().includes(q))return;n++;const d=dl(m.ts);if(d!=last){h+=`<div class="day">${d}</div>`;last=d}
  if(m.s=="i"){h+=bub(m,i,i==lb);return}
  h+=`<div class="b ${m.s}" data-i="${i}">${m.img?'<img src="'+m.img+'">':""}${hl(m.t)}<small>${m.ed?"edited ":""}${hm(m.ts)}${m.s=="o"?`<span class="${m.st==2?"rd":""}" style="display:inline-flex">${m.st?K2:K1}</span>`:""}</small></div>`});
  if(D.msgs.length)HQC={};if(!D.msgs.length&&!q)h=empty();$("cnt").textContent=q?n+" found":"";if(q&&!n)h='<div class="day">No messages found</div>';
- $("msgs").innerHTML=h;if(typeof thinkBub=="function")thinkBub();$("msgs").scrollTop=1e9;subs()}
+ $("msgs").innerHTML=h;if(typeof thinkBub=="function")thinkBub();ancFix(M0);if(newAnc)ancTop(M0);else M0.scrollTop=goBottom?1e9:prev0;RS.cur=D.cur;RS.n=D.msgs.length;subs();window.__askReady=1}
 function stopEdit(){ei=null;$("inp").value="";$("editing").style.display="none"}
 function send(){
  const v=$("inp").value.trim();if(!v||stream!=null)return;
@@ -1778,11 +1837,13 @@ function offSub0(q,I){q=String(q||"");const fam=relSubs(D.sub);
  /* sums and equations belong to Mathematics only */
  try{if(!fam.includes("Mathematics")&&(work(q)||arithSolve(q)))return"Mathematics"}catch(e){}
  return null}
-function setSub(sb){D.lock=true;save();if(sb==D.sub&&D.chats.some(c=>c.id==D.cur&&c.sub==sb&&(c.lv||lvKey())==lvKey())){render();return}stopS();stopEdit();
- const cur=D.chats.find(c=>c.id==D.cur);if(cur&&!cur.msgs.length&&D.chats.length>1)D.chats=D.chats.filter(c=>c!==cur);
- D.sub=sb;let c=D.chats.find(x=>x.sub==sb&&(x.lv||lvKey())==lvKey());
- if(!c){c={id:Date.now(),title:"New chat",sub:sb,lv:lvKey(),msgs:[]};D.chats.unshift(c)}
- c.lock=D.lock;sw(c.id)}
+/* switching subject always opens a NEW chat for that subject; the earlier chats stay in the chat history untouched */
+function setSub(sb){D.lock=true;save();const cur=D.chats.find(c=>c.id==D.cur);
+ if(sb==D.sub&&cur&&cur.sub==sb&&(cur.lv||lvKey())==lvKey()){render();return}
+ stopS();stopEdit();
+ /* an empty chat is reused (nothing to keep), so the history does not fill with empty chats */
+ if(cur&&!cur.msgs.length){cur.sub=sb;cur.lv=lvKey();cur.lock=D.lock;D.sub=sb;sw(cur.id);return}
+ D.sub=sb;const c={id:Date.now(),title:"New chat",sub:sb,lv:lvKey(),msgs:[],lock:D.lock};D.chats.unshift(c);sw(c.id)}
 const gen=x=>["Explain the main ideas of "+x,"Give me a revision summary for "+x,"What are common exam questions in "+x+"?"];
 const STARTS={General:["How do I study better for exams?","What is photosynthesis?","Explain fractions simply"],Mathematics:["How do I solve 2x + 5 = 11?","What is the Pythagoras theorem?","Explain percentages"],Science:["How do plants make food?","What are the states of matter?","How is rain formed?"],English:["What is a noun?","How do I write a good essay?","Explain the past tense"],History:["What caused World War 1?","Who built the pyramids?","What was the Industrial Revolution?"]};
 const SEND=$("send").innerHTML,STOP='<svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" style="fill:currentColor"/></svg>';
@@ -1800,7 +1861,7 @@ function texClean(x){
  const BR="(?:[^{}]|\\{[^{}]*\\})*";
  const rx=new RegExp("\\\\(?:text|textbf|textit|textrm|mathrm|mathbf|mathit|mathsf|operatorname|mbox|rm|boxed|underline|overline|bar|ce)\\{("+BR+")\\}","g");
  for(let i=0;i<4&&rx.test(x);i++){rx.lastIndex=0;x=x.replace(rx,"$1")}
- x=x.replace(/\^\s*\{?\\circ\}?/g,"\u00b0").replace(/\\circ\b/g,"\u00b0").replace(/\\degree\b/g,"\u00b0")
+ x=x.replace(/\\(?:vec|overrightarrow)\{([^{}]*)\}/g,"$1\u20d7").replace(/\^\s*\{?\\circ\}?/g,"\u00b0").replace(/\\circ\b/g,"\u00b0").replace(/\\degree\b/g,"\u00b0")
   .replace(/\\(?:longrightarrow|rightarrow|to)\b/g,"\u2192").replace(/\\(?:leftarrow)\b/g,"\u2190").replace(/\\(?:Rightarrow|implies)\b/g,"\u21d2")
   .replace(/\\(?:rightleftharpoons|leftrightarrow|leftrightharpoons)\b/g,"\u21cc").replace(/\\uparrow\b/g,"\u2191").replace(/\\downarrow\b/g,"\u2193")
   .replace(/\\approx\b/g,"\u2248").replace(/\\pm\b/g,"\u00b1").replace(/\\infty\b/g,"\u221e").replace(/\\propto\b/g,"\u221d").replace(/\\equiv\b/g,"\u2261").replace(/\\angle\b/g,"\u2220").replace(/\\triangle\b/g,"\u25b3").replace(/\\perp\b/g,"\u22a5").replace(/\\parallel\b/g,"\u2225")
@@ -1808,6 +1869,66 @@ function texClean(x){
   .replace(/\\(?:quad|qquad)\b/g,"  ").replace(/\\[,;:!]/g," ").replace(/\\ /g," ").replace(/\\%/g,"%").replace(/\\([{}_#&])/g,"$1");
  x=x.replace(/ ?<=> ?/g," \u21cc ").replace(/ ?-> ?/g," \u2192 ");
  return x}
+
+/* ===== WORKING IN ITS OWN FORMAT: matrices (any rows x columns), column vectors, determinants, augmented matrices, aligned equations,
+   cases, tables made with \array, code blocks (long division, column working) and column sums. The answer text is turned into small
+   placeholders first (so no other rule touches it) and the finished HTML is put back at the end of md(). ===== */
+const MXS=[],MXM=new Map(),WKS=[],WKM=new Map();
+const mxPut=h=>{let i=MXM.get(h);if(i==null){i=MXS.length;MXS.push(h);MXM.set(h,i)}return"\u0003"+String.fromCharCode(0xE000+i)+"\u0003"};
+const wkPut=h=>{let i=WKM.get(h);if(i==null){i=WKS.length;WKS.push(h);WKM.set(h,i)}return i};
+const mxIT=h=>h.split(/(<[^>]+>)/).map((q,i)=>i%2?q:q.replace(/(?<![A-Za-z\u00a0])([a-zA-Z])(?![A-Za-z])/g,"<i>$1</i>")).join("");
+function mxCell(c){c=String(c==null?"":c).trim();if(!c)return"";let e;try{e=esc(texClean(c))}catch(x){e=esc(c)}let h;try{h=mth(e)}catch(x){h=e}return mxIT(h)}
+const MXSPLIT=/\\\\(?:\s*\[[^\]]*\])?/;
+function mxFrom(body,kind,spec){
+ const bars=[];if(spec){let col=0;String(spec).replace(/[{}\s]/g,"").split("").forEach(ch=>{if(ch=="|"){if(col>0)bars.push(col)}else if(/[lcrpmb]/i.test(ch))col++})}
+ const R=body.split(MXSPLIT).map(r=>r.trim()).filter(r=>r!=="").map(r=>{let hl=false;if(/^\\hline/.test(r)){hl=true;r=r.replace(/^(\\hline\s*)+/,"")}const c=r.split(/(?<!\\)&/).map(x=>x.replace(/\\hline/g,"").trim());c.hl=hl;return c});
+ if(!R.length)return null;const n=Math.max(...R.map(r=>r.length));
+ let h='<span class="mx '+kind+'"><span class="mxg" style="--c:'+n+'">';
+ R.forEach(r=>{for(let j=0;j<n;j++)h+='<span class="mxc'+(bars.includes(j)?" vb":"")+(r.hl?" hl":"")+'">'+mxCell(r[j])+'</span>'});
+ return h+'</span></span>'}
+function mxAlign(body){
+ const R=body.split(MXSPLIT).map(r=>r.trim()).filter(r=>r!=="");if(!R.length)return null;
+ let h='<span class="eqa">';
+ R.forEach(r=>{const k=r.search(/(?<!\\)&/);if(k<0)h+='<span class="eqf">'+mxCell(r)+'</span>';else h+='<span class="eql">'+mxCell(r.slice(0,k))+'</span><span class="eqr">'+mxCell(r.slice(k+1).replace(/(?<!\\)&/g," "))+'</span>'});
+ return h+'</span>'}
+const MXTOK=/^[-+\u2212]?(?:\d+(?:[.,/]\d+)?|\d*[a-zA-Z](?:\^?\d)?)$/;
+function mxPlainRows(b){const R=b.split(";").map(r=>r.trim().split(/[\s,]+/).filter(Boolean));if(!R.length||R.length>8)return null;const n=R[0].length;if(!n||n>8)return null;if(!R.every(r=>r.length==n&&r.every(x=>MXTOK.test(x))))return null;return R}
+function mxBuild(R,kind){const n=R[0].length;let h='<span class="mx '+kind+'"><span class="mxg" style="--c:'+n+'">';R.forEach(r=>r.forEach(c=>{h+='<span class="mxc">'+mxCell(c)+'</span>'}));return h+'</span></span>'}
+function mxPre(t){
+ t=String(t||"");
+ if(t.indexOf("\\")>=0){
+  /* \left[ \begin{matrix}..\end{matrix} \right] and the same with ( and | */
+  t=t.replace(/\\left\s*([\[(|])\s*\\begin\{(matrix|array)\}(\{[^}]*\})?([\s\S]*?)\\end\{\2\}\s*\\right\s*([\])|])/g,(a,l,env,spec,body)=>{const h=mxFrom(body,l=="["?"b":l=="("?"p":"v",spec);return h?mxPut(h):a});
+  t=t.replace(/\\begin\{(p|b|B|v|V|small)?matrix\*?\}(?:\[[^\]]*\])?([\s\S]*?)\\end\{\1?matrix\*?\}/g,(a,k,body)=>{const h=mxFrom(body,{p:"p",b:"b",B:"p",v:"v",V:"V"}[k]||"n");return h?mxPut(h):a});
+  t=t.replace(/\\begin\{array\}(\{[^}]*\})([\s\S]*?)\\end\{array\}/g,(a,spec,body)=>{const h=mxFrom(body,"n",spec);return h?mxPut(h):a});
+  t=t.replace(/\\begin\{cases\}([\s\S]*?)\\end\{cases\}/g,(a,body)=>{const h=mxFrom(body,"cs");return h?mxPut(h):a});
+  t=t.replace(/\\begin\{(aligned|alignedat|align\*?|split|gathered|gather\*?|eqnarray\*?)\}(?:\{[^}]*\})?([\s\S]*?)\\end\{\1\}/g,(a,env,body)=>{const h=mxAlign(body);return h?mxPut(h):a});
+  t=t.replace(/\\d?binom\{([^{}]{1,12})\}\{([^{}]{1,12})\}/g,(a,x,y)=>mxPut(mxBuild([[x],[y]],"p")));
+ }
+ /* matrices written with plain characters: [[1,2],[3,4]]   [1 2; 3 4]   [3; 4]   and rows on separate lines  [ 1 2 ] */
+ t=t.replace(/\[\s*(\[[^\[\]\n]+\](?:\s*,\s*\[[^\[\]\n]+\])+)\s*\]/g,(a,b)=>{const R=(b.match(/\[[^\[\]]+\]/g)||[]).map(r=>r.slice(1,-1).split(/[\s,]+/).filter(Boolean)),n=R[0]&&R[0].length;if(!n||n>8||R.length>8||!R.every(r=>r.length==n&&r.every(x=>MXTOK.test(x))))return a;return mxPut(mxBuild(R,"b"))});
+ t=t.replace(/\[\s*([^\[\]\n;]{1,30}(?:;[^\[\]\n;]{1,30})+)\s*\]/g,(a,b)=>{const R=mxPlainRows(b);return R?mxPut(mxBuild(R,"b")):a});
+ const L=t.split("\n"),out=[];
+ const parse=l=>{let k="b",m=l.match(/^\s*\[\s*([^\[\]|]+?)\s*\]\s*$/);if(!m){k="p";m=l.match(/^\s*\(\s*([^()|]+?)\s*\)\s*$/)}if(!m){k="v";m=l.match(/^\s*\|\s*([^|]+?)\s*\|\s*$/)}if(!m)return null;
+  const p=m[1].split(/\s+/).filter(Boolean);if(!p.length||p.length>8||!p.every(x=>MXTOK.test(x)))return null;return{k,p}};
+ for(let i=0;i<L.length;){const a=parse(L[i]);if(!a){out.push(L[i++]);continue}
+  const R=[a.p];let j=i+1;while(j<L.length){const b=parse(L[j]);if(!b||b.k!=a.k||b.p.length!=a.p.length)break;R.push(b.p);j++}
+  if(R.length>=2){out.push(":: "+mxPut(mxBuild(R,a.k)));i=j}else out.push(L[i++])}
+ return out.join("\n")}
+/* code blocks (long division, column working, drawings made of characters) keep every space */
+function wkPre(t){t=String(t||"");if(t.indexOf("```")<0)return t;
+ return t.replace(/```[A-Za-z0-9_+-]*[ \t]*\n?([\s\S]*?)(?:```|$)/g,(a,b)=>{b=b.replace(/\s+$/,"").replace(/^\n+/,"");if(!b.trim())return"";return"\n::wk "+wkPut(esc(b))+"\n"})}
+/* a sum written in columns (numbers above a line) is put in a fixed-width block, right-aligned */
+function colPre(t){const L=String(t||"").split("\n"),out=[],NL=/^\s*[+\-\u2212\u00d7x\u00f7*\/=]?\s*\d[\d.,]*\s*$/,SEP=/^\s*[-_=\u2500\u2014]{3,}\s*$/;
+ for(let i=0;i<L.length;i++){
+  if(SEP.test(L[i])&&out.length>=2&&NL.test(out[out.length-1])&&NL.test(out[out.length-2])&&i+1<L.length&&NL.test(L[i+1])){
+   const up=[];while(out.length&&NL.test(out[out.length-1])&&up.length<4)up.unshift(out.pop());
+   const dn=[];let j=i+1;while(j<L.length&&NL.test(L[j])&&dn.length<3){dn.push(L[j]);j++}
+   const f=x=>{const m=x.trim().match(/^([+\-\u2212\u00d7x\u00f7*\/=]?)\s*(\d[\d.,]*)$/);return m?[m[1],m[2]]:["",x.trim()]},U=up.map(f),D=dn.map(f),w=Math.max(...U.concat(D).map(a=>a[1].length))+2,fm=a=>(a[0]||" ")+a[1].padStart(w-1," ");
+   out.push("::wk "+wkPut(esc(U.map(fm).concat(["-".repeat(w)]).concat(D.map(fm)).join("\n"))));i=j-1;continue}
+  out.push(L[i])}
+ return out.join("\n")}
+
 const TEXLIKE=/\\(?:text|frac|dfrac|times|div|sqrt|rightarrow|to|Delta|cdot|ce|mathrm|begin|boxed)\b/;
 /* turn $$..$$, \[..\], \(..\), nested bullets, "- Label: $$formula$$" into clean lines the renderer understands */
 function mdPrep(t){
@@ -2268,7 +2389,7 @@ function dgHtml(k){if(k=="@wait")return'<div class="dgw">Drawing the diagram…<
 function dgAuto(m){try{if(!m||m.stream||m.note||m.err||m.lim||m.quiz||!m.t||/::fig |<svg|```svg/.test(m.t))return"";
  const q=String(m.q||""),hd=(String(m.t).match(/^#\s*(.+)$/m)||[])[1]||"",tp=String(m.tq||"");
  for(const pass of[q,hd,tp])if(pass)for(const k in DG)if(DG[k].re.test(pass))return dgHtml(k)}catch(e){}return""}
-function md(t){t=dgPre(t);t=mdPrep(t);t=esc(t);let o="",m=null,tb=[],li=false,cm=false;
+function md(t){if(MXS.length>420||WKS.length>420){MXS.length=0;MXM.clear();WKS.length=0;WKM.clear()}t=dgPre(t);t=wkPre(t);t=colPre(t);t=mxPre(t);t=mdPrep(t);t=esc(t);let o="",m=null,tb=[],li=false,cm=false;
  const cl=()=>{if(m=="table"){const R=tb;tb=[];let h="";R.forEach((r,k)=>{const hd=r.hd;h+="<tr>"+r.c.map(c=>{const num=/^[-+]?(UGX\s)?[\d,.\s]+(%|\s?[a-zA-Z\u00b2\u00b3\/]{0,4})?$/.test(mthLite(c).replace(/<[^>]+>/g,"").trim())&&!hd;return"<"+(hd?"th":"td")+(num?' class="nm"':"")+">"+il(c)+"</"+(hd?"th":"td")+">"}).join("")+"</tr>"});o+='<div class="tw"><table>'+h+"</table></div>";m=null;return}
   if(m=="mb"){o+="</div>";m=null;return}
   if(m){if(cm){o+="</div>";cm=false}if(li){o+="</li>";li=false}o+="</"+m+">";m=null}},
@@ -2279,6 +2400,7 @@ function md(t){t=dgPre(t);t=mdPrep(t);t=esc(t);let o="",m=null,tb=[],li=false,cm
  const lines=t.split("\n");
  for(let k=0;k<lines.length;k++){const raw=lines[k],ind=(raw.match(/^[ \t]*/)[0].replace(/\t/g,"  ")).length,l=raw.trim()?raw.replace(/^[ \t]+/,""):"";
   if(/^\|/.test(l)){if(/^\|[-| :]+\|?$/.test(l)){if(tb.length==1)tb[0].hd=true;continue}if(m!="table"){cl();m="table"}tb.push({c:l.split("|").slice(1,-1).map(c=>c.trim()),hd:false});continue}
+  const wk=l.match(/^::wk (\d+)$/);if(wk){cl();o+='<pre class="wk">'+(WKS[+wk[1]]||"")+"</pre>";continue}
   const fg=l.match(/^::fig (\S+)$/);if(fg){cl();o+=dgHtml(fg[1]);continue}
   const dd=l.match(/^::diagram (.{3,600})$/);if(dd){cl();o+='<figure class="dg"><figcaption style="text-align:left;font-weight:400">'+"<b>Diagram to draw:</b> "+il(dd[1])+"</figcaption></figure>";continue}
   const mm=l.match(/^::\s?(.*)$/)||l.match(/^\$\$\s*(.+?)\s*\$\$$/);
@@ -2291,7 +2413,7 @@ function md(t){t=dgPre(t);t=mdPrep(t);t=esc(t);let o="",m=null,tb=[],li=false,cm
   if(ind>0&&(m=="ul"||m=="ol")&&li&&l){if(cm){o+="</div>";cm=false}o+=u?'<div class="sub">\u2022 '+il(u[1])+"</div>":b?'<div class="sub">'+b[1]+". "+il(b[2])+"</div>":'<div class="sub">'+il(l)+"</div>";continue}
   if(b||u){const ty=b?"ol":"ul";if(m!=ty){cl();o+="<"+ty+">";m=ty}if(cm){o+="</div>";cm=false}if(li)o+="</li>";o+="<li>"+il((b||u)[b?2:1]);li=true}
   else{cl();if(/^#{3,} /.test(l))o+="<h4>"+il(l.replace(/^#+ /,""))+"</h4>";else if(/^## /.test(l))o+="<h4>"+il(l.slice(3))+"</h4>";else if(/^# /.test(l))o+="<h3>"+il(l.slice(2))+"</h3>";else if(/^\*\*(Final answer|Answer|Therefore)\b/i.test(l))o+='<div class="ans">'+il(l)+"</div>";else if(l.trim())o+="<p>"+il(l)+"</p>"}}
- cl();return o}
+ cl();return o.replace(/\u0003([\uE000-\uF8FF])\u0003/g,(a,c)=>MXS[c.charCodeAt(0)-0xE000]||"")}
 /* ===== WORKED SOLUTIONS: real step-by-step working, shown in full at once ===== */
 const gcd=(a,b)=>{a=Math.abs(a);b=Math.abs(b);while(b){const t=a%b;a=b;b=t}return a};
 const FR=(n,d=1)=>{if(d<0){n=-n;d=-d}const g=gcd(n,d)||1;return{n:n/g,d:d/g}};
@@ -4495,26 +4617,40 @@ function sendFb(m){try{if(m&&m.fb==-1)gdSense("dn")}catch(e){}try{
 /* ===== TRAINING 11: "ASK ABOUT" BUTTON. On the latest long answer it shows tappable parts (bold words, numbered steps, formulas, table rows).
    A tap types a clear pointer question for the learner (the same kind ctxPart understands), so typing by hand works the same way. ===== */
 function abGroups(t){
- const hl=[],more=[],seen={},cl=x=>String(x).replace(/["\u201c\u201d]/g,"").replace(/\*\*|`/g,"").replace(/\s+/g," ").trim().slice(0,50),
-  add=(arr,lab,q)=>{const k=lab.toLowerCase();if(seen[k]||hl.length+more.length>=24)return;seen[k]=1;arr.push({lab:lab.length>34?lab.slice(0,32)+"…":lab,q})},
-  ask=c=>'Explain "'+c+'" in your answer in more detail';
+ const hl=[],more=[],seen={},cl=x=>String(x).replace(/["\u201c\u201d]/g,"").replace(/\*\*|`/g,"").replace(/\s+/g," ").replace(/[:\-\u2013\s]+$/,"").trim().slice(0,60),
+  /* headings that only describe the layout of an answer carry no content to ask about */
+  SKIP=/^(detailed explanation|explanation|introduction|overview|step[- ]by[- ]step|steps?( \d+)?|worked examples?( \d+)?:?|answer|solution|notes?|diagram|table|definition)$/i,
+  isQ=x=>/\?$/.test(x)&&/^(what|why|how|when|where|who|which|can|could|does|do|is|are)\b/i.test(x),
+  /* a tap asks a natural question that points at the answer on screen (the pointer words keep it tied to that answer) */
+  qFor=c=>{
+   if(/^(key|main|important) (points?|ideas?|facts?)$/i.test(c))return"In your answer, what are the "+c.toLowerCase()+"?";
+   if(/^(examples?|example \d+|for example|worked example)$/i.test(c))return"Give me an example";
+   if(/^(in short|in summary|summary|short answer|quick summary|remember|to remember|conclusion|in brief)$/i.test(c))return"Explain that in short";
+   if(isQ(c))return c.replace(/\?*$/,"?");
+   const w=c.split(" ").length;
+   return w==1?'In your answer, what does "'+c+'" mean?':'In your answer, what is "'+c+'" and what does it mean?'},
+  lab=c=>/^example \d+$/i.test(c)?"Example":/^(worked example)$/i.test(c)?"Example":c,
+  add=(arr,c,q)=>{const k=lab(c).toLowerCase();if(seen[k]||hl.length+more.length>=24)return;seen[k]=1;const L=lab(c);arr.push({lab:L.length>34?L.slice(0,32)+"\u2026":L,q:q||qFor(c)})};
  const S=String(t||""),L=S.split("\n");let tb=0;
- /* highlighted: the bold words */
- (S.match(/\*\*[^*\n]{2,40}\*\*/g)||[]).forEach(b=>{const c=cl(b);if(c.length>1&&hl.length<10)add(hl,c,'What do you mean by "'+c+'"')});
- /* other important parts: section headings, steps, table rows, formulas, "Term: explanation" points */
- L.forEach(l=>{const h=l.match(/^#{2,3}\s+(.+)/);if(h){const c=cl(h[1].replace(/^\d+\.\s*/,""));if(c.length>1)add(more,c,ask(c))}});
- L.forEach(l=>{const n=l.match(/^\s*(\d{1,2})[.)]\s+\S/);if(n)add(more,"Step "+n[1],"Explain step "+n[1]+" of your answer in more detail")});
- L.forEach(l=>{if(/^\s*\|/.test(l)){if(/^\s*\|[\s:|-]+\|?\s*$/.test(l)){tb=2;return}if(tb==0){tb=1;return}if(tb==1)tb=2;const c=cl(l.replace(/^\s*\|/,"").split("|")[0]);if(c.length>1)add(more,"Row: "+c,'Explain that row in your table: "'+c+'"')}else tb=0});
- L.forEach(l=>{if(/^\s*\|/.test(l))return;const f=l.replace(/\*\*|`/g,"").replace(/^[-\u2022]\s+/,"").replace(/^[A-Za-z ]{3,20}:\s+(?=\S+\s*=)/,"").trim();if(f.length>=5&&f.length<=80&&(/[A-Za-z0-9)\]]\s*=\s*[A-Za-z0-9(\-]/.test(f)||/\^|sqrt\(/.test(f))&&!/^#/.test(f)&&f.split(" ").length<=12){const c=cl(f);add(more,c,'Explain that formula in your answer: "'+c+'"')}});
- L.forEach(l=>{const m=l.match(/^\s*[-\u2022]\s+\**([A-Z][^:*\n]{2,32}?)\**:\s+\S/);if(m){const c=cl(m[1]);if(c.length>1)add(more,c,ask(c))}});
+ /* highlighted: the bold words and bold points */
+ (S.match(/\*\*[^*\n]{2,40}\*\*/g)||[]).forEach(b=>{const c=cl(b);if(c.length>1&&!SKIP.test(c)&&hl.length<10)add(hl,c)});
+ /* other key content areas: section headings, table rows, formulas, "Term: explanation" points. Step numbers are not offered. */
+ L.forEach(l=>{const h=l.match(/^#{2,3}\s+(.+)/);if(h){const c=cl(h[1].replace(/^\d+\.\s*/,"").replace(/^step\s*\d+\s*[:.\-\u2013]?\s*/i,""));if(c.length>1&&!SKIP.test(c))add(more,c)}});
+ L.forEach(l=>{if(/^\s*\|/.test(l)){if(/^\s*\|[\s:|-]+\|?\s*$/.test(l)){tb=2;return}if(tb==0){tb=1;return}if(tb==1)tb=2;const c=cl(l.replace(/^\s*\|/,"").split("|")[0]);if(c.length>1&&!SKIP.test(c))add(more,c)}else tb=0});
+ L.forEach(l=>{if(/^\s*\|/.test(l))return;const f=l.replace(/\*\*|`/g,"").replace(/^[-\u2022]\s+/,"").replace(/^[A-Za-z ]{3,20}:\s+(?=\S+\s*=)/,"").trim();if(f.length>=5&&f.length<=80&&(/[A-Za-z0-9)\]]\s*=\s*[A-Za-z0-9(\-]/.test(f)||/\^|sqrt\(/.test(f))&&!/^#/.test(f)&&f.split(" ").length<=12){const c=cl(f);add(more,c,'In your answer, what does this formula mean and how is it used: "'+c+'"?')}});
+ L.forEach(l=>{const m=l.match(/^\s*[-\u2022]\s+\**([A-Z][^:*\n]{2,32}?)\**:\s+\S/);if(m){const c=cl(m[1]);if(c.length>1&&!SKIP.test(c))add(more,c)}});
  return{hl,more}}
 function abParts(t){const g=abGroups(t);return g.hl.concat(g.more)}
 /* the bold words in a finished answer become tappable on their own (no buttons): a tap asks about that word */
-const hlWrap=h=>h.replace(/<b>([^<]{2,40})<\/b>/g,(a,x)=>'<b class="hl" data-st="What do you mean by &quot;'+x.replace(/&quot;/g,"")+'&quot;">'+x+'</b>');
+const hlWrap=h=>h.replace(/<b>([^<]{2,40})<\/b>/g,(a,x)=>'<b class="hl" data-st="In your answer, what is &quot;'+x.replace(/&quot;/g,"")+'&quot; and what does it mean?">'+x+'</b>');
 /* Ask about this: shown on EVERY finished reply. Best place to start = the most highlighted part (first bold word, else first important part).
    If a reply has no parts at all (a short reply), three general follow-ups are offered so the button is never empty. Typing your own question still works. */
 const abGen=[{lab:"Explain in simpler words",q:"Explain that in simpler words"},{lab:"Give an example",q:"Give me an example"},{lab:"Why is this important?",q:"Why is this important?"}];
-function abPlan(t){const G=abGroups(t),all=G.hl.concat(G.more);return{top:all[0]||null,hl:G.hl.slice(1),more:G.more.filter(x=>x!==all[0]),gen:all.length?[]:abGen,all:all.length?all:abGen}}
+function abPlan(t){const G=abGroups(t),gen=x=>x.q=="Give me an example"||x.q=="Explain that in short",
+ /* the main points a learner is most likely to ask about come first; example and summary chips come last */
+ H=G.hl.filter(x=>!gen(x)).concat(G.hl.filter(gen)),all=H.concat(G.more),top=all[0]||null,
+ hl=H.filter(x=>x!==top).slice(0,4),more=G.more.filter(x=>x!==top).slice(0,Math.max(0,4-hl.length));
+ return{top,hl,more,gen:all.length?[]:abGen,all:all.length?all:abGen}}
 /* a closing label with nothing under it (for example the Researcher ending "Next questions to investigate") is taken off, and the label is shown with tappable questions instead */
 const NQ_END=/\n[ \t]*(?:#{1,4}[ \t]*)?(?:\*\*)?[ \t]*(next questions? to investigate|your next step|in summary|remember)[ \t]*:?[ \t]*(?:\*\*)?[ \t]*$/i;
 function nqSplit(t){const x=String(t||"").replace(/\s+$/,""),m=NQ_END.exec(x);return m?{t:x.slice(0,m.index),nq:/^next/i.test(m[1])}:{t:x,nq:false}}
@@ -5290,10 +5426,10 @@ function plans(fs){
 let TH=null,TYI=null;
 const THW=[["Pondering your question","pondering"],["Searching my notes","searching"],["Looking through the topics","searching"],["Retrieving what matches","retrieving"],["Checking the facts","checking"],["Reading it carefully","reading"],["Putting the answer together","preparing"],
 ["Thinking it through","thinking"],["Digging into the library","digging"],["Opening the textbooks","opening books"],["Flipping through the pages","flipping pages"],["Finding the best match","matching"],["Sorting the right answer","sorting"],["Gathering the key points","gathering"],["Connecting the ideas","connecting"],["Looking at your class level","checking level"],["Matching it to your subject","matching"],["Scanning the syllabus","scanning"],["Collecting examples","collecting"],["Double checking","double checking"],["Weighing the details","weighing"],["Working out the steps","working it out"],["Choosing simple words","choosing words"],["Making it clear for you","simplifying"],["Tidying the explanation","tidying"],["Asking the teacher's notes","asking notes"],["Checking the spelling","proofreading"],["Lining up the facts","lining up"],["Reviewing what I found","reviewing"],["Polishing the answer","polishing"],["Writing it out neatly","drafting"],["Nearly ready","nearly ready"],["Almost there","almost there"],["Just a moment more","one moment"],["Still working on it","still working"]];
-const THS=7;
-function thinkBub(){if(!TH)return;const b=$("msgs");if(!b)return;let t=$("tb");
- if(!t){b.insertAdjacentHTML("beforeend",'<div class="b i" id="tb"><span class="tbo"></span><span class="tbt"></span></div>');t=$("tb")}
- t.className="s"+TH.s;t.querySelector(".tbt").textContent=TH.o[TH.i%TH.o.length][0];b.scrollTop=1e9}
+const THS=10;
+function thinkBub(){if(!TH)return;const b=$("msgs");if(!b)return;const nb=nearBot(b);let t=$("tb");
+ if(!t){const hh='<div class="b i" id="tb"><span class="tbo"></span><span class="tbt"></span></div>',sp=b.querySelector("#aspc");if(sp)sp.insertAdjacentHTML("beforebegin",hh);else b.insertAdjacentHTML("beforeend",hh);t=$("tb")}
+ t.className="s"+TH.s;t.querySelector(".tbt").textContent=TH.o[TH.i%TH.o.length][0];if(RS.anc!=null)ancFix(b);else if(nb)b.scrollTop=1e9}
 function thinkTick(){if(!TH)return;TH.i++;let n;do{n=Math.floor(Math.random()*THS)}while(n==TH.s);TH.s=n;
  const w=TH.o[TH.i%TH.o.length];$("stat").textContent=w[1]+"…";const t=$("tb");
  if(t){t.classList.add("sw");setTimeout(()=>{if(!TH)return;thinkBub()},170)}else thinkBub();
@@ -6089,7 +6225,25 @@ function hqPool(lv,sub){const out=[],seen={},add=q=>{const k=q.toLowerCase();if(
   add(HQT[Math.floor(Math.random()*HQT.length)].replace("{n}",t.n))});
  return out}
 const hqShuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const HQLT={},HQSEEN={};
+/* one topic is broad: many different questions come out of it. Each suggestion is a topic plus an angle, and one is not shown again until the others have been shown. */
+const HQA=["What is {n}?","Explain {n} in simple words","What are the key points in {n}?","Give me an example on {n}","Explain {n} step by step","What are the main terms in {n}?","What are the common mistakes in {n}?","How do I remember {n} easily?","Why do we learn {n}?","Where is {n} used in real life?","Give me an exam-style question on {n}","What do examiners ask about {n}?","What should I revise first in {n}?","Give me short notes on {n}","What is the most important part of {n}?","Test me on {n}"],
+HQX={Mathematics:["What formulas do I need for {n}?","Show me a worked example on {n}","How do I solve a question on {n}?","How do I check my answer in {n}?"],Physics:["What formulas do I need for {n}?","Show me a worked example on {n}","Show me a diagram for {n}","What are the units used in {n}?"],Chemistry:["What equations do I need for {n}?","Show me a worked example on {n}","What are the tests or observations in {n}?"],Biology:["Show me a diagram for {n}","What are the processes in {n}?","What are the functions in {n}?"],Geography:["Show me a diagram for {n}","Give me examples from Uganda on {n}"],Agriculture:["Show me a diagram for {n}","What are the practical steps in {n}?"],History:["What are the causes and effects in {n}?","Give me the key dates and facts on {n}"],"Christian Religious Education":["Which Bible passages go with {n}?","What lessons do we learn from {n}?"],"Islamic Religious Education":["Which Quran verses go with {n}?","What lessons do we learn from {n}?"],Entrepreneurship:["Give me a business example on {n}","What are the steps in {n}?"],ICT:["What are the uses of {n}?","Show me the steps for {n}"],English:["Give me sentences that use {n}","How do I write about {n}?"]};
+/* the learner's own class (Senior 1 to 4): only that class's topics from the school curriculum, never other classes */
+function hqCls(){const m=/^Senior ([1-4])$/.exec(D.cls||"");if(!m||lvKey()!="UCE")return null;const c=+m[1],sub=D.sub,subs=sub&&sub!=="General"?(typeof relSubs=="function"?relSubs(sub):[sub]):null;
+ const rows=CUR.filter(r=>r[1]==c&&r[3]&&(!subs||subs.includes(r[0])));return rows.length?{rows,locked:!!subs}:null}
+function hqPickCls(n,H){const key=lvKey()+"|"+D.cls+"|"+D.sub;
+ const seen=HQSEEN[key]||(HQSEEN[key]={}),topics=[],ts={};H.rows.forEach(r=>{const k=r[0]+"|"+r[3];if(!ts[k]){ts[k]=1;topics.push(r)}});
+ const all=[];topics.forEach(r=>HQA.concat(HQX[r[0]]||[]).forEach(a=>all.push({t:r[0]+"|"+r[3],q:a.replace("{n}",r[3])})));
+ let fresh=all.filter(x=>!seen[x.q]);if(fresh.length<n){for(const k in seen)delete seen[k];fresh=all.slice()}
+ fresh=hqShuf(fresh);const out=[],used={},last=HQLT[key]||[];
+ /* three different topics when there are enough, and not the topics shown a moment ago */
+ for(const x of fresh){if(out.length>=n)break;if(used[x.t]||last.includes(x.t))continue;used[x.t]=1;out.push(x)}
+ for(const x of fresh){if(out.length>=n)break;if(used[x.t])continue;used[x.t]=1;out.push(x)}
+ for(const x of fresh){if(out.length>=n)break;if(!out.includes(x))out.push(x)}
+ out.forEach(x=>seen[x.q]=1);HQLT[key]=out.map(x=>x.t);return out.map(x=>x.q)}
 function hqPick(n){const lv=lvKey(),sub=D.sub,key=lv+"|"+sub;
+ const H=hqCls();if(H){const o=hqPickCls(n,H);if(o.length)return o}
  let out=[];
  if(sub&&sub!=="General"){const P=hqShuf(hqPool(lv,sub)),old=HQLAST[key]||[],fresh=P.filter(x=>!old.includes(x));out=(fresh.length>=n?fresh:P).slice(0,n)}
  else{const bank=HOMEQ[lv]||{},ks=hqShuf(Object.keys(bank));ks.forEach(k=>{if(out.length>=n)return;const P=hqShuf(hqPool(lv,k)),old=HQLAST[key]||[],f=P.filter(x=>!old.includes(x));if((f[0]||P[0]))out.push(f[0]||P[0])})}
@@ -6098,6 +6252,10 @@ function homeQs(){const key=lvKey()+"|"+D.sub;if(HQC[key])return HQC[key];
  let out=hqPick(3);
  if(!out.length)out=(STARTS[D.sub]||gen(D.sub)).slice(0,3);
  return HQC[key]=out}
+/* the suggestions on the empty chat screen keep changing on their own, all three, while the learner is not typing */
+setInterval(()=>{try{const e=document.querySelector("#msgs .empty");if(!e||D.msgs.length||document.hidden)return;const i=$("inp");if(i&&i.value.trim())return;
+ HQC={};const qs=homeQs(),bs=e.querySelectorAll("button.st");if(qs.length!=bs.length){$("msgs").innerHTML=empty();return}
+ bs.forEach((b,k)=>{b.style.opacity=0;setTimeout(()=>{b.textContent=qs[k];b.dataset.st=qs[k];b.style.opacity=""},220)})}catch(x){}},7000);
 function greetNow(){const h=new Date().getHours();return h<12?"Good morning":h<17?"Good afternoon":"Good evening"}
 function empty(){return`<div class="empty"><b style="font-size:1.25em">${greetNow()}${D.pname?", "+esc(D.pname):""}. ${D.lock&&D.sub!=="General"?"What would you like to learn in "+esc(D.sub)+"?":"What do you want to learn?"}</b><p style="margin:6px 0 12px">${esc(D.cls||lvKey())} · ${D.lock&&D.sub!=="General"?esc(D.sub)+" only · ":""}Pick a question or type your own.</p>${homeQs().map(x=>`<button class="st" data-st="${esc(x)}">${esc(x)}</button>`).join("")}</div>`}
 (()=>{

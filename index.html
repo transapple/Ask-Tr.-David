@@ -1739,7 +1739,7 @@ function curRoute(q){if(lvKey()!="UCE")return null;const r=curScore(q);if(!r.len
  const ss=Object.keys(all).sort((a,b)=>all[b]-all[a]);if(all[ss[0]]<4)return null;if(ss[1]&&all[ss[0]]-all[ss[1]]<2)return null;
  return{sub:ss[0],score:all[ss[0]],all,top:r.filter(x=>x.s==ss[0]).slice(0,3)}}
 /* The line every O-Level answer starts with: Class, then Term, then Topic (up to two close matches, inside the chat's subject). */
-function curHeader(q,fd){try{if(lvKey()!="UCE")return"";if(fd&&/^S[1-4]$/.test(fd.class||"")&&fd.topic)return"**Senior "+fd.class[1]+(fd.term?" · Term "+fd.term:"")+" · "+String(fd.topic).slice(0,120)+"**\n\n";const r=curScore(q);if(!r.length)return"";const fam=relSubs(D.sub),mine=r.filter(x=>fam.includes(x.s));if(!mine.length||mine[0].sc<4)return"";const b=mine[0].sc,L=[];for(const x of mine){if(x.sc<b*.8||L.length>=2)break;L.push("**Senior "+x.c+" · Term "+x.t+" · "+x.n+"**")}return L.join("  \n")+"\n\n"}catch(e){return""}}
+function curHeader(q,fd){try{if(lvKey()!="UCE")return"";if(fd&&/^S[1-4]$/.test(fd.class||"")&&fd.topic)return"**Senior "+fd.class[1]+(fd.term?" · Term "+fd.term:"")+" · Topic: "+String(fd.topic).slice(0,120)+"**\n\n";const r=curScore(q);if(!r.length)return"";const fam=relSubs(D.sub),mine=r.filter(x=>fam.includes(x.s));if(!mine.length||mine[0].sc<4)return"";const b=mine[0].sc,L=[];for(const x of mine){if(x.sc<b*.8||L.length>=2)break;L.push("**Senior "+x.c+" · Term "+x.t+" · Topic: "+x.n+"**")}return L.join("  \n")+"\n\n"}catch(e){return""}}
 /* topics to hand to the AI: best matches inside the chat's subject family, else overall; each says subject, class, term */
 function curHint(q){try{if(lvKey()!="UCE")return undefined;const r=curScore(q);if(!r.length||r[0].sc<3)return undefined;const fam=relSubs(D.sub),mine=r.filter(x=>fam.includes(x.s)),pick=(mine.length?mine:r).slice(0,3);
  return pick.map(x=>({subject:x.s,class:"S"+x.c,term:x.t,topic:x.n}))}catch(e){return undefined}}
@@ -4254,12 +4254,12 @@ function quizAns(q){
  if(bare){const pool=TOP.filter(t=>!t.ai&&t.q&&t.q.length&&(!t.L||t.L.includes(lvKey()))&&subOK(t)),alt=pool.filter(t=>t.n!=QLAST),src=alt.length?alt:pool;T=src[Math.floor(Math.random()*src.length)]||null}
  else T=topicOf(q);
  if(!T){const k=cleanQ(q);return bare?{t:"# Quiz\nI do not have a quiz ready for this level and subject yet."}:{t:"# Quiz: "+cap(k)+"\nI do not have a quiz on **"+k+"** yet. Say **quiz me** and I will pick a topic for you."}}
- QLAST=T.n;const list=T.q.slice().sort(()=>Math.random()-.5),z={list,n:0,score:0,t:T.n};
+ QLAST=T.n;const list=T.q.slice().sort(()=>Math.random()-.5).slice(0,{Free:2,Basic:3,Standard:4}[planName()]||99),z={list,n:0,score:0,t:T.n};
  return{t:qText(T.n,z),quiz:["q",list[0][1],list[0][2]],qz:z}}
 function mockBase(q,mode){
  if(!mode&&mathOK()){const W=work(q)||mathWork(q);if(W)return W}
  const T=topicOf(q),H=heads(T),k=cleanQ(q),F=/Religio|Divinity|Islamic/.test(D.sub)?faithOf(q):null,s=F?F+" "+D.sub:D.sub,L=lvKey(),nm=(T?T.n:k.charAt(0).toUpperCase()+k.slice(1))+(F?" ("+F+")":""),b="**"+k+"**";
- if(mode=="Explain simpler")return{t:"# "+nm+", simpler\n"+clLine(T)+(T?T.s:"Think of "+b+" as a small idea in "+s+".\n- Break it into small parts.\n- Learn one part at a time.\n- Say it back in your own words.")};
+ if(mode=="Explain simpler")return{t:"# "+nm+", simpler\n"+clLine(T)+(T?T.s.split("\n").slice(0,{Free:2,Basic:3,Standard:5}[planName()]||99).join("\n"):"Think of "+b+" as a small idea in "+s+".\n- Break it into small parts.\n- Learn one part at a time.\n- Say it back in your own words.")};
  if(mode=="Give an example")return{t:"# Examples of "+nm.toLowerCase()+"\n"+clLine(T)+(T?T.e:"- Example 1: a simple case of "+b+".\n- Example 2: a case from daily life.\n- Example 3: a case from an exam question.")};
  if(mode=="More detail")return{t:"# "+nm+", in more detail\n"+clLine(T)+"## Definition\n"+(T?T.d:b+" is a topic in "+s+". State its exact meaning first.")+"\n## "+H[0]+"\n"+(T?T.h:"- Understand what is being asked.\n- Write what you know.\n- Apply the rule step by step.\n- Check your answer.")+"\n## "+H[1]+"\n"+(T?T.w:"- In classwork and exams in "+s+".\n- In daily life where this idea applies.")+"\n"+(T?T.m:"## Common mistakes\n- Skipping steps.\n- Mixing up similar terms.")+"\n## Examples\n"+(T?T.e:"- A simple example from "+s+".")+clSec(T)};
  if(mode=="Quiz me")return quizAns(q);
@@ -4413,7 +4413,7 @@ async function aiAnswer(q,FUx,loose){
  AIWHY="";const c=new AbortController(),tm=setTimeout(()=>c.abort(),loose?25000:58000);
  try{
   const sub=loose==2?"General":(D.sub=="General"?(detectSub(q)||"General"):D.sub);
-  const bd=JSON.stringify({full_question:fullQ(q),answer_spec:"v3",no_svg:true,question:String(q).slice(0,300),level:D.lvl,class:loose==2?"":String(D.cls||"").replace(/^Primary /,"P").replace(/^Senior /,"S"),subject:sub,topics:curHint(q),plan:planName(),curriculum:"Uganda NCDC",strict_subject:!loose,retry:loose?true:undefined,brief:!wantFull()||modelName()=="malumalu",...svMe(),blueprint:bpCtx(q),follow:FUx&&!FUx.local?{kind:FUx.kind,topic:FUx.topic,step:FUx.step||0,instruction:FUx.hint||"",previous:lastAnsText()}:undefined});
+  const bd=JSON.stringify({full_question:fullQ(q),answer_spec:"v3",no_svg:true,question:String(q).slice(0,300),level:D.lvl,class:loose==2?"":String(D.cls||"").replace(/^Primary /,"P").replace(/^Senior /,"S"),subject:sub,topics:curHint(q),plan:planName(),curriculum:"Uganda NCDC",strict_subject:!loose,retry:loose?true:undefined,brief:!wantFull()||modelName()=="malumalu",...svMe(),blueprint:bpCtx(q),format_rules:LESSON_RULES,follow:FUx&&!FUx.local?{kind:FUx.kind,topic:FUx.topic,step:FUx.step||0,instruction:FUx.hint||"",previous:lastAnsText()}:undefined});
   const hd={apikey:SBK,"Content-Type":"application/json"};
   let r=await fetch(AIU,{method:"POST",signal:c.signal,headers:hd,body:bd});
   if(!r.ok&&(r.status==404||r.status>=500)){try{const r2=await fetch(AIU1,{method:"POST",signal:c.signal,headers:hd,body:bd});if(r2.ok)r=r2}catch(e){}}
@@ -4679,16 +4679,16 @@ function bub(m,i,last){
   if(!m.rdone)h+=m.rs=="thanks"?`<div class="rtx"><div class="rts">Thank you, we are glad it helped.</div></div>`:m.rs=="sorry"?`<div class="rtx"><div class="rts">We are sorry it did not help. Please report here. You can also ignore.</div><div class="rtb rtr"><button class="rep" data-act="rep" data-i="${i}">Report</button><button class="ign" data-act="ign" data-i="${i}">Ignore</button></div></div>`:`<div class="rtx"><div class="rtq">Did this answer your question?</div><div class="rtn">Tap Like if it did. If anything is wrong, tap Unlike. It will be reported to us immediately for review.</div><div class="rtb"><button class="up" data-act="up" data-i="${i}">${AI.up}<span>Like</span></button><button class="dn" data-act="dn" data-i="${i}">${AI.dn}<span>Unlike</span></button></div></div>`}
  if(!m.stream){act=`<div class="act out">${A.map(a=>`<button class="${a[2]?"on":""}" data-act="${a[0]}" data-i="${i}" aria-label="${a[1]}" title="${a[1]}">${AI[a[0]]}</button>`).join("")}${last?`<button data-act="regen" data-i="${i}" aria-label="Regenerate" title="Regenerate">${AI.regen}</button>`:""}</div>`;}
  return h+`<small>${hm(m.ts)}</small></div>${act}`}
-/* ===== FREE PLAN: random word limit (2000 to 3000) per account, kept on this phone ===== */
+/* ===== FREE PLAN: random word limit (2000 to 2500) per account; after the limit the reset is 45 to 75 minutes, kept on this phone ===== */
 const LIM1="You have hit the maximum limit of the free plan.",LIM2="Upgrade to enjoy Unlimitedly.",LIM=LIM1+" "+LIM2,
 FQK=()=>"ask_free_"+((window.AK&&AK.me()&&AK.me().username)||""),
 FQW=q=>{try{localStorage.setItem(FQK(),JSON.stringify(q))}catch(e){}};
 const fmt=ms=>{ms=Math.max(0,Math.ceil((ms||0)/1000));const h=Math.floor(ms/3600),m=Math.floor(ms%3600/60),x=ms%60;return h+"h "+m+"m "+x+"s"},
-newCap=()=>1000+Math.floor(Math.random()*201);
+newCap=()=>2000+Math.floor(Math.random()*501);
 function FQ(){let q=null;try{q=JSON.parse(localStorage.getItem(FQK()))}catch(e){}
- if(!q||q.v!=2){const o=q||{};q={v:2,cap:newCap(),used:o.used||0,left:o.left==null?null:o.left,seen:Date.now()};FQW(q)}return q}
+ if(!q||q.v!=3){const o=q||{};q={v:3,cap:newCap(),used:o.used||0,left:null,seen:Date.now()};FQW(q)}return q}
 function useW(t){const q=FQ();q.used+=(String(t).match(/\S+/g)||[]).length;FQW(q)}
-function capped(){if(planName()!="Free")return false;const q=FQ();if(q.used<q.cap)return false;if(q.left==null){q.left=12600000+Math.floor(Math.random()*1800001);q.seen=Date.now();q.at=Date.now()+q.left;FQW(q)}return true}
+function capped(){if(planName()!="Free")return false;const q=FQ();if(q.used<q.cap)return false;if(q.left==null){q.left=2700000+Math.floor(Math.random()*1800001);q.seen=Date.now();q.at=Date.now()+q.left;FQW(q)}return true}
 function rtime(){const q=FQ();if(q.left==null)return"";if(!q.at){q.at=Date.now()+q.left;FQW(q)}const d=new Date(q.at),t=d.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});return d.toDateString()==new Date().toDateString()?t:t+" tomorrow"}
 const PLANS4=["Free","Basic","Standard","Premium"],PCOL={Free:"#6b7c85",Basic:"#2f80ed",Standard:"#00a884",Premium:"#8b5cf6"},PVER={Free:"1.0",Basic:"1.0",Standard:"1.0",Premium:"1.0"},
 PK=()=>"ask_planv2_"+((window.AK&&AK.me()&&AK.me().username)||"");
@@ -4847,20 +4847,15 @@ function scenarioCheck(q,T){const bad=[],t=q.tasks||[],f=q.facts||[],esc=String(
    Summary, Revision Questions, Competency-Based Assessment. Depth d decides how many items each part gives. */
 const wantRQ=()=>/\b(revision questions?|practice questions?|review questions?|questions? (on|about|for)|quizz?(es)?|test me|exercises?|past papers?|exam questions?|exam practice|assess(ment)?|competency|cba)\b/i.test(window.ASKQ||"");
 const wantCBA=()=>/\b(competency|assess(ment)?|cba|scenario|exam questions?|exam practice|past papers?|test me)\b/i.test(window.ASKQ||"");
-function ncdcNotes(N,d,c,extra){const T=c.T,P=c.P,SUB=(typeof D!=="undefined"&&D.sub)||"",
- pts=P.filter(x=>x!==N.d),body=pts.length?pts:P,kt=keyTerms(N),
- vis=/^(Mathematics|Physics|Chemistry|Biology|Geography)$/.test(SUB),
- fx=[N.d].concat(N.pts).filter(x=>/=|formula|equation|diagram|map|graph|sketch|label/i.test(String(x)));
+function exPick(T,arr,n){arr=arr.filter(Boolean);if(!arr.length)return[];let S={};try{S=JSON.parse(sessionStorage.getItem("ask_exseen")||"{}")}catch(e){}const k=String(T).toLowerCase();let seen=S[k]||[],idx=arr.map((_,i)=>i).filter(i=>!seen.includes(i));const pick=idx.slice(0,n);if(pick.length<n){const rest=arr.map((_,i)=>i).filter(i=>!pick.includes(i)).slice(0,n-pick.length);S[k]=rest;rest.forEach(i=>pick.push(i))}else S[k]=seen.concat(pick);try{sessionStorage.setItem("ask_exseen",JSON.stringify(S))}catch(e){}const res=pick.map(i=>arr[i]);exNote(res);return res}
+function workedEx(t,i){t=String(t).trim();const m=t.match(/^([^:]{3,90}):\s+(.+)$/);if(m&&/[=\d]/.test(m[2]))return"**Example "+i+":** "+m[1]+"\n**Working:** "+m[2];return"**Example "+i+":** "+t}
+function ncdcNotes(N,d,c,extra){const T=c.T,P=c.P,
+ pts=P.filter(x=>x!==N.d),body=pts.length?pts:P,kt=keyTerms(N);
  let o="# "+T+(N.cl?"\n"+N.cl:"");
- o+="\n## Topic\n"+T;
- o+="\n## Sub-topic\n"+(N.h0&&N.h0!="How it works"?N.h0:"The main ideas of "+T);
- o+=sec("Learning Outcomes","By the end of this lesson you should be able to:\n"+ul(["define "+T+" using the correct terms","explain "+(N.h0||"how it works").toLowerCase()].concat(d>=2?["give examples of "+T+" from daily life in Uganda"]:[]).concat(d>=3?["apply what you have learnt about "+T+" to a new situation"]:[]).concat(d>=5?["judge the importance and the limits of "+T]:[])));
- o+=sec("Key Concepts and Definitions",(N.d?"**"+T+":** "+N.d+"\n":"")+(kt.length?ul(take(kt.filter(x=>!T.toLowerCase().includes(x.toLowerCase())),d+2)):""));
- o+=sec("Detailed Explanations",N.body||nl(take(body,3+d)));
- o+=sec("Examples and Illustrations",ul(take(N.ex.length?N.ex:N.uses,d+1)));
- if(fx.length)o+=sec("Diagrams, Maps, Equations or Formulas",ul(take(fx,d+1)));
- else if(vis&&d>=2)o+=sec("Diagrams, Maps, Equations or Formulas","Draw a neat, labelled diagram, sketch map or graph for "+T+", and write any formula or equation that goes with it, with the meaning of each symbol.");
- o+=sec("Practical Activities or Applications",ul(take(N.uses,d+1).concat(["Activity: look for one example of "+T+" at home or at school, and describe it to a classmate."])));
+ o+=sec("What "+T+" means",(N.d?N.d+"\n":"")+(kt.length?"\n**Words to know:**\n"+ul(take(kt.filter(x=>!T.toLowerCase().includes(x.toLowerCase())),d+2)):""));
+ o+=sec("Detailed Explanation","Let us go through "+T+" step by step.\n\n"+(N.body||nl(take(body,3+d))));
+ const exs=exPick(T,N.ex.length?N.ex:N.uses,d>=3?2:1);
+ if(exs.length)o+=sec("Worked Examples",exs.map((x,i)=>workedEx(x,i+1)).join("\n\n"));
  if(extra)o+=extra;
  o+=sec("Summary",N.simple||N.d);
  const rq=["State what is meant by "+T+".",c.cw[1]+" the main points about "+T+"."].concat(N.ex[0]?["Give one example of "+T+" from your community."]:[]);
@@ -5214,7 +5209,7 @@ function activatePlan(){uiAlert("Your plan is set by the admin after payment.")}
 const PLAN_TEST_MODE=false;
 document.getElementById("psl").onclick=()=>modelPicker();document.getElementById("psr").onclick=()=>plans(1);
 function limitMsg(){D.msgs.push({s:"i",lim:1,t:"**"+LIM+"**",ts:Date.now()});save();render()}
-function freeReset(){FQW({v:2,cap:newCap(),used:0,left:null,seen:Date.now()});const rm=a=>{for(let i=a.length;i--;)if(a[i].lim)a.splice(i,1)};rm(D.msgs);D.chats.forEach(c=>rm(c.msgs));D.msgs.push({s:"i",note:1,ok:1,t:"Your free plan has been reset. You can continue asking.",ts:Date.now()});save();render();const h=document.getElementById("plh");if(h){const l=h.querySelector(".cpl");if(l)l.innerHTML="Your free words have been reset."}}
+function freeReset(){FQW({v:3,cap:newCap(),used:0,left:null,seen:Date.now()});const rm=a=>{for(let i=a.length;i--;)if(a[i].lim)a.splice(i,1)};rm(D.msgs);D.chats.forEach(c=>rm(c.msgs));D.msgs.push({s:"i",note:1,ok:1,t:"Your free plan has been reset. You can continue asking.",ts:Date.now()});save();render();const h=document.getElementById("plh");if(h){const l=h.querySelector(".cpl");if(l)l.innerHTML="Your free words have been reset."}}
 let _pn=performance.now();
 setInterval(()=>{const n=performance.now(),d=n-_pn;_pn=n;if(!(window.AK&&AK.me()))return;const q=FQ();if(q.left==null){if(q.used>=q.cap)capped();return}
  const w=Date.now()-q.seen;q.left-=(w>3000?w:d);q.seen=Date.now();if(q.left<=0){freeReset();return}FQW(q)},1000);
@@ -5326,18 +5321,164 @@ function reqQ(q){return String(q).replace(/[?!]+/g," ")
  .replace(/^\s*(explain|describe)\b/i," ").replace(/\s+/g," ").trim()}
 function isBare(q){return reqQ(q).replace(/\b(it|this|that|again|me|one|more|the|an?|now|topic|topics|any|random|something|on|about|of|for|in|to|explain|describe|and|with|also)\b/gi,"").replace(/[^a-z0-9]/gi,"")===""}
 function lastBase(){const c=ctxGet();if(c&&c.tq)return c.tq;for(let i=D.msgs.length;i--;){const x=D.msgs[i];if(x.s=="i"&&x.q&&!x.err&&!x.note&&!x.lim&&!smallTalk(x.q))return x.q}return null}
+const SOFT_UP=()=>"Want more than this? Upgrade your plan to get fuller, more detailed answers.";
 function planGate(q){
  const pl=planName(),rk=PRANK[pl],s=" "+String(q).toLowerCase().replace(/[^a-z0-9'\s]/g," ").replace(/\s+/g," ")+" ",h=r=>r.test(s);
  const kind=h(RX_QZ)?"quiz":h(RX_SI)?"simpler":h(RX_DE)?"detail":h(RX_EX)?"example":null;
  if(!kind)return null;
  const bare=isBare(q),cl=reqQ(q),G={kind,bare};
- if(rk<PRANK[GATE[kind][1]]){G.block=1;G.note=GATE[kind][0]+" are available on the "+GATE[kind][1]+" plan and above. You are on the "+pl+" plan. Upgrade your plan now to enjoy "+GATE[kind][0].toLowerCase()+".";G.q=cl;G.mode=null;return G}
- if(kind=="detail")return null;
- if(kind=="example"&&h(RX_EXPL))return null;
+ const soft=rk<PRANK[GATE[kind][1]]?SOFT_UP():null;
+ if(kind=="example"&&rk<PRANK.Standard){if(h(RX_EXPL)){if(soft)G.soft=1,G.note=soft,G.q=String(q),G.mode=null;return soft?G:null}if(bare){const b0=lastBase();if(!b0){G.noBase=1;return G}G.q=b0}else G.q=cl;G.exlist=1;G.mode=null;G.note=soft;return G}
+ if(soft){G.soft=1;G.note=soft}
+ if(kind=="detail"){if(G.soft){G.q=String(q);G.mode=null;return G}return null}
+ if(kind=="example"&&h(RX_EXPL))return G.soft?(G.q=String(q),G.mode=null,G):null;
  G.mode=kind=="quiz"?"Quiz me":kind=="simpler"?"Explain simpler":"Give an example";
  if(kind=="quiz"){G.q=bare?"Quiz me":cl;return G}
  if(bare){const b=lastBase();if(!b)G.noBase=1;G.q=b}else G.q=cl;
  return G}
+/* ===== DIFFERENCE QUESTIONS (all subjects, all plans) =====
+ "What is the difference between A and B?" is answered as: A with its points, B with the matching points in the same order, then a short summary.
+ It never goes to the topic lookup (speed and velocity used to open Linear and Non-linear Motion). A saved pair below is used first; every other pair is
+ written by the AI with the same layout. The layout is the same for every subject. */
+const DIFFB=[
+[["speed"],["velocity"],"Speed","Velocity",[["Type","Scalar: it has size only","Vector: it has size and direction"],["Meaning","How fast an object moves","How fast an object moves in a stated direction"],["Formula","distance ÷ time","displacement ÷ time"],["Sign","Never negative","Can be positive, negative or zero"],["Example","A car moving at 60 km/h","A car moving at 60 km/h north"]],["Speed has size only; velocity has size and direction.","Speed uses distance; velocity uses displacement.","Speed is never negative; velocity can be negative."]],
+[["distance"],["displacement"],"Distance","Displacement",[["Type","Scalar","Vector"],["Meaning","The total length of the path travelled","The straight-line change in position, from start to finish"],["Direction","Not needed","Needed"],["Value","Never negative; it never decreases","Can be positive, negative or zero"],["Example","Walking 3 m east then 3 m west: distance is 6 m","The same walk: displacement is 0 m"]],["Distance follows the path; displacement is the straight line from start to end.","Distance has no direction; displacement has direction.","Distance can only grow; displacement can shrink to zero."]],
+[["mass"],["weight"],"Mass","Weight",[["Meaning","The amount of matter in an object","The pull of gravity on an object"],["Type","Scalar","Vector (it acts downwards)"],["Unit","Kilogram (kg)","Newton (N)"],["Changes with place?","No, it is the same everywhere","Yes, it changes with gravity"],["Measured with","A beam or lever balance","A spring balance or newton meter"]],["Mass is the amount of matter; weight is the force of gravity on it.","Mass is in kg and stays constant; weight is in N and changes with gravity."]],
+[["heat"],["temperature"],"Heat","Temperature",[["Meaning","Energy that flows because of a temperature difference","How hot or cold an object is"],["Unit","Joule (J)","Degree Celsius (°C) or kelvin (K)"],["Measured with","A calorimeter","A thermometer"],["Depends on amount?","Yes, more matter holds more heat","No, it does not depend on the amount"],["Example","A bucket of hot water holds more heat","Two cups of water can both be at 80 °C"]],["Heat is energy that moves; temperature measures hotness.","Heat is in joules; temperature is in °C or K."]],
+[["scalar","scalar quantity"],["vector","vector quantity"],"Scalar quantity","Vector quantity",[["Has","Size only","Size and direction"],["Examples","Mass, time, speed, distance, energy","Force, velocity, displacement, acceleration, weight"],["Adding","Add normally","Add using direction (resultant)"],["Can be negative?","Not as a direction","Yes, the sign shows direction"]],["A scalar has size only; a vector has size and direction.","Vectors are added with direction taken into account."]],
+[["mitosis"],["meiosis"],"Mitosis","Meiosis",[["Purpose","Growth, repair and asexual reproduction","Making gametes (sex cells)"],["Where","Body (somatic) cells","Reproductive organs"],["Divisions","One","Two"],["Daughter cells","2 cells","4 cells"],["Chromosomes","Same number as the parent (diploid)","Half the parent number (haploid)"],["Genetic result","Identical cells","Different cells (variation)"]],["Mitosis makes 2 identical diploid cells; meiosis makes 4 different haploid cells.","Mitosis is for growth and repair; meiosis is for gametes."]],
+[["diffusion"],["osmosis"],"Diffusion","Osmosis",[["Meaning","Movement of particles from high to low concentration","Movement of water from high to low water concentration through a semi-permeable membrane"],["What moves","Any particles: gases, liquids, solutes","Water only"],["Membrane","Not needed","A semi-permeable membrane is needed"],["Energy","Passive: none needed","Passive: none needed"],["Example","Smell of food spreading in a room","A potato strip swelling in pure water"]],["Diffusion is movement of any particles; osmosis is movement of water only.","Osmosis needs a semi-permeable membrane; diffusion does not."]],
+[["acid"],["base","alkali"],"Acid","Base (alkali)",[["Taste","Sour","Bitter"],["Feel","Can burn; corrosive","Soapy"],["pH","Below 7","Above 7"],["Litmus paper","Turns blue litmus red","Turns red litmus blue"],["Ions produced in water","Hydrogen ions (H⁺)","Hydroxide ions (OH⁻)"],["Examples","Lemon juice, vinegar, hydrochloric acid","Soap, ammonia, sodium hydroxide"]],["Acids are sour with pH below 7; bases are bitter or soapy with pH above 7.","Acids turn blue litmus red; bases turn red litmus blue."]],
+[["element"],["compound"],"Element","Compound",[["Meaning","One kind of atom only","Two or more elements joined chemically"],["Broken down?","Cannot be split by chemical means","Can be split into elements"],["Symbol","Has its own symbol, e.g. Fe","Has a formula, e.g. H₂O"],["Properties","Its own properties","Different from the elements in it"],["Examples","Oxygen, iron, carbon","Water, salt, carbon dioxide"]],["An element has one kind of atom; a compound has different atoms chemically joined.","A compound can be split chemically; an element cannot."]],
+[["mixture"],["compound"],"Mixture","Compound",[["Joining","Substances are only mixed together","Elements are chemically joined"],["Proportions","Any amount","Fixed ratio"],["Separation","Easy, by physical methods","Only by chemical reactions"],["Properties","Keep the properties of the parts","New properties"],["Examples","Air, sea water, soil","Water, salt, rust"]],["A mixture is only mixed and can be separated physically; a compound is chemically joined.","A mixture has no fixed ratio; a compound has a fixed ratio."]],
+[["physical change"],["chemical change"],"Physical change","Chemical change",[["New substance","None is formed","A new substance is formed"],["Reversible?","Usually easy to reverse","Usually hard to reverse"],["Energy","Little energy change","Often heat, light or gas is given out or taken in"],["Mass","Same substance, same particles","Particles are rearranged"],["Examples","Melting ice, cutting paper, dissolving sugar","Burning wood, rusting, cooking an egg"]],["A physical change makes no new substance; a chemical change does.","Physical changes are usually reversible; chemical changes usually are not."]],
+[["ionic bond","ionic bonding","ionic compound"],["covalent bond","covalent bonding","covalent compound"],"Ionic bond","Covalent bond",[["How formed","Electrons are transferred","Electrons are shared"],["Between","A metal and a non-metal","Non-metals"],["Particles","Ions","Molecules"],["Melting point","High","Low"],["Conducts electricity","When molten or dissolved","Does not conduct"],["Examples","Sodium chloride","Water, carbon dioxide"]],["Ionic bonds transfer electrons; covalent bonds share them.","Ionic compounds have high melting points; covalent compounds have low ones."]],
+[["series circuit","series"],["parallel circuit","parallel"],"Series circuit","Parallel circuit",[["Paths","One path for the current","More than one path"],["Current","Same everywhere","Splits among the branches"],["Voltage","Shared among the components","Same across each branch"],["If one bulb breaks","All the others go off","The others stay on"],["Brightness","Bulbs get dimmer as more are added","Bulbs stay bright"],["Use","Simple switches, fairy lights","House wiring"]],["Series has one path; parallel has many paths.","In series one fault stops everything; in parallel the other branches keep working."]],
+[["conduction"],["convection"],"Conduction","Convection",[["Meaning","Heat moves through a material from particle to particle","Heat moves by the movement of a fluid"],["Happens in","Mostly solids (metals are best)","Liquids and gases"],["Particles","Vibrate but stay in place","Move from place to place"],["Example","A metal spoon getting hot in tea","Hot air rising above a fire"]],["Conduction passes heat through particles that stay in place; convection moves heat as the fluid itself moves.","Conduction is mostly in solids; convection is in liquids and gases."]],
+[["aerobic respiration","aerobic"],["anaerobic respiration","anaerobic"],"Aerobic respiration","Anaerobic respiration",[["Oxygen","Needed","Not needed"],["Breakdown of glucose","Complete","Incomplete"],["Energy released","A lot","Little"],["Products","Carbon dioxide and water","Lactic acid (animals) or alcohol and carbon dioxide (yeast)"],["Example","Walking, normal breathing","Sprinting, fermentation"]],["Aerobic respiration uses oxygen and releases much energy; anaerobic does not use oxygen and releases little.","Their products are different."]],
+[["plant cell"],["animal cell"],"Plant cell","Animal cell",[["Cell wall","Present","Absent"],["Chloroplasts","Present","Absent"],["Vacuole","One large permanent vacuole","Small or none"],["Shape","Fixed, regular","Irregular"],["Stored food","Starch","Glycogen"]],["Plant cells have a cell wall, chloroplasts and a large vacuole; animal cells do not.","Plant cells store starch; animal cells store glycogen."]],
+[["xylem"],["phloem"],"Xylem","Phloem",[["Carries","Water and mineral salts","Manufactured food (sucrose)"],["Direction","Upwards from the roots","Up and down"],["Cells","Dead, hollow vessels","Living sieve tubes"],["Walls","Thickened with lignin","Thin, with sieve plates"],["Function also","Support","None"]],["Xylem carries water up; phloem carries food up and down.","Xylem is dead and strengthened; phloem is living."]],
+[["artery","arteries"],["vein","veins"],"Arteries","Veins",[["Direction of blood","Away from the heart","Towards the heart"],["Wall","Thick and muscular","Thin"],["Lumen","Narrow","Wide"],["Valves","Absent (except at the heart)","Present"],["Pressure","High","Low"],["Blood","Usually oxygenated","Usually deoxygenated"]],["Arteries carry blood away from the heart under high pressure; veins carry it back under low pressure.","Veins have valves; arteries have thick walls."]],
+[["photosynthesis"],["respiration"],"Photosynthesis","Respiration",[["Purpose","Makes food (glucose)","Releases energy from food"],["Gases","Takes in carbon dioxide, gives out oxygen","Takes in oxygen, gives out carbon dioxide"],["Light","Needed","Not needed"],["Where","Cells with chloroplasts","All living cells"],["Time","Only during the day","Day and night"],["Energy","Stored","Released"]],["Photosynthesis stores energy by making glucose; respiration releases energy from glucose.","Their gases are opposite."]],
+[["dna"],["rna"],"DNA","RNA",[["Name","Deoxyribonucleic acid","Ribonucleic acid"],["Strands","Two (double helix)","One"],["Sugar","Deoxyribose","Ribose"],["Bases","A, T, C, G","A, U, C, G"],["Job","Stores genetic information","Carries the instructions to make proteins"]],["DNA is double stranded and stores the code; RNA is single stranded and helps make proteins.","DNA has thymine; RNA has uracil."]],
+[["weather"],["climate"],"Weather","Climate",[["Time","Short term: hours or days","Long term: about 30 years or more"],["Meaning","The condition of the atmosphere now","The average weather of a place over many years"],["Changes","Quickly","Slowly"],["Example","It rained in Kampala this morning","Kampala has two rainy seasons a year"]],["Weather is the short-term state of the air; climate is the long-term average.","Weather changes quickly; climate changes slowly."]],
+[["simile"],["metaphor"],"Simile","Metaphor",[["Meaning","Compares two things using like or as","Says one thing is another"],["Link words","Uses like or as","No link words"],["Strength","Direct and plain","More forceful and imaginative"],["Example","She is as brave as a lion","She is a lion"]],["A simile compares using like or as; a metaphor says one thing is another.","A metaphor has no link word."]],
+[["active voice","active"],["passive voice","passive"],"Active voice","Passive voice",[["Focus","On the doer of the action","On the receiver of the action"],["Pattern","Subject + verb + object","Object + be + past participle (+ by the doer)"],["Tone","Direct and strong","Formal; used when the doer is unknown or unimportant"],["Example","The boy kicked the ball","The ball was kicked by the boy"]],["In active voice the subject does the action; in passive voice the subject receives it.","Passive uses a form of be and the past participle."]]
+];
+const dnorm=s=>String(s||"").toLowerCase().replace(/[^a-z0-9\s]/g," ").replace(/\s+/g," ").trim().replace(/^(the|a|an)\s+/,"").replace(/(?<!s)s$/,"");
+function diffReq(q){
+ let t=String(q).toLowerCase().replace(/[\u2018\u2019`]/g,"'").replace(/[?!]+/g," ").replace(/\s+/g," ").trim();
+ if(!t||t.length>150)return null;
+ let m=t.match(/\b(?:differences?|distinguish|differentiate|contrast|compare|comparison)\s+(?:between\s+)?(.+?)\s+(?:and|with|from|to|against|vs\.?|versus)\s+(.+)$/)||t.match(/^(?:how|what) (?:is|are|does|do) (.+?) (?:different|differ)(?: from| to)? (.+)$/)||t.match(/^(.+?)\s+(?:vs\.?|versus)\s+(.+)$/);
+ if(!m)return null;
+ const cl=x=>String(x).replace(/\s+(in|for|at|with|using|as|by|please|thanks|thank you|sir|teacher|david)\b.*$/,"").replace(/^(the|a|an)\s+/,"").replace(/[.,;:]+$/,"").trim();
+ const a=cl(m[1].replace(/^(?:please |can you |could you |tell me |give me |explain |state |what is |what are |the )+/,"")),b=cl(m[2]);
+ if(a.length<2||b.length<2||a.length>50||b.length>50)return null;
+ if(/^(it|this|that|them|these|those|they)$/.test(a)||/^(it|this|that|them|these|those|they)$/.test(b))return null;
+ if(/^[\d.,\s]+$/.test(a)&&/^[\d.,\s]+$/.test(b))return null;
+ return{a,b}}
+function diffLocal(DR){
+ const PL=planName(),NR={Free:3,Basic:4,Standard:5}[PL]||99,NS={Free:2,Basic:2}[PL]||99;
+ const A=dnorm(DR.a),B=dnorm(DR.b);
+ for(const e of DIFFB){const has=(arr,x)=>arr.map(dnorm).includes(x);
+  let sw=null;if(has(e[0],A)&&has(e[1],B))sw=0;else if(has(e[0],B)&&has(e[1],A))sw=1;
+  if(sw===null)continue;
+  const n1=sw?e[3]:e[2],n2=sw?e[2]:e[3],col=sw?2:1,oth=sw?1:2,rows=e[4].slice(0,NR);
+  return"# Difference between "+n1+" and "+n2+"\n## "+n1+"\n"+rows.map(r=>"- **"+r[0]+":** "+r[col]+".").join("\n")+"\n## "+n2+"\n"+rows.map(r=>"- **"+r[0]+":** "+r[oth]+".").join("\n")+"\n## Summary\n"+e[5].slice(0,NS).map(s=>"- "+s).join("\n")}
+ return null}
+async function aiMd(fn,extra,qtext,sub,ms){
+ const c=new AbortController(),tm=setTimeout(()=>c.abort(),ms||30000);
+ try{const r=await fetch(SBU.replace("/rest/v1/","/functions/v1/")+fn,{method:"POST",signal:c.signal,headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify(Object.assign({full_question:qtext,answer_spec:"v3",no_svg:true,question:qtext.slice(0,300),level:D.lvl,class:String(D.cls||"").replace(/^Primary /,"P").replace(/^Senior /,"S"),subject:sub||D.sub,plan:planName(),brief:planName()!="Premium",history:[]},extra,svMe()))});
+  if(!r.ok)return null;const j=await r.json();
+  if(j&&j.status=="busy")return{busy:1};
+  if(j&&j.status=="ok"&&j.markdown&&String(j.markdown).length>=20)return{md:String(j.markdown)};
+  return null}catch(e){return null}finally{clearTimeout(tm)}}
+const titleCase=x=>String(x).replace(/\b[a-z]/g,c=>c.toUpperCase());
+async function diffAnswer(DR,q){
+ const L=diffLocal(DR);if(L)return{t:L,part:1,diff:1};
+ const A=DR.a,B=DR.b,TA=titleCase(A),TB=titleCase(B);
+ const PL=planName(),DP={Free:"3 short bullet points, one short line each",Basic:"4 short bullet points, one line each",Standard:"5 bullet points, each with a brief reason",Premium:"6 detailed bullet points, each with a short reason or example"}[PL]||"4 short bullet points",SP=PL=="Free"||PL=="Basic"?"2":"3";
+ const ins="Give the differences between "+A+" and "+B+" in exactly this layout. First line: # Difference between "+TA+" and "+TB+". Then ## "+TA+" followed by "+DP+", one difference each. Then ## "+TB+" followed by the matching bullet points, the same number and the same order, so each bullet answers the same point as the bullet above it. Then ## Summary with "+SP+" short bullets stating the main differences."+(PL=="Premium"?" Then ## Exam tip with one line on how this is asked in exams.":"")+" Do not write an introduction, a lesson or a topic overview, and write about nothing except "+A+" and "+B+".";
+ const r=await aiMd("ai_expand",{type:"compare",concept2:B,topic:A,instruction:ins,format:"differences"},ins,D.sub=="General"?(detectSub(q)||"General"):D.sub,40000);
+ if(r&&r.busy)return r;
+ if(r&&r.md){let md=r.md.trim();if(!/^#\s/.test(md))md="# Difference between "+TA+" and "+TB+"\n"+md;return{t:md,part:1,diff:1}}
+ return null}
+/* ===== EXAMPLES ON FREE AND BASIC: a bullet list, each example with a short reason (shorter on Free). Standard and above get the fuller stored examples. ===== */
+async function exampleList(q){
+ const pl=planName(),n=pl=="Free"?4:5,topic=String(q).replace(/[?.!]+$/,"").trim().slice(0,120);
+ if(!topic)return null;
+ const av=exShown(),ins="List "+n+" examples of "+topic+(av.length?", different from these already shown: "+av.join(" | "):"")+". Write them as bullet points, one line each: the example, then a "+(pl=="Free"?"very short reason of under 8 words":"short one-line explanation")+". No definitions, no introduction and no closing sentence.";
+ const r=await aiMd("ai_explain",{term:topic,instruction:ins},ins,D.sub=="General"?(detectSub(q)||"General"):D.sub,30000);
+ if(r&&r.busy)return r;
+ if(!(r&&r.md))return null;
+ let ls=r.md.split("\n").map(x=>x.trim()).filter(x=>/^([-*\u2022]|\d+[.)])\s+\S/.test(x)).map(x=>"- "+x.replace(/^([-*\u2022]|\d+[.)])\s+/,"").slice(0,160)).slice(0,n);
+ if(!ls.length)ls=r.md.split("\n").map(x=>x.trim()).filter(x=>x&&!/^#/.test(x)).slice(0,n).map(x=>"- "+x);
+ exNote(ls.map(x=>x.replace(/^- /,"")));let nice=topic;try{nice=cleanQ(topic)||topic}catch(e){}
+ return{t:"# Examples of "+nice+"\n"+ls.join("\n"),part:1,exl:1}}
+/* ===== TOPIC LIST AND TOPIC CONTENTS (all subjects, Senior 1 to 4) =====
+ "How many topics are in Senior 3 Physics?" lists the topics of that class and subject from CUR, by term, and nothing else.
+ "What do they discuss in <topic>?" is turned into an explanation of that topic, so the normal answer path describes it fully and follow-ups stay on the topic. */
+const TSUB={"physics":"Physics","chemistry":"Chemistry","biology":"Biology","mathematics":"Mathematics","maths":"Mathematics","math":"Mathematics","english":"English","geography":"Geography","history":"History","agriculture":"Agriculture","entrepreneurship":"Entrepreneurship","ict":"ICT","computer studies":"ICT","art and design":"Art and Design","art":"Art and Design","physical education":"Physical Education","pe":"Physical Education","christian religious education":"Christian Religious Education","cre":"Christian Religious Education","islamic religious education":"Islamic Religious Education","ire":"Islamic Religious Education","bio":"Biology","chem":"Chemistry","geo":"Geography"};
+const TNUM={one:1,two:2,three:3,four:4,"1":1,"2":2,"3":3,"4":4};
+function tSubOf(t){const k=Object.keys(TSUB).sort((a,b)=>b.length-a.length).find(x=>new RegExp("(^|[^a-z])"+x.replace(/ /g,"\\s+")+"([^a-z]|$)").test(t));if(k)return TSUB[k];const d=D&&D.sub;return d&&d!="General"&&CUR.some(r=>r[0]==d)?d:null}
+function tClsOf(t,nd){if(/\b(p|primary)\s*[1-7]\b/.test(t))return -1;const m=t.match(/\b(?:senior|s|form|class)\s*(1|2|3|4|one|two|three|four)\b/);if(m)return TNUM[m[1]];if(nd)return 0;const d=String(D&&D.cls||"").match(/Senior\s*([1-4])/i);return d?+d[1]:0}
+const tOK=r=>r[3]&&r[3].length<=70&&!/[,.:]$|http/.test(r[3])&&!(r[3].length>12&&r[3]==r[3].toUpperCase())&&/^[A-Z0-9]/.test(r[3]);
+function tTermOf(t){const w={one:1,two:2,three:3,first:1,second:2,third:3,"1":1,"2":2,"3":3},m=t.match(/\bterm\s*(1|2|3|one|two|three)\b/)||t.match(/\b(first|second|third)\s+term\b/)||t.match(/\bt([123])\b/);return m?w[m[1]]:0}
+function topicListReq(q){
+ const t=String(q).toLowerCase().replace(/[?!]+/g," ").replace(/\s+/g," ").trim();
+ const P=window.TLPEND,pm=P&&Date.now()-P.at<600000&&t.match(/^(?:it is |in |for |i am in |im in )?(?:senior|s|form|class)\s*(1|2|3|4|one|two|three|four)(?:\s+please)?$/);
+ let sub,cl,tm0;
+ if(pm){sub=P.sub;cl=TNUM[pm[1]];tm0=P.term;window.TLPEND=null}
+ else{
+ if(!/\btopics\b|\bhow many topics?\b|\btopic list\b/.test(t)||/\b(this|that|the) topic\b|\bin (this|that) topic\b/.test(t))return null;
+ if(!/\b(how many|list|name|show|give|what|which|write|all|tell|in|of|for|are)\b/.test(t))return null;
+ sub=tSubOf(t);if(!sub)return null;cl=tClsOf(t);if(cl<0)return null;tm0=tTermOf(t);
+ if(!cl){window.TLPEND={sub,term:tm0,at:Date.now()};return"Which class are you in? Tell me the class (Senior 1, Senior 2, Senior 3 or Senior 4) and I will list the "+sub+(tm0?" Term "+tm0:"")+" topics for it."}}
+ const seen=new Set(),rows=CUR.filter(r=>r[0]==sub&&tOK(r)&&(!cl||r[1]==cl)&&(!tm0||r[2]==tm0)&&!seen.has(r[1]+"|"+r[2]+"|"+r[3])&&seen.add(r[1]+"|"+r[2]+"|"+r[3]));
+ if(!rows.length)return null;
+ const block=c=>{const rs=rows.filter(r=>r[1]==c);if(!rs.length)return"";let o="## Senior "+c+": "+rs.length+" topic"+(rs.length>1?"s":"")+"\n";(tm0?[tm0]:[1,2,3]).forEach(tm=>{const x=rs.filter(r=>r[2]==tm);if(x.length)o+="**Term "+tm+"**\n"+x.map(r=>"- "+r[3]).join("\n")+"\n"});return o};
+ const cls=cl?[cl]:[1,2,3,4];
+ const TT=tm0?" in Term "+tm0:"",pl=rows.length>1?"s":"";
+ return"# "+sub+" topics"+(cl?" in Senior "+cl:"")+(tm0?(cl?", Term ":" in Term ")+tm0:"")+"\n"+(cl?"There "+(rows.length>1?"are ":"is ")+rows.length+" topic"+pl+" in "+sub+" for Senior "+cl+TT+".\n":"There "+(rows.length>1?"are ":"is ")+rows.length+" topic"+pl+" in "+sub+TT+" from Senior 1 to Senior 4.\n")+cls.map(block).join("")+"\nAsk me about any topic and I will explain it."}
+function topicAskRewrite(q){
+ const t=String(q).toLowerCase().replace(/[\u2018\u2019`]/g,"'").replace(/[?!]+/g," ").replace(/\s+/g," ").trim();
+ if(!/\b(discuss\w*|covers?|covered|taught|teach|learn\w*|stud(y|ied|ies)|include\w*|contains?|inside|about)\b|\bwhat('s| is| are) in\b|\bwhat do (we|they|you) (do|have)\b/.test(t))return null;
+ if(/\btopics\b/.test(t))return null;
+ const sub=tSubOf(t),cl=tClsOf(t);
+ const c=CUR.filter(r=>tOK(r)&&r[3].length>3&&t.includes(r[3].toLowerCase())&&(!sub||r[0]==sub)&&(!cl||cl<0||r[1]==cl)).sort((a,b)=>b[3].length-a[3].length)[0];
+ if(!c)return null;
+ return"Explain "+c[3]+" in "+c[0]+" for Senior "+c[1]+", with everything that is discussed in this topic"}
+/* ===== LESSON ANSWERS FROM ANY SOURCE: same clean style everywhere. Removes the parts the owner does not want, renames two parts, works out the examples, and never repeats an example already shown. ===== */
+const LESSON_RULES="Lesson style: show no Sub-topic, Learning Outcomes, Diagrams/Maps/Equations/Formulas or Practical Activities sections, and do not repeat the topic or class. Write 'What it means' (a short definition), then 'Detailed Explanation' as a teacher would explain it, with enough information to understand, then 'Worked Examples': one or two examples, each with '**Example n:**' and '**Working:**' with the steps and final answer. Examples must be new each time they are asked for.";
+function exShown(){try{return JSON.parse(sessionStorage.getItem("ask_exshown")||"[]")}catch(e){return[]}}
+function exNote(a){try{const L=exShown().concat(a.map(x=>String(x).replace(/\s+/g," ").slice(0,90)));sessionStorage.setItem("ask_exshown",JSON.stringify(L.slice(-12)))}catch(e){}}
+function lessonClean(t){
+ if(!t||typeof t!="string")return t;
+ const L=t.split("\n"),o=[];let skip=false;
+ for(const l of L){
+  if(/^#{1,4}\s/.test(l)){skip=/^#{2,4}\s*(Topic|Sub-?topic|Learning Outcomes|Diagrams?[^\n]*|Practical Activities[^\n]*)\s*$/i.test(l);if(skip)continue;
+   if(/^#{2,4}\s*Key Concepts and Definitions\s*$/i.test(l)){o.push("## What it means");continue}
+   if(/^#{2,4}\s*Examples and Illustrations\s*$/i.test(l)){o.push("## Worked Examples");continue}
+   if(/^#{2,4}\s*Detailed Explanations\s*$/i.test(l)){o.push("## Detailed Explanation");continue}}
+  if(!skip)o.push(l)}
+ return o.join("\n").replace(/\n{3,}/g,"\n\n")}
+async function workOutEx(t){
+ const m=t&&t.match(/\n## Worked Examples\n([\s\S]*?)(?=\n## |$)/);if(!m)return t;
+ const blk=m[1].trim();if(blk.length<8)return t;
+ const ne=(blk.match(/\*\*Example/g)||[]).length,nw=(blk.match(/\*\*Working:\*\*/g)||[]).length;
+ if(nw&&nw>=Math.max(1,ne))return t;
+ const ins="Work out these examples step by step like a teacher. Keep the same examples. For each one write '**Example n:**' with the question, then '**Working:**' with the clear steps and the final answer. Examples:\n"+blk;
+ const r=await aiMd("ai_explain",{term:"worked examples",instruction:ins},ins,D.sub=="General"?"General":D.sub,25000);
+ if(r&&r.md&&/\*\*Working:\*\*/.test(r.md)){const md=r.md.split("\n").filter(x=>!/^#/.test(x)).join("\n").trim();exNote([blk]);return t.replace(m[0],"\n## Worked Examples\n"+md)}
+ exNote([blk]);return t}
+async function moreExample(q){
+ const topic=String(q).replace(/[?.!]+$/,"").trim().slice(0,120);if(!topic)return null;
+ const av=exShown(),ins="Give 2 NEW worked examples on "+topic+(av.length?". They must be different from these examples already shown: "+av.join(" | "):"")+". For each one write '**Example n:**' with the question, then '**Working:**' with the clear steps and the final answer. No introduction and no closing sentence.";
+ const r=await aiMd("ai_explain",{term:topic,instruction:ins},ins,D.sub=="General"?(detectSub(q)||"General"):D.sub,30000);
+ if(r&&r.busy)return r;if(!(r&&r.md))return null;
+ const md=r.md.split("\n").filter(x=>!/^#/.test(x)).join("\n").trim();exNote([md.slice(0,90)]);
+ let nice=topic;try{nice=cleanQ(topic)||topic}catch(e){}
+ return{t:"# More examples of "+nice+"\n"+md,part:1,exl:1}}
 /* ===== CHAT MEMORY: while a chat is open, follow-ups stay on the topic being discussed and each repeat changes the way it is answered.
  The topic (tq), subject (tsub), follow-up kind (fk) and check question (chk) are kept on each answer inside the chat, so a new chat,
  Clear chat or reopening the app (which opens a new chat) starts with no topic. A real new question sets a new topic. ===== */
@@ -5469,9 +5610,8 @@ function expandReq(q){
  const left=t.split(" ").filter(w=>w&&!FU_STOP.has(w)&&!EX_X.has(w));
  if(left.length&&!ptr)return null;if(left.length>3)return null;
  return{type,c2:"",topic:p,q:String(q).trim().slice(0,300)}}
-function expandNote(q){const x=expandReq(q);if(!x)return null;const pl=planName();if((PRANK[pl]||0)>=PRANK[GATE.expand[1]])return null;
- return GATE.expand[0]+" are available on the "+GATE.expand[1]+" plan and above. You are on the "+pl+" plan."}
-function ctxExpand(q){const x=expandReq(q);if(!x)return null;if((PRANK[planName()]||0)<PRANK[GATE.expand[1]])return null;
+function expandNote(q){const x=expandReq(q);if(!x)return null;if((PRANK[planName()]||0)>=PRANK[GATE.expand[1]])return null;return SOFT_UP()}
+function ctxExpand(q){const x=expandReq(q);if(!x)return null;
  const c=ctxGet();return{part:1,exp:1,q:x.q,kind:"expand",xt:x.type,c2:x.c2,topic:x.topic,sub:c?c.sub:D.sub,step:0}}
 async function expandPart(q,P){
  const c=new AbortController(),tm=setTimeout(()=>c.abort(),30000),pl=planName();
@@ -5801,8 +5941,9 @@ function bpHandle(q){const s=String(q||"");if(s.length>400)return false;const t=
  if(!hit)return false;
  const ch=D.chats.find(c=>c.id==D.cur);if(ch&&(ch.title=="New chat"||ch.title=="Chat"))ch.title=s.slice(0,32);
  const push=o=>{o.s="i";o.ts=Date.now();o.q=s.slice(0,300);D.msgs.push(o);save();render()};
- if(PRANK[planName()]<1){push({note:1,up:1,t:"**Elements of construct are available on the Basic, Standard and Premium plans.** You are on the Free plan. Upgrade now to see the item-by-item exam blueprint for all 14 UCE subjects and to unlock full features."});return true}
- const S=S0||bpSubj(t,1);push({t:S?bpText(S):bpMaster(),bp:1});return true}
+ const S=S0||bpSubj(t,1);let bt=S?bpText(S):bpMaster();
+ if(PRANK[planName()]<1){bt=String(bt).split("\n").slice(0,14).join("\n");push({t:bt,bp:1});D.msgs.push({s:"i",note:1,up:1,t:SOFT_UP(),ts:Date.now()});save();render();return true}
+ push({t:bt,bp:1});return true}
 function ask(q,mode){
  if(stream!=null||INTP)return;
  if(!mode){try{gdSense("q",q)}catch(e){}}
@@ -5820,11 +5961,12 @@ function leakSub(f){if(!f||f.un||f.w||D.sub=="General")return null;const fam=rel
  if(T&&!T.S.some(y=>fam.includes(y)||fam.some(f=>subOvl(f,y))))return T.S.find(y=>y!=="General"&&subsList().includes(y))||"another subject";
  return null}
 function askCore(q,mode,I){
- if(stream!=null)return;let gn=null,FU=null,bareG=false;const q0=String(q);
+ if(stream!=null)return;let gn=null,FU=null,bareG=false,exl=0;const q0=String(q);
  if(!mode){let a=null;if(I)try{a=interpApply(q,I)}catch(e){}
   if(a){FU=a.FU;q=a.q}else FU=ctxPart(q)||ctxExpand(q)||ctxFollow(q)||ellipFU(q);
   if(FU&&!FU.local)q=FU.q;
-  if(!(FU&&FU.part)){const xn=expandNote(q0);if(xn)gn=xn}}
+  {const xn=expandNote(q0);if(xn)gn=xn}}
+ if(!mode&&!(FU&&FU.local)){try{const rw=topicAskRewrite(q);if(rw)q=rw}catch(e){}}
  window.ASKQ_RAW=String(q);
  if(!mode&&!(FU&&FU.part)){const G=planGate(q);if(G){bareG=!!G.bare;
   const nt=(t,up)=>{D.msgs.push({s:"i",note:1,up:up?1:0,t,ts:Date.now()});save();render()};
@@ -5832,6 +5974,7 @@ function askCore(q,mode,I){
   if(G.noBase)return nt("Ask me a question first, then I can do that for it.",0);
   if(G.block&&(G.bare||G.kind=="quiz"))return nt(G.note,1);
   if(G.block)gn=G.note;
+  if(G.exlist){exl=1;gn=G.note}else if(G.soft)gn=G.note
   q=G.q;mode=G.mode||null}}
  let folQ=false;if(!mode&&!FU&&FOLLOW_RX.test(String(q).trim())){const lb=lastBase();if(lb){q=cleanQ(lb)+" in more detail";folQ=true}}
  if(D.lock&&D.sub!="General"){if((!FU||(!FU.local&&!FU.part))&&!mode){const o=folQ?null:offSub(q,I);if(o){D.msgs.push({s:"i",note:1,up:0,t:"This chat is set to "+D.sub+", so I answer "+D.sub+" questions only. Your question looks like "+o+". Tap the subject button above to switch, or ask me something about "+D.sub+".",ts:Date.now()});save();render();return}}}else if(!(FU&&FU.part))D.sub=(I&&I.intent==="new"&&I.subject&&I.subject!=="General"?I.subject:routeSub(q));if(capped())return limitMsg();const ch=D.chats.find(c=>c.id==D.cur);if(ch.title=="New chat"||ch.title=="Chat")ch.title=q.slice(0,32);
@@ -5842,7 +5985,12 @@ function askCore(q,mode,I){
  if(!navigator.onLine)return err("No internet connection. Please connect to the internet and tap Retry.");
  stamps.push(now);sm=null;const tok=++AN;
  thinkOn();$("send").innerHTML=STOP;
- stream=setTimeout(async()=>{let f=FU&&FU.local?{t:FU.local}:null;if(!f&&FU&&FU.part){try{f=FU.exp?await expandPart(q,FU):await explainPart(q,FU)}catch(e){f=null}if(stream==null||tok!=AN)return;if(f&&f.busy){stopS();return err("Many learners are asking right now. Please try again in a little while.")}if(!f){if(FU.exp){const F2=ctxFollow(q);FU=F2||null;if(F2&&F2.local)f={t:F2.local};else if(F2)q=F2.q}else{FU.part=0;FU.kind="custom";FU.hint=FU_HINT.custom}}}if(!f)try{f=await Promise.race([dbAnswer(q,mode),new Promise(r=>setTimeout(()=>r(null),2500))])}catch(e){}
+ stream=setTimeout(async()=>{let f=FU&&FU.local?{t:FU.local}:null;
+  if(!f&&!exl&&mode=="Give an example"){try{f=await moreExample(q)}catch(e){f=null}if(stream==null||tok!=AN)return;if(f&&f.busy){stopS();return err("Many learners are asking right now. Please try again in a little while.")}}
+  if(!f&&exl){try{f=await exampleList(q)}catch(e){f=null}if(stream==null||tok!=AN)return;if(f&&f.busy){stopS();return err("Many learners are asking right now. Please try again in a little while.")}}
+  if(!f&&!exl&&!mode){let tl=null;try{tl=topicListReq(q0)}catch(e){}if(tl)f={t:tl,part:1,diff:1}}
+  if(!f&&!exl&&!mode){const DR=diffReq(q);if(DR){try{f=await diffAnswer(DR,q)}catch(e){f=null}if(stream==null||tok!=AN)return;if(f&&f.diff&&!f.busy&&!gn&&PRANK[planName()]<2)gn=SOFT_UP();if(f&&f.busy){stopS();return err("Many learners are asking right now. Please try again in a little while.")}}}
+  if(!f&&FU&&FU.part){try{f=FU.exp?await expandPart(q,FU):await explainPart(q,FU)}catch(e){f=null}if(stream==null||tok!=AN)return;if(f&&f.busy){stopS();return err("Many learners are asking right now. Please try again in a little while.")}if(!f){if(FU.exp){const F2=ctxFollow(q);FU=F2||null;if(F2&&F2.local)f={t:F2.local};else if(F2)q=F2.q}else{FU.part=0;FU.kind="custom";FU.hint=FU_HINT.custom}}}if(!f)try{f=await Promise.race([dbAnswer(q,mode),new Promise(r=>setTimeout(()=>r(null),2500))])}catch(e){}
   if(stream==null||tok!=AN)return;
   if(!f)f=mock(q,mode);
   {const lk=f.part?null:leakSub(f);if(lk){stopS();D.msgs.push({s:"i",note:1,up:0,t:"This chat is set to "+D.sub+", so I answer "+D.sub+" questions only. That answer belongs to "+lk+". Tap the subject button above to switch, or ask me something about "+D.sub+".",ts:Date.now()});save();render();return}}
@@ -5859,11 +6007,12 @@ function askCore(q,mode,I){
     return err(w=="net"||w=="offline"||!navigator.onLine?"No internet connection. Please connect to the internet and tap Retry.":"The answer is taking longer than expected. Please tap Retry."+(isOwner()?" ("+(w||"unknown")+")":""))}}
   if(f.un&&!mode&&!FU)logUn(q);
   if(f.fmt&&!f.un&&!mode&&f.t!==window.DIRECT_T){const st=await styleAnswer(f.t,q);if(stream==null||tok!=AN)return;if(st){f.sty={t:f.t,k:modelName(),L:lvKey(),pl:planName()};f.t=st.md+(modelName()=="examiner"?"\n\n*Written by the Ask Tr. David Academic Intelligence System in the UNEB exam format. It is not an official UNEB exam.*":"")}}
+  if(f&&f.t&&!f.diff&&!f.exl&&!f.quiz&&!f.qz&&!f.w&&!f.un){f.t=lessonClean(f.t);if(!mode){try{f.t=await workOutEx(f.t)}catch(e){}if(stream==null||tok!=AN)return}}
   if(!f.part&&!f.ai&&!f.un){const Tm=topicOf(q);if(Tm&&Tm.ai)f.ai=1}
   if(!f.part&&f.ai&&!f.tid){const Tm=topicOf(q);if(Tm&&Tm.tid)f.tid=Tm.tid}
   if(!f.part&&!f.lv&&!f.un){const Tm=topicOf(q);if(Tm&&Tm.sl){f.lv=Tm.sl;f.cls=Tm.cls}}
   let chk=0;if(FU&&FU.chkk&&f&&f.t&&!f.un&&!f.w&&!f.quiz&&!f.qz&&!FU.local){f.t+="\n\n"+FU.chkk;chk=1}
-  if(!mode&&!FU&&!f.un&&!f.w&&f.t&&!/^\s*\*\*Senior \d/.test(f.t)){const hd=curHeader(q,f.filed);if(hd)f.t=hd+f.t}
+  if(!mode&&!FU&&!f.un&&!f.w&&!f.diff&&!f.exl&&f.t&&!/^\s*\*\*Senior \d/.test(f.t)){const hd=curHeader(q,f.filed);if(hd)f.t=hd+f.t.replace(/^#[^\n]*\n(?:(?:\*\*)?(?:Topic|Class):[^\n]*\n)*/,"")}
   const m={s:"i",t:"",ts:Date.now(),q,mode,stream:1,fk:FU&&FU.kind||undefined,chk:chk||undefined,tq:CTX&&CTX.tq||undefined,tsub:CTX&&(CTX.sub||D.sub)||undefined},w=f.t.split(/(?<=\s)/);if(f.quiz)m.quiz=f.quiz;if(f.qz)m.qz=f.qz;if(f.w)m.w=f.w;if(f.aid)m.aid=f.aid;if(f.sty)m.sty=f.sty;if(f.ai)m.ai=1;if(f.tid)m.tid=f.tid;if(f.fmt){const M=MODELS[modelName()];m.mdl=M.n+" "+M.v}{const ln=levelNote(f.lv,f.cls);if(ln)m.lvn=ln}
   thinkOff();typeOn();D.msgs.push(m);sm=m;let k=0;if(!(FU&&FU.local))logAct("ask",m,f.t);stream=setInterval(()=>{m.t+=w[k++]||"";if(k>=w.length){stopS();if(gn){D.msgs.push({s:"i",note:1,up:1,t:gn,ts:Date.now()});save();render()}if(capped())limitMsg()}else render()},35)},600)}
 $("msgs").addEventListener("click",e=>{

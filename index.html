@@ -1230,6 +1230,813 @@ addEventListener('resize',fit);fit();start(0);
 <div id="panel"></div>
 <div id="scrim"><div id="sheet"></div></div>
 <script>
+/* ===== ACADEMIC ANSWER STRUCTURING ENGINE (AASE), part 1: steps 1 to 5 =====
+   Reads a learner's question and works out WHAT is being asked, before any answer is written:
+   1 Subject identification        2 Class and topic recognition   3 Question instruction (command word) detection
+   4 Question type classification  5 Theory / practical / calculation detection
+   Output is one plain object (see analyse). Nothing here writes or changes an answer; steps 6 to 10 (format selection,
+   structuring, diagram decision, level adaptation, validation) will read this object.
+   All rules live in AASE.CFG so subjects, command words and question types can be edited without rewriting the code. */
+(function(root){
+"use strict";
+const CFG={
+/* spelling and speech slips, fixed before any rule runs */
+fix:[[/\bwat\b|\bwot\b|\bwhut\b/g,"what"],[/\bwat r\b/g,"what are"],[/\bhw\b/g,"how"],[/\bwy\b/g,"why"],[/\bu\b/g,"you"],[/\bpls\b|\bplz\b/g,"please"],
+[/\bbtwn\b|\bbtw\b|\bbetwen\b|\bbetwean\b/g,"between"],[/\bdif+e?r+[ae]n[cs]e?s?\b|\bdiffr?[ae]n[cs]e?s?\b|\bdifferen[cs]es?\b|\bdiferen\w*|\bdifferance\w*/g,"difference"],[/\bdistingush\b|\bdistinquish\b|\bdistingwish\b|\bdistinguis\b/g,"distinguish"],
+[/\bsimilarit\w*|\bsimlarit\w*|\bsimilaties\b/g,"similarities"],[/\bdisadvant\w*|\bdisadvan\w*/g,"disadvantages"],[/\badvant\w*|\badvan\w*/g,"advantages"],
+[/\bexplian\b|\bexplane\b|\bexplin\b|\bexpalin\b/g,"explain"],[/\bdefne\b|\bdefin\b|\bdifine\b|\bdefination\b|\bdefinatio\w*/g,"define"],
+[/\bdescibe\b|\bdiscribe\b|\bdescrbe\b|\bdecribe\b/g,"describe"],[/\bcalcuat\w*|\bcalcalat\w*|\bcalcualt\w*|\bcalculat\b/g,"calculate"],
+[/\bproceedure\b|\bprocedur\b|\bprocidure\b/g,"procedure"],[/\bexperement\b|\bexperimant\b|\bexpirement\b|\bexperimen\b/g,"experiment"],
+[/\bphotosyn\w*/g,"photosynthesis"],[/\bresperation\b|\brespiratio\b/g,"respiration"],[/\bclasification\b|\bclasify\b|\bclassifiy\b/g,"classification"],
+[/\btypes? off\b|\btype of\b/g,"types of"],[/\bcauses? and affects?\b/g,"causes and effects"],[/\baffects of\b/g,"effects of"],[/\bimportanc\b|\bimportence\b/g,"importance"],
+[/\bcomparision\b|\bcomparsion\b|\bcompair\b/g,"compare"],[/\bdiscus\b|\bdiscuse\b/g,"discuss"],[/\bevalute\b|\bevaluat\b/g,"evaluate"]],
+/* command words: id, pattern, answer depth, what the learner must receive */
+cmd:[
+["define",/\bdefine\b|\bdefinition of\b|\bmeaning of\b|\bwhat do (you|we) mean by\b|\bwhat does [\w\s-]{1,30} mean\b|\bstate the meaning\b/,"short","a direct definition"],
+["state",/\bstate\b|\bgive (me )?(two|three|four|five|\d+|some|any|one)\b|\bname (two|three|four|five|\d+|some|any|one|the)\b|\bidentify\b|\bmention\b/,"short","direct points"],
+["list",/\blist\b|\bgive (a )?list\b|\bwrite down\b/,"short","organised points, no long explanation"],
+["outline",/\boutline\b|\bbriefly (explain|describe|state)\b|\bin brief\b|\bin short\b/,"short","brief organised main points"],
+["distinguish",/\bdistinguish\b|\bdifference[s]?\b|\bdiffer(s|ent|entiate)?\b|\bcontrast\b|\bdifferentiate\b|\bversus\b|\bvs\b/,"explain","the differences format"],
+["compare",/\bcompare\b|\bcomparison\b|\bsimilarities\b|\bsimilar (to|between)\b|\bin common\b|\balike\b/,"discuss","similarities and differences as asked"],
+["describe",/\bdescribe\b|\b(write )?short notes (on|about)\b|\bdescription of\b|\btell me about\b|\bwhat is the structure\b/,"explain","detailed characteristics or a sequence"],
+["explain",/\bexplain\b|\bhow (does|do|is|are|did|can|could|would)\b|\bwhy\b|\bwhat happens\b|\bgive (the )?reasons?\b|\bshow how\b|\bclarify\b/,"explain","an explanation with supporting details"],
+["account",/\baccount for\b|\bgive reasons? for\b|\bwhat (causes|caused)\b|\breasons? (for|why)\b/,"explain","the reasons behind an occurrence"],
+["discuss",/\bdiscuss\b|\bto what extent\b|\bassess\b|\bcritically\b/,"discuss","introduction, organised arguments, conclusion"],
+["analyse",/\banaly[sz]e\b|\banalysis of\b|\bexamine\b|\binterpret\b/,"discuss","parts and the relationships between them"],
+["evaluate",/\bevaluate\b|\bhow far\b|\bweigh\b/,"discuss","strengths and weaknesses, then a justified judgment"],
+["justify",/\bjustify\b|\bgive (a )?justification\b|\bsupport (the|your) (view|statement|claim)\b/,"explain","reasons supporting a position"],
+["calculate",/\bcalculate\b|\bcompute\b|\bfind (the )?(value|area|volume|perimeter|speed|mass|force|number|sum|total|average|mean|median|mode|range|cost|profit|loss|gradient|distance|height|length|angle|x|y)\b|\bwork out\b|\bdetermine the (value|mass|volume|density|speed|force|pressure|resistance|current|number|moles?|concentration|amount)\b|\bsolve\b|\bsimplify\b|\bfactori[sz]e\b|\bexpand\b|\bevaluate the (expression|value)\b|\bhow (many|much|long|far|fast)\b[^?]*\d|\bwhat is \d|\bwhat is the (value|sum|product|area|volume|perimeter|average|mean) of\b/,"steps","the calculation structure"],
+["illustrate",/\billustrate\b|\bgive an? (example|illustration)\b|\bwith (an )?examples?\b|\bdraw\b|\bsketch\b|\blabel\b|\bshow (me )?(with|using) (a )?(diagram|picture)\b/,"explain","a relevant example or diagram"]],
+/* subjects: key, app names that belong to it, keyword weights [pattern, weight].  Words that belong to several subjects carry a small weight; scenario words carry more. */
+sub:{
+mathematics:{app:["Mathematics","Subsidiary Mathematics"],practical:false,kw:[[/\b(equation|quadratic|simultaneous|algebra|expression|factori[sz]e|expand|simplify|inequalit\w*|polynomial|indices|logarithm|surd)\b/,3],[/\b(fraction|decimal|percentage|ratio|proportion|prime number|hcf|lcm|integers?|place value|bodmas)\b/,3],[/\b(triangle|pythagoras|trigonometr\w*|sine|cosine|tangent|angle|polygon|bearing|locus|loci|vector|matrix|matrices|gradient|coordinate|probability|mean|median|mode|statistics|histogram|sequence|series|set theory|venn|area|perimeter|volume|circumference|radius|diameter|sides|hexagon|pentagon|octagon|square|rectangle|circle|cube|cuboid|cylinder)\b/,2],[/\d\s*[+\-*/x×÷=^]\s*\d|\bx\s*[+\-=]|\d+x\b|\bx\^?2/,4],[/\bmath(s|ematics)?\b/,4]]},
+biology:{app:["Biology"],practical:true,kw:[[/\b(cell|cells)\b/,1],[/\b(plants?|animals?|organisms?|living things?|living organisms?|seeds?|seedlings?|roots?|leaf|leaves|flowers?|crops?|trees?|fish|birds?|humans?|human beings?|mammals?|grow|grows|growing|growth|germinat\w*|breath\w*|sweat\w*|oxygen we|our bodies|the body|body temperature|blood|heart ?beat|food we eat|why do we need (food|water|air|to eat|to drink|to sleep)|feed|feeds|feeding|eat|eats)\b/,4],[/\b(nucleus|cytoplasm|organelles?|mitochondri\w*|chloroplasts?|cell membrane|cell wall|vacuole|ribosome|tissue|organ system)\b/,4],[/\b(photosynthesis|respiration|digestion|excretion|osmosis|diffusion|transpiration|germination|pollination|fertili[sz]ation|reproduction|inheritance|genes?|dna|chromosomes?|enzymes?|hormones?|nervous|reflex|ecology|ecosystem|food chain|food web|habitat|species|kingdom|classification|bacteria|virus|fungi|insects?|mosquito|metamorphosis|mitosis|meiosis|cell division|nitrogen cycle|carbon cycle|vaccin\w*|immunity|antibod\w*|malaria|disease|diseases|nephron|neurone|alveoli|digestive system|respiratory system|circulatory system|excretory system|human body|nutrition|plants? make food|puberty|menstrual\w*|sexual reproduction|asexual|balanced diet|vitamins?|proteins?|carbohydrates?)\b/,3],[/\b(heart|eye|eyes|ear|ears|skin|tongue|nose|lungs?|kidneys?|liver|stomach|blood|artery|arteries|vein|veins|brain|skeleton|bones?|muscles?|teeth|alimentary|leaf|leaves|root|stem|flower|seed|stomata|xylem|phloem|chlorophyll|plant|animal|organism|living things)\b/,2],[/\b(specimen|microscope|dissect\w*|biology|biological)\b/,3]]},
+chemistry:{app:["Chemistry"],practical:true,kw:[[/\b(cell|cells)\b/,1],[/\b(rust|rusts|rusting|corrode\w*|burn|burns|burning|combustion|dissolve\w*|ferment\w*|decompos\w*|acidic|alkaline|neutral)\b/,3],[/\b(acid|acids|alkali|alkalis|base|bases|salt|salts|ph|indicator|litmus|neutrali[sz]ation|titration)\b/,3],[/\b(element|compound|mixture|atom|atoms|molecule|ion|ions|electron|proton|neutron|isotope|group \d|bond|bonding|ionic|covalent|metallic|atomic structure|structure of (an |the )?atom|sodium|chloride|metals?|melting point)\b/,2],[/\bperiodic table\b/,4],[/\b(mole|moles|molar|stoichiometry|equation|oxidation|reduction|redox|electrolysis|electrolyte|electrode|anode|cathode|electrochemical|reactivity series|catalyst|exothermic|endothermic|enthalpy|alkane|alkene|ethanol|hydrocarbon|organic|fossil fuels?|crude oil|distillation|filtration|chromatography|crystalli[sz]ation|haber|contact process|blast furnace)\b/,3],[/\b(chemistry|chemical|reagent|precipitate|solution|solute|solvent|reaction)\b/,3],[/\b(h2o|co2|naoh|hcl|h2so4|nacl|caco3)\b/,4]]},
+physics:{app:["Physics"],practical:true,kw:[[/\b(cell|cells)\b/,1],[/\b(hot|cold|warm|cool|melt|melts|melting|freeze|freezes|freezing|boil|boils|boiling|expand\w*|contract\w*|float|floats|sink|sinks|fall|falls|weigh\w*|shadow\w*|spoon)\b/,2],[/\b(force|forces|newton|motion|velocity|speed|acceleration|momentum|friction|pressure|moment|moments|lever|work done|energy|power|efficiency|kinetic|potential)\b/,3],[/\b(light|reflection|refraction|lens|lenses|mirror|prism|wave|waves|wavelength|frequency|amplitude|sound|echo|heat|temperature|thermometer|conduction|convection|radiation|expansion|specific heat|latent heat)\b/,3],[/\b(current|voltage|resistance|ohm|circuit|resistor|ammeter|voltmeter|battery|emf|e\.m\.f|transformer|magnet|magnetic|electrostatics?|static electricity|charge|generator|motor effect|fuse)\b/,3],[/\b(radioactiv\w*|half[- ]life|nuclear|fission|fusion|solar system|planet|star|galaxy|satellite|density|hooke|spring constant|vernier|micrometer|physics)\b/,3]]},
+geography:{app:["Geography","Social Studies"],practical:false,kw:[[/\b(water cycle|nitrogen cycle|carbon cycle|seasons?)\b/,2],[/\b(map|maps|scale|contour|grid reference|compass|relief|plateau|rift valley|volcano|volcanic|earthquake|fold mountains?|river|erosion|deposition|weathering|delta|meander|glacier|desert)\b/,3],[/\b(climate|rainfall|weather|vegetation|savanna|equatorial|monsoon|latitude|longitude|time zone|hemisphere|continent|lake victoria|nile|east africa|rhine|ruhr|china|north america)\b/,3],[/\b(population|urbani[sz]ation|migration|settlement|transport|mining|manufacturing|industr\w+|tourism|fishing|irrigation|forestry|wildlife|conservation|census|trade)\b/,2],[/\b(geography|geographical|physical features|landforms?|drainage)\b/,4]]},
+history:{app:["History","Social Studies"],practical:false,kw:[[/\b(colonial\w*|colonialism|scramble|partition|berlin conference|independence|nationalis[tm]|pan-?africanism|world war|treaty|kingdom|buganda|bunyoro|empire|slave trade|missionar\w*|explorers?|chief|kabaka|apartheid|mau mau)\b/,4],[/\b(history|historical|past|ancient|migration|state formation|origin of man|stone age|iron age)\b/,2],[/\b(constitution|parliament|democracy|human rights|united nations|local government|patriotism|neo-?colonialism|globali[sz]ation|ngos?|civil society|buganda agreement|agreement)\b/,2],[/\b(19\d\d|18\d\d|17\d\d|ad\b|bc\b)/,2]]},
+english:{app:["English","Literature in English","General Paper"],practical:false,kw:[[/\b(noun|verb|adjective|adverb|pronoun|preposition|conjunction|tense|plural|singular|synonym|antonym|homophone|punctuation|capital letters?|sentence|clause|phrase|active voice|passive voice|reported speech|direct speech|figure of speech|simile|metaphor|idiom|proverb|grammar)\b/,4],[/\b(composition|essay|letter|comprehension|passage|summary|precis|speech|dialogue|report writing|notice|memo|minutes|paragraph)\b/,3],[/\b(poem|poetry|novel|play|drama|character|theme|setting|plot|imagery|symbolism|irony|literary|literature|author|stanza)\b/,3],[/\benglish\b/,4]]},
+cre:{app:["Christian Religious Education","Divinity","Religious Education"],practical:false,kw:[[/\b(bible|biblical|jesus|christ|christian\w*|church|gospel|apostle|disciples?|moses|abraham|david|paul|prophet\w*|baptism|holy communion|ten commandments|sermon|testament|genesis|exodus|psalms?|proverbs|luke|matthew|john|mark|romans|corinthians|trinity|salvation|resurrection|pentecost|christmas|easter)\b/,4],[/\b(worship|prayer|marriage|family|peace|justice|work|wealth|leisure|conflict resolution)\b/,1],[/\bcre\b|\bdivinity\b/,5]]},
+ire:{app:["Islamic Religious Education","Islamic Studies"],practical:false,kw:[[/\b(islam\w*|muslim\w*|quran|qur'?an|hadith|sunnah|prophet muhammad|allah|salat|zakat|hajj|sawm|ramadan|pillars? of islam|mosque|imam|sharia|eid|umrah|tawhid|iman)\b/,5],[/\bire\b/,5]]},
+agriculture:{app:["Agriculture"],practical:true,kw:[[/\b(soil conservation|soil fertility|soil erosion)\b/,3],[/\b(agriculture|agricultural|farm\w*|crops?|livestock|cattle|dairy|poultry|goats?|pigs?|rabbits?|maize|millet|sorghum|cassava|banana|coffee|tea|cotton|vegetables?|cabbage|tomato|nursery|seedbed|transplanting|manure|fertili[sz]er|pasture|silage|hay|breed|breeding|vaccination|dipping|land tenure|mailo|freehold|cooperative|sacco|hoe|panga|plough|tractor|irrigation|mulching|weeding|pruning)\b/,3],[/\b(soil|erosion|conservation)\b/,1]]},
+ict:{app:["ICT","Subsidiary ICT","Computer Studies"],practical:true,kw:[[/\b(computer|computers|ict|keyboard|mouse|monitor|printer|scanner|hardware|software|operating system|windows|folder|desktop|cpu|ram|rom|motherboard|usb|flash disk|internet|email|browser|website|web page|html|database|spreadsheet|excel|word processing|ms word|microsoft word|powerpoint|presentation|slide|cell reference|virus|antivirus|cyber|e-?waste|binary|bit|byte|input device|output device)\b/,3],[/\b(table|record|records|field|query|file|memory|storage|network|formula|insert)\b/,1],[/\b(ms excel|ms word|ms access|insert|format|font|bold|italic|save as|copy and paste)\b/,2]]},
+commerce:{app:["Commerce"],practical:false,kw:[[/\b(commerce|trade|trading|wholesaler|retailer|middleman|channel of distribution|warehousing|transport|insurance|banking|bank|advertising|communication|tourism|consumer|producer|market|demand|supply|price|money|barter|cheque|credit|invoice|receipt|quotation|order|delivery note|documents? of trade|consignment|import|export|tariff)\b/,2],[/\bcommerce\b/,5]]},
+entrepreneurship:{app:["Entrepreneurship"],practical:false,kw:[[/\b(entrepreneur\w*|business plan|business idea|business opportunit\w*|start-?up|enterprise|sole proprietor\w*|partnership|limited company|marketing mix|market research|tax|taxation|vat|paye|uganda revenue authority|ura|revenue|capital|risk|innovation|customer|small business|sme|financial institutions?|micro ?finance|sacco)\b/,3],[/\bentrepreneurship\b/,5]]},
+accounting:{app:["Accounting","Principles of Accounting"],practical:false,kw:[[/\b(journal|ledger|trial balance|trading account|profit and loss|income statement|statement of financial position|balance sheet|cash book|petty cash|bank reconciliation|debit|credit|debtors?|creditors?|depreciation|bad debts?|accruals?|prepayments?|capital|drawings|purchases|sales returns?|purchases returns?|inventory|double entry|assets?|liabilit\w+|equity|accounting|accounts)\b/,3],[/\b(cash book|trial balance|journal entr\w*|ledger|trading account|profit and loss account|statement of financial position|balance sheet|petty cash|bank reconciliation|double entry)\b/,6],[/\baccounting\b/,5]]},
+economics:{app:["Economics"],practical:false,kw:[[/\b(economics|economy|economic|demand|supply|elasticity|inflation|gdp|national income|monetary policy|fiscal policy|opportunity cost|scarcity|market structure|monopoly|unemployment|balance of payments|exchange rate|public finance|development)\b/,3]]},
+kiswahili:{app:["Kiswahili"],practical:false,kw:[[/\b(kiswahili|swahili|sarufi|insha|ufahamu|methali|nahau|barua|kiambishi|nomino|kitenzi)\b/,5]]},
+pe:{app:["Physical Education"],practical:true,kw:[[/\b(physical education|netball|volleyball|handball|soccer|rounders|athletics|gymnastics|aerobics|swimming|fitness|warm[- ]?up|first aid|sports?)\b/,4]]},
+art:{app:["Art and Design","Fine Art","Performing Arts","Technical Drawing"],practical:true,kw:[[/\b(art|painting|drawing|sculpture|pottery|batik|tie and dye|collage|mosaic|printmaking|graphic design|poster|perspective|composition|colour wheel|music|dance|drama|orthographic|isometric)\b/,3]]}
+},
+/* an app subject name that stands for a whole family of disciplines (the question itself decides which one) */
+broad:{"Science":["biology","chemistry","physics"],"Social Studies":["geography","history"],"Religious Education":["cre","ire"],"General":null}
+};
+
+const norm=q=>{let s=" "+String(q||"").toLowerCase().replace(/[“”"]/g,"").replace(/[’']/g,"'").replace(/[?!.,;:]+/g," ").replace(/\s+/g," ")+" ";
+ for(const[r,t]of CFG.fix)s=s.replace(r,t);return s.trim()};
+const appToKey=name=>{for(const k in CFG.sub)if(CFG.sub[k].app.includes(name))return k;return null};
+const keyToApp=(k,list)=>{const a=CFG.sub[k]&&CFG.sub[k].app||[];if(!list||!list.length)return a[0]||null;return a.find(x=>list.includes(x))||null};
+
+/* ---- 1 SUBJECT ---- */
+function subjectOf(t,ctx){
+ const LIFEQ=/\b(plants?|animals?|organisms?|living things?|seeds?|leaf|leaves|roots?|crops?|trees?|fish|birds?|humans?|mammals?|the body|our bodies|germinat\w*|we breathe|breathe|breathing|we sweat|sweat\w*|we eat|we need (food|water|air|oxygen))\b/,SHAREDQ=new Set(["light","heat","energy","power","sound","temperature","pressure","force","forces","radiation","charge","motion","speed","work","moment","potential","kinetic","current","expansion","conduction"]);
+ const sc={},why={};for(const k in CFG.sub){let s=0;for(const[r,w]of CFG.sub[k].kw){const m=t.match(new RegExp(r.source,r.flags.replace("g","")+"g"));if(m){s+=w*Math.min(m.length,2);(why[k]=why[k]||[]).push(m[0])}}if(s)sc[k]=s}
+ /* scenario reading: a word like "cell" is shared, so a scenario word from one subject decides it */
+ /* a question about living things keeps Biology when the only physics or chemistry hits are shared words (light, heat, energy...) */
+ if(LIFEQ.test(t)&&sc.biology){["physics","chemistry"].forEach(k=>{if(!sc[k])return;const w=(why[k]||[]).filter(x=>!SHAREDQ.has(String(x).toLowerCase()));if(!w.length){delete sc[k];delete why[k]}})}
+ const rank=Object.keys(sc).sort((a,b)=>sc[b]-sc[a]);
+ const ctxName=ctx&&ctx.sub&&ctx.sub!=="General"?ctx.sub:null,fam=ctxName&&CFG.broad[ctxName]||null;
+ let ck=ctxName?appToKey(ctxName):null;
+ let top=rank[0]||null,conf=top?Math.min(1,sc[top]/8):0,off=false;
+ if(fam){const f=rank.find(k=>fam.includes(k));if(f)top=f}
+ else if(ck){
+  /* the chat is set to a subject: keep it unless another subject is clearly stronger */
+  const mine=sc[ck]||0;
+  if(!top||mine>=sc[top]-3){top=ck;conf=Math.max(conf,mine?Math.min(1,mine/8):.5)}
+  else off=true}
+ if(!top&&ck)top=ck;
+ return{key:top,conf:+conf.toFixed(2),alt:rank.filter(k=>k!==top).slice(0,2),off,scores:sc,why:top&&why[top]||[]}}
+
+/* ---- 2 CLASS AND TOPIC ---- */
+function classOf(t,ctx){
+ let m=t.match(/\b(?:senior|s|form)\s?([1-6])\b/),c=null,src="";
+ if(m){c="S"+m[1];src="question"}
+ else if((m=t.match(/\b(?:primary|p)\s?([1-7])\b/))){c="P"+m[1];src="question"}
+ else if(ctx&&ctx.cls){const x=String(ctx.cls).replace(/^Primary /,"P").replace(/^Senior /,"S");if(/^[PS][1-7]$/.test(x)){c=x;src="learner"}}
+ let lvl=c?(c[0]=="P"?"PLE":+c[1]>=5?"UACE":"UCE"):(ctx&&ctx.level)||null;
+ return{cls:c,level:lvl,src:src||(ctx&&ctx.level?"level only":"unknown")}}
+const STOP=new Set("distinguish compare between differentiate contrast versus a an the of in on at to for and or is are was were be been do does did can could would should will what which who whom whose why how when where please tell me about explain describe define state list give outline discuss meaning definition brief briefly simple simply detail details more full steps step by with using use used from into this that these those it its their there here one two three some any short long also then than as if not no yes my our your you we i they he she them his her".split(" "));
+function topicOf(t,subKey,ctx,cmdWords){
+ /* curriculum list first: [subject, class number, term, topic, keywords] */
+ let best=null;const CUR=ctx&&ctx.cur;
+ if(CUR&&subKey){const names=CFG.sub[subKey].app,tw=new Set(t.split(" ").filter(w=>w.length>2&&!STOP.has(w)));
+  for(const r of CUR){if(!names.includes(r[0]))continue;const nm=String(r[3]).toLowerCase().replace(/[^a-z0-9 ]/g," ").split(" ").filter(w=>w.length>2&&!STOP.has(w)),kw=String(r[4]||"").toLowerCase().split(" ").filter(w=>w.length>2);
+   let s=0;for(const w of nm)if(tw.has(w))s+=3;for(const w of kw)if(tw.has(w))s+=1;
+   if(s>=3&&(!best||s>best.s))best={s,topic:r[3],cls:"S"+r[1],term:r[2]}}}
+ /* the words the learner used for the thing itself */
+ let core=t.replace(/\b(the )?(difference|differences|similarities|advantages|disadvantages|causes|effects|importance|uses|types|characteristics|functions|parts|structure|process|steps|procedure)\b( of| between| and| in)?/g," ");
+ core=core.split(" ").filter(w=>!STOP.has(w)).join(" ").trim();
+ return{topic:best?best.topic:null,topicCls:best?best.cls:null,term:best?best.term:null,phrase:core.slice(0,80)||null}}
+
+/* ---- 3 COMMAND WORDS ---- */
+function commandsOf(t){
+ const out=[];for(const[id,r,depth,need]of CFG.cmd){const m=t.match(r);if(m)out.push({id,at:m.index,depth,need})}
+ out.sort((a,b)=>a.at-b.at);
+ /* first word beats later ones when it is itself a command; "what is" counts as define */
+ if(/^(what (is|are|was|were) (?!(an? |the )?(difference|importance|use|uses|function|functions|purpose|role|advantage|disadvantage|cause|effect|similarit|process|structure|meaning|value|\d))|who (is|was|were)\b)/.test(t)&&!out.some(c=>c.id=="define"))out.unshift({id:"define",at:0,depth:"short",need:"a direct definition"});
+ const seen=new Set();return out.filter(c=>seen.has(c.id)?false:(seen.add(c.id),true))}
+
+/* ---- 4 QUESTION TYPE ---- */
+const QT=[ /* id, pattern, extra check(subject key) */
+["differences",/\bdifference\b|\bdistinguish\b|\bdiffer\b|\bdiffers\b|\bcontrast\b|\bversus\b|\bvs\b|\bdifferentiate\b|\bdifferent from\b/],
+["similarities",/\bsimilarities\b|\bsimilar (to|between)\b|\bin common\b|\bcommon (features|characteristics)\b|\balike\b|\bcompare\b|\bcomparison\b/],
+["advantages_disadvantages",/\badvantages\b|\bdisadvantages\b|\bpros and cons\b|\bmerits\b|\bdemerits\b|\bstrengths and weaknesses\b|\bbenefits and (limitations|drawbacks|risks)\b|\bgood and bad\b/],
+["causes_effects",/\bcaus(e|es|ed)\b|\beffects?\b|\bconsequences?\b|\breasons? for\b|\bimpacts? of\b|\bwhat caus(es|ed)\b|\bresults? of\b|\baccount for\b|\bwhy (did|does|do|is|are)\b/],
+["classification",/\bclassif\w*|\bcategor(y|ies|ise|ize)\b|\bgroups? of\b|\bdivided? into\b|\bclasses of\b/],
+["types_examples",/\btypes? of\b|\bkinds? of\b|\bforms? of\b|\bgive (some |two |three |four |five |\d+ )?examples?\b|\bexamples? of\b|\bnames? of\b/],
+["steps_procedures",/\bsteps?\b|\bprocedure\b|\bhow (do|can|to|would|should) (i|you|we|one)\b[^?]{0,20}\b(make|prepare|construct|draw|write|perform|carry out|set up|do|create|insert|format|save|apply|plant|prune|raise|keep|grow|rear|use|open|copy|install)\b|\bhow to\b|\bstages in (a |the )?(commercial|business|transaction|purchase)\b|\bmethod of\b|\bin order\b|\bsequence of (actions|steps)\b/],
+["process",/^(how (does|do|is|are|did) )|\bprocess\b|\bhow (does|do|is|are|did) [\w\s-]{1,40}\b(work|works|form|formed|happen|occur|occurs|take place|made|produced|carried|transported|digested|move|moves|develop|develops)\b|\bformation of\b|\blife cycle\b|\bcycle\b|\bmechanism\b|\bstages of\b|\bhow is\b[\w\s-]{1,40}\b(formed|made|produced|transmitted|spread|absorbed|digested)\b|\bhow (do|does|did) [\w\s-]{1,40}\b(make|makes|get|gets|obtain|obtains|produce|produces|grow|grows|reproduce|reproduces|breathe|breathes|feed|feeds|respire|absorb|absorbs|digest|digests)\b|\bwhat happens (when|during|in)\b/],
+["parts_functions",/\bparts? of\b|\bstructure of\b|\bcomponents? of\b|\borgans? of\b|\blabel(l?ed)?\b|\bdiagram of\b|\bfunctions? of\b|\bparts and functions\b|\bwhat does (the |a |an )?[\w\s-]{1,25} do\b|\bpurpose of (the|each)\b/],
+["problems_solutions",/\bhow can (a |an |the )?[\w\s-]{1,30}\b(improve|increase|reduce|prevent|control|overcome|manage|solve|stop|avoid)\b|\bways of (controlling|improving|preventing)\b|\bproblems?\b|\bchallenges?\b|\bsolutions? (to|for|of)\b|\bhow can (this|these|it|they|[\w-]+(?: [\w-]+){0,3}) be (solved|controlled|reduced|prevented|managed|improved|overcome)\b|\bcontrol measures?\b|\bways of (solving|controlling|reducing|preventing|overcoming|improving)\b|\bmeasures (to|taken)\b/],
+["characteristics",/\bcharacteristics\b|\bfeatures\b|\bproperties\b|\bqualities\b|\btraits\b|\bsigns of\b|\bsymptoms\b/],
+["importance",/\bimportance\b|\bsignificance\b|\bwhy (is|are) [\w\s-]{1,40}important\b|\b(reasons?|ways?) why [\w\s-]{1,40}(matters?|important)\b|\bmatters?\b|\bbenefits? of\b|\brole of\b|\bvalue of\b|\bcontributions? (of|to)\b|\bwhy (do|should) we (need|study|learn)\b/],
+["uses_applications",/\buses? of\b|\bapplications? of\b|\bused (for|to|in)\b|\bwhat is [\w\s-]{1,30} used for\b|\bapplications?\b|\bwhere (is|are) [\w\s-]{1,30} used\b/],
+["definition",/\bdefine\b|\bdefinition of\b|\bmeaning of\b|\bwhat do (you|we) mean by\b|\bstate the meaning\b|\bwhat does [\w\s-]{1,30} mean\b/],
+["accounting_layout",/\bjournal entr\w*|\bledger\b|\btrial balance\b|\btrading account\b|\bprofit and loss\b|\bincome statement\b|\bstatement of financial position\b|\bbalance sheet\b|\bcash book\b|\bpetty cash\b|\bbank reconciliation\b|\bprepare (a|an|the) [\w\s]{0,20}account\b|\bdouble entry\b|\brecord (the|these|this) (following )?transactions?\b/],
+["composition",/\bwrite (a|an|the) (composition|essay|letter|story|speech|report|article|dialogue|notice|memo|minutes|application|email|CV|curriculum vitae|poem)\b|\bcomposition (on|about)\b|\bessay (on|about)\b|\b(formal|informal) letter\b/],
+["comprehension",/\bpassage\b|\baccording to the (passage|text|poem|extract)\b|\bcomprehension\b|\bthe extract\b/],
+["summary",/\bsummari[sz]e\b|\bsummary\b|\bprecis\b|\bwrite (a )?summary\b/],
+["grammar",/\b(noun|verb|adjective|adverb|pronoun|preposition|conjunction|tense|plural|singular|synonym|antonym|homophone|punctuation|capital letters?|clause|active voice|passive voice|reported speech|direct speech|figure of speech|simile|metaphor|idiom|proverb|grammar|subject and predicate|articles?)\b/],
+["literature",/\b(theme|themes|character|characters|characterisation|characterization|setting|plot|imagery|symbolism|irony|stanza|narrator|protagonist|tone|mood)\b/],
+["graph",/\b(draw|plot|sketch) (a |the )?(graph|curve|histogram|bar chart|pie chart|ogive|line graph)\b|\bgraph of\b/],
+["proof",/\bprove that\b|\bshow that\b|\bproof (of|that)\b|\bverify that\b/],
+["geometric_construction",/\bconstruct\b|\bbisect\w*\b|\bcompass and ruler\b|\bprotractor\b|\blocus\b|\bloci\b/],
+["map_work",/\bmap (of|work|reading|skills)\b|\bgrid reference\b|\bscale of (a |the )?map\b|\bcontour lines?\b|\bdraw a map\b|\blocate\b[\w\s]{0,30}\bon (a |the )?map\b|\bmark and name\b/],
+["chronology",/\bchronolog\w*|\btimeline\b|\bsequence of events\b|\bevents (that )?(led|leading) to\b|\bhistory of\b|\bdevelopment of\b/],
+["business_plan",/\bbusiness plan\b/]];
+const MATHSUBS=new Set(["mathematics"]);
+function calcSignal(t,subKey){
+ if(/\b(prove|show|verify) that\b/.test(t)||/\b(sketch|draw|plot) (a |the )?(graph|curve|histogram|bar chart|pie chart|ogive|line graph)\b/.test(t))return false;
+ const hasNum=/\d/.test(t),alg=/\b\d*[a-z]\s*[+\-*/^=]\s*\d|\b\d+\s*[+\-*/×÷^=]\s*\d|\bx\s*[+\-=]|\b\d+x\b|\bx\^?2\b|=/.test(t);
+ const verb=/\b(calculate|compute|work out|solve|simplify|factori[sz]e|expand|differentiate|integrate|find (the )?(value|area|volume|perimeter|speed|mass|force|number|sum|total|average|mean|median|mode|range|cost|profit|loss|gradient|distance|height|length|angle|x|y|resistance|current|pressure|density|moles?|concentration)|determine the (value|mass|volume|density|speed|force|pressure|resistance|current|number|moles?|concentration|amount)|how (many|much|long|far|fast)|what is the (value|sum|product|area|volume|perimeter|average|mean|speed|force|mass|density|pressure|resistance|current|cost|profit|total) of)\b/.test(t);
+ const wordProblem=/\b(if|given|a (car|train|man|woman|rectangle|triangle|circle|tank|mass|body|wire|resistor|bulb|solution|sample)|\d+\s*(m|cm|km|kg|g|n|j|w|v|a|s|hz|ml|l|%|shillings|ugx|ugsh|sh)\b)/.test(t);
+ if(MATHSUBS.has(subKey)&&(alg||(verb&&hasNum)||(hasNum&&/^(what is|find|solve|simplify|calculate|evaluate|expand|factori[sz]e)\b/.test(t))))return true;
+ if(verb&&hasNum)return true;
+ if(hasNum&&wordProblem&&/\b(calculate|find|determine|work out|how (many|much|long|far|fast))\b/.test(t))return true;
+ if(/\b(solve|factori[sz]e|expand|simplify|differentiate|integrate)\b/.test(t)&&(alg||hasNum||/\b(equation|expression|quadratic|inequality|algebra)\b/.test(t)))return true;
+ return false}
+function qtypesOf(t,subKey,calc){
+ const hits=[];
+ for(const[id,r]of QT){const m=t.match(r);if(m)hits.push({id,at:m.index})}
+ let ids=hits.sort((a,b)=>a.at-b.at).map(h=>h.id);
+ const has=x=>ids.includes(x),drop=(...xs)=>{ids=ids.filter(i=>!xs.includes(i))};
+ /* a "what is X" definition loses to a stronger specific ask, and vice versa */
+ if(calc){ids=["calculation"].concat(ids.filter(i=>["accounting_layout","graph","proof","geometric_construction"].includes(i)));return finish(ids)}
+ if(has("differences")&&has("similarities")){/* "compare" gives both; plain "differences" keeps only differences */}
+ if(has("differences")&&has("similarities")&&!/\bsimilarities\b|\bsimilar (to|between)\b|\bin common\b|\bcompare\b|\bcomparison\b|\balike\b/.test(t))drop("similarities");
+ if(has("differences")&&!/\bsimilarities\b|\bsimilar (to|between)\b|\bin common\b|\balike\b|\bcompar(e|ison)\b/.test(t))drop("similarities");
+ if(has("importance")&&/\bwhy (is|are)\b[\w\s-]{0,40}\bimportant\b/.test(t))drop("causes_effects");
+ if(has("similarities")&&!has("differences")&&/\bcompar(e|ison)\b/.test(t)&&!/\bsimilarities\b|\bsimilar (to|between)\b|\bin common\b|\balike\b/.test(t))ids.push("differences");
+ if(has("advantages_disadvantages"))drop("importance"); /* "benefits" next to "advantages" */
+ if(has("types_examples")&&has("classification"))drop("types_examples");
+ if(has("process")&&has("steps_procedures")&&!/\bprocess\b|\bformation\b|\bcycle\b|\bmechanism\b/.test(t))drop("process");
+ if(has("process")&&has("steps_procedures")&&/\bprocess\b|\bformation\b|\bcycle\b/.test(t)&&!/\bsteps?\b|\bprocedure\b/.test(t))drop("steps_procedures");
+ if(has("parts_functions")&&["commerce","accounting","entrepreneurship","economics","history","geography"].includes(subKey)&&!/\b(parts|structure|label|diagram|organs?|components?)\b/.test(t)){drop("parts_functions");if(!has("importance"))ids.push("importance")}
+ if(has("definition")&&ids.length>1&&/^(what is|what are) (the )?(difference|importance|use)/.test(t))drop("definition");
+ if(has("composition"))drop("grammar","literature","comprehension","summary");
+ if(has("comprehension"))drop("literature","grammar");
+ if(has("proof")&&subKey!=="mathematics"&&/\b(experiment|investigat\w*|practical|apparatus)\b/.test(t))drop("proof");
+ if(has("literature")&&subKey!=="english")drop("literature");
+ if(has("grammar")&&subKey!=="english"&&subKey!=="kiswahili")drop("grammar");
+ if(has("accounting_layout")&&!["accounting","entrepreneurship","commerce","economics"].includes(subKey)&&subKey!=null)drop("accounting_layout");
+ if(has("map_work")&&subKey!=="geography")drop("map_work");
+ if(has("geometric_construction")&&subKey!=="mathematics"&&subKey!=="art")drop("geometric_construction");
+ return finish(ids);
+ function finish(a){a=Array.from(new Set(a));
+  if(!a.length){const lead=/^(what is|what are|who (is|was|were))\b/.test(t)?"definition":"general_explanation";a=[lead]}
+  /* "what is X" that also carries another ask: the other ask leads, definition comes first only if the learner wrote "define" */
+  return a}}
+/* causes and effects keep their order: causes first, then effects */
+function ceParts(t){const c=/\bcaus(e|es|ed)\b|\breasons? for\b|\bwhat caus(es|ed)\b|\bwhy (did|does|do|is|are)\b|\baccount for\b/.test(t),e=/\beffects?\b|\bconsequences?\b|\bimpacts? of\b|\bresults? of\b/.test(t);return c&&e?["causes","effects"]:c?["causes"]:e?["effects"]:[]}
+/* the two things being compared: A and B */
+function itemsOf(t){
+ let m=t.match(/\b(?:difference|differences|similarities|comparison|contrast)\s+(?:between|of)\s+(.+?)\s+(?:and|with|from|&)\s+(.+?)$/)||t.match(/\bdistinguish\s+(?:between\s+)?(.+?)\s+(?:and|from)\s+(.+?)$/)||t.match(/\bcompare\s+(.+?)\s+(?:and|with|to)\s+(.+?)$/)||t.match(/^(?:how (?:does|do|is|are) )?(.+?)\s+(?:differ|differs|different)\s+(?:from|to)\s+(.+?)$/)||t.match(/^(.+?)\s+(?:versus|vs)\s+(.+?)$/);
+ if(!m)return null;const cl=s=>s.replace(/\b(please|in terms of|briefly|in detail|with examples?|and give examples?|giving examples?)\b.*$/,"").split(" ").filter((w,i)=>!(i==0&&STOP.has(w)&&w!="a"&&w!="an")).join(" ").replace(/^(an? |the )/,"").trim();
+ const a=cl(m[1]),b=cl(m[2]);return a&&b&&a!==b?[a,b]:null}
+
+/* ---- 5 THEORY / PRACTICAL / CALCULATION ---- */
+const PRAC=/\b(experiment|investigat(e|ion)|practical|dissect\w*|observe|observation|apparatus|aim of the|carry out|perform (an? |the )?(experiment|test|titration|investigation|practical)|conduct (an? |the )?(experiment|test|titration|investigation|practical)|set up|setup|demonstrate|verify|prepare|how (would|can|do|could|will) (you|we|i) (test|prove|show|demonstrate|determine|verify|separate|prepare|identify|measure|find out|investigate|detect|obtain|collect|purify)|test for|tests for|prepare (a |the |some )?(sample|salt|solution|gas|crystals|specimen|slide|nursery|seedbed|compost|silage|hay)|preparation of (a |the )?(salt|gas|crystals|solution|oxygen|hydrogen|carbon dioxide|ammonia|soap)|titrate|(carry out|perform|do|conduct|describe|outline|how to)\b[^?]{0,25}\btitration|titration (experiment|procedure|practical)|separate (a |the )?(mixture|sand|salt|ink|iron)|plant (a |the )?(seeds?|seedlings?|crop)|transplant|prune|spray|dip(ping)? (the )?(cattle|animals)|how (to|do i|can i) (create|insert|format|save|copy|open|type|apply|make|use|install|change|delete|rename|print|merge|sort|filter)\b)/;
+const PRAC_SUBS=new Set(["biology","chemistry","physics","agriculture","ict","pe","art"]);
+function natureOf(t,subKey,calc,qts,cmds,quest){
+ const why=[];let kind="theory";
+ const layout=qts.includes("accounting_layout");
+ if(calc){kind="calculation";why.push("numbers with a calculate/solve/find ask")}
+ else if(layout){kind="layout";why.push("standard accounting record named")}
+ else if(["composition","comprehension","summary"].some(x=>qts.includes(x))&&subKey=="english"){kind="language_task";why.push("English writing or reading task")}
+ else if(qts.includes("map_work")||qts.includes("graph")||qts.includes("geometric_construction")||qts.includes("proof")){kind="skill";why.push(qts.find(x=>["map_work","graph","geometric_construction","proof"].includes(x)))}
+ else if(PRAC_SUBS.has(subKey)&&PRAC.test(t)){
+  /* "define titration" or "what is an experiment" is still theory: a practical needs an action or a doing word */
+  const theoryOnly=/^(define|what is|what are|what do you mean|state the meaning|meaning of)\b/.test(t)&&!/\b(carry out|perform|conduct|how (would|can|do|could) (you|we)|how to|set up|describe an?|outline an?|experiment to|experiment for)\b/.test(t);
+  if(!theoryOnly){kind="practical";why.push("doing word: "+(t.match(PRAC)||[""])[0].trim())}}
+ else if(PRAC_SUBS.has(subKey)&&qts.includes("steps_procedures")&&["ict","agriculture","pe","art"].includes(subKey)){kind="practical";why.push("procedure in a practical subject")}
+ if(kind=="theory")why.push("no experiment, calculation or record asked");
+ /* a calculation inside a science subject keeps its subject flavour */
+ return{kind,practical:kind=="practical",calculation:kind=="calculation",layout:layout?(t.match(QT.find(q=>q[0]=="accounting_layout")[1])||[""])[0]:null,why:why[0]}}
+
+/* ---- put it together ---- */
+function analyse(q,ctx){
+ ctx=ctx||{};if(!ctx.cur&&root.CUR)ctx.cur=root.CUR;
+ const raw=String(q||""),t=norm(raw),res={v:1,q:raw.slice(0,300),text:t};
+ if(!t)return Object.assign(res,{empty:true,subject:null,qtype:"general_explanation",qtypes:["general_explanation"],kind:"theory",commands:[]});
+ const S=subjectOf(t,ctx),C=classOf(t,ctx),calc=calcSignal(t,S.key);
+ const cm=commandsOf(t);
+ const qts=qtypesOf(t,S.key,calc);
+ const N=natureOf(t,S.key,calc,qts,cm,t);
+ const T=topicOf(t,S.key,ctx,cm);
+ if(!calc)cm.splice(0,cm.length,...cm.filter(c=>c.id!="calculate"));
+ const ids=cm.map(c=>c.id),list=ctx.subList||[];
+ /* depth follows the strongest wording: discuss > explain > steps > short */
+ const rankD={short:0,steps:1,explain:2,discuss:3};
+ let depth=cm.length?cm.reduce((a,c)=>rankD[c.depth]>rankD[a]?c.depth:a,"short"):(/\bwhat is|what are|who\b/.test(t)?"short":"explain");
+ if(N.kind=="calculation")depth="steps";
+ /* a one-line fact stays brief */
+ const words=t.split(" ").length;if(!cm.length&&N.kind=="theory"&&(words<=4||/^(how many|how much|which|who|when|where|name|is|are|does|do)\b/.test(t)))depth="short";
+ Object.assign(res,{
+  subject:S.key,subjectName:keyToApp(S.key,list),subjectConf:S.conf,subjectAlt:S.alt,offContext:S.off,subjectWords:S.why.slice(0,4),
+  cls:C.cls,level:C.level,classFrom:C.src,topic:T.topic,topicCls:T.topicCls,term:T.term,subjectPhrase:T.phrase,
+  commands:ids,commandNeeds:cm.map(c=>c.need),primaryCommand:ids[0]||null,
+  qtype:qts[0],qtypes:qts,causeEffect:qts.includes("causes_effects")?ceParts(t):null,items:itemsOf(t),
+  kind:N.kind,practical:N.practical,calculation:N.calculation,accountingLayout:N.layout,natureWhy:N.why,
+  depth,wantsVisual:/\b(draw|sketch|diagram|label|illustrate|show me|picture|map of|graph)\b/.test(t),
+  followUp:!!ctx.followUp});
+ return res}
+
+/* a compact copy that is safe to send with a question to the answer service */
+function brief(a){if(!a||a.empty)return undefined;return{subject:a.subject,class:a.cls,level:a.level,topic:a.topic||a.subjectPhrase,commands:a.commands,question_type:a.qtype,question_types:a.qtypes,nature:a.kind,depth:a.depth,items:a.items||undefined,cause_effect_order:a.causeEffect||undefined,accounting_layout:a.accountingLayout||undefined}}
+
+root.AASE={CFG,analyse,brief,norm,parts:{subjectOf,classOf,commandsOf,qtypesOf,natureOf,topicOf,itemsOf},version:"1.0-steps1-5"};
+if(typeof module!=="undefined"&&module.exports)module.exports=root.AASE;
+})(typeof window!=="undefined"?window:globalThis);
+
+
+</script>
+<script>
+/* ===== ACADEMIC ANSWER STRUCTURING ENGINE (AASE), part 2: step 6, academic format selection =====
+   Reads the object made by steps 1 to 5 (AASE.analyse) and CHOOSES the layout the answer must follow:
+   which format, in which order, with which headings, in what style, and what must NOT appear.
+   It does not write or change any answer text; step 7 (answer structuring) will fill the chosen layout.
+   Result is added to the analysis as a.format and to the summary sent to ai_answer as academic.format.
+   All layouts live in the tables below (AASE.FORMATS, THEORY, PRACTICAL, CALC, LAYOUTS, SUBJECT_RULES),
+   so a subject or a question format can be added or edited without touching the selection code.
+   Heading syntax: a trailing ? means optional (use it only when the topic and level need it). {A} and {B} are the two items compared. */
+(function(root){
+"use strict";
+const A=root.AASE;
+if(!A||A.step6)return;
+
+const H=(...s)=>s.map(x=>/\?$/.test(x)?{h:x.slice(0,-1),o:1}:{h:x});
+const PRACTICAL_SUBJECTS=["biology","chemistry","physics","agriculture","ict"];
+
+/* ---------- 1. FORMATS BY QUESTION TYPE (brief, section 1) ---------- */
+const FORMATS={
+ differences:{label:"Differences",h:H("Characteristics of {A}","Characteristics of {B}","Differences"),
+  rules:["List all the characteristics of {A} first, then all of {B}. Never mix them.","Then show the differences point by point, in a comparison table when each point has a matching pair."],visual:"comparison table"},
+ similarities:{label:"Similarities",h:H("Similarities"),
+  rules:["Name {A} and {B}, then list only what they share and explain each point if needed.","Do not make separate lists for {A} and {B}."]},
+ advantages_disadvantages:{label:"Advantages and disadvantages",h:H("Advantages","Disadvantages"),
+  rules:["Advantages first, disadvantages second. Keep the two groups separate and explain each point."]},
+ causes_effects:a=>{const o=a.causeEffect||["causes","effects"];
+  return{label:"Causes and effects",h:H(...o.map(x=>x=="causes"?"Causes":"Effects")),
+   rules:o.length>1?["Causes first, effects second. Do not mix the two."]:["Give only what was asked: "+o[0]+"."]}},
+ classification:{label:"Classification",h:H("Introduction","Main classes","Subcategories?","Examples?"),
+  rules:["Say what is being classified, show the main classes, put each subcategory under its correct class, explain each, give examples where useful.","Show the hierarchy with indentation or a classification tree."],visual:"classification tree"},
+ types_examples:{label:"Types and examples",h:H("Types and examples"),
+  rules:["For each type: its name, a short explanation, then a relevant example beside it."]},
+ steps_procedures:{label:"Steps and procedures",h:H("What you need?","Steps"),
+  rules:["Number every step and keep the correct chronological or operational order. Say what happens in each step."],visual:"flowchart (only if it helps)"},
+ process:{label:"Process",h:H("Introduction","Stages in order","Summary?"),
+  rules:["Introduce the process, then explain each stage in sequence from beginning to end."],visual:"flowchart or diagram"},
+ parts_functions:{label:"Parts and functions",h:H("The whole structure","Parts and their functions"),
+  rules:["Name the whole structure, then each part with the function of that same part."],visual:"labelled diagram"},
+ problems_solutions:{label:"Problems and solutions",h:H("Problems","Solutions"),
+  rules:["Problems first, solutions second. Link each solution to the problem it solves."]},
+ characteristics:{label:"Characteristics",h:H("Introduction","Characteristics","Examples?"),
+  rules:["List the distinguishing features, explain each one, give examples where useful."]},
+ importance:{label:"Importance",h:H("Introduction","Why it is important","Examples?"),
+  rules:["List why it matters, explain each point, give a practical example where relevant."]},
+ uses_applications:{label:"Uses and applications",h:H("What it is","Uses","Examples?"),
+  rules:["List the uses, explain how each is applied and give examples."]},
+ definition:{label:"Definition",h:H("Definition","In simple words?","Examples?"),
+  rules:["Give the direct, correct definition first. No long introduction before it."]},
+ /* English and other language or skill formats */
+ grammar:{label:"Grammar",h:H("The concept","The rule","Explanation?","Examples"),
+  rules:["Identify the concept, state the rule, explain it, give correct examples."]},
+ comprehension:{label:"Comprehension",h:H("Answer from the passage","Evidence from the passage?"),
+  rules:["Answer only from the passage and give the supporting evidence. Add nothing the passage does not say."]},
+ summary:{label:"Summary",h:H("Summary"),
+  rules:["Keep to the required length and keep only the important points."]},
+ literature:{label:"Literature",selfFramed:1,h:H("Introduction to the text","Characters, themes or devices","Evidence and examples","Conclusion?"),
+  rules:["Explain each point with evidence from the text."]},
+ composition:a=>/\bletter\b|\bapplication\b/.test(a.text||"")
+  ?{label:"Letter",selfFramed:1,h:H("Writer's address","Date","Receiver's address","Salutation","Subject heading?","Body","Closing and signature"),
+    rules:["Use the correct letter layout for a formal or informal letter, as the question asks."]}
+  :{label:"Composition",selfFramed:1,h:H("Title?","Introduction","Body paragraphs","Conclusion"),
+    rules:["One idea per paragraph, with linking words between paragraphs."]},
+ /* skills */
+ graph:{label:"Graph",h:H("Table of values or data?","Axes and scale","Plotted points","Line or curve","Interpretation?"),
+  rules:["Label both axes, state the scale, show the coordinates."],visual:"graph"},
+ proof:{label:"Proof",h:H("Given","To prove","Statements with reasons","Conclusion"),
+  rules:["Every statement needs a reason. Use correct notation."]},
+ geometric_construction:{label:"Construction",h:H("Given","Construction steps","Final figure"),
+  rules:["Number the construction steps in order."],visual:"labelled diagram"},
+ map_work:{label:"Map work",h:H("Map conventions","Reading the map","Answer"),
+  rules:["Observe map conventions (title, key, scale, direction) and label correctly."],visual:"map"},
+ chronology:{label:"Events in order",selfFramed:1,h:H("Background","Events in order","Key people?","Effects","Significance","Conclusion?"),
+  rules:["Keep the correct historical sequence."],visual:"timeline"},
+ business_plan:{label:"Business plan",selfFramed:1,h:H("Executive summary","Business description","Market analysis","Marketing plan","Operations","Management","Financial plan","Risks?"),
+  rules:["Use a proper business-plan structure, not ordinary notes."]}
+};
+
+/* ---------- 2. CALCULATIONS BY SUBJECT (brief, sections 2 and 3, addendum 3) ---------- */
+const CALC_DEFAULT=H("Given information","Required information","Formula or method","Substitution","Working, step by step","Final answer");
+const CALC={
+ mathematics:{h:H("Given information","Required information","Formula or method","Substitution","Working, step by step","Final answer"),
+  rules:["Never skip or summarise the working. Show every step in order with correct notation.","Explain why a formula or operation is used when the learner may not know.","Give the unit with the final answer where it applies."]},
+ physics:{h:H("Given information","Required information","Formula","Substitution","Working, step by step","Final answer and unit"),
+  rules:["Show every step and keep the units in the working."]},
+ chemistry:{h:H("Given information","Required information","Balanced equation?","Formula","Substitution","Working, step by step","Final answer and unit"),
+  rules:["Show every step and keep the units in the working."]},
+ accounting:{h:H("Given information","Required information","Accounting principle or formula","Calculations","Accounting presentation","Final answer"),
+  rules:["Show the calculations, then present them in the correct accounting layout."]}
+};
+
+/* ---------- 3. PRACTICAL WORK BY SUBJECT (brief, sections 2 and 3) ---------- */
+const PRACTICAL={
+ biology:H("Aim","Materials or apparatus","Procedure","Observations","Results","Explanation","Conclusion"),
+ chemistry:H("Aim","Apparatus and materials","Procedure","Observations","Results","Chemical equation?","Explanation","Conclusion"),
+ physics:H("Aim","Apparatus","Setup","Procedure","Observations","Results","Graph or calculation?","Conclusion"),
+ agriculture:H("Aim","Materials or tools","Procedure","Observations","Results","Conclusion"),
+ ict:H("Objective","Requirements","Procedure","Expected output","Explanation"),
+ _:H("Aim","Materials","Procedure","Result")
+};
+const PRACTICAL_RULES=["Do not invent observations or results. If the learner has not given any, say what is expected and mark it as expected.","Keep the procedure in the order it is done."];
+
+/* ---------- 4. THEORY STARTING POINTS BY SUBJECT (brief, section 2: use only the headings the topic needs) ---------- */
+const THEORY={
+ mathematics:H("Definition","Explanation","Properties?","Examples"),
+ biology:H("Definition","Explanation","Characteristics or types?","Parts and functions?","Examples?","Importance?"),
+ chemistry:H("Definition","Explanation","Properties?","Types or classification?","Chemical equation?","Examples?","Applications?"),
+ physics:H("Definition","Explanation","Law or principle?","Properties?","Examples?","Applications?"),
+ geography:H("Definition","Explanation","Formation or process?","Characteristics?","Causes?","Effects?","Examples and locations?","Solutions or control measures?"),
+ history:H("Background","Causes or reasons?","Events in order","Key people?","Effects","Significance","Conclusion?"),
+ english:H("Main idea","Explanation","Examples"),
+ kiswahili:H("Main idea","Explanation","Examples"),
+ cre:H("Introduction","The teaching","Scripture reference?","Meaning","Examples or applications?","Lessons"),
+ ire:H("Introduction","The teaching","Reference from the Quran or Hadith?","Meaning","Examples or applications?","Lessons"),
+ agriculture:H("Definition","Explanation","Types or classification?","Characteristics?","Importance or uses?","Advantages and disadvantages?","Examples?"),
+ ict:H("Definition","Explanation","Types or classification?","Components and functions?","Advantages and disadvantages?","Applications?","Examples?"),
+ commerce:H("Definition","Explanation","Types or classification?","Characteristics?","Functions or importance?","Advantages and disadvantages?","Examples?"),
+ entrepreneurship:H("Definition","Explanation","Characteristics?","Types?","Importance?","Opportunities and challenges?","Examples?"),
+ economics:H("Definition","Explanation","Types or classification?","Characteristics?","Importance?","Advantages and disadvantages?","Examples?"),
+ accounting:H("Definition","Explanation","Example?"),
+ pe:H("Definition","Explanation","Examples?"),
+ art:H("Definition","Explanation","Examples?"),
+ _:H("Main idea","Explanation","Example?")
+};
+
+/* ---------- 5. ACCOUNTING RECORDS: standard layouts, never ordinary paragraphs ---------- */
+const LAYOUTS=[
+ [/journal/,"General journal","Date | Particulars (debit account, then credit account) | Folio? | Debit | Credit | Narration"],
+ [/\bledger\b/,"Ledger account","Debit side: Date | Particulars | Amount. Credit side: Date | Particulars | Amount"],
+ [/trial balance/,"Trial balance","Account | Debit | Credit, with equal totals"],
+ [/trading account/,"Trading account","Sales, cost of sales, gross profit or loss"],
+ [/profit and loss|income statement/,"Profit and loss account","Gross profit, expenses, net profit or loss"],
+ [/statement of financial position|balance sheet/,"Statement of financial position","Assets (non-current, current), then capital and liabilities"],
+ [/petty cash/,"Petty cash book","Receipts | Date | Details | Total | analysis columns"],
+ [/cash book/,"Cash book","Debit side and credit side with Date | Details | Folio? | Cash | Bank"],
+ [/bank reconciliation/,"Bank reconciliation statement","Balance as per cash book, adjustments, balance as per bank statement"],
+ [/./,"Standard accounting record","Date | Particulars | Debit | Credit, as the record requires"]
+];
+
+/* ---------- 6. RULES THAT BELONG TO A SUBJECT, whatever the layout ---------- */
+const SUBJECT_RULES={
+ history:["Keep events in the correct historical sequence."],
+ geography:["Explain the actual processes. Use correct map conventions where a map is used."],
+ cre:["Do not invent Bible quotations or references. Give a reference only when sure of it."],
+ ire:["Do not invent Quran or Hadith quotations or references. Give a reference only when sure of it."],
+ commerce:["For a commercial transaction, keep the steps in their correct sequence."],
+ accounting:["Use a standard accounting layout, not ordinary paragraphs, when a record is asked for."],
+ mathematics:["Use correct notation."],
+ ict:["Name the exact buttons, menus or commands used."]
+};
+
+/* ---------- selection ---------- */
+const cap=s=>s?s.charAt(0).toUpperCase()+s.slice(1):s;
+const fillTxt=(s,a)=>{const it=a.items||[];return s.replace(/\{A\}/g,cap(it[0]||"A")).replace(/\{B\}/g,cap(it[1]||"B"))};
+const uniq=arr=>Array.from(new Set(arr));
+const STYLE={short:"points",steps:"steps",explain:"explained",discuss:"essay"};
+
+function blockFor(id,a){
+ if(id=="calculation"){const c=CALC[a.subject]||{h:CALC_DEFAULT,rules:["Show every step in order."]};
+  const lay=a.subject=="accounting"&&a.accountingLayout?LAYOUTS.find(l=>l[0].test(a.accountingLayout)):null;
+  return{id,label:"Calculation",h:c.h,rules:c.rules.concat(lay?["Present the answer as a "+lay[1]+": "+lay[2]+"."]:[]),visual:null}}
+ if(id=="practical"){return{id,label:"Practical work",h:PRACTICAL[a.subject]||PRACTICAL._,rules:PRACTICAL_RULES,visual:PRACTICAL_SUBJECTS.includes(a.subject)?"labelled diagram of the set-up":null}}
+ if(id=="accounting_layout"){const lay=LAYOUTS.find(l=>l[0].test(a.accountingLayout||a.text||""));
+  return{id,label:lay[1],h:H("Given information?","Accounting record"),rules:["Use the "+lay[1]+" layout: "+lay[2]+".","Show dates, particulars and the debit and credit columns as the record needs. No ordinary paragraphs."],visual:"accounting table",layout:lay[1]}}
+ if(id=="general_explanation"){return{id,label:"Explanation",h:THEORY[a.subject]||THEORY._,rules:[],visual:null}}
+ const f=typeof FORMATS[id]=="function"?FORMATS[id](a):FORMATS[id];
+ if(!f)return null;
+ return{id,label:f.label,h:f.h,rules:f.rules||[],visual:f.visual||null,selfFramed:!!f.selfFramed}}
+
+function selectFormat(a){
+ if(!a||a.empty)return null;
+ const t=a.text||"",sub=a.subject,kind=a.kind,qts=(a.qtypes||[]).slice(),why=[];
+ let ids=[],examples=false;
+
+ const stepsOnly=kind=="practical"&&/^procedure in a practical subject/.test(a.natureWhy||"");
+ if(kind=="calculation"){ids=["calculation"];why.push("calculation")}
+ else if(kind=="layout"){ids=["accounting_layout"];why.push("standard accounting record")}
+ else if(kind=="practical"&&!stepsOnly){ids=["practical"];why.push("practical work")}
+ else if(stepsOnly){ids=["steps_procedures"];why.push("a procedure to follow, not an experiment")}
+ else{
+  /* theory, language task or skill: one block for every ask in the question, in the order asked */
+  let list=qts.filter(x=>x!="calculation"&&x!="accounting_layout"&&(FORMATS[x]||x=="general_explanation"));
+  if(kind=="language_task"){const L=list.filter(x=>["composition","comprehension","summary"].includes(x));if(L.length)list=L.slice(0,1)}
+  if(list.length>1&&list.includes("types_examples")&&!/\b(types?|kinds?|forms?) of\b/.test(t)){list=list.filter(x=>x!="types_examples");examples=true}
+  if((a.commands||[]).includes("define")&&!list.includes("definition")&&/\bdefine\b|\bdefinition\b|\bmeaning of\b|\bwhat do you mean\b/.test(t))list.unshift("definition");
+  if(list.includes("definition")&&list.length>1)list=["definition"].concat(list.filter(x=>x!="definition"));
+  if(list.length>1&&list.includes("general_explanation"))list=list.filter(x=>x!="general_explanation");
+  ids=list.length?list:["general_explanation"];
+  why.push(kind=="theory"?"theory":kind)}
+ why.unshift("question type: "+ids.join(" + "));
+
+ const blocks=ids.map(id=>blockFor(id,a)).filter(Boolean);
+ if(!blocks.length)return null;
+
+ /* depth: a "state" or "list" question stays brief; discuss and evaluate get a frame */
+ const compact=a.depth=="short"&&kind!="calculation"&&kind!="practical"&&kind!="layout";
+ const cmds=a.commands||[];
+ const wantsEssay=cmds.includes("discuss")||cmds.includes("evaluate");
+ const style=a.depth=="discuss"&&!wantsEssay&&!cmds.includes("analyse")?"explained":(STYLE[a.depth]||"explained");
+ const framed=wantsEssay&&kind=="theory"&&!blocks.some(b=>b.selfFramed);
+ const ev=cmds.includes("evaluate")&&!blocks.some(b=>b.id=="advantages_disadvantages");
+ const open=framed?[{h:"Introduction"}]:[];
+ const close=framed?(ev?[{h:"Strengths"},{h:"Weaknesses"},{h:"Justified judgment"}]:[{h:cmds.includes("evaluate")?"Justified judgment":"Conclusion"}]):[];
+
+ /* flat, ordered headings; a heading used twice (such as Introduction) appears once */
+ const seen=new Set(),headings=[],INTRO=["introduction","what it is"],defFirst=ids[0]=="definition"&&ids.length>1,causeProblem=ids.includes("causes_effects")&&ids.includes("problems_solutions");
+ const push=(x,blockId)=>{const k=x.h.toLowerCase();if(seen.has(k)||(defFirst&&blockId!="definition"&&INTRO.includes(k))||(causeProblem&&blockId=="problems_solutions"&&k=="problems"))return;if(compact&&x.o)return;seen.add(k);headings.push({h:fillTxt(x.h,a),o:x.o?1:0,block:blockId})};
+ open.forEach(x=>push(x,"frame"));blocks.forEach(b=>b.h.forEach(x=>push(x,b.id)));close.forEach(x=>push(x,"frame"));
+
+ /* what must NOT appear */
+ const forbid=[];
+ if(kind=="theory"&&PRACTICAL_SUBJECTS.includes(sub))forbid.push("Aim","Apparatus or materials","Procedure","Observations");
+ if(kind=="theory"&&sub=="mathematics")forbid.push("Given information","Substitution");
+ const forbidU=uniq(forbid);
+
+ const rules=uniq([].concat(...blocks.map(b=>b.rules)).concat(sub&&SUBJECT_RULES[sub]||[]).map(r=>fillTxt(r,a)));
+ if(compact||cmds.some(c=>["state","list","outline"].includes(c)))rules.push("Keep it brief: direct points, no long explanations.");
+ if(examples)rules.push("Give a relevant example for each point, as the question asks for examples.");
+ if(forbidU.includes("Aim"))rules.push("This is a theory question: do not use practical headings such as aim, apparatus, procedure or observations.");
+ if(a.depth=="short"&&kind=="theory"&&ids.length==1&&["definition","general_explanation"].includes(ids[0]))rules.push("Simple question: give a short direct answer.");
+ if(framed)rules.push(cmds.includes("evaluate")?"Weigh the arguments and evidence, then give a justified judgment.":"Organise the arguments, then end with a conclusion.");
+ if(cmds.includes("analyse"))rules.push("Break the topic into parts and explain how the parts relate.");
+ const visuals=uniq(blocks.map(b=>b.visual).filter(Boolean));
+ if(a.wantsVisual&&!visuals.length)visuals.push("diagram or illustration the learner asked for");
+
+ return{
+  id:ids[0],ids,label:blocks.map(b=>b.label).join(" + "),
+  headings,style,compact,examples,followUp:!!a.followUp,
+  frame:framed?{open:"Introduction",close:close[close.length-1].h}:null,
+  layout:(blocks.find(b=>b.layout)||{}).layout||null,
+  visuals,forbid:forbidU,rules,
+  reason:why.join("; ")+"; command: "+(a.primaryCommand||"none")+"; depth: "+a.depth}}
+
+/* the headings as plain text lines: optional ones end with ? */
+const headingLines=f=>f?f.headings.map(x=>x.h+(x.o?"?":"")):[];
+
+/* ---------- hook into the engine (steps 1 to 5 stay exactly as they were) ---------- */
+const baseAnalyse=A.analyse,baseBrief=A.brief;
+A.analyse=function(q,ctx){const r=baseAnalyse.call(A,q,ctx);try{r.format=selectFormat(r)}catch(e){r.format=null}return r};
+A.brief=function(a){const b=baseBrief.call(A,a);
+ if(b&&a&&a.format){const f=a.format;b.format={id:f.id,ids:f.ids,style:f.style,compact:f.compact,headings:headingLines(f),visuals:f.visuals,forbid:f.forbid,rules:f.rules.slice(0,8),layout:f.layout||undefined}}
+ return b};
+A.FORMATS=FORMATS;A.CALC=CALC;A.PRACTICAL=PRACTICAL;A.THEORY=THEORY;A.LAYOUTS=LAYOUTS;A.SUBJECT_RULES=SUBJECT_RULES;
+A.selectFormat=selectFormat;A.headingLines=headingLines;
+A.step6=true;A.version="1.1-steps1-6";
+if(typeof module!=="undefined"&&module.exports)module.exports=A;
+})(typeof window!=="undefined"?window:globalThis);
+</script>
+<script>
+/* ===== ACADEMIC ANSWER STRUCTURING ENGINE (AASE), part 3: step 7, answer structuring =====
+   Takes the layout chosen in step 6 (a.format) and puts the answer in that order.  Two jobs:
+   1  AASE.prompt(a)           the layout as plain instructions for the answer writer (Gemini), learner friendly and concise.
+   2  AASE.structure(md, a)    reads a written answer (markdown), matches its sections to the chosen headings, puts them in the
+                               chosen order, removes headings that must not appear and filler lines, and reports what is missing.
+   AASE.applyStructure(md, a)  the safe version used by the app: returns the restructured answer only when every required heading
+                               was found; otherwise null, and the app keeps its normal answer. Nothing is invented here: a section
+                               that was never written is reported as missing, never made up.
+   Rules live in the tables below (ALIAS, FILLER, STRICT, LEVEL_NOTE) so they can be edited without touching the code. */
+(function(root){
+"use strict";
+const A=root.AASE;
+if(!A||!A.step6||A.step7)return;
+
+/* words that mean the same thing in a heading, so "Working" matches "Solution" and "Steps" */
+const ALIAS=[
+ ["working","workings","solution","calculation","calculations","steps","step"],
+ ["given","data","known","information"],
+ ["answer","result","results","conclusion","finally"],
+ ["required","find","aim","objective","asked"],
+ ["formula","equation","principle","law"],
+ ["definition","meaning","means","define"],
+ ["explanation","explain","detail","details","described","description"],
+ ["example","examples","illustration"],
+ ["advantage","advantages","benefit","benefits","merit","merits","pros"],
+ ["disadvantage","disadvantages","limitation","limitations","demerit","demerits","cons","drawback","drawbacks"],
+ ["cause","causes","reason","reasons"],
+ ["effect","effects","consequence","consequences","impact","impacts"],
+ ["problem","problems","challenge","challenges"],
+ ["solution","solutions","remedy","remedies","measure","measures","control"],
+ ["apparatus","materials","requirements","tools","equipment"],
+ ["procedure","method"],
+ ["observation","observations","see","seen","observed","saw"],
+ ["use","uses","application","applications"],
+ ["importance","significance","important","matters"],
+ ["difference","differences","contrast"],
+ ["similarity","similarities","common","shared"],
+ ["characteristic","characteristics","feature","features","property","properties"],
+ ["part","parts","function","functions","structure"],
+ ["type","types","kind","kinds"],
+ ["introduction","intro","overview","background"],
+ ["setup","set-up","set","arrangement"]
+];
+const STOPW=new Set(["and","of","the","in","or","with","to","a","an","is","are","for","on","by","from","what","how","why","your","you","its","it","that","this","as","at"]);
+const FILLER=[/^\s*(sure|certainly|of course|great question|good question|okay|ok|alright)[!,. ].*$/i,/^\s*(i hope this helps|hope this helps|let me know if you).*$/i,/^\s*(here is|here's|here are) (the|an?|your) (answer|explanation|solution|notes?)[^\n]*:?\s*$/i];
+/* formats the app should restructure; a plain definition or general explanation keeps the app's own teacher style */
+const STRICT=["calculation","practical","accounting_layout","differences","similarities","advantages_disadvantages","causes_effects","classification","types_examples","steps_procedures","process","parts_functions","problems_solutions","characteristics","importance","uses_applications","grammar","graph","proof","geometric_construction","map_work","chronology","business_plan"];
+const LEVEL_NOTE={P13:"very short, simple sentences and everyday words",P47:"short sentences, simple words and everyday examples",S14:"clear language suited to a lower secondary learner, with correct subject terms explained when first used",S56:"advanced secondary level: precise terms and enough depth for examinations"};
+
+/* ---------- helpers ---------- */
+const stem=w=>w.replace(/(ies)$/,"y").replace(/(s)$/,"").replace(/[^a-z0-9-]/g,"");
+const canon=w=>{w=w.toLowerCase().replace(/[^a-z0-9-]/g,"");if(!w||STOPW.has(w))return null;const g=ALIAS.findIndex(L=>L.includes(w));return g>=0?"@"+g:stem(w)};
+const toks=h=>Array.from(new Set(String(h).replace(/\([^)]*\)/g," ").split(/\s+/).map(canon).filter(Boolean)));
+const bandOf=a=>{const c=a.cls||"";if(/^P[1-3]$/.test(c))return"P13";if(/^P[4-7]$/.test(c))return"P47";if(/^S[1-4]$/.test(c))return"S14";if(/^S[56]$/.test(c))return"S56";return a.level=="PLE"?"P47":a.level=="UACE"?"S56":"S14"};
+
+/* ---------- 1. the layout as instructions for the answer writer ---------- */
+function prompt(a){
+ const f=a&&a.format;if(!f||!f.headings||!f.headings.length||f.followUp)return null;
+ const req=f.headings.filter(x=>!x.o),opt=f.headings.filter(x=>x.o);
+ const L=[];
+ L.push("ANSWER LAYOUT. This replaces any other layout or lesson-style instruction.");
+ L.push("Layout chosen: "+f.label+(f.layout?" ("+f.layout+")":"")+". Answer style: "+({points:"short direct points",steps:"every step shown in order",explained:"each point explained simply",essay:"organised arguments"}[f.style]||"explained simply")+".");
+ L.push("Write the answer under these '## ' headings, in exactly this order, using these exact words:");
+ f.headings.forEach((x,i)=>L.push((i+1)+". "+x.h+(x.o?"  (optional: include only if the question needs it)":"")));
+ if(req.length)L.push("Every heading not marked optional must appear. Do not add any other heading.");
+ if(f.forbid&&f.forbid.length)L.push("Never use these headings or sections: "+f.forbid.join(", ")+".");
+ if(f.rules&&f.rules.length){L.push("Rules:");f.rules.forEach(r=>L.push("- "+r))}
+ if(f.visuals&&f.visuals.length)L.push("Visuals that may help (use only if they really improve understanding): "+f.visuals.join(", ")+".");
+ L.push("Learner-friendly: write for "+(a.cls?(a.cls[0]=="P"?"Primary "+a.cls[1]:"Senior "+a.cls[1]):"the learner")+" in "+LEVEL_NOTE[bandOf(a)]+". Put the main idea first. No greeting, no filler, no repetition. Keep it concise but complete.");
+ if(f.style=="steps"||f.id=="calculation")L.push("Number the steps. Show every calculation step in order and explain why a formula or operation is used. Never jump from the question to the answer.");
+ else L.push("If an idea has several stages, explain it one numbered step at a time. A simple fact gets a short direct answer.");
+ L.push("Do not invent facts, observations, results or quotations.");
+ return L.join("\n")}
+
+/* ---------- 2. read an answer into sections ---------- */
+function parse(md){
+ const lines=String(md||"").replace(/\r/g,"").split("\n");
+ let title="",lead=[],secs=[],cur=null,gotTitle=false;
+ const hd=l=>{let m=/^\s{0,3}(#{1,4})\s+(.+?)\s*#*\s*$/.exec(l);if(m)return{lvl:m[1].length,t:m[2].replace(/\*\*/g,"").replace(/:\s*$/,"").trim()};
+  m=/^\s*\*\*([^*\n]{2,70}?)\*\*\s*:?\s*$/.exec(l);if(m)return{lvl:3,t:m[1].replace(/:\s*$/,"").trim()};return null};
+ for(const l of lines){
+  const h=hd(l);
+  if(h&&h.lvl==1&&!gotTitle&&!secs.length){title=h.t;gotTitle=true;continue}
+  if(h){cur={t:h.t,body:[]};secs.push(cur);continue}
+  if(cur)cur.body.push(l);else lead.push(l)}
+ const clean=b=>b.join("\n").replace(/\n{3,}/g,"\n\n").trim();
+ return{title,lead:clean(lead),secs:secs.map(s=>({t:s.t,body:clean(s.body),tk:toks(s.t)}))}}
+
+/* ---------- 3. put the sections in the chosen order ---------- */
+function structure(md,a){
+ const rep={ok:false,matched:[],missing:[],dropped:[],extra:[],reordered:false,reason:""};
+ const f=a&&a.format;
+ if(!f||!f.headings||!f.headings.length){rep.reason="no layout chosen";return{md:String(md||""),ok:false,report:rep}}
+ const P=parse(md);
+ if(P.secs.length<1){rep.reason="the answer has no sections to arrange";return{md:String(md||""),ok:false,report:rep}}
+ const OPEN=/^(definition|meaning|what (it|\w+) is|what is [\w\s]+|introduction|intro|the whole structure|overview|background|about)\b/i;
+ const forbidTk=(f.forbid||[]).map(x=>({x,tk:toks(x)}));
+ const used=new Set(),slot=[];
+ /* best section for each wanted heading: the fraction of the wanted words found in it */
+ f.headings.forEach(w=>{
+  const tk=toks(w.h);let best=-1,bs=0;
+  P.secs.forEach((s,i)=>{if(used.has(i)||!tk.length)return;const hit=tk.filter(x=>s.tk.includes(x)).length;const key=tk.filter(x=>x[0]!="@");if(key.some(x=>!s.tk.includes(x)))return;
+   const exact=s.t.toLowerCase()==w.h.toLowerCase();const sc=exact?2:hit/tk.length;
+   if(sc>bs&&(exact||sc>=.5)){bs=sc;best=i}});
+  if(best<0&&OPEN.test(w.h)){const j=P.secs.findIndex((s,i)=>!used.has(i)&&OPEN.test(s.t));if(j>=0)best=j}
+  if(best>=0){used.add(best);slot.push({w,i:best})}else slot.push({w,i:-1})});
+ /* text written before the first heading belongs to the first wanted heading when that one has no section */
+ if(P.lead&&slot[0]&&slot[0].i<0){slot[0].lead=P.lead}
+ const out=[];if(P.title)out.push("# "+P.title);
+ let lastI=-1,inOrder=true;
+ slot.forEach(s=>{
+  const body=s.i>=0?P.secs[s.i].body:(s.lead||"");
+  if(s.i<0&&!s.lead){if(!s.w.o)rep.missing.push(s.w.h);return}
+  if(s.i>=0){if(s.i<lastI)inOrder=false;lastI=s.i}
+  out.push("## "+s.w.h+(body?"\n"+body:""));rep.matched.push(s.w.h)});
+ rep.reordered=!inOrder;
+ /* what is left over: headings that must not appear are dropped, the rest is kept at the end */
+ P.secs.forEach((s,i)=>{if(used.has(i))return;
+  const bad=forbidTk.some(F=>F.tk.length&&F.tk.every(x=>s.tk.includes(x)));
+  if(bad){rep.dropped.push(s.t);return}
+  if(s.body){rep.extra.push(s.t);out.push("## "+s.t+"\n"+s.body)}});
+ /* filler lines and spacing */
+ let text=out.join("\n\n").split("\n").filter(l=>!FILLER.some(r=>r.test(l))).join("\n").replace(/\n{3,}/g,"\n\n").trim();
+ /* maths and science working must be shown, not skipped */
+ if(f.id=="calculation"){const w=slot.find(s=>/working/i.test(s.w.h));if(w&&w.i>=0){const n=P.secs[w.i].body.split("\n").filter(l=>l.trim()).length;if(n<2)rep.thinWorking=true}}
+ rep.ok=rep.missing.length==0;rep.reason=rep.ok?"all required headings found":"missing: "+rep.missing.join(", ");
+ return{md:text,ok:rep.ok,report:rep}}
+
+/* the app's safe entry point */
+function applyStructure(md,a){
+ const f=a&&a.format;if(!f||!f.ids||f.followUp)return null;
+ if(!f.ids.some(id=>STRICT.includes(id)))return null;
+ if(a.offContext)return null;
+ const r=structure(md,a);
+ return r.ok&&!r.report.thinWorking?r.md:null}
+
+A.prompt=prompt;A.parse=parse;A.structure=structure;A.applyStructure=applyStructure;
+A.ALIAS=ALIAS;A.STRICT=STRICT;A.LEVEL_NOTE=LEVEL_NOTE;
+A.step7=true;A.version="1.2-steps1-7";
+if(typeof module!=="undefined"&&module.exports)module.exports=A;
+})(typeof window!=="undefined"?window:globalThis);
+</script>
+<script>
+/* ===== ACADEMIC ANSWER STRUCTURING ENGINE (AASE), part 4: step 8, diagram and illustration decision =====
+   Decides, for every question, whether ONE visual really helps the learner and which kind:
+   labelled diagram, set-up diagram, circuit diagram, flowchart, classification tree, comparison table, timeline, graph,
+   sketch map, sketch of a figure, equation line, accounting layout. A simple fact, definition, list or state question gets no visual.
+   AASE.visual(a)               the decision: {need, kind, label, how, reason, asked}
+   AASE.addVisual(md, a, v, o)  puts the app's own library diagram (::fig key) in the right place, or a "diagram to draw" line only when
+                                the learner asked for a drawing; removes decorative figures when none is needed. Nothing is invented.
+   Also in this part (the two pieces that make the new layout actually show):
+   AASE.enforce(md, a)          puts a written answer in the chosen layout and keeps it even when a section is missing (nothing is made up)
+   AASE.fromTopic(N, a, o)      builds a saved-topic answer in the chosen layout (definition, steps, uses, importance, types, parts...)
+   Rules are in the tables below (VK, GEO, CIRC, PROC, MAPQ, ASKED) so they can be edited without touching the code. */
+(function(root){
+"use strict";
+const A=root.AASE;
+if(!A||!A.step7||A.step8)return;
+
+/* ---------- rules ---------- */
+const VK={
+ labelled_diagram:{label:"labelled diagram",how:"Draw one neat labelled diagram. Label every part you name in the answer, with each label next to its part."},
+ apparatus_diagram:{label:"labelled diagram of the set-up",how:"Draw one labelled diagram of the apparatus as it is set up, with every item named."},
+ circuit_diagram:{label:"circuit diagram",how:"Draw one circuit diagram with standard symbols and every component labelled."},
+ flowchart:{label:"flowchart",how:"Show the stages as one simple flowchart in the same order as the numbered steps."},
+ classification_tree:{label:"classification tree",how:"Show the classes as one small tree, with each subclass under its class."},
+ comparison_table:{label:"comparison table",how:"Show the differences in one table: one column for each item compared and one row for each point of difference."},
+ timeline:{label:"timeline",how:"Show the events on one simple timeline with the date beside each event."},
+ graph:{label:"graph",how:"Show one graph with labelled axes, units and a scale, then say what it shows."},
+ map:{label:"sketch map",how:"Show one sketch map with a title, a key and the places named in the answer."},
+ sketch:{label:"sketch of the figure",how:"Draw a simple sketch of the figure in the question and mark the given measurements on it."},
+ equation:{label:"equation",how:"Write the balanced chemical equation on its own line."},
+ accounting_table:{label:"accounting layout",how:"Use the standard accounting layout, with date, particulars and debit and credit columns where needed."}
+};
+const DRAWN=["labelled_diagram","apparatus_diagram","circuit_diagram","flowchart","classification_tree","timeline","graph","map","sketch"];
+const GEO=/\b(triangle|triangles|circle|circles|angle|angles|polygon|rectangle|square|parallelogram|trapezium|quadrilateral|bearing|bearings|radius|diameter|chord|tangent|prism|cylinder|cone|pyramid|sphere|cuboid|cube|arc|sector|loci|locus)\b/;
+const CIRC=/\b(circuit|circuits|resistor|resistors|ammeter|voltmeter|bulb|bulbs|lamp|lamps|battery|ohm|ohms|series|parallel)\b/;
+const PROC=/\b(cycle|formed|formation|made|making|production|produced|manufacture|extraction|extracted|treatment|process|stages?|flow|works?|how is|how are)\b/;
+const MAPQ=/\b(map|maps|location|located|where is|where are|relief|climatic zones?|vegetation zones?|distribution|boundary|boundaries)\b/;
+const ASKED=/\b(draw|sketch|diagram|label|labelled|labeled|illustrate|illustration|picture|flow ?chart|timeline|plot a graph|draw a graph|sketch a graph|sketch map|table)\b/;
+const PLAIN=["define","state","list","outline","name"];
+const DRAW_SUBJECTS=["biology","agriculture","physics","chemistry","ict","art"];
+const PROC_SUBJECTS=["biology","chemistry","physics","geography","agriculture","ict","commerce","entrepreneurship"];
+
+const TOPIC_NOISE=/\b(draw|drawing|label|labelled|labeled|sketch|diagram|show|me|please|explain|describe|illustrate|with|a|an|the|of|and|on|about|picture|neat)\b/g;
+const cleanTopic=a=>{const t=String(a&&(a.subjectPhrase||a.topic)||"").toLowerCase().replace(TOPIC_NOISE," ").replace(/\s+/g," ").trim();return t||"figure"};
+
+/* ---------- 1. the decision ---------- */
+function visual(a){
+ const none=why=>({need:false,kind:"none",label:"",how:"",reason:why,asked:false});
+ if(!a||!a.format)return none("no layout chosen");
+ if(a.followUp||a.offContext)return none("follow-up or off-context question");
+ const f=a.format,q=String(a.text||a.q||"").toLowerCase(),asked=ASKED.test(q),sub=a.subject||"";
+ const ids=f.ids&&f.ids.length?f.ids:[f.id],has=id=>ids.includes(id),cmds=a.commands||[];
+ const plain=cmds.length>0&&cmds.every(c=>PLAIN.includes(c));
+ const mk=(kind,why)=>({need:true,kind,label:VK[kind].label,how:VK[kind].how,reason:why,asked});
+ /* records and equations are part of the layout, not pictures */
+ if(has("accounting_layout"))return mk("accounting_table","a standard accounting record is required");
+ if(a.calculation||has("calculation")){
+  if((sub=="mathematics"||sub=="physics")&&GEO.test(q))return mk("sketch","the calculation uses a figure, so a sketch shows the given values");
+  if(sub=="physics"&&CIRC.test(q))return mk("circuit_diagram","the calculation uses a circuit");
+  if(sub=="chemistry"&&/\b(equation|reacts?|reaction|produced|formed)\b/.test(q))return mk("equation","the working starts from a balanced equation");
+  if(asked&&GEO.test(q))return mk("sketch","the learner asked for a drawing");
+  return none("a calculation needs working, not a picture");
+ }
+ if(plain&&!asked)return none("a short direct answer needs no picture");
+ if(a.practical&&["biology","chemistry","physics"].includes(sub))return mk("apparatus_diagram","a real experiment: the set-up must be drawn and labelled");
+ if(has("differences"))return mk("comparison_table","differences are clearest side by side");
+ if(has("parts_functions")&&DRAW_SUBJECTS.includes(sub))return mk("labelled_diagram","the parts are clearer when labelled on a diagram");
+ if(has("process")&&PROC_SUBJECTS.includes(sub))return mk("flowchart","a process is clearer as stages joined by arrows");
+ if(has("steps_procedures")&&PROC_SUBJECTS.includes(sub)&&PROC.test(q))return mk("flowchart","the steps form a process");
+ if(has("classification"))return mk("classification_tree","classes and subclasses form a tree");
+ if(has("chronology")||(sub=="history"&&has("steps_procedures")))return mk("timeline","events are clearer in date order");
+ if(has("graph"))return mk("graph","the question is about a graph");
+ if(has("map_work")||(sub=="geography"&&MAPQ.test(q)&&!plain))return mk("map","the question is about places");
+ if(has("geometric_construction"))return mk("sketch","a construction is drawn");
+ if(asked&&sub){
+  if(sub=="geography")return mk("map","the learner asked for a drawing");
+  if(sub=="history")return mk("timeline","the learner asked for a drawing");
+  if(sub=="physics"&&CIRC.test(q))return mk("circuit_diagram","the learner asked for a drawing");
+  if(DRAW_SUBJECTS.includes(sub)||sub=="mathematics")return mk(sub=="mathematics"?"sketch":"labelled_diagram","the learner asked for a drawing")}
+ return none("words are enough for this question");
+}
+
+/* ---------- 2. tell the answer writer ---------- */
+function promptVisual(v,a){
+ if(!v)return"";
+ if(!v.need)return"VISUAL: add no diagram, figure or table to this answer. Words are enough ("+v.reason+").";
+ let t="VISUAL: this answer needs one "+v.label+" ("+v.reason+"). "+v.how+" Use at most one visual, explain it in a sentence, and never add one for decoration.";
+ if(DRAWN.includes(v.kind))t+=" Put it on its own line as: ::diagram Draw and label the "+cleanTopic(a)+" (say what to draw and which parts to label). Do not draw SVG.";
+ if(a&&/^P[1-3]$/.test(a.cls||""))t+=" Keep it very simple: no more than five labels.";
+ return t}
+
+/* ---------- 3. put a library diagram in the right place ---------- */
+function addVisual(md,a,v,o){
+ o=o||{};md=String(md||"");
+ const has=/(^|\n)::(fig|diagram) |<svg|```svg/.test(md);
+ if(!v)return md;
+ if(!v.need){
+  if(v.asked||!has)return md;
+  return md.split("\n").filter(l=>!/^::(fig \S+|diagram .*)$/.test(l.trim())).join("\n").replace(/\n{3,}/g,"\n\n")}
+ if(has||!DRAWN.includes(v.kind))return md;
+ let line=null;
+ const L=o.lib?o.lib(String(a&&(a.text||a.q)||""),v):null;
+ if(L&&L.key)line="::fig "+L.key;
+ else if(v.asked){const topic=cleanTopic(a);line="::diagram Draw and label the "+topic+". Label every part named in the answer."}
+ if(!line)return md;
+ const hs=[];md.replace(/\n## /g,(m,i)=>{hs.push(i);return m});
+ if(hs.length>=2)return md.slice(0,hs[1])+"\n\n"+line+"\n"+md.slice(hs[1]);
+ return md.replace(/\s+$/,"")+"\n\n"+line}
+
+/* ---------- 4. keep the chosen layout (no falling back to the old layout) ---------- */
+function enforce(md,a){
+ const f=a&&a.format;
+ if(!f||!f.headings||!f.headings.length||f.followUp||a.offContext)return null;
+ const r=A.structure(md,a);
+ if(!r.report.matched.length)return null;
+ return r.md}
+
+/* ---------- 5. saved-topic answers in the chosen layout ---------- */
+const SAFE=["definition","uses_applications","importance","characteristics","steps_procedures","process","parts_functions"];
+const HK=[
+ [/example|illustration/i,"ex"],
+ [/\buse|application|matters|importan|significan|useful/i,"uses"],
+ [/step|stage|procedure|process|method|how it works|explanation|characteristic|feature|propert|part|function|key/i,"list"],
+ [/definition|meaning|what it is|introduction|whole structure|overview|background|what is/i,"def"],
+ [/summary|in short|remember/i,"simple"]
+];
+const kindOf=h=>{for(const[r,k]of HK)if(r.test(h))return k;return null};
+function fromTopic(N,a,o){
+ o=o||{};const f=a&&a.format;
+ if(!N||!N.n||!f||!f.headings||!f.headings.length||f.followUp||a.offContext)return null;
+ if(a.practical||a.calculation||!SAFE.includes(f.id))return null;
+ const rank=o.rank==null?3:Math.max(0,Math.min(3,o.rank)),cap=[3,5,8,99][rank];
+ const bl=x=>(x||[]).slice(0,cap).map(s=>"- "+s);
+ const src={
+  def:()=>{const r=[N.d||N.simple].filter(Boolean);
+   if(f.id=="definition"){if(N.simple&&N.simple!==N.d)r.push("*In simple words:* "+N.simple);const e=bl(N.ex);if(e.length)r.push("**Examples**",...e)}
+   return r},
+  list:()=>bl(N.pts),
+  uses:()=>bl(N.uses),
+  ex:()=>bl(N.ex),
+  simple:()=>[N.simple].filter(Boolean)};
+ const used=new Set(),out=["# "+N.n];if(N.cl)out.push(N.cl);
+ for(const w of f.headings){
+  const k=kindOf(w.h),lines=k&&!used.has(k)?src[k]():[];
+  if(!lines.length){if(w.o)continue;return null}
+  used.add(k);out.push("## "+w.h+"\n"+lines.join("\n"))}
+ return out.join("\n\n")}
+
+/* ---------- wrap the earlier steps so they carry the decision ---------- */
+const prompt0=A.prompt;
+A.prompt=function(a){
+ const t=prompt0(a);if(!t)return t;
+ let v=null;try{v=visual(a)}catch(e){}
+ return t.replace(/^Visuals that may help[^\n]*\n?/m,"").replace(/\s+$/,"")+(v?"\n"+promptVisual(v,a):"")};
+const brief0=A.brief;
+A.brief=function(a){
+ const b=brief0(a);if(!b)return b;
+ try{const v=visual(a);b.visual={need:v.need,kind:v.kind,reason:v.reason}}catch(e){}
+ return b};
+
+A.visual=visual;A.promptVisual=promptVisual;A.addVisual=addVisual;A.enforce=enforce;A.fromTopic=fromTopic;
+A.VISUALS=VK;A.step8=true;A.version="1.3-steps1-8";
+if(typeof module!=="undefined"&&module.exports)module.exports=A;
+})(typeof window!=="undefined"?window:globalThis);
+
+</script>
+<script>
 const AVATAR="data:image/webp;base64,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";
 const $=id=>document.getElementById(id);let ei=null,q="";const sel=new Set();
 const BOT=["haha nice","what, really?","let’s do it","send pics","on my way","Okay","Tell me more","Sounds good"];
@@ -2395,7 +3202,8 @@ function dgFig(svg,cap){return svg?`<figure class="dg">${svg}${cap?`<figcaption>
 function dgHtml(k){if(k=="@wait")return'<div class="dgw">Drawing the diagram…</div>';
  if(k[0]=="@"){const s=dgClean(DGS[+k.slice(1)]||""),m=s.match(/<title[^>]*>([^<]*)<\/title>/i);return dgFig(s,m?m[1]:"Diagram")}
  const d=DG[k];return d?dgFig(d.s(),"Diagram: "+d.t):""}
-function dgAuto(m){try{if(!m||m.stream||m.note||m.err||m.lim||m.quiz||!m.t||/::fig |<svg|```svg/.test(m.t))return"";
+function libFor(q){for(const k in DG)if(DG[k].re.test(q))return{key:k,title:DG[k].t};return null}
+function dgAuto(m){try{if(m&&m.vis&&m.vis.need===false)return"";if(!m||m.stream||m.note||m.err||m.lim||m.quiz||!m.t||/::fig |<svg|```svg/.test(m.t))return"";
  const q=String(m.q||""),hd=(String(m.t).match(/^#\s*(.+)$/m)||[])[1]||"",tp=String(m.tq||"");
  for(const pass of[q,hd,tp])if(pass)for(const k in DG)if(DG[k].re.test(pass))return dgHtml(k)}catch(e){}return""}
 function md(t){if(MXS.length>420||WKS.length>420){MXS.length=0;MXM.clear();WKS.length=0;WKM.clear()}t=dgPre(t);t=wkPre(t);t=colPre(t);t=mxPre(t);t=mdPrep(t);t=esc(t);let o="",m=null,tb=[],li=false,cm=false;
@@ -4432,7 +5240,7 @@ function part(T,f,H){
  if(f=="simple"&&T.s)return["In simple words",T.s];
  return[null,T.d]}
 let VN=Math.floor(Math.random()*1000);
-function tiered(q,T0){const T=T0||topicOf(q);if(!T||!T.d)return null;return{t:modelText(normT(T)),fmt:1}}
+function tiered(q,T0){const T=T0||topicOf(q);if(!T||!T.d)return null;const N=normT(T);let s=null;try{s=AASE.fromTopic(N,window.AASE_LAST,{rank:PRANK[planName()]})}catch(e){}return s?{t:s,fmt:1,aase:1}:{t:modelText(N),fmt:1}}
 function tieredOld(q,T0){const T=T0||topicOf(q);if(!T||!T.d)return null;
  const pl=planName(),I=qIntent(q),H=heads(T),v=VN++,pk=a=>a[v%a.length],L=lvKey(),onlyReq=(I.only||I.defw)&&!I.full,
   narrow=pl=="Free"||pl=="Basic"||onlyReq,sec=(h,b)=>b?"\n## "+h+"\n"+b:"";
@@ -4520,7 +5328,7 @@ async function crossLevel(q){
  const sj=D.sub=="General"?[null]:relSubs(D.sub);
  const rs=await Promise.all(order.flatMap(l=>sj.map(sx=>sbCall("rpc/find_answer",{method:"POST",body:JSON.stringify({p_question:String(q).slice(0,300),p_level:l,p_subject:sx,p_mode:"answer",p_threshold:0.6})},3000).then(r=>Array.isArray(r)&&r[0]&&rowOK(r[0])?{r:r[0],l}:null).catch(()=>null))));
  const h=rs.find(x=>x);if(!h)return null;
- return{t:modelFromMd(/^\s*#/.test(h.r.body_md)?h.r.body_md:"# "+h.r.title+"\n"+h.r.body_md),aid:h.r.answer_id,lv:h.l,fmt:1}}
+ const md1=/^\s*#/.test(h.r.body_md)?h.r.body_md:"# "+h.r.title+"\n"+h.r.body_md;let st1=null;try{st1=AASE.enforce(md1,window.AASE_LAST)}catch(e){}return{t:st1||modelFromMd(md1),aid:h.r.answer_id,lv:h.l,fmt:1,aase:st1?1:undefined}}
 /* owner-written answers from Supabase (find_answer), chosen by plan */
 const MODEMAP={"Explain simpler":"simpler","Give an example":"example","More detail":"detail"};
 async function dbAnswer(q,mode){
@@ -4534,7 +5342,7 @@ async function dbAnswer(q,mode){
  else if(narrow){r=await get("answer");if(r)t=txt(r)}
  else if(pl=="Standard"){const[a,s]=await Promise.all([get("answer"),get("simpler")]);r=a||s;if(a&&s)t=txt(a)+"\n## In simple words\n"+s.body_md;else if(r)t=txt(r)}
  else{const[d,a]=await Promise.all([get("detail"),get("answer")]);r=d||a;if(r)t=txt(r)}
- return r?{t:mode?t:modelFromMd(t),aid:r.answer_id,fmt:mode?0:1}:null}
+ let st2=null;if(r&&!mode){try{st2=AASE.enforce(t,window.AASE_LAST)}catch(e){}}return r?{t:mode?t:(st2||modelFromMd(t)),aid:r.answer_id,fmt:mode?0:1,aase:st2?1:undefined}:null}
 /* NEW QUESTIONS: ask the ai_answer Edge Function. Gemini writes the answer once and it is saved as a draft in Supabase.
  The reply is built by tiered() so it follows the learner's plan; draft answers get the "AI generated, not yet checked" label. */
 const AIU=SBU.replace("/rest/v1/","/functions/v1/")+"ai_answer_v3",escRex=x=>x.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
@@ -4544,19 +5352,20 @@ async function aiAnswer(q,FUx,loose){
  AIWHY="";const c=new AbortController(),tm=setTimeout(()=>c.abort(),loose?25000:58000);
  try{
   const sub=loose==2?"General":(D.sub=="General"?(detectSub(q)||"General"):D.sub);
-  const bd=JSON.stringify({full_question:fullQ(q),answer_spec:"v3",no_svg:true,question:String(q).slice(0,300),level:D.lvl,class:loose==2?"":String(D.cls||"").replace(/^Primary /,"P").replace(/^Senior /,"S"),subject:sub,topics:curHint(q),plan:planName(),curriculum:"Uganda NCDC",strict_subject:!loose,retry:loose?true:undefined,brief:!wantFull()||modelName()=="malumalu",...svMe(),blueprint:bpCtx(q),format_rules:LESSON_RULES,follow:FUx&&!FUx.local?{kind:FUx.kind,topic:FUx.topic,step:FUx.step||0,instruction:FUx.hint||"",previous:lastAnsText()}:undefined});
+  const bd=JSON.stringify({full_question:fullQ(q),answer_spec:"v3",no_svg:true,question:String(q).slice(0,300),level:D.lvl,class:loose==2?"":String(D.cls||"").replace(/^Primary /,"P").replace(/^Senior /,"S"),subject:sub,topics:curHint(q),plan:planName(),curriculum:"Uganda NCDC",strict_subject:!loose,retry:loose?true:undefined,brief:!wantFull()||modelName()=="malumalu",...svMe(),blueprint:bpCtx(q),format_rules:(()=>{try{return AASE.prompt(window.AASE_LAST)||LESSON_RULES}catch(e){return LESSON_RULES}})(),academic:(()=>{try{return AASE.brief(window.AASE_LAST)}catch(e){return undefined}})(),follow:FUx&&!FUx.local?{kind:FUx.kind,topic:FUx.topic,step:FUx.step||0,instruction:FUx.hint||"",previous:lastAnsText()}:undefined});
   const hd={apikey:SBK,"Content-Type":"application/json"};
   let r=await fetch(AIU,{method:"POST",signal:c.signal,headers:hd,body:bd});
   if(!r.ok&&(r.status==404||r.status>=500)){try{const r2=await fetch(AIU1,{method:"POST",signal:c.signal,headers:hd,body:bd});if(r2.ok)r=r2}catch(e){}}
   if(!r.ok){AIWHY="http "+r.status;return null}
   let j;try{j=await r.json()}catch(e){AIWHY="bad reply";return null}
   if(j.status=="busy")return{busy:1};
-  if(j.status=="found"&&j.kind=="answer"&&j.answer&&j.answer.body_md){const a=j.answer;return{t:modelFromMd(/^\s*#/.test(a.body_md)?a.body_md:"# "+a.title+"\n"+a.body_md),aid:a.answer_id,fmt:1,lv:a.level||null}}
+  if(j.status=="found"&&j.kind=="answer"&&j.answer&&j.answer.body_md){const a=j.answer,md0=/^\s*#/.test(a.body_md)?a.body_md:"# "+a.title+"\n"+a.body_md;let st=null;try{if(!FUx)st=AASE.enforce(md0,window.AASE_LAST)}catch(e){}return{t:st||modelFromMd(md0),aid:a.answer_id,fmt:1,aase:st?1:undefined,lv:a.level||null}}
   const t=(j.status=="created"||(j.status=="found"&&j.kind=="topic"))?j.topic:null;
   if(!t||!t.name||!t.definition){AIWHY="no answer: "+(j.status||"empty");return null}
   const dr=j.status=="created"||j.draft===true;
   const T={n:String(t.name),re:new RegExp(escRe(String(q).trim().toLowerCase())),d:t.definition,h:t.steps||"",w:t.uses||"",s:t.simple||"",e:t.examples||"",m:t.more||"",q:Array.isArray(t.quiz)?t.quiz:[],a:t.label_steps||"How to work it out",b:t.label_uses||"Where it is used",nd:0,S:[sub],L:[D.lvl],ai:dr?1:0,tid:t.id||null,sl:t.syllabus_level||null,cls:t.class_label||null};
-  const f=tiered(q,T);if(!f){AIWHY="no answer: format";return null}
+  let f=null;if(!FUx&&t.layout_md){try{const A0=window.AASE_LAST,same=!t.layout_id||(A0&&A0.format&&A0.format.id===t.layout_id),st=same?AASE.enforce(String(t.layout_md),A0):null;if(st)f={t:st,fmt:1,aase:1}}catch(e){}}
+   if(!f)f=tiered(q,T);if(!f){AIWHY="no answer: format";return null}
   /* keep it for this session so "explain simpler", "give an example" and "quiz me" work on it */
   if(!FUx)TOP.push(T);const ax=TOP.filter(x=>x.ai!=null&&x.re&&x.db==null);if(ax.length>30)TOP.splice(TOP.indexOf(ax[0]),1);
   if(dr)f.ai=1;if(T.tid)f.tid=T.tid;if(T.sl){f.lv=T.sl;f.cls=T.cls}
@@ -6116,6 +6925,7 @@ function askCore(q,mode,I){
   {const xn=expandNote(q0);if(xn)gn=xn}}
  if(!mode&&!(FU&&FU.local)){try{const rw=topicAskRewrite(q);if(rw)q=rw}catch(e){}}
  window.ASKQ_RAW=String(q);
+ try{window.AASE_LAST=AASE.analyse(String(q),{sub:D.sub,level:D.lvl,cls:D.cls,cur:typeof CUR!="undefined"?CUR:null,subList:subsList(),followUp:!!FU})}catch(e){window.AASE_LAST=null}
  if(!mode&&!(FU&&FU.part)){const G=planGate(q);if(G){bareG=!!G.bare;
   const nt=(t,up)=>{D.msgs.push({s:"i",note:1,up:up?1:0,t,ts:Date.now()});save();render()};
   if(capped())return limitMsg();
@@ -6154,14 +6964,15 @@ function askCore(q,mode,I){
    if(a2&&a2.t)f=a2;else{const w=AIWHY;logUn(q);stopS();
     return err(w=="net"||w=="offline"||!navigator.onLine?"No internet connection. Please connect to the internet and tap Retry.":"The answer is taking longer than expected. Please tap Retry."+(isOwner()?" ("+(w||"unknown")+")":""))}}
   if(f.un&&!mode&&!FU)logUn(q);
-  if(f.fmt&&!f.un&&!mode&&f.t!==window.DIRECT_T){const st=await styleAnswer(f.t,q);if(stream==null||tok!=AN)return;if(st){f.sty={t:f.t,k:modelName(),L:lvKey(),pl:planName()};f.t=st.md+(modelName()=="examiner"?"\n\n*Written by the Ask Tr. David Academic Intelligence System in the UNEB exam format. It is not an official UNEB exam.*":"")}}
-  if(f&&f.t&&!f.diff&&!f.exl&&!f.quiz&&!f.qz&&!f.w&&!f.un){f.t=lessonClean(f.t);if(!mode){try{f.t=await workOutEx(f.t)}catch(e){}if(stream==null||tok!=AN)return}}
+  if(f.fmt&&!f.aase&&!f.un&&!mode&&f.t!==window.DIRECT_T){const st=await styleAnswer(f.t,q);if(stream==null||tok!=AN)return;if(st){f.sty={t:f.t,k:modelName(),L:lvKey(),pl:planName()};f.t=st.md+(modelName()=="examiner"?"\n\n*Written by the Ask Tr. David Academic Intelligence System in the UNEB exam format. It is not an official UNEB exam.*":"")}}
+  if(f&&f.t&&!f.aase&&!f.diff&&!f.exl&&!f.quiz&&!f.qz&&!f.w&&!f.un){f.t=lessonClean(f.t);if(!mode){try{f.t=await workOutEx(f.t)}catch(e){}if(stream==null||tok!=AN)return}}
   if(!f.part&&!f.ai&&!f.un){const Tm=topicOf(q);if(Tm&&Tm.ai)f.ai=1}
   if(!f.part&&f.ai&&!f.tid){const Tm=topicOf(q);if(Tm&&Tm.tid)f.tid=Tm.tid}
   if(!f.part&&!f.lv&&!f.un){const Tm=topicOf(q);if(Tm&&Tm.sl){f.lv=Tm.sl;f.cls=Tm.cls}}
+  try{if(f&&f.t&&!f.part&&!f.un&&!f.w&&!f.quiz&&!f.qz&&!f.diff&&!f.exl&&!FU&&!mode){const V=AASE.visual(window.AASE_LAST);f.vis={need:V.need,kind:V.kind};f.t=AASE.addVisual(f.t,window.AASE_LAST,V,{lib:libFor})}}catch(e){}
   let chk=0;if(FU&&FU.chkk&&f&&f.t&&!f.un&&!f.w&&!f.quiz&&!f.qz&&!FU.local){f.t+="\n\n"+FU.chkk;chk=1}
   if(!mode&&!FU&&!f.un&&!f.w&&!f.diff&&!f.exl&&f.t&&!/^\s*\*\*Senior \d/.test(f.t)){const hd=curHeader(q,f.filed);if(hd)f.t=hd+f.t.replace(/^#[^\n]*\n(?:(?:\*\*)?(?:Topic|Class):[^\n]*\n)*/,"")}
-  const m={s:"i",t:"",ts:Date.now(),q,mode,stream:1,fk:FU&&FU.kind||undefined,chk:chk||undefined,tq:CTX&&CTX.tq||undefined,tsub:CTX&&(CTX.sub||D.sub)||undefined},w=f.t.split(/(?<=\s)/);if(f.quiz)m.quiz=f.quiz;if(f.qz)m.qz=f.qz;if(f.w)m.w=f.w;if(f.aid)m.aid=f.aid;if(f.sty)m.sty=f.sty;if(f.ai)m.ai=1;if(f.tid)m.tid=f.tid;if(f.fmt){const M=MODELS[modelName()];m.mdl=M.n+" "+M.v}{const ln=levelNote(f.lv,f.cls);if(ln)m.lvn=ln}
+  const m={s:"i",t:"",ts:Date.now(),q,mode,stream:1,fk:FU&&FU.kind||undefined,chk:chk||undefined,tq:CTX&&CTX.tq||undefined,tsub:CTX&&(CTX.sub||D.sub)||undefined},w=f.t.split(/(?<=\s)/);if(f.quiz)m.quiz=f.quiz;if(f.qz)m.qz=f.qz;if(f.w)m.w=f.w;if(f.aid)m.aid=f.aid;if(f.vis)m.vis=f.vis;if(f.sty)m.sty=f.sty;if(f.ai)m.ai=1;if(f.tid)m.tid=f.tid;if(f.fmt){const M=MODELS[modelName()];m.mdl=M.n+" "+M.v}{const ln=levelNote(f.lv,f.cls);if(ln)m.lvn=ln}
   thinkOff();typeOn();D.msgs.push(m);sm=m;let k=0;if(!(FU&&FU.local))logAct("ask",m,f.t);stream=setInterval(()=>{m.t+=w[k++]||"";if(k>=w.length){stopS();if(gn){D.msgs.push({s:"i",note:1,up:1,t:gn,ts:Date.now()});save();render()}if(capped())limitMsg()}else render()},35)},600)}
 $("msgs").addEventListener("click",e=>{
 
@@ -6841,7 +7652,7 @@ async function hoCopyFile(n){const j=await admCall("admin_file_get",{p_name:n});
  Set done to 1 on finished items, add new items, add a line to log, set updated to today.
  Never mark an item done unless it was built and tested. */
 const HANDOFF={
- "updated": "2026-11-02",
+ "updated": "2026-11-08",
  "about": [
   [
    "What this is",
@@ -7110,9 +7921,62 @@ const HANDOFF={
      0
     ]
    ]
-  ]
+   ],
+  [
+   "Academic Answer Structuring Engine (two PDF briefs from the owner)",
+   [
+    [
+     "Step 1: Subject identification (scenario words decide shared words such as cell; the chat subject is kept unless another is clearly stronger; fixed on 2026-11-08 so everyday questions about living things such as why do plants need light stay in Biology when the chat is set to Science)",
+     1
+    ],
+    [
+     "Step 2: Class and topic recognition (class from the question or the learner profile, topic from the Uganda curriculum list)",
+     1
+    ],
+    [
+     "Step 3: Question instruction detection (define, state, list, outline, distinguish, compare, describe, explain, account for, discuss, analyse, evaluate, justify, calculate, illustrate)",
+     1
+    ],
+    [
+     "Step 4: Question type classification (differences, similarities, advantages and disadvantages, causes and effects, classification, types, steps, process, parts and functions, problems and solutions, characteristics, importance, uses, definition, accounting layouts, essays, comprehension and more); fixes common spelling and speech slips",
+     1
+    ],
+    [
+     "Step 5: Theory, practical, calculation and layout detection (a theory question never becomes a practical, a real experiment is never missed)",
+     1
+    ],
+    [
+     "Steps 1 to 5 run on every question inside askCore and send a short summary (field named academic) to the ai_answer function with the question. From step 6 the summary also carries the chosen format (format id, ordered headings, style, what must not appear, rules). From step 7 the same layout is also sent as plain instructions in format_rules (replacing the old lesson-style text for that question), and a new full answer is arranged into that layout when it comes back. Saved answers and the topic path are not changed.",
+     1
+    ],
+    [
+     "Step 6: Academic format selection (choose the layout from the question type and subject)",
+     1
+    ],
+    [
+     "Step 7: Answer structuring (put the answer in that order, concise and learner friendly, maths working shown in full)",
+     1
+    ],
+    [
+     "Step 8: Diagram and illustration decision (one visual only when it truly helps: labelled diagram, set-up, circuit, flowchart, classification tree, comparison table, timeline, graph, sketch map, sketch of a figure; none for a simple fact, definition or list)",
+     1
+    ],
+    [
+     "Step 9: Curriculum and level adaptation",
+     0
+    ],
+    [
+     "Step 10: Final answer validation (and updating the ai_answer function and model prompts to follow the chosen format)",
+     0
+    ]
+   ]
+ ]
  ],
  "log": [
+  ["2026-11-08","Academic Answer Structuring Engine, step 8 built (diagram and illustration decision) with three fixes from the step 6 and 7 follow-up list. Step 8: AASE.visual decides for each question whether ONE visual helps and which kind (labelled diagram for parts and functions, set-up diagram for a real experiment, circuit diagram, flowchart for a process, classification tree, comparison table for differences, timeline for history, graph, sketch map, sketch for a geometry calculation, equation line, accounting layout). Definitions, state and list questions and plain calculations get none. The decision is sent to Gemini inside format_rules and in the academic summary; the app's own library diagram is put in the right place; a diagram to draw line is added only when the learner asked for a drawing; decorative figures are removed when none is needed. Fix 1, wrong subject: when the chat is set to Science, why do plants need light now stays Biology (plant, animal, seed, leaf, breathe, sweat, grow and similar words now count for Biology, and shared words such as light, heat, energy and sound no longer decide the subject on a question about living things; everyday rust, burn, hot and melt words were also added for Chemistry and Physics). Tested on 32 mixed questions, none wrong. Fix 2, the old layout no longer wins: a new answer from Gemini AND every stored answer (find_answer and owner-written answers) is put in the chosen layout even if one section is missing (nothing is made up), for every plan and every model, and the style rewrite and the lesson clean-up no longer undo it. Opening headings such as What it is, Introduction and Definition now match each other. Fix 3, saved topics: for a definition, uses, importance, characteristics, steps, process or parts and functions question, the saved topic is arranged under the chosen headings, with detail following the plan (Free 3 points, Basic 5, Standard 8, Premium all). Layouts a saved topic cannot fill honestly (differences, causes and effects, advantages and disadvantages, calculations, practicals) keep the old layout. The ai_answer_v3 function was updated to version t06-v3.1 (file ai_answer_v3_index.ts, deployed by the owner): it reads format_rules and academic and returns a layout_md field written under the chosen headings, which the app uses when the layout matches. Written and tested with scripts only; not yet opened in a browser or on a phone."],
+  ["2026-11-08","Academic Answer Structuring Engine, step 7 built (answer structuring): AASE.prompt turns the chosen layout into clear instructions for Gemini (exact headings in order, headings that must not appear, rules, wording for the learner's class, no filler, numbered steps, never skip working, never invent facts) and it is sent in format_rules instead of the old lesson-style text. AASE.structure reads the answer that comes back, matches its sections to the chosen headings (so Working matches Solution, Method matches Procedure), puts them in the chosen order, drops headings that must not appear (for example Procedure in a theory question), removes filler lines and reports what is missing. Nothing is invented: if a required heading is missing, or maths working is only one line, the answer is left as it was and the app's normal layout is used. The restructured answer is used only for a new full answer (not a follow-up), only when the plan shows full answers, and not for a plain definition or general explanation, which keep the teacher style. Saved answers and the topic path are unchanged. Step 6 also now says Final answer, with the unit given by a rule. Steps 8 to 10 are next."],
+  ["2026-11-08","Academic Answer Structuring Engine, step 6 built (academic format selection): from the question type, subject and whether it is theory, practical, calculation or a standard record, the engine now chooses the layout: format, ordered headings (optional ones marked), answer style (points, explained, steps or essay), what must not appear (for example practical headings on a theory question) and the rules to follow. Differences list A then B then the differences; similarities list only shared points; causes come before effects; maths and science calculations get given, required, formula, substitution, working, final answer; real experiments get aim, apparatus, procedure, observations, results, conclusion; accounting records get a standard layout; several asks in one question are combined in the order asked. All layouts are tables in AASE.FORMATS, CALC, PRACTICAL, THEORY and LAYOUTS so they can be edited without touching the code. The choice is sent to ai_answer inside the academic field. Answers are not reformatted yet; steps 7 to 10 are next. Three small fixes in steps 4 and 5 went with it: how can soil erosion be controlled and solutions of are now problems and solutions, and an experiment to show that something is no longer taken for a maths proof."],
+  ["2026-11-08","Academic Answer Structuring Engine, steps 1 to 5 built (recognition only): subject, class and topic, command words, question type, theory or practical or calculation. It runs on every question and sends a short summary to ai_answer in the field academic. Answers are not reformatted yet; steps 6 to 10 are next."],
   ["2026-11-02","Answer rating block reworked: Like shows thanks then the block disappears; Unlike shows a sorry message with Report and Ignore; Report opens the Contact Tr. David chat as a complaint, Ignore removes the block."],
   [
    "2026-10-30",

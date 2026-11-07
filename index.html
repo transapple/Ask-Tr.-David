@@ -309,7 +309,7 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 #annrow{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px;padding-top:10px;border-top:1px solid var(--line)}
 #annrow button{border-radius:8px;font:600 12.5px inherit;padding:6px 12px;cursor:pointer;line-height:1.2}
 #annr{border:0;background:var(--green);color:#fff}#annx{border:1px solid var(--line);background:none;color:var(--text)}
-#jump{position:fixed;right:14px;bottom:calc(84px + env(safe-area-inset-bottom,0px));width:42px;height:42px;border-radius:50%;border:0;background:var(--sheet,#fff);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.3);display:none;place-items:center;z-index:5;cursor:pointer}
+#jump{position:fixed;right:14px;bottom:calc(87px + env(safe-area-inset-bottom,0px));width:42px;height:42px;border-radius:50%;border:0;background:var(--sheet,#fff);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.3);display:none;place-items:center;z-index:5;cursor:pointer}
 #auth{position:fixed;inset:0;z-index:30;background:var(--bg);color:var(--text);overflow-y:auto;display:block}.ab{max-width:420px;margin:0 auto;padding-bottom:40px}
 .fw{padding:6px 18px}.fw label{font-size:13px;color:var(--sub);display:flex;justify-content:space-between;margin-bottom:3px}.fw .fld{width:100%}.hn{font-size:12px;min-height:16px;color:var(--sub);white-space:pre-wrap;margin-top:3px}.hn.e{color:#e03131}.hn.g{color:var(--green)}.hn .ok{color:var(--green)}.hn .no{color:var(--sub)}.hn .lk{margin:4px 4px 0 0}
 .fe{padding:6px 18px;font-size:14px;white-space:pre-wrap}.btn{display:block;margin:10px 18px;width:calc(100% - 36px);padding:13px;border:0;border-radius:24px;background:var(--green);color:#fff;font:inherit;font-weight:600;cursor:pointer}.btn:disabled{opacity:.6}.pcard{text-align:center;padding:22px 18px 12px}.pav{width:72px;height:72px;border-radius:50%;background:var(--green);color:#fff;font-size:30px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 10px}.pcn{font-size:18px;font-weight:700}.pcu{font-size:13px;color:var(--sub);margin-top:2px}.pbn{margin:14px 18px 4px;padding:13px 14px;border-radius:0;border-left-width:6px;background:rgba(255,159,10,.16);border:1px solid rgba(255,159,10,.45);line-height:1.4;font-weight:600}.pbn.ok{background:rgba(0,168,132,.12);border-color:rgba(0,168,132,.4)}
@@ -844,7 +844,7 @@ nav{display:flex;align-items:center;gap:12px}nav button{width:40px;height:40px;b
 #ap #annrow button{border-radius:8px;font:600 12.5px inherit;padding:6px 12px;cursor:pointer;line-height:1.2}
 #ap #annr{border:0;background:var(--green);color:#fff}
 #ap #annx{border:1px solid var(--line);background:none;color:var(--text)}
-#ap #jump{position:fixed;right:14px;bottom:calc(84px + env(safe-area-inset-bottom,0px));width:42px;height:42px;border-radius:50%;border:0;background:var(--sheet,#fff);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.3);display:none;place-items:center;z-index:5;cursor:pointer}
+#ap #jump{position:fixed;right:14px;bottom:calc(87px + env(safe-area-inset-bottom,0px));width:42px;height:42px;border-radius:50%;border:0;background:var(--sheet,#fff);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.3);display:none;place-items:center;z-index:5;cursor:pointer}
 #ap #auth{position:fixed;inset:0;z-index:30;background:var(--bg);color:var(--text);overflow-y:auto;display:block}
 #ap .ab{max-width:420px;margin:0 auto;padding-bottom:40px}
 #ap .fw{padding:6px 18px}
@@ -1267,6 +1267,9 @@ function applyTheme(){const r=document.documentElement;if(D.theme)r.dataset.them
 function hl(t){t=esc(t);if(!q)return t;const e=esc(q).replace(/[.*+?^${}()|[\]\\]/g,"\\$&");return t.replace(new RegExp(e,"gi"),x=>"<mark>"+x+"</mark>")}
 /* scroll rules: the chat only follows the typing answer while the learner is at (or near) the bottom. Scrolling up to read stops the follow, and nothing is pulled back down. */
 const RS={cur:null,n:-1,anc:null};
+let FOLLOW=true,FSM=null;
+["touchstart","wheel","mousedown","keydown"].forEach(ev=>document.addEventListener(ev,e=>{try{if(sm&&sm.stream&&e.target&&e.target.closest&&e.target.closest("#msgs"))FOLLOW=false}catch(x){}},{passive:true,capture:true}));
+document.addEventListener("click",e=>{try{if(sm&&sm.stream&&e.target.closest&&e.target.closest("#jump"))FOLLOW=true}catch(x){}},true);
 const nearBot=m=>m.scrollHeight-m.scrollTop-m.clientHeight<150;
 /* when a question is sent, that question is brought up near the top of the screen and the answer fills in below it. The blank space under it keeps shrinking as the answer grows. */
 function ancFix(M){let sp=M.querySelector("#aspc");if(RS.anc==null){if(sp)sp.remove();return}
@@ -1277,14 +1280,15 @@ function ancTop(M){const a=M.querySelector(':scope > [data-i="'+RS.anc+'"]');if(
 function render(){
  try{updPlan()}catch(e){}
  const M0=$("msgs"),near0=nearBot(M0),prev0=M0.scrollTop;
+ if(sm&&sm.stream){if(FSM!==sm){FSM=sm;FOLLOW=true}if(FOLLOW)RS.anc=null}
  /* while an answer is typing, only that one bubble is refreshed (the rest of the chat is not rebuilt, so touch scrolling is not interrupted) */
  if(sm&&sm.stream&&!q&&RS.cur===D.cur&&RS.n===D.msgs.length){
   const i=D.msgs.indexOf(sm),el=i>=0&&M0.querySelector(':scope > [data-i="'+i+'"]');
   if(el){const tp=document.createElement("template");try{tp.innerHTML=bub(sm,i,i==D.msgs.map(x=>x.s).lastIndexOf("i"))}catch(e){tp.innerHTML=""}
-   if(tp.content.children.length==1){el.replaceWith(tp.content.firstElementChild);if(RS.anc!=null){ancFix(M0);M0.scrollTop=prev0}else if(near0)M0.scrollTop=M0.scrollHeight;else M0.scrollTop=prev0;return}}}
+   if(tp.content.children.length==1){el.replaceWith(tp.content.firstElementChild);if(FOLLOW){ancFix(M0);M0.scrollTop=M0.scrollHeight}else if(RS.anc!=null){ancFix(M0);M0.scrollTop=prev0}else M0.scrollTop=prev0;return}}}
  const lastM=D.msgs[D.msgs.length-1],grew=RS.n>=0&&D.msgs.length>RS.n;let newAnc=false;
  if(RS.cur!==D.cur)RS.anc=null;else if(grew&&lastM&&lastM.s=="o"){RS.anc=D.msgs.length-1;newAnc=true}
- const goBottom=RS.anc==null&&(RS.cur!==D.cur||grew||RS.n<0||near0);
+ const goBottom=(RS.anc==null&&(RS.cur!==D.cur||grew||RS.n<0||near0))||!!(FOLLOW&&sm&&sm.stream);
  $("nm").textContent=D.name;if(!$("av").firstElementChild)$("av").innerHTML='<img src="'+AVATAR+'" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block">';let h="",last="",n=0;const lb=D.msgs.map(x=>x.s).lastIndexOf("i");
  D.msgs.forEach((m,i)=>{if(q&&!m.t.toLowerCase().includes(q))return;n++;const d=dl(m.ts);if(d!=last){h+=`<div class="day">${d}</div>`;last=d}
  if(m.s=="i"){h+=bub(m,i,i==lb);return}
@@ -1297,7 +1301,12 @@ function send(){
  if(ei!=null){const m=D.msgs[ei];if(m){m.t=v;m.ed=1;m.st=2;D.msgs.splice(ei+1);stopEdit();save();render();ask(v);return}stopEdit();return}
  const m={s:"o",t:v,ts:Date.now(),st:0};D.msgs.push(m);$("inp").value="";save();render();
  m.st=2;ask(v)}
-function toTrash(arr){D.trash.push(...arr.map(m=>({...m,dt:Date.now()})))}
+/* MY LIBRARY: a saved answer is a copy kept in D.lib, so clearing a chat, deleting a chat or emptying Trash never removes it. Only Unsave removes it. */
+function libKey(m){return m.lid||(m.lid=m.ts+"_"+String(m.q||"").slice(0,24))}
+function libAdd(m){D.lib=D.lib||[];const id=libKey(m);if(D.libGone)delete D.libGone[id];if(D.lib.some(y=>y.id==id))return;D.lib.push({id,q:m.q||"",t:m.t,ts:m.ts,sv:Date.now(),sub:m.tsub||D.sub})}
+function libDel(id){D.lib=(D.lib||[]).filter(y=>y.id!=id);D.libGone=D.libGone||{};D.libGone[id]=Date.now();D.chats.forEach(c=>c.msgs.forEach(m=>{if(m.lid==id)m.bm=false}))}
+function libSync(){try{D.lib=D.lib||[];D.chats.forEach(c=>(c.msgs||[]).forEach(m=>{if(m.s=="i"&&!m.err&&m.bm&&m.t&&!(D.libGone&&D.libGone[libKey(m)]))libAdd(m)}))}catch(e){}}
+function toTrash(arr){libSync();D.trash.push(...arr.map(m=>({...m,dt:Date.now()})))}
 /* long-press on YOUR OWN message: small pop-up with the time, Copy message and Edit (no Delete, no Select text) */
 function sheet(i){
  const m=D.msgs[i];if(!m||m.s!="o")return;
@@ -1546,7 +1555,7 @@ function personalPage(){HBACK=null;const m=(window.AK&&AK.me())||{},fn={serif:"S
  h_page("Personalization",h_hd("About you")+h_grp(h_row("nm",HI.user,"Name",{v:esc(m.names||GNm())})+h_row("cl",HI.cls,"Class",{v:D.cls?esc(D.cls):"Not chosen"}))+h_hd("How the app looks")+h_grp(h_row("fo",HI.font,"Font style",{v:fn})+h_row("tx",HI.eye,"Text size and contrast",{v:D.fs==14?"Small":D.fs==20?"Large":"Medium"}))+`<div class="t" style="padding:12px 24px;line-height:1.45">Your name and class help Tr. David give answers that fit your level.</div>`,hub,e=>{
   const a=e.target.closest("[data-a]")?.dataset.a;if(!a)return;
   if(a=="nm")AK.upd("names");if(a=="cl")clsPick(1);if(a=="fo"){HBACK=personalPage;fontStyle()}if(a=="tx"){HBACK=personalPage;access()}})}
-function memoryPage(){HBACK=null;let sv=0;D.chats.forEach(c=>c.msgs.forEach(x=>{if(x.bm)sv++}));
+function memoryPage(){HBACK=null;libSync();let sv=(D.lib||[]).length;
  h_page("Memory",`<div class="doc" style="padding-bottom:4px"><p>Ask Tr. David remembers your name, your class and your subject so answers fit your level. Your chats and saved answers are kept with your account, so they follow you to any phone you log in on. Every new chat starts fresh while the old ones stay in Chat history.</p></div>`+h_grp(h_row("ch",HI.chat,"Chats",{v:D.chats.length,n:1,x:1})+h_row("sv",HI.star,"Saved answers",{v:sv})+h_row("hi",HI.hd,"Chat history")+h_row("tr",HI.bin,"Trash",{v:D.trash.length}))+`<div class="t" style="padding:12px 24px;line-height:1.45">Saved answers are the replies you bookmarked. Deleted messages stay in Trash until you empty it.</div>`,hub,e=>{
   const a=e.target.closest("[data-a]")?.dataset.a;if(!a)return;
   if(a=="sv"){HBACK=memoryPage;saved()}if(a=="hi")chatHistory();if(a=="tr"){HBACK=memoryPage;sel.clear();trash()}})}
@@ -1555,7 +1564,7 @@ function usagePage(){HBACK=null;const q=FQ(),pn=planName(),rk={Free:0,Basic:1,St
  const pct=Math.min(100,Math.round(q.used/Math.max(1,q.cap)*100));
  h_page("Usage and limits",curPlan(q)+(pn=="Free"?`<div style="padding:4px 24px 8px"><div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:8px"><span>Words used</span><b>${q.used.toLocaleString()} of ${q.cap.toLocaleString()}</b></div><div style="height:10px;border-radius:10px;background:var(--line);overflow:hidden"><i style="display:block;height:100%;width:${pct}%;background:var(--green)"></i></div></div>`:`<div class="t" style="padding:4px 24px 8px">No word limit on your plan.</div>`)+h_hd("What your plan includes")+h_grp(F.map(f=>h_row("x",f[1]<=rk?h_svg('<path d="M5 12.5l4.5 4.5L19 7.5"/>'):h_svg('<path d="M6 6l12 12M18 6L6 18"/>'),f[0],{v:f[1]<=rk?"Included":"Needs "+NM[f[1]],n:1,x:1})).join(""))+(pn=="Premium"?"":h_grp(h_row("up",HI.up,"Upgrade plan",{c:"var(--green)"}))),hub,e=>{if(e.target.closest("[data-a=up]")){HBACK=usagePage;plans(1)}})}
 function generalPage(){HBACK=null;
- h_page("General",h_grp(h_row("tx",HI.eye,"Text size and contrast")+h_row("fo",HI.font,"Font style")+h_row("md",HI.star,"Teaching styles",{s:"Which model is best for lessons, exams and research"})+h_row("amd",HI.gen,"Automatic Model Detection",{n:1,v:'<span class="amsw'+(D.amd!==false?" on":"")+'" role="switch" aria-checked="'+(D.amd!==false?"true":"false")+'"></span>',s:"Automatically identify the best AI model for your question and recommend or switch to it for better responses."+(planName()=="Premium"||planName()=="Standard"?"":"<br>Standard and Premium switch for you; Basic keeps your model.")})+(isOwner()?h_row("qb",HI.star,"Question bank",{s:"Coverage and questions waiting for your check"}):"")+h_row("up",HI.gen,"Update app",{s:"Reload to get the latest version"})+(isOwner()?h_row("wk",HI.star,"Preview rating pop-up",{s:"See what learners get (nothing is sent)"}):"")),hub,e=>{
+ h_page("General",h_grp(h_row("tx",HI.eye,"Text size and contrast")+h_row("fo",HI.font,"Font style")+h_row("md",HI.star,"Teaching styles",{s:"Choose yourself: Teacher for lessons, Examiner for exams and questions, Philosopher for research and deep thinking"})+(isOwner()?h_row("qb",HI.star,"Question bank",{s:"Coverage and questions waiting for your check"}):"")+h_row("up",HI.gen,"Update app",{s:"Reload to get the latest version"})+(isOwner()?h_row("wk",HI.star,"Preview rating pop-up",{s:"See what learners get (nothing is sent)"}):"")),hub,e=>{
   const a=e.target.closest("[data-a]")?.dataset.a;if(!a)return;HBACK=generalPage;
   if(a=="tx")access();if(a=="fo")fontStyle();if(a=="md")modelsGuide();if(a=="amd")amdToggle();if(a=="qb")QBX.bankAdmin();if(a=="up")updateApp();if(a=="wk")wkShow(1)})}
 function notifPage(){HBACK=null;
@@ -1581,7 +1590,7 @@ function aboutPage(){HBACK=null;
  h_page("About us",`<div class="hh" style="padding-top:20px"><div class="hav"><div class="hpic" style="background:url(${AVATAR}) center/cover"></div></div><div class="hnm">Ask Tr. David</div><div class="hsub">Everything About Your Studies · Version 1.0</div></div><div class="doc"><h3>Who we are</h3><p>Ask Tr. David is a study helper made by Tr. David (Teacher David). It is built for learners who want clear, honest help with school work at any time of day.</p><h3>What you can do</h3><p>Ask any question about your studies, get revision notes, see worked steps, take short quizzes and research a topic. You can type or speak your question.</p><h3>For your level</h3><p>Choose your class and the app answers for Primary, O-Level or A-Level. Four study models, Malumalu, Teacher, Examiner and Philosopher, give you the right kind of answer for quick answers, lessons, exams and research.</p><h3>Plans</h3><p>Everyone starts on the Free plan. Basic, Standard and Premium unlock more models and features. See Upgrade plan for prices and how to pay.</p><h3>Contact</h3><p>Call or WhatsApp 0788 737 517, or email asktrdavid@gmail.com. You can also write to Tr. David from inside the app.</p></div>`+h_grp(h_row("pv",HI.sf,"Privacy policy")+h_row("tc",HI.doc,"Terms and conditions")+h_row("sp",HI.chat,"Contact Tr. David")+h_row("cu",HI.call,"Call, WhatsApp or email")),hub,e=>{
   const a=e.target.closest("[data-a]")?.dataset.a;if(!a)return;HBACK=aboutPage;
   if(a=="pv")privacyPage();if(a=="tc")termsPage();if(a=="sp")supportOpen();if(a=="cu")contactUs()})}
-function libAll(){const o={sv:[],lk:[],sh:[]};D.chats.forEach(c=>c.msgs.forEach(m=>{if(m.s!="i"||m.err)return;if(m.bm)o.sv.push(m);if(m.fb==1)o.lk.push(m);if(m.sh)o.sh.push(m)}));o.sh.sort((a,b)=>b.sh-a.sh);return o}
+function libAll(){libSync();const o={sv:(D.lib||[]).slice().sort((a,b)=>b.sv-a.sv),lk:[],sh:[]};D.chats.forEach(c=>c.msgs.forEach(m=>{if(m.s!="i"||m.err)return;if(m.fb==1)o.lk.push(m);if(m.sh)o.sh.push(m)}));o.sh.sort((a,b)=>b.sh-a.sh);return o}
 function saved(){library("sv")}
 let LIBT="sv";
 function library(t){LIBT=t||LIBT;const L=libAll(),T=[["sv","Saved"],["lk","Liked"],["sh","Shared"]],items=L[LIBT];
@@ -1594,7 +1603,7 @@ function library(t){LIBT=t||LIBT;const L=libAll(),T=[["sv","Saved"],["lk","Liked
    const x=e.target.closest("[data-x]");if(!x)return;const c=x.closest(".lc"),m=items[+c.dataset.i],k=x.dataset.x;
    if(k=="open"){c.classList.toggle("open");x.textContent=c.classList.contains("open")?"Show less":"Read more"}
    if(k=="copy"){try{navigator.clipboard.writeText(m.t.replace(/[#*`|]/g,""));x.textContent="Copied"}catch(er){}}
-   if(k=="rm"){if(LIBT=="sv")m.bm=false;else if(LIBT=="lk")m.fb=0;else{delete m.sh;delete m.shn}save();render();library()}})}
+   if(k=="rm"){if(LIBT=="sv")libDel(m.id);else if(LIBT=="lk")m.fb=0;else{delete m.sh;delete m.shn}save();render();library()}})}
 function fontStyle(){const c=D.font||"";showP("Font style",`<div class="sec">Choose a font</div><div class="sws">${[["","Default"],["serif","Serif"],["rounded","Rounded"],["mono","Typewriter"]].map(a=>`<button class="lk ${c==a[0]?"on":""}" data-fo="${a[0]}">${a[1]}</button>`).join("")}</div><div class="t" style="padding:0 18px;line-height:1.5">The font changes across the whole app. Pick Default to go back.</div>`,settings,e=>{const v=e.target.dataset.fo;if(v==null)return;if(v)D.font=v;else delete D.font;applyTheme();save();fontStyle()})}
 function permsPage(){
  const items=[["notif","Notifications","Announcements and updates",'<path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0"/>'],["microphone","Microphone","Ask your questions by voice",'<rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/>'],["camera","Camera","Ask about a photo of your work",'<path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/>']];
@@ -1738,7 +1747,7 @@ $("msgs").addEventListener("contextmenu",e=>e.preventDefault());
 
 D.name="Ask Tr. David";D.sub=D.sub||"General";D.lvl=["PLE","UCE","UACE"].includes(D.lvl)?D.lvl:(/^Primary/.test(D.grade||"")?"PLE":/^Senior [56]$/.test(D.grade||"")?"UACE":"UCE");delete D.grade;D.lang=D.lang||"English";D.pname=D.pname||"";D.fs=D.fs||16;
 if(!D.chats){D.chats=[{id:1,title:"Chat",msgs:D.msgs||[]}];D.cur=1}
-D.msgs=(D.chats.find(c=>c.id==D.cur)||D.chats[0]).msgs;
+D.msgs=(D.chats.find(c=>c.id==D.cur)||D.chats[0]).msgs;libSync();
 if(D.sub=="Math")D.sub="Mathematics";if(D.sub=="Computer Studies")D.sub="ICT";D.chats.forEach(c=>{if(c.sub=="Computer Studies")c.sub="ICT"});
 /* The app always opens on a fresh, empty chat. Earlier chats stay in Chat history. An empty chat that already exists is reused, so empty chats do not pile up. */
 {let c=D.chats.find(x=>!x.msgs.length&&(x.sub||D.sub)==D.sub&&(x.lv||D.lvl)==D.lvl);
@@ -4630,7 +4639,7 @@ function abGroups(t){
    const w=c.split(" ").length;
    return w==1?'In your answer, what does "'+c+'" mean?':'In your answer, what is "'+c+'" and what does it mean?'},
   lab=c=>/^example \d+$/i.test(c)?"Example":/^(worked example)$/i.test(c)?"Example":c,
-  add=(arr,c,q)=>{const k=lab(c).toLowerCase();if(seen[k]||hl.length+more.length>=24)return;seen[k]=1;const L=lab(c);arr.push({lab:L.length>34?L.slice(0,32)+"\u2026":L,q:q||qFor(c)})};
+  add=(arr,c,q)=>{const k=lab(c).toLowerCase();if(HEADL.test(c)||inAsk(c))return;if(seen[k]||hl.length+more.length>=24)return;seen[k]=1;const L=lab(c);arr.push({lab:L.length>34?L.slice(0,32)+"\u2026":L,q:q||qFor(c)})};
  const S=String(t||""),L=S.split("\n");let tb=0;
  /* highlighted: the bold words and bold points */
  (S.match(/\*\*[^*\n]{2,40}\*\*/g)||[]).forEach(b=>{const c=cl(b);if(c.length>1&&!SKIP.test(c)&&hl.length<10)add(hl,c)});
@@ -4640,17 +4649,20 @@ function abGroups(t){
  L.forEach(l=>{if(/^\s*\|/.test(l))return;const f=l.replace(/\*\*|`/g,"").replace(/^[-\u2022]\s+/,"").replace(/^[A-Za-z ]{3,20}:\s+(?=\S+\s*=)/,"").trim();if(f.length>=5&&f.length<=80&&(/[A-Za-z0-9)\]]\s*=\s*[A-Za-z0-9(\-]/.test(f)||/\^|sqrt\(/.test(f))&&!/^#/.test(f)&&f.split(" ").length<=12){const c=cl(f);add(more,c,'In your answer, what does this formula mean and how is it used: "'+c+'"?')}});
  L.forEach(l=>{const m=l.match(/^\s*[-\u2022]\s+\**([A-Z][^:*\n]{2,32}?)\**:\s+\S/);if(m){const c=cl(m[1]);if(c.length>1&&!SKIP.test(c))add(more,c)}});
  return{hl,more}}
+const HEADL=/^(senior|primary|p|s)\s*\d|\bterm\s*\d|\btopic\s*:/i;let ABQ="";
+const stm5=w=>w.toLowerCase().replace(/[^a-z0-9]/g,"").slice(0,5),inAsk=c=>{if(!ABQ)return false;const qs=new Set(ABQ.split(/\s+/).map(stm5).filter(Boolean)),ws=String(c).split(/\s+/).filter(w=>w.length>2).map(stm5);return ws.length>0&&ws.every(w=>qs.has(w))};
 function abParts(t){const g=abGroups(t);return g.hl.concat(g.more)}
 /* the bold words in a finished answer become tappable on their own (no buttons): a tap asks about that word */
-const hlWrap=h=>h.replace(/<b>([^<]{2,40})<\/b>/g,(a,x)=>'<b class="hl" data-st="In your answer, what is &quot;'+x.replace(/&quot;/g,"")+'&quot; and what does it mean?">'+x+'</b>');
+const hlWrap=h=>h.replace(/<b>([^<]{2,40})<\/b>/g,(a,x)=>HEADL.test(x)?a:'<b class="hl" data-st="In your answer, what is &quot;'+x.replace(/&quot;/g,"")+'&quot; and what does it mean?">'+x+'</b>');
 /* Ask about this: shown on EVERY finished reply. Best place to start = the most highlighted part (first bold word, else first important part).
    If a reply has no parts at all (a short reply), three general follow-ups are offered so the button is never empty. Typing your own question still works. */
+const abSug=[{lab:"Give an example",q:"Give me an example"},{lab:"Explain in more detail",q:"More details"},{lab:"Explain in simpler words",q:"Explain that in simpler words"}];
 const abGen=[{lab:"Explain in simpler words",q:"Explain that in simpler words"},{lab:"Give an example",q:"Give me an example"},{lab:"Why is this important?",q:"Why is this important?"}];
-function abPlan(t){const G=abGroups(t),gen=x=>x.q=="Give me an example"||x.q=="Explain that in short",
+function abPlan(t,q){ABQ=String(q||"");const G=abGroups(t),gen=x=>x.q=="Give me an example"||x.q=="Explain that in short",
  /* the main points a learner is most likely to ask about come first; example and summary chips come last */
  H=G.hl.filter(x=>!gen(x)).concat(G.hl.filter(gen)),all=H.concat(G.more),top=all[0]||null,
  hl=H.filter(x=>x!==top).slice(0,4),more=G.more.filter(x=>x!==top).slice(0,Math.max(0,4-hl.length));
- return{top,hl,more,gen:all.length?[]:abGen,all:all.length?all:abGen}}
+ return{top,hl,more,gen:[],sug:abSug,all:all.length?all:abGen}}
 /* a closing label with nothing under it (for example the Researcher ending "Next questions to investigate") is taken off, and the label is shown with tappable questions instead */
 const NQ_END=/\n[ \t]*(?:#{1,4}[ \t]*)?(?:\*\*)?[ \t]*(next questions? to investigate|your next step|in summary|remember)[ \t]*:?[ \t]*(?:\*\*)?[ \t]*$/i;
 function nqSplit(t){const x=String(t||"").replace(/\s+$/,""),m=NQ_END.exec(x);return m?{t:x.slice(0,m.index),nq:/^next/i.test(m[1])}:{t:x,nq:false}}
@@ -4809,9 +4821,9 @@ function bub(m,i,last){
  let h=`<div class="b i ai" data-i="${i}">${m.mdl?`<div class="mdltag">${esc(m.mdl)}</div>`:""}${exHtml(m,i)||`<div class="md">${last&&!m.stream&&!m.quiz?hlWrap(md(NQ.t)):md(NQ.t)}</div>${dgAuto(m)}`}`;
  if(m.quiz){h+=m.quiz[1].map((o,k)=>`<button class="opt ${m.pick!=null?(k==m.quiz[2]?"ok":k==m.pick?"bad":""):""}" data-act="pick" data-i="${i}" data-k="${k}">${md(o).replace(/^<p>|<\/p>$/g,"")}</button>`).join("")+(m.pick!=null?`<p>${m.pick==m.quiz[2]?"Correct, well done.":"Not quite. The correct answer is highlighted."}</p>`+(m.qz?(m.qz.n<m.qz.list.length-1?`<div class="chips"><button data-act="nq" data-i="${i}">Next question</button></div>`:`<p><b>Quiz finished: ${m.qz.score} out of ${m.qz.list.length}.</b></p>`):""):"")}
  let act="";
- if(last&&!m.stream&&!m.quiz){const P=abPlan(m.t),cb=(x,c)=>x.map(y=>`<button${c?` class="${c}"`:""} data-st="${stAttr(y.q)}">${esc(y.lab)}</button>`).join("");
+ if(last&&!m.stream&&!m.quiz){const P=abPlan(m.t,m.q),cb=(x,c)=>x.map(y=>`<button${c?` class="${c}"`:""} data-st="${stAttr(y.q)}">${esc(y.lab)}</button>`).join("");
   if(NQ.nq)h+=`<div class="nqx"><div class="abl">Next questions to investigate</div><div class="chips">${cb(P.all.slice(0,3))}</div></div>`;
-  h+=`<div class="abx"><button class="abt${m.ab?" on":""}" data-act="ab" data-i="${i}">${m.ab?"Hide":"Ask about this"}</button>${m.ab?`<div class="abp">${P.top?`<div class="abl">Best place to start</div><div class="chips">${cb([P.top],"top")}</div>`:""}${P.hl.length?`<div class="abl">Highlighted</div><div class="chips">${cb(P.hl)}</div>`:""}${P.more.length?`<div class="abl">Also important</div><div class="chips">${cb(P.more)}</div>`:""}${P.gen.length?`<div class="abl">You can ask</div><div class="chips">${cb(P.gen)}</div>`:""}<div class="abl">Or type your own question below. It will follow on from this answer.</div></div>`:""}</div>`;
+  h+=`<div class="abx"><button class="abt${m.ab?" on":""}" data-act="ab" data-i="${i}">${m.ab?"Hide":"Ask about this"}</button>${m.ab?`<div class="abp">${(P.top||P.hl.length)?`<div class="abl">Highlighted</div><div class="chips">${cb((P.top?[P.top]:[]).concat(P.hl))}</div>`:""}${P.more.length?`<div class="abl">Also important</div><div class="chips">${cb(P.more)}</div>`:""}<div class="abl">You can ask</div><div class="chips">${cb(P.sug)}</div><div class="abl">Or type your own question below. It will follow on from this answer.</div></div>`:""}</div>`;
   if(!m.rdone)h+=m.rs=="thanks"?`<div class="rtx"><div class="rts">Thank you, we are glad it helped.</div></div>`:m.rs=="sorry"?`<div class="rtx"><div class="rts">We are sorry it did not help. Please report here. You can also ignore.</div><div class="rtb rtr"><button class="rep" data-act="rep" data-i="${i}">Report</button><button class="ign" data-act="ign" data-i="${i}">Ignore</button></div></div>`:`<div class="rtx"><div class="rtq">Did this answer your question?</div><div class="rtn">Tap Like if it did. If anything is wrong, tap Unlike. It will be reported to us immediately for review.</div><div class="rtb"><button class="up" data-act="up" data-i="${i}">${AI.up}<span>Like</span></button><button class="dn" data-act="dn" data-i="${i}">${AI.dn}<span>Unlike</span></button></div></div>`}
  if(!m.stream){act=`<div class="act out">${A.map(a=>`<button class="${a[2]?"on":""}" data-act="${a[0]}" data-i="${i}" aria-label="${a[1]}" title="${a[1]}">${AI[a[0]]}</button>`).join("")}${last?`<button data-act="regen" data-i="${i}" aria-label="Regenerate" title="Regenerate">${AI.regen}</button>`:""}</div>`;}
  return h+`<small>${hm(m.ts)}</small></div>${act}`}
@@ -5075,7 +5087,7 @@ philosopher:(N,d,c)=>{const T=c.T,P=c.P;let o="# Thinking it through: "+T;
  o+=sec("Write your own position",nl(["State your claim in one sentence.","Give your strongest reason.","Support it with evidence or an example.","State the best objection to your claim.","Answer that objection."]));
  return o+sec("Think further",nl(["How would you explain "+T+" to someone who disagrees?","What is the strongest point you found, and what is the weakest?","What would you like to find out next?"]))}};
 /* Short answers by default. Full notes only when the learner asks to explain, wants details, or asks for revision/assessment material. */
-const wantFull=()=>/\b(explain|explanation|explanations|details?|detailed|elaborate|in depth|describe|full notes|notes|lesson|teach me|why|how (does|do|is|are|can|did)|steps?|expand|tell me more|more about)\b/i.test(window.ASKQ||"")||wantRQ()||wantCBA();
+const wantFull=()=>/\b(explain|explanation|explanations|details?|detailed|elaborate|in depth|describe|full notes|notes|lesson|teach me|why|how (does|do|is|are|can|did)|steps?|expand|tell me more|more about|know about|tell me about|learn about|talk about|everything|all about|want to (know|learn|understand)|understand)\b/i.test(window.ASKQ||"")||wantRQ()||wantCBA();
 /* DIRECT ANSWERS: when a learner asks one specific question (what is..., state..., give an example..., name two..., where...), answer only that
    one thing in one or two short lines. No heading, no key points, no example, no closing offer. Asking for "explain", "describe",
    "details", notes, a lesson or exam practice still gives the fuller answer. The wording comes from the topic's own text. */
@@ -5090,7 +5102,7 @@ function directAnswer(N,c){
   asks=/\b(uses?|importance|important|benefits?|advantages?|examples?|instances?|mistakes?|errors?|formula|equation|calculate|types?|kinds?|causes?|effects?|functions?|parts?|products?|stages?|steps?|factors?|where|when|why|how)\b/.test(Q),
   def=/\b(what is|what are|what's|whats|define|definition|meaning of|what do you mean|what does)\b/.test(Q)&&!asks;
  const clean=x=>String(x||"").replace(/\*\*/g,"").replace(/\s+/g," ").trim();
- if(def){if(!N.d)return null;const a=sents(N.d).slice(0,2).join(" ");return /^\*\*/.test(N.d)||new RegExp("^"+T.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"i").test(a)?a:"**"+T+"**: "+a}
+ if(def){if(!N.d)return null;const a=sents(N.d).slice(0,2).join(" "),det=(N.pts||[]).filter(p=>p!==N.d).map(clean).filter(Boolean).slice(0,2).map(x=>"- "+(sents(x)[0]||x)),base=/^\*\*/.test(N.d)||new RegExp("^"+T.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"i").test(a)?a:"**"+T+"**: "+a;return base+(det.length?"\n\n"+det.join("\n"):"")}
  let pool;
  if(/\b(examples?|instances?)\b/.test(Q))pool=N.ex;
  else if(/\b(uses?|importance|important|benefits?|advantages?)\b/.test(Q))pool=N.uses;
@@ -6162,7 +6174,7 @@ $("msgs").addEventListener("click",e=>{
   const sheet=()=>{const E=encodeURIComponent,u=E(L),t=E(T+L),P=[["wa","WhatsApp","https://wa.me/?text="+t],["tg","Telegram","https://t.me/share/url?url="+u+"&text="+E(m.q||"Answer")],["fb","Facebook","https://www.facebook.com/sharer/sharer.php?u="+u],["x","X (Twitter)","https://twitter.com/intent/tweet?text="+E(m.q||"Answer")+"&url="+u],["sms","Messages (SMS)","sms:?&body="+t],["em","Email","mailto:?subject="+E("Ask Tr. David")+"&body="+t]];
    showP("Share answer",P.map(x=>`<div class="row" data-p="${x[0]}"><div>${x[1]}</div></div>`).join("")+'<div class="row" data-p="cp"><div>Copy link</div></div>',closeP,e=>{const k=e.target.closest(".row")?.dataset.p;if(!k)return;if(k=="cp"){try{navigator.clipboard.writeText(L)}catch(x){}closeP();uiAlert("Link copied.");return}const f=P.find(x=>x[0]==k);closeP();window.open(f[2],"_blank")})};
   if(navigator.share){try{await navigator.share({title:"Ask Tr. David",text:T,url:L})}catch(e){if(e&&e.name!="AbortError")sheet()}}else sheet()})();return}
- if(a=="ab")m.ab=!m.ab;if(a=="bm"){m.bm=!m.bm;ownerAct(m.bm?"save":"unsave",m)}if(a=="up"){m.fb=1;m.rs="thanks";sendFb(m);setTimeout(()=>{m.rdone=1;try{save();render()}catch(e){}},2500)}if(a=="dn"){m.fb=-1;m.rs="sorry";sendFb(m)}if(a=="ign"){m.rdone=1}if(a=="rep"){m.rdone=1;setTimeout(()=>supportOpen("complaint","About this answer: "),0)}
+ if(a=="ab")m.ab=!m.ab;if(a=="bm"){m.bm=!m.bm;if(m.bm)libAdd(m);else libDel(libKey(m));ownerAct(m.bm?"save":"unsave",m)}if(a=="up"){m.fb=1;m.rs="thanks";sendFb(m);setTimeout(()=>{m.rdone=1;try{save();render()}catch(e){}},2500)}if(a=="dn"){m.fb=-1;m.rs="sorry";sendFb(m)}if(a=="ign"){m.rdone=1}if(a=="rep"){m.rdone=1;setTimeout(()=>supportOpen("complaint","About this answer: "),0)}
   if(a=="pick"&&m.pick==null){m.pick=+b.dataset.k;if(m.qz&&m.pick==m.quiz[2])m.qz.score++}
  if(a=="nq"&&m.qz&&m.pick!=null&&m.qz.n<m.qz.list.length-1){const z=m.qz;z.n++;m.quiz=["q",z.list[z.n][1],z.list[z.n][2]];m.pick=null;m.t=qText(z.t,z)}
  if(a=="regen"){redoReply(i).then(h=>{if(h)return;const k=D.msgs.indexOf(m);if(k<0)return;D.msgs.splice(k,1);save();render();ask(m.q,m.mode)});return}
@@ -6255,7 +6267,7 @@ function homeQs(){const key=lvKey()+"|"+D.sub;if(HQC[key])return HQC[key];
 /* the suggestions on the empty chat screen keep changing on their own, all three, while the learner is not typing */
 setInterval(()=>{try{const e=document.querySelector("#msgs .empty");if(!e||D.msgs.length||document.hidden)return;const i=$("inp");if(i&&i.value.trim())return;
  HQC={};const qs=homeQs(),bs=e.querySelectorAll("button.st");if(qs.length!=bs.length){$("msgs").innerHTML=empty();return}
- bs.forEach((b,k)=>{b.style.opacity=0;setTimeout(()=>{b.textContent=qs[k];b.dataset.st=qs[k];b.style.opacity=""},220)})}catch(x){}},7000);
+ bs.forEach((b,k)=>{b.style.opacity=0;setTimeout(()=>{b.textContent=qs[k];b.dataset.st=qs[k];b.style.opacity=""},220)})}catch(x){}},15000);
 function greetNow(){const h=new Date().getHours();return h<12?"Good morning":h<17?"Good afternoon":"Good evening"}
 function empty(){return`<div class="empty"><b style="font-size:1.25em">${greetNow()}${D.pname?", "+esc(D.pname):""}. ${D.lock&&D.sub!=="General"?"What would you like to learn in "+esc(D.sub)+"?":"What do you want to learn?"}</b><p style="margin:6px 0 12px">${esc(D.cls||lvKey())} · ${D.lock&&D.sub!=="General"?esc(D.sub)+" only · ":""}Pick a question or type your own.</p>${homeQs().map(x=>`<button class="st" data-st="${esc(x)}">${esc(x)}</button>`).join("")}</div>`}
 (()=>{
@@ -6351,13 +6363,26 @@ const _send=send;send=function(){if(on)stop();return _send.apply(this,arguments)
 })();
 function sw(id){D.cur=id;const ch=D.chats.find(c=>c.id==id);D.msgs=ch.msgs;if(ch.sub&&subsList().includes(ch.sub))D.sub=ch.sub;D.lock=true;stopS();stopEdit();q="";$("sq").value="";$("srch").style.display="none";save();render();closeP()}
 function newChat(){const c={id:Date.now(),title:"New chat",sub:D.sub,lv:lvKey(),msgs:[]};D.chats.unshift(c);sw(c.id)}
-function chatHistory(){showP("Chat history",`<div class="row" data-a="new"><div><b>New chat</b></div></div><div style="padding:10px 14px"><input id="hq" class="fld" placeholder="Search chats"></div><div id="hl"></div>`,closeP,e=>{
- const r=e.target.closest(".row");if(!r)return;const id=+r.dataset.id,a=e.target.dataset.a||r.dataset.a,c=D.chats.find(x=>x.id==id);
+let HSEL=null;
+function chatHistory(){HSEL=null;showP("Chat history",`<div class="row" data-a="new"><div><b>New chat</b></div></div><div id="hbar" style="display:flex;gap:8px;flex-wrap:wrap;padding:6px 14px"></div><div style="padding:10px 14px"><input id="hq" class="fld" placeholder="Search chats"></div><div id="hl"></div>`,closeP,e=>{
+ const bt=e.target.closest("[data-hb]");if(bt){hbAct(bt.dataset.hb);return}
+ const r=e.target.closest(".row");if(!r)return;const id=+r.dataset.id,a=e.target.dataset.a||r.dataset.a;
  if(a=="new")return newChat();
  if(lp){lp=0;return}
+ if(HSEL){if(!r.dataset.id)return;HSEL.has(id)?HSEL.delete(id):HSEL.add(id);hlist();return}
  if(e.target.closest("[data-a=more]"))return chatSheet(id);
  sw(id)});$("hq").oninput=hlist;hlist();longp()}
-function hlist(){const f=$("hq").value.toLowerCase();$("hl").innerHTML=D.chats.filter(c=>c.title.toLowerCase().includes(f)).map(c=>`<div class="row" data-id="${c.id}"><div style="flex:1;min-width:0"><b>${esc(c.title)}</b><small>${c.msgs.length} messages</small></div><button class="ic" data-a="more" aria-label="Options"><svg viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button></div>`).join("")}
+function hVis(){const f=$("hq").value.toLowerCase();return D.chats.filter(c=>c.title.toLowerCase().includes(f))}
+function hbAct(a){const V=hVis();
+ if(a=="on")HSEL=new Set();else if(a=="off")HSEL=null;
+ else if(a=="all"){if(V.length&&V.every(c=>HSEL.has(c.id)))V.forEach(c=>HSEL.delete(c.id));else V.forEach(c=>HSEL.add(c.id))}
+ else if(a=="clr"){if(!HSEL||!HSEL.size)return;const ids=new Set(HSEL),n=ids.size;
+  uiConfirm("Clear "+n+" chat"+(n==1?"":"s")+" from your history? Answers you saved stay in My library.",()=>{libSync();D.gone=D.gone||{};ids.forEach(id=>D.gone[id]=Date.now());const hadCur=ids.has(D.cur);D.chats=D.chats.filter(x=>!ids.has(x.id));if(!D.chats.length)D.chats=[{id:Date.now(),title:"New chat",msgs:[]}];HSEL=null;
+   if(hadCur){sw(D.chats[0].id);chatHistory()}else{save();hlist()}},"Clear")}
+ hlist()}
+function hlist(){const V=hVis(),sel=HSEL,al=sel&&V.length&&V.every(c=>sel.has(c.id));
+ $("hbar").innerHTML=sel?`<button class="lk" data-hb="all">${al?"Unselect all":"Select all"}</button><button class="lk dg" data-hb="clr" ${sel.size?"":"disabled"}>${sel.size?"Clear selected ("+sel.size+")":"Clear selected"}</button><button class="lk" data-hb="off">Cancel</button>`:(D.chats.length?`<button class="lk" data-hb="on">Select chats</button>`:"");
+ $("hl").innerHTML=V.map(c=>`<div class="row" data-id="${c.id}">${sel?`<input type="checkbox" ${sel.has(c.id)?"checked":""} style="margin-right:12px;pointer-events:none">`:""}<div style="flex:1;min-width:0"><b>${esc(c.title)}</b><small>${c.msgs.length} messages</small></div>${sel?"":`<button class="ic" data-a="more" aria-label="Options"><svg viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button>`}</div>`).join("")}
 let lp=0;
 function longp(){let t;const h=$("hl");h.onpointerdown=e=>{const w=e.target.closest(".row");if(!w)return;t=setTimeout(()=>{lp=1;chatSheet(+w.dataset.id)},500)};
  h.onpointerup=()=>{clearTimeout(t);setTimeout(()=>lp=0,300)};h.onpointercancel=h.onpointerleave=()=>clearTimeout(t);h.oncontextmenu=e=>e.preventDefault()}
@@ -6365,7 +6390,7 @@ function chatSheet(id){const c=D.chats.find(x=>x.id==id),s=$("sheet");
  s.innerHTML='<div data-a="r">Rename</div><div class="dl" data-a="d">Delete</div><div class="x" data-a="x">Cancel</div>';$("scrim").style.display="flex";
  s.onclick=e=>{const a=e.target.dataset.a;if(!a)return;$("scrim").style.display="none";
   if(a=="r"){uiPrompt("Rename chat",c.title,n=>{if(n&&n.trim()){c.title=n.trim();save();hlist()}})}
-  if(a=="d")uiConfirm("Delete this chat?",()=>{D.gone=D.gone||{};D.gone[id]=Date.now();D.chats=D.chats.filter(x=>x.id!=id);if(!D.chats.length)D.chats=[{id:Date.now(),title:"New chat",msgs:[]}];if(D.cur==id){sw(D.chats[0].id);chatHistory()}else{save();hlist()}},"Delete")}}
+  if(a=="d")uiConfirm("Delete this chat? Answers you saved stay in My library.",()=>{libSync();D.gone=D.gone||{};D.gone[id]=Date.now();D.chats=D.chats.filter(x=>x.id!=id);if(!D.chats.length)D.chats=[{id:Date.now(),title:"New chat",msgs:[]}];if(D.cur==id){sw(D.chats[0].id);chatHistory()}else{save();hlist()}},"Delete")}}
 function saved0(){const L=[];D.chats.forEach(c=>c.msgs.forEach(m=>{if(m.bm)L.push(m)}));showP("Saved answers",L.length?L.map(m=>`<div class="row" style="display:block"><b>${esc(m.q||"Answer")}</b><div class="md">${md(m.t)}</div></div>`).join(""):'<div class="empty">No saved answers yet</div>',closeP)}
 const op=(a,v)=>a.map(x=>`<option ${x==v?"selected":""}>${x}</option>`).join("");
 const LVS=[["PLE","Primary"],["UCE","O-Level"],["UACE","A-Level"]];
@@ -6442,60 +6467,65 @@ function admGo(t){if(!ADMPG[t])t="home";ADMTAB=t;ADMSEQ++;const S=admSec(t);
 
 /* FREE DAYS: schedule windows when everyone gets a plan free. The database decides who gets what and when; this screen only edits the schedule. Times are East Africa Time (Kampala). */
 const FWD=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],FWP=["Basic","Standard","Premium"];
-const fwNew=()=>({id:null,title:"",plan:"Premium",wd:[],dt:[],st:"08:00",en:"20:00",on:true});
+const fwNew=()=>({id:null,title:"",plan:"Premium",wd:[],dt:[],st:"08:00",en:"20:00",on:true,rec:true});
 let FWF=fwNew();
 const fwQ=x=>esc(String(x==null?"":x)).replace(/"/g,"&quot;");
 const fwT=t=>{const a=String(t||"00:00").split(":"),h=+a[0]||0,m=+a[1]||0;return((h%12)||12)+":"+String(m).padStart(2,"0")+(h<12?" AM":" PM")};
 const fwD=d=>{try{return new Date(d+"T00:00").toLocaleDateString([],{weekday:"short",day:"numeric",month:"short"})}catch(e){return d}};
 const fwLT=d=>{try{return new Date(d).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})}catch(e){return""}};
 const fwLS=d=>{try{return new Date(d).toLocaleString([],{weekday:"short",hour:"numeric",minute:"2-digit"})}catch(e){return""}};
-const fwErr=r=>({"not allowed":"This is only for the owner account.","bad range":"The end time must be after the start time.","no days":"Choose at least one weekday or one date.","bad plan":"Choose a plan.","bad time":"Check the start and end times.","bad days":"Check the days.","too many dates":"Too many dates. Remove some.","not found":"That schedule no longer exists."}[r&&r.err]||(r&&r.err=="net"?"No internet. Try again.":"Could not save. Try again."));
+const fwErr=r=>({"not allowed":"This is only for the owner account.","bad range":"Check the start and end times.","no days":"Choose at least one day.","bad plan":"Choose a plan.","bad time":"Check the start and end times.","bad days":"Check the days.","too many dates":"Too many dates. Remove some.","not found":"That schedule no longer exists."}[r&&r.err]||(r&&r.err=="net"?"No internet. Try again.":"Could not save. Try again."));
 function fwRead(){if($("fwt"))FWF.title=$("fwt").value;if($("fws"))FWF.st=$("fws").value||FWF.st;if($("fwe"))FWF.en=$("fwe").value||FWF.en}
 async function admFree(){const s=ADMSEQ,b=$("abody");b.innerHTML=admLd();const j=await admCall("admin_fw_list");if(s!==ADMSEQ)return;
  if(!j.ok){b.innerHTML=admFail(j,1);b.onclick=e=>{if(e.target.closest("[data-r]"))admFree()};return}
  admFreeDraw(j,"")}
-function admFreeDraw(j,msg){const b=$("abody"),F=FWF,days=a=>(a.weekdays||[]).slice().sort().map(d=>FWD[d]).join(", ");
- const st=j.active?`<b style="color:#00a884">ON now</b> · Free ${esc(j.active.plan)} for everyone until ${fwLT(j.active.ends_at)}`:j.next?`Not active now. Next: <b>Free ${esc(j.next.plan)}</b> from ${fwLS(j.next.starts_at)}`:"Nothing scheduled. Everyone is on their own plan.";
+const FWO=[1,2,3,4,5,6,0],FWN=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+const fwMin=(a,b)=>{const m=x=>{const p=String(x||"00:00").split(":");return(+p[0]||0)*60+(+p[1]||0)},d=(m(b)-m(a)+1440)%1440;return d||1440};
+const fwDur=n=>{const h=Math.floor(n/60),m=n%60;return(h?h+(h==1?" hour":" hours"):"")+(h&&m?" ":"")+(m?m+(m==1?" minute":" minutes"):"")};
+const fwOver=(a,b)=>String(b)<=String(a);
+const fwSpan=(a,b)=>fwT(a)+" to "+fwT(b)+(fwOver(a,b)?" (next day)":"");
+function admFreeDraw(j,msg){const b=$("abody"),F=FWF,dayTxt=a=>FWO.filter(d=>(a.weekdays||[]).includes(d)).map(d=>FWD[d]).join(", ");
+ const st=j.active?`<b style="color:#00a884">ON now</b> · Free ${esc(j.active.plan)} for everyone until ${fwLS(j.active.ends_at)}`:j.next?`Not active now. Next: <b>Free ${esc(j.next.plan)}</b> from ${fwLS(j.next.starts_at)}`:"Nothing scheduled. Everyone is on their own plan.";
+ const sw=on=>`<span style="display:inline-block;width:46px;height:26px;border-radius:13px;position:relative;flex:none;background:${on?"var(--green)":"var(--line,#c9d1d6)"}"><span style="position:absolute;top:3px;left:${on?"23px":"3px"};width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.3)"></span></span>`;
  b.innerHTML=`<div class="asec">Free access now</div><div style="padding:4px 18px 8px;line-height:1.5">${st}</div>
  <div class="asec">${F.id?"Edit schedule":"New schedule"}</div>
- <input class="ain" id="fwt" maxlength="80" placeholder="Name (e.g. Free Tuesdays)" autocomplete="off" value="${fwQ(F.title)}">
+ <input class="ain" id="fwt" maxlength="80" placeholder="Name (e.g. Free weekends)" autocomplete="off" value="${fwQ(F.title)}">
  <div style="padding:0 18px 4px;color:var(--sub);font-size:13px">Everyone gets this plan</div>
  <div style="display:flex;gap:6px;padding:4px 18px 8px">${FWP.map(p=>svBtn(F.plan==p,p,"data-p",p)).join("")}</div>
- <div style="padding:0 18px 4px;color:var(--sub);font-size:13px">Every week on</div>
- <div style="display:flex;flex-wrap:wrap;gap:6px;padding:4px 18px 8px">${FWD.map((n,i)=>`<button data-d="${i}" style="padding:9px 12px;border:0;border-radius:18px;font:inherit;font-weight:600;cursor:pointer;background:${F.wd.includes(i)?"var(--green)":"var(--wall)"};color:${F.wd.includes(i)?"#fff":"var(--text)"}">${n}</button>`).join("")}</div>
- <div style="padding:0 18px 4px;color:var(--sub);font-size:13px">And/or on a specific date</div>
- <div style="display:flex;gap:8px;align-items:center;padding:0 14px"><input class="ain" id="fwdt" type="date" style="margin:6px 0;flex:1">${abt("adddate","Add","#2f80ed").replace("flex:1;min-width:30%","flex:0 0 auto;min-width:70px")}</div>
- <div style="padding:6px 18px 4px;color:var(--sub);font-size:13px">Or a range of dates (every day from the first date to the last)</div>
- <div style="display:flex;gap:10px;padding:0 14px"><div style="flex:1"><div style="padding:0 4px;color:var(--sub);font-size:13px">First date</div><input class="ain" id="fwr1" type="date" style="margin:4px 0;width:100%"></div><div style="flex:1"><div style="padding:0 4px;color:var(--sub);font-size:13px">Last date</div><input class="ain" id="fwr2" type="date" style="margin:4px 0;width:100%"></div></div>
- <div style="display:flex;padding:4px 18px 6px">${abt("addrange","Add all dates in range","#2f80ed")}</div>
- ${F.dt.length?`<div style="display:flex;flex-wrap:wrap;gap:6px;padding:4px 18px 8px">${F.dt.map((d,i)=>`<button data-rd="${i}" style="padding:8px 12px;border:0;border-radius:18px;font:inherit;cursor:pointer;background:var(--wall);color:var(--text)">${esc(fwD(d))} ✕</button>`).join("")}</div>`:""}
+ <div style="padding:0 18px 4px;color:var(--sub);font-size:13px">1. Choose the days</div>
+ <div style="display:flex;flex-wrap:wrap;gap:6px;padding:4px 18px 8px">${FWO.map(i=>`<button data-d="${i}" style="padding:9px 12px;border:0;border-radius:18px;font:inherit;font-weight:600;cursor:pointer;background:${F.wd.includes(i)?"var(--green)":"var(--wall)"};color:${F.wd.includes(i)?"#fff":"var(--text)"}">${FWD[i]}</button>`).join("")}</div>
+ <div style="padding:0 18px 6px"><button data-a="allweek" style="border:0;background:none;color:#2f80ed;font:inherit;font-weight:600;padding:4px 0;cursor:pointer">${F.wd.length==7?"Clear all days":"Select all seven days"}</button></div>
+ <div style="padding:6px 18px 4px;color:var(--sub);font-size:13px">2. Recurring or not</div>
+ <div data-a="rec" role="switch" aria-checked="${F.rec}" style="display:flex;align-items:center;gap:12px;padding:6px 18px;cursor:pointer"><div style="flex:1"><b>Recurring</b><div style="color:var(--sub);font-size:13px;line-height:1.45">${F.rec?"ON: it repeats every week. After Sunday it starts again on Monday, and keeps going until you turn it off or delete it.":"OFF: it runs on the chosen days over the next 7 days (counting from the day you save), then stops by itself."}</div></div>${sw(F.rec)}</div>
+ <div style="padding:10px 18px 4px;color:var(--sub);font-size:13px">3. Choose the time</div>
  <div style="display:flex;gap:10px;padding:6px 14px"><div style="flex:1"><div style="padding:0 4px;color:var(--sub);font-size:13px">From</div><input class="ain" id="fws" type="time" value="${fwQ(F.st)}" style="margin:4px 0;width:100%"></div><div style="flex:1"><div style="padding:0 4px;color:var(--sub);font-size:13px">Until</div><input class="ain" id="fwe" type="time" value="${fwQ(F.en)}" style="margin:4px 0;width:100%"></div></div>
- <div style="padding:0 18px 6px"><button data-a="allday" style="border:0;background:none;color:#2f80ed;font:inherit;font-weight:600;padding:4px 0;cursor:pointer">Use the whole day (12:00 AM to 11:59 PM)</button></div>
- <div style="padding:2px 18px;color:var(--sub);font-size:13px;line-height:1.45">Times are East Africa Time (Kampala). At the end time everyone goes back to the plan they had. Anyone on a higher plan keeps it.</div>
+ <div style="padding:0 18px 6px"><button data-a="allday" style="border:0;background:none;color:#2f80ed;font:inherit;font-weight:600;padding:4px 0;cursor:pointer">Use 24 hours (12:00 AM to 12:00 AM)</button></div>
+ <div id="fwdur" style="margin:4px 18px 8px;padding:12px 14px;border-radius:12px;background:var(--wall);line-height:1.5"></div>
+ <div style="padding:2px 18px;color:var(--sub);font-size:13px;line-height:1.45">Times are East Africa Time (Kampala). If Until is earlier than From, it ends the next day. At the end everyone goes back to the plan they had. Anyone on a higher plan keeps it. It starts working for users as soon as you save.</div>
  <div id="fwm" style="padding:6px 18px;min-height:20px;color:var(--sub)">${esc(msg)}</div>
  <div style="display:flex;gap:8px;padding:2px 18px 10px">${abt("save",F.id?"Save changes":"Save schedule","#00a884")}${F.id?abt("clear","Cancel","#6b7c85"):""}</div>
- <div class="asec">Schedules</div>`+(j.items.length?j.items.map((x,i)=>`<div class="row" style="display:block"><b>${esc(x.title)}</b> <small style="color:var(--sub)">Free ${esc(x.plan)} · ${fwT(x.start_time)} to ${fwT(x.end_time)}</small><div style="margin-top:2px;color:var(--sub)">${[days(x),(x.on_dates||[]).map(fwD).join(", ")].filter(Boolean).map(esc).join(" · ")}</div><div style="display:flex;gap:14px;margin-top:6px"><button data-tg="${i}" style="border:0;background:none;color:${x.enabled?"#00a884":"#6b7c85"};font:inherit;font-weight:700;padding:4px 0;cursor:pointer">${x.enabled?"On":"Off"}</button><button data-ed="${i}" style="border:0;background:none;color:#2f80ed;font:inherit;font-weight:600;padding:4px 0;cursor:pointer">Edit</button><button data-del="${i}" style="border:0;background:none;color:#ff453a;font:inherit;font-weight:600;padding:4px 0;cursor:pointer">Delete</button></div></div>`).join(""):'<div style="padding:12px 18px;color:var(--sub)">No schedules yet.</div>');
+ <div class="asec">Schedules</div>`+(j.items.length?j.items.map((x,i)=>{const mins=x.minutes||fwMin(x.start_time,x.end_time),rec=x.recurring!==false,fin=x.finished,od=(x.on_dates||[]).map(fwD).join(", ");
+  return `<div class="row" style="display:block"><b>${esc(x.title)}</b> <small style="color:var(--sub)">Free ${esc(x.plan)}</small><div style="margin-top:2px;color:var(--sub);line-height:1.45">${esc(dayTxt(x)||"")}${od?(dayTxt(x)?" · ":"")+esc(od):""}<br>${esc(fwSpan(x.start_time,x.end_time))} · <b>${esc(fwDur(mins))}</b><br>${rec?"Repeats every week":fin?"Finished (it ran once and stopped)":"Runs once, then stops"+(x.starts_on?" · from "+esc(fwD(x.starts_on)):"")}</div><div style="display:flex;gap:14px;margin-top:6px"><button data-tg="${i}" style="border:0;background:none;color:${x.enabled?"#00a884":"#6b7c85"};font:inherit;font-weight:700;padding:4px 0;cursor:pointer">${x.enabled?"On":"Off"}</button><button data-ed="${i}" style="border:0;background:none;color:#2f80ed;font:inherit;font-weight:600;padding:4px 0;cursor:pointer">Edit</button><button data-del="${i}" style="border:0;background:none;color:#ff453a;font:inherit;font-weight:600;padding:4px 0;cursor:pointer">Delete</button></div></div>`}).join(""):'<div style="padding:12px 18px;color:var(--sub)">No schedules yet.</div>');
  const say=t=>{const m=$("fwm");if(m)m.textContent=t},redo=async(note)=>{const n=await admCall("admin_fw_list");if(n.ok)admFreeDraw(n,note||"");else admFree()};
+ const upd=()=>{fwRead();const el=$("fwdur");if(!el)return;const n=fwMin(FWF.st,FWF.en),o=fwOver(FWF.st,FWF.en),ds=FWO.filter(d=>FWF.wd.includes(d)).map(d=>FWD[d]).join(", ");
+  el.innerHTML=`<b>Duration: ${esc(fwDur(n))}</b><br>${esc(fwT(FWF.st))} ${o?"until "+esc(fwT(FWF.en))+" the next day":"until "+esc(fwT(FWF.en))+" the same day"}<br>${ds?esc((FWF.rec?"Every ":"On ")+ds)+(FWF.rec?" · repeats every week":" · once, then stops"):"No day chosen yet"}`};
+ upd();$("fws").oninput=upd;$("fwe").oninput=upd;$("fws").onchange=upd;$("fwe").onchange=upd;
  b.onclick=async e=>{
   const p=e.target.closest("[data-p]");if(p){fwRead();FWF.plan=p.dataset.p;admFreeDraw(j,"");return}
   const d=e.target.closest("[data-d]");if(d){fwRead();const k=+d.dataset.d,i=FWF.wd.indexOf(k);if(i<0)FWF.wd.push(k);else FWF.wd.splice(i,1);admFreeDraw(j,"");return}
-  if(e.target.closest("[data-a=adddate]")){const v=$("fwdt").value;if(!/^\d{4}-\d{2}-\d{2}$/.test(v)){say("Pick a date first.");return}fwRead();if(!FWF.dt.includes(v))FWF.dt.push(v);FWF.dt.sort();admFreeDraw(j,"");return}
-  if(e.target.closest("[data-a=addrange]")){const a=$("fwr1").value,z=$("fwr2").value;if(!/^\d{4}-\d{2}-\d{2}$/.test(a)||!/^\d{4}-\d{2}-\d{2}$/.test(z)){say("Pick the first date and the last date.");return}if(z<a){say("The last date must not be before the first date.");return}
-   const A=a.split("-").map(Number),Z=z.split("-").map(Number),t0=Date.UTC(A[0],A[1]-1,A[2]),t1=Date.UTC(Z[0],Z[1]-1,Z[2]),add=[];for(let t=t0;t<=t1;t+=864e5){const d=new Date(t).toISOString().slice(0,10);if(!FWF.dt.includes(d))add.push(d)}
-   if(FWF.dt.length+add.length>60){say("That is more than 60 dates in total. Use a shorter range.");return}fwRead();FWF.dt=FWF.dt.concat(add).sort();admFreeDraw(j,add.length?"":"Those dates are already added.");return}
-  if(e.target.closest("[data-a=allday]")){fwRead();FWF.st="00:00";FWF.en="23:59";admFreeDraw(j,"");return}
-  const rd=e.target.closest("[data-rd]");if(rd){fwRead();FWF.dt.splice(+rd.dataset.rd,1);admFreeDraw(j,"");return}
+  if(e.target.closest("[data-a=allweek]")){fwRead();FWF.wd=FWF.wd.length==7?[]:[0,1,2,3,4,5,6];admFreeDraw(j,"");return}
+  if(e.target.closest("[data-a=rec]")){fwRead();FWF.rec=!FWF.rec;admFreeDraw(j,"");return}
+  if(e.target.closest("[data-a=allday]")){fwRead();FWF.st="00:00";FWF.en="00:00";admFreeDraw(j,"");return}
   if(e.target.closest("[data-a=clear]")){FWF=fwNew();admFreeDraw(j,"");return}
-  const ed=e.target.closest("[data-ed]");if(ed){const x=j.items[+ed.dataset.ed];if(!x)return;FWF={id:x.id,title:x.title,plan:x.plan,wd:(x.weekdays||[]).slice(),dt:(x.on_dates||[]).slice(),st:x.start_time,en:x.end_time,on:x.enabled};admFreeDraw(j,"");scrollTo(0,0);b.scrollTop=0;return}
-  const tg=e.target.closest("[data-tg]");if(tg){const x=j.items[+tg.dataset.tg];if(!x)return;tg.disabled=true;const r=await admCall("admin_fw_save",{p_id:x.id,p_title:x.title,p_plan:x.plan,p_weekdays:x.weekdays,p_on_dates:x.on_dates,p_start:x.start_time,p_end:x.end_time,p_enabled:!x.enabled});if(r.ok)redo(x.enabled?"Turned off.":"Turned on.");else{tg.disabled=false;say(fwErr(r))}return}
-  const dl=e.target.closest("[data-del]");if(dl){const x=j.items[+dl.dataset.del];if(!x)return;uiConfirm("Delete this schedule?",async()=>{const r=await admCall("admin_fw_delete",{p_id:x.id});if(r.ok){if(FWF.id==x.id)FWF=fwNew();redo("Deleted.")}else uiAlert("Could not delete. Try again.")},"Delete");return}
+  const ed=e.target.closest("[data-ed]");if(ed){const x=j.items[+ed.dataset.ed];if(!x)return;FWF={id:x.id,title:x.title,plan:x.plan,wd:(x.weekdays||[]).slice(),dt:(x.on_dates||[]).slice(),st:x.start_time,en:x.end_time,on:x.enabled,rec:x.recurring!==false};admFreeDraw(j,"");scrollTo(0,0);b.scrollTop=0;return}
+  const tg=e.target.closest("[data-tg]");if(tg){const x=j.items[+tg.dataset.tg];if(!x)return;tg.disabled=true;const r=await admCall("admin_fw_save",{p_id:x.id,p_title:x.title,p_plan:x.plan,p_weekdays:x.weekdays,p_on_dates:x.on_dates,p_start:x.start_time,p_end:x.end_time,p_enabled:!x.enabled,p_recurring:x.recurring!==false});if(r.ok){try{syncPlan()}catch(z){}redo(x.enabled?"Turned off.":"Turned on.")}else{tg.disabled=false;say(fwErr(r))}return}
+  const dl=e.target.closest("[data-del]");if(dl){const x=j.items[+dl.dataset.del];if(!x)return;uiConfirm("Delete this schedule?",async()=>{const r=await admCall("admin_fw_delete",{p_id:x.id});if(r.ok){if(FWF.id==x.id)FWF=fwNew();try{syncPlan()}catch(z){}redo("Deleted.")}else uiAlert("Could not delete. Try again.")},"Delete");return}
   const sv=e.target.closest("[data-a=save]");if(!sv)return;fwRead();
-  if(!FWF.wd.length&&!FWF.dt.length){say("Choose at least one weekday or one date.");return}
-  if(FWF.st>=FWF.en){say("The end time must be after the start time.");return}
+  if(!FWF.wd.length&&!FWF.dt.length){say("Choose at least one day.");return}
   sv.disabled=true;say("Saving…");
-  const r=await admCall("admin_fw_save",{p_id:FWF.id||null,p_title:FWF.title.trim(),p_plan:FWF.plan,p_weekdays:FWF.wd.slice().sort(),p_on_dates:FWF.dt,p_start:FWF.st,p_end:FWF.en,p_enabled:FWF.on!==false});
+  const r=await admCall("admin_fw_save",{p_id:FWF.id||null,p_title:FWF.title.trim(),p_plan:FWF.plan,p_weekdays:FWF.wd.slice().sort(),p_on_dates:FWF.dt,p_start:FWF.st,p_end:FWF.en,p_enabled:FWF.on!==false,p_recurring:FWF.rec!==false});
   if(!r.ok){sv.disabled=false;say(fwErr(r));return}
-  const was=FWF.id;FWF=fwNew();try{syncPlan()}catch(x){}redo(was?"Saved.":"Saved. It runs automatically on those days.")}}
+  const was=FWF.id,n=fwMin(FWF.st,FWF.en);FWF=fwNew();try{syncPlan()}catch(x){}redo((was?"Saved. ":"Saved. ")+"Duration "+fwDur(n)+". It is working now for all users.")}}
 
 /* REFERRALS (admin): every referral in one list, with Cancel and Restore. The database does the work (admin_ref_list, admin_ref_cancel, admin_ref_restore); this screen only shows the list and sends the owner's choice. */
 let RFF="all",RFQ="",RFX=null,RFJ=null;
@@ -7798,6 +7828,8 @@ function snap(){const o=JSON.parse(JSON.stringify(D,function(k,v){return(this===
  const p={v:1,D:o,x};if(JSON.stringify(p).length>2400000){o.chats.sort((a,b)=>(b.ut||0)-(a.ut||0));while(JSON.stringify(p).length>2300000&&o.chats.length>1)o.chats.pop()}return p}
 function mergeIn(p){const r={took:false,extra:false};if(!p||!p.D)return r;const s=p.D,x=p.x||{};D.gone=D.gone||{};
  Object.keys(s.gone||{}).forEach(k=>{if((D.gone[k]||0)<s.gone[k])D.gone[k]=s.gone[k]});
+ D.lib=D.lib||[];D.libGone=D.libGone||{};Object.keys(s.libGone||{}).forEach(k=>{if((D.libGone[k]||0)<s.libGone[k])D.libGone[k]=s.libGone[k]});
+ {const li=new Map(D.lib.map(x=>[x.id,x])),n0=li.size;(s.lib||[]).forEach(x=>{if(!li.has(x.id))li.set(x.id,x)});D.lib=[...li.values()].filter(x=>!((D.libGone[x.id]||0)>=x.sv));if(D.lib.length!=n0)r.took=true;if(D.lib.length!=(s.lib||[]).length)r.extra=true}
  const mp=new Map(),sm=new Map();D.chats.forEach(c=>mp.set(String(c.id),c));(s.chats||[]).forEach(c=>sm.set(String(c.id),c));
  sm.forEach((sc,id)=>{const g=D.gone[id]||0;if(g&&g>=(sc.ut||0))return;const lc=mp.get(id);
   if(!lc){if(sc.msgs&&sc.msgs.length){mp.set(id,sc);r.took=true}}
@@ -7934,6 +7966,7 @@ function detect(q){
 const MN=k=>(MODELS[k]&&MODELS[k].n)||k;
 /* what to do for this plan: pass | upsell | ask | auto */
 function decide(q){
+ return{act:"pass"}; /* models are never detected or switched automatically: the learner picks Teacher, Examiner or Philosopher */
  const r=detect(q),cur=modelName();if(!r||r.model===cur)return{act:"pass"};
  const pl=planName(),al=PMOD[pl]||PMOD.Free;
  if(pl==="Free"||pl==="Basic")return{act:"upsell",to:r.model};   /* never blocked, never forced */
@@ -8069,7 +8102,7 @@ async function bankAdmin(){
   const id=(a||b).dataset.ap||(a||b).dataset.rj;await rpc("bank_set_status",{p_t:tok(),p_id:id,p_status:a?"approved":"rejected"});bankAdmin()});
 }
 window.QBX={learn,serve,detect,decide,topup,bankAdmin};
-window.amdToggle=function(){D.amd=!(D.amd!==false);D.mt=Date.now();try{save()}catch(e){}try{generalPage()}catch(e){}};
+window.amdToggle=function(){return;D.amd=!(D.amd!==false);D.mt=Date.now();try{save()}catch(e){}try{generalPage()}catch(e){}};
 })();
 </script>
 </body></html>

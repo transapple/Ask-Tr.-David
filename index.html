@@ -2164,7 +2164,7 @@ function settings0(){
  showP("Settings",`
  <div class="row" data-a="ex"><span class="ri">${IC.dl}</span><div>Export chat<small>Download as a text file</small></div></div>
  <div class="row" data-a="tr"><span class="ri">${IC.bin}</span><div>Trash<small>${D.trash.length} message${D.trash.length==1?"":"s"}</small></div></div>
- <div class="row" data-a="md"><span class="ri">${IC.star}</span><div>Teaching styles<small>Which model is best for lessons, exams and research</small></div></div>
+ <div class="row" data-a="md"><span class="ri">${IC.star}</span><div>Teaching identity<small>${identLabel(planName())}</small></div></div>
  ${isOwner()?`<div class="row" data-a="wk"><span class="ri">${IC.star}</span><div>Preview rating pop-up<small>See what learners get when you send it (nothing is sent)</small></div></div>`:""}
  <div class="row" data-a="up"><span class="ri">${IC.refresh}</span><div>Update app<small>Reload to get the latest version</small></div></div>
 `,closeP,e=>{
@@ -2220,7 +2220,7 @@ function hub(){HUB=true;HBACK=null;
  const apv=D.theme=="dark"?"Dark":D.theme=="light"?"Light":"System",acn=(ACC.find(a=>a[0]==D.acc)||ACC[0])[1];
  const apO=HO=="ap"?`<div class="dd">${[["","System"],["light","Light"],["dark","Dark"]].map(o=>`<div data-o="ap:${o[0]}" class="${(D.theme||"")==o[0]?"on":""}">${o[1]}<span>✓</span></div>`).join("")}</div>`:"";
  const acO=HO=="ak"?`<div class="dd">${ACC.map(o=>`<div data-o="ak:${o[0]}" class="${D.acc==o[0]?"on":""}"><b class="dot" style="background:${o[0]}"></b>${o[1]}<span>✓</span></div>`).join("")}</div>`:"";
- showP("Account",`<div class="hh"><div class="hav"><div class="hpic" style="background:url(${AVATAR}) center/cover"></div><button class="hpe" data-a="pf" aria-label="Edit profile">${HI.pen}</button></div><div class="hnm">${esc(D.name)}</div><div class="hsub">${m.username?"@"+esc(m.username)+" · ":""}${pn} plan</div></div>
+ showP("Account",`<div class="hh"><div class="hav"><div class="hpic" style="background:url(${AVATAR}) center/cover"></div><button class="hpe" data-a="pf" aria-label="Edit profile">${HI.pen}</button></div><div class="hnm">${esc(D.name)}</div><div class="hsub">${m.username?"@"+esc(m.username)+" · ":""}${identLabel(pn)}</div></div>
  ${h_hd("My Ask Tr. David")}${h_grp(h_row("lib",HI.lib,"My library")+h_row("gd",HI.ab,"How to use Ask Tr. David")+h_row("pz",HI.pz,"Personalization")+h_row("mem",HI.mem,"Memory"))}
  ${h_hd("Account")}${h_grp(h_row("up",HI.up,"Upgrade plan",{c:"var(--green)"})+h_row("rf",HI.star,"Refer and earn")+h_row("us",HI.us,"Usage and limits")+h_row("cl",HI.cls,"Class",{v:D.cls?esc(D.cls):"Not chosen"})+(m.username?h_row("un",HI.user,"Username",{v:esc(m.username),n:1,x:1}):""))}
  ${h_grp(h_row("ap",HI.sun,"Appearance",{v:apv,d:1})+apO+h_row("ak",HI.pal,"Accent color",{v:`<b class="dot" style="background:${D.acc||"#00a884"}"></b>${acn}`,d:1})+acO)}
@@ -2288,7 +2288,7 @@ function guidePage(fromChat){
  <h4>Check yourself</h4><p>After each answer say \"Quiz me\". If you cannot answer, ask for the part you missed.</p>
  <h4>Save what helps</h4><p>Tap <b>Save</b> under an answer to keep it in My library. Tap <b>Like</b> on answers that helped you.</p>
  <h4>Use Redo</h4><p>If the answer is hard to follow, tap <b>Redo</b>. I write it again in a new style: a story, steps, questions and answers, an everyday picture, or the exam view. Tap again for another style.</p>
- <h4>Teaching styles</h4><p>In Account, then General, then Teaching styles, you can choose how I teach: Teacher (simple words), Tutor (step by step), Lecturer (exact terms), Mentor (exam coaching), and more. Pick the one that helps you most.</p>`)+
+ <h4>Teaching identity</h4><p>Your plan decides how I teach: Free \u2014 Learning Assistant (short, clear answers), Basic \u2014 Teacher (classroom-style lessons), Standard \u2014 Tutor (step-by-step personal help) and Premium \u2014 Lecturer (the deepest explanations). You can see yours in Account, then General, then Teaching identity.</p>`)+
  D_("7. How to ask in each subject",
  `<h4>Mathematics</h4><p>Type the full question with all numbers and units. Say: \"Show the full working.\" Ask \"Check my answer: ...\" to compare yours. Ask \"Show another example like this.\" Write powers as x^2, roots as sqrt(x), fractions as a/b.</p>
  <h4>Physics</h4><p>Name the law or quantity. Give the numbers and units. Ask: \"State the formula, then solve.\" For experiments ask: \"Describe the experiment and the results.\"</p>
@@ -2371,7 +2371,7 @@ function usagePage(){HBACK=null;const q=FQ(),pn=planName(),rk={Free:0,Basic:1,St
  const pct=Math.min(100,Math.round(q.used/Math.max(1,q.cap)*100));
  h_page("Usage and limits",curPlan(q)+(pn=="Free"?`<div style="padding:4px 24px 8px"><div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:8px"><span>Words used</span><b>${q.used.toLocaleString()} of ${q.cap.toLocaleString()}</b></div><div style="height:10px;border-radius:10px;background:var(--line);overflow:hidden"><i style="display:block;height:100%;width:${pct}%;background:var(--green)"></i></div></div>`:`<div class="t" style="padding:4px 24px 8px">No word limit on your plan.</div>`)+h_hd("What your plan includes")+h_grp(F.map(f=>h_row("x",f[1]<=rk?h_svg('<path d="M5 12.5l4.5 4.5L19 7.5"/>'):h_svg('<path d="M6 6l12 12M18 6L6 18"/>'),f[0],{v:f[1]<=rk?"Included":"Needs "+NM[f[1]],n:1,x:1})).join(""))+(pn=="Premium"?"":h_grp(h_row("up",HI.up,"Upgrade plan",{c:"var(--green)"}))),hub,e=>{if(e.target.closest("[data-a=up]")){HBACK=usagePage;plans(1)}})}
 function generalPage(){HBACK=null;
- h_page("General",h_grp(h_row("tx",HI.eye,"Text size and contrast")+h_row("fo",HI.font,"Font style")+h_row("md",HI.star,"Teaching styles",{s:"Choose yourself: Teacher for lessons, Examiner for exams and questions, Philosopher for research and deep thinking"})+(isOwner()?h_row("qb",HI.star,"Question bank",{s:"Coverage and questions waiting for your check"}):"")+h_row("up",HI.gen,"Update app",{s:"Reload to get the latest version"})+(isOwner()?h_row("wk",HI.star,"Preview rating pop-up",{s:"See what learners get (nothing is sent)"}):"")),hub,e=>{
+ h_page("General",h_grp(h_row("tx",HI.eye,"Text size and contrast")+h_row("fo",HI.font,"Font style")+h_row("md",HI.star,"Teaching identity",{s:identLabel(planName())+": set by your plan"})+(isOwner()?h_row("qb",HI.star,"Question bank",{s:"Coverage and questions waiting for your check"}):"")+h_row("up",HI.gen,"Update app",{s:"Reload to get the latest version"})+(isOwner()?h_row("wk",HI.star,"Preview rating pop-up",{s:"See what learners get (nothing is sent)"}):"")),hub,e=>{
   const a=e.target.closest("[data-a]")?.dataset.a;if(!a)return;HBACK=generalPage;
   if(a=="tx")access();if(a=="fo")fontStyle();if(a=="md")modelsGuide();if(a=="amd")amdToggle();if(a=="qb")QBX.bankAdmin();if(a=="up")updateApp();if(a=="wk")wkShow(1)})}
 function notifPage(){HBACK=null;
@@ -2394,7 +2394,7 @@ function historyPage(){HBACK=null;
   if(a=="hi")chatHistory();if(a=="sv"){HBACK=historyPage;saved()}if(a=="ex")exportChat();if(a=="tr"){HBACK=historyPage;sel.clear();trash()}
   if(a=="cc")uiConfirm("Move all messages in this chat to Trash?",()=>{if(D.msgs.length){toTrash(D.msgs.slice());D.msgs.length=0;stopEdit();save();render()}historyPage()},"Clear")})}
 function aboutPage(){HBACK=null;
- h_page("About us",`<div class="hh" style="padding-top:20px"><div class="hav"><div class="hpic" style="background:url(${AVATAR}) center/cover"></div></div><div class="hnm">Ask Tr. David</div><div class="hsub">Everything About Your Studies · Version 1.0</div></div><div class="doc"><h3>Who we are</h3><p>Ask Tr. David is a study helper made by Tr. David (Teacher David). It is built for learners who want clear, honest help with school work at any time of day.</p><h3>What you can do</h3><p>Ask any question about your studies, get revision notes, see worked steps, take short quizzes and research a topic. You can type or speak your question.</p><h3>For your level</h3><p>Choose your class and the app answers for Primary, O-Level or A-Level. Four study models, Malumalu, Teacher, Examiner and Philosopher, give you the right kind of answer for quick answers, lessons, exams and research.</p><h3>Plans</h3><p>Everyone starts on the Free plan. Basic, Standard and Premium unlock more models and features. See Upgrade plan for prices and how to pay.</p><h3>Contact</h3><p>Call or WhatsApp 0788 737 517, or email asktrdavid@gmail.com. You can also write to Tr. David from inside the app.</p></div>`+h_grp(h_row("pv",HI.sf,"Privacy policy")+h_row("tc",HI.doc,"Terms and conditions")+h_row("sp",HI.chat,"Contact Tr. David")+h_row("cu",HI.call,"Call, WhatsApp or email")),hub,e=>{
+ h_page("About us",`<div class="hh" style="padding-top:20px"><div class="hav"><div class="hpic" style="background:url(${AVATAR}) center/cover"></div></div><div class="hnm">Ask Tr. David</div><div class="hsub">Everything About Your Studies · Version 1.0</div></div><div class="doc"><h3>Who we are</h3><p>Ask Tr. David is a study helper made by Tr. David (Teacher David). It is built for learners who want clear, honest help with school work at any time of day.</p><h3>What you can do</h3><p>Ask any question about your studies, get revision notes, see worked steps, take short quizzes and research a topic. You can type or speak your question.</p><h3>For your level</h3><p>Choose your class and the app answers for Primary, O-Level or A-Level. Four teaching identities, Learning Assistant, Teacher, Tutor and Lecturer, match your plan and give you the right depth of teaching.</p><h3>Plans</h3><p>Everyone starts on the Free plan. Basic, Standard and Premium unlock deeper teaching and more features. See Upgrade plan for prices and how to pay.</p><h3>Contact</h3><p>Call or WhatsApp 0788 737 517, or email asktrdavid@gmail.com. You can also write to Tr. David from inside the app.</p></div>`+h_grp(h_row("pv",HI.sf,"Privacy policy")+h_row("tc",HI.doc,"Terms and conditions")+h_row("sp",HI.chat,"Contact Tr. David")+h_row("cu",HI.call,"Call, WhatsApp or email")),hub,e=>{
   const a=e.target.closest("[data-a]")?.dataset.a;if(!a)return;HBACK=aboutPage;
   if(a=="pv")privacyPage();if(a=="tc")termsPage();if(a=="sp")supportOpen();if(a=="cu")contactUs()})}
 function libAll(){libSync();const o={sv:(D.lib||[]).slice().sort((a,b)=>b.sv-a.sv),lk:[],sh:[]};D.chats.forEach(c=>c.msgs.forEach(m=>{if(m.s!="i"||m.err)return;if(m.fb==1)o.lk.push(m);if(m.sh)o.sh.push(m)}));o.sh.sort((a,b)=>b.sh-a.sh);return o}
@@ -5343,36 +5343,12 @@ async function dbAnswer(q,mode){
  else if(pl=="Standard"){const[a,s]=await Promise.all([get("answer"),get("simpler")]);r=a||s;if(a&&s)t=txt(a)+"\n## In simple words\n"+s.body_md;else if(r)t=txt(r)}
  else{const[d,a]=await Promise.all([get("detail"),get("answer")]);r=d||a;if(r)t=txt(r)}
  let st2=null;if(r&&!mode){try{st2=AASE.enforce(t,window.AASE_LAST)}catch(e){}}return r?{t:mode?t:(st2||modelFromMd(t)),aid:r.answer_id,fmt:mode?0:1,aase:st2?1:undefined}:null}
-/* NEW QUESTIONS: ask the ai_answer Edge Function. Gemini writes the answer once and it is saved as a draft in Supabase.
- The reply is built by tiered() so it follows the learner's plan; draft answers get the "AI generated, not yet checked" label. */
-const AIU=SBU.replace("/rest/v1/","/functions/v1/")+"ai_answer_v3",escRex=x=>x.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+/* NEW QUESTIONS. The old ai_answer, ai_answer_v2 and ai_answer_v3 answering code was removed on 2026-11-14 (answer engine version 4).
+   Chemistry (UCE and UACE) is answered by chem_coach through askChem. Other subjects have no AI engine yet: aiAnswer returns nothing and the learner is told so. */
+const escRex=x=>x.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
 const fullQ=q=>String(q||"").trim().slice(0,8000);
-let AIWHY="";const AIU1=AIU.replace("ai_answer_v3","ai_answer_v2");
-async function aiAnswer(q,FUx,loose){
- AIWHY="";const c=new AbortController(),tm=setTimeout(()=>c.abort(),loose?25000:58000);
- try{
-  const sub=loose==2?"General":(D.sub=="General"?(detectSub(q)||"General"):D.sub);
-  const bd=JSON.stringify({full_question:fullQ(q),answer_spec:"v3",no_svg:true,question:String(q).slice(0,300),level:D.lvl,class:loose==2?"":String(D.cls||"").replace(/^Primary /,"P").replace(/^Senior /,"S"),subject:sub,topics:curHint(q),plan:planName(),curriculum:"Uganda NCDC",strict_subject:!loose,retry:loose?true:undefined,brief:!wantFull()||modelName()=="malumalu",...svMe(),blueprint:bpCtx(q),format_rules:(()=>{try{return AASE.prompt(window.AASE_LAST)||LESSON_RULES}catch(e){return LESSON_RULES}})(),academic:(()=>{try{return AASE.brief(window.AASE_LAST)}catch(e){return undefined}})(),follow:FUx&&!FUx.local?{kind:FUx.kind,topic:FUx.topic,step:FUx.step||0,instruction:FUx.hint||"",previous:lastAnsText()}:undefined});
-  const hd={apikey:SBK,"Content-Type":"application/json"};
-  let r=await fetch(AIU,{method:"POST",signal:c.signal,headers:hd,body:bd});
-  if(!r.ok&&(r.status==404||r.status>=500)){try{const r2=await fetch(AIU1,{method:"POST",signal:c.signal,headers:hd,body:bd});if(r2.ok)r=r2}catch(e){}}
-  if(!r.ok){AIWHY="http "+r.status;return null}
-  let j;try{j=await r.json()}catch(e){AIWHY="bad reply";return null}
-  if(j.status=="busy")return{busy:1};
-  if(j.status=="found"&&j.kind=="answer"&&j.answer&&j.answer.body_md){const a=j.answer,md0=/^\s*#/.test(a.body_md)?a.body_md:"# "+a.title+"\n"+a.body_md;let st=null;try{if(!FUx)st=AASE.enforce(md0,window.AASE_LAST)}catch(e){}return{t:st||modelFromMd(md0),aid:a.answer_id,fmt:1,aase:st?1:undefined,lv:a.level||null}}
-  const t=(j.status=="created"||(j.status=="found"&&j.kind=="topic"))?j.topic:null;
-  if(!t||!t.name||!t.definition){AIWHY="no answer: "+(j.status||"empty");return null}
-  const dr=j.status=="created"||j.draft===true;
-  const T={n:String(t.name),re:new RegExp(escRe(String(q).trim().toLowerCase())),d:t.definition,h:t.steps||"",w:t.uses||"",s:t.simple||"",e:t.examples||"",m:t.more||"",q:Array.isArray(t.quiz)?t.quiz:[],a:t.label_steps||"How to work it out",b:t.label_uses||"Where it is used",nd:0,S:[sub],L:[D.lvl],ai:dr?1:0,tid:t.id||null,sl:t.syllabus_level||null,cls:t.class_label||null};
-  let f=null;if(!FUx&&t.layout_md){try{const A0=window.AASE_LAST,same=!t.layout_id||(A0&&A0.format&&A0.format.id===t.layout_id),st=same?AASE.enforce(String(t.layout_md),A0):null;if(st)f={t:st,fmt:1,aase:1}}catch(e){}}
-   if(!f)f=tiered(q,T);if(!f){AIWHY="no answer: format";return null}
-  /* keep it for this session so "explain simpler", "give an example" and "quiz me" work on it */
-  if(!FUx)TOP.push(T);const ax=TOP.filter(x=>x.ai!=null&&x.re&&x.db==null);if(ax.length>30)TOP.splice(TOP.indexOf(ax[0]),1);
-  if(dr)f.ai=1;if(T.tid)f.tid=T.tid;if(T.sl){f.lv=T.sl;f.cls=T.cls}
-  if(t.filed&&/^S[1-4]$/.test(t.filed.class||"")&&t.filed.topic)f.filed=t.filed;
-  return f
-
- }catch(e){AIWHY=e&&e.name=="AbortError"?"timeout":(navigator.onLine?"net":"offline");return null}finally{clearTimeout(tm)}}
+let AIWHY="";
+async function aiAnswer(q,FUx,loose){AIWHY="v4";return null}
 /* READING TIME: from the moment an answer is shown until the learner asks the next question, leaves the app or locks the screen. Only time with the app on screen counts, each stretch is capped at 10 minutes, and the server stores it per question. */
 let RDM=null,RDT=0,RDS=0;
 function rdSend(){if(!RDM)return;if(RDT){RDS+=Date.now()-RDT;RDT=0}const m=RDM,secs=Math.min(600,Math.round(RDS/1000));RDM=null;RDS=0;if(secs<3)return;try{const t=tokNow();if(!t)return;fetch(SBU+"rpc/log_read_time",{method:"POST",keepalive:true,headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_t:t,p_q:m.q,p_sub:m.sub,p_lvl:m.lvl,p_secs:secs})}).catch(()=>{})}catch(e){}}
@@ -5400,7 +5376,7 @@ let REDOING=0;
 async function redoReply(i){
  const m=D.msgs[i];if(!m||REDOING)return true;
  const q=String(m.q||"").replace(/\s+/g," ").trim(),prev=String(m.t||"");
- if(m.s!="i"||m.err||m.note||m.lim||m.quiz||m.qz||m.w||m.mode||m.stream||prev.length<20||q.length<3||q.length>300||!navigator.onLine)return false;
+ if(m.s!="i"||m.err||m.note||m.lim||m.quiz||m.qz||m.w||m.mode||m.chem||m.stream||prev.length<20||q.length<3||q.length>300||!navigator.onLine)return false;
  try{gdSense("redo")}catch(e){}
  if(capped()){limitMsg();return true}
  REDOING=1;const st=$("stat"),old=st.textContent;st.textContent="writing another way…";
@@ -5627,7 +5603,7 @@ function bub(m,i,last){
  if(m.w&&m.w.parts&&!m.stream)m.t=wBuild(m);
  const A=[["copy","Copy"],["bm",m.bm?"Saved":"Save",m.bm],["up","Helpful",m.fb==1],["dn","Not helpful",m.fb==-1],["share","Share"]];
  const NQ=(!m.stream&&!m.quiz&&!m.note)?nqSplit(m.t):{t:m.t,nq:false};
- let h=`<div class="b i ai" data-i="${i}">${m.mdl?`<div class="mdltag">${esc(m.mdl)}</div>`:""}${exHtml(m,i)||`<div class="md">${last&&!m.stream&&!m.quiz?hlWrap(md(NQ.t)):md(NQ.t)}</div>${dgAuto(m)}`}`;
+ let h=`<div class="b i ai" data-i="${i}">${m.mdl?`<div class="mdltag">${esc(mdlShow(m.mdl))}</div>`:""}${exHtml(m,i)||`<div class="md">${last&&!m.stream&&!m.quiz?hlWrap(md(NQ.t)):md(NQ.t)}</div>${dgAuto(m)}`}`;
  if(m.quiz){h+=m.quiz[1].map((o,k)=>`<button class="opt ${m.pick!=null?(k==m.quiz[2]?"ok":k==m.pick?"bad":""):""}" data-act="pick" data-i="${i}" data-k="${k}">${md(o).replace(/^<p>|<\/p>$/g,"")}</button>`).join("")+(m.pick!=null?`<p>${m.pick==m.quiz[2]?"Correct, well done.":"Not quite. The correct answer is highlighted."}</p>`+(m.qz?(m.qz.n<m.qz.list.length-1?`<div class="chips"><button data-act="nq" data-i="${i}">Next question</button></div>`:`<p><b>Quiz finished: ${m.qz.score} out of ${m.qz.list.length}.</b></p>`):""):"")}
  let act="";
  if(last&&!m.stream&&!m.quiz){const P=abPlan(m.t,m.q),cb=(x,c)=>x.map(y=>`<button${c?` class="${c}"`:""} data-st="${stAttr(y.q)}">${esc(y.lab)}</button>`).join("");
@@ -5650,6 +5626,9 @@ function rtime(){const q=FQ();if(q.left==null)return"";if(!q.at){q.at=Date.now()
 const PLANS4=["Free","Basic","Standard","Premium"],PCOL={Free:"#6b7c85",Basic:"#2f80ed",Standard:"#00a884",Premium:"#8b5cf6"},PVER={Free:"1.0",Basic:"1.0",Standard:"1.0",Premium:"1.0"},
 PK=()=>"ask_planv2_"+((window.AK&&AK.me()&&AK.me().username)||"");
 function planName(){try{const p=localStorage.getItem(PK());return PLANS4.includes(p)?p:"Free"}catch(e){return"Free"}}
+/* TEACHING IDENTITIES: the plan decides the identity. There is no model switch. The real plan is checked on the server (chem_coach reads it from the login token). */
+const IDENT={Free:"Learning Assistant",Basic:"Teacher",Standard:"Tutor",Premium:"Lecturer"},identLabel=p=>{p=PLANS4.includes(p)?p:"Free";return p+" \u2014 "+IDENT[p]},
+mdlShow=t=>{t=String(t||"");const m=t.match(/^(Malumalu|Teacher|Examiner|Philosopher) \d+\.\d+$/);return m?(m[1]=="Malumalu"?IDENT.Free:IDENT[planName()]):t};
 /* ===== TRANSAPPLE EDUCATION AI v1.0: TEN MODELS =====
  Free: Teacher, Examiner. Basic: + Tutor, Instructor. Standard: + Lecturer, Researcher. Premium: + Professor, Mentor, Librarian, Philosopher.
  Every model has its own answer format. Depth = the model's rank in its group + the plan bonus, so inside one plan the higher model gives more
@@ -5662,7 +5641,7 @@ const MODELS={
  philosopher:{n:"Philosopher",g:"Research & Academic Writing",r:3,p:"Premium",v:"1.1",d:"Research questions, evidence and write-up"}};
 /* PLAN SPEC: exactly what each plan includes. Same model, different version and description per plan. */
 const PTAG={Free:"",Basic:"TEACHING & LESSONS",Standard:"EXAMINATIONS & REVISION",Premium:"RESEARCH & ACADEMIC WRITINGS"},
-PMOD={Free:["malumalu"],Basic:["teacher","examiner"],Standard:["teacher","examiner"],Premium:["teacher","examiner","philosopher"]},
+PMOD={Free:["malumalu"],Basic:["teacher"],Standard:["teacher"],Premium:["teacher"]},
 PSPEC={
  Free:{malumalu:["1.0",["Always brief and short","Doesn't provide detailed information; for quick short responses only","Limited to a specific rate"]]},
  Basic:{teacher:["1.2",["Explains lessons and teaches concepts"]],examiner:["1.0",["Exams questions, scenarios and marking guides","Sets questions to the UCE elements of construct"]]},
@@ -5673,7 +5652,7 @@ mdesc=(k,pl)=>((PSPEC[pl||planName()]||{})[k]||[0,[MODELS[k].d]])[1];
 const MGROUPS=["Teaching & Lessons","Examinations & Revision","Research & Academic Writing"],GCOL={"Quick Answers":"#6b7c85","Teaching & Lessons":"#00a884","Examinations & Revision":"#2f80ed","Research & Academic Writing":"#8b5cf6"},
 PORD={Free:0,Basic:1,Standard:2,Premium:3},PBONUS={Free:0,Basic:1,Standard:2,Premium:3},
 MK=()=>"ask_model_"+((window.AK&&AK.me()&&AK.me().username)||"");
-function modelName(){const al=PMOD[planName()]||PMOD.Free;let k=al[0];try{const x=localStorage.getItem(MK());if(x&&al.includes(x))k=x}catch(e){}return k}
+function modelName(){return(PMOD[planName()]||PMOD.Free)[0]}
 /* DEPTH LADDER: higher plan = fuller answer, and inside a plan the higher model = fuller answer. */
 const DEPTH={Free:{malumalu:1},Basic:{teacher:2,examiner:2},Standard:{teacher:3,examiner:3},Premium:{teacher:5,examiner:5,philosopher:7}},
 modelDepth=k=>((DEPTH[planName()]||{})[k])||1;
@@ -5971,30 +5950,13 @@ function modelText(N){const dg0=N&&N.dg;N=focusN(N)||N;const k=modelName(),d=mod
  c={T:N.n,P,L,cw,head:"# "+N.n+(N.cl?"\n"+N.cl:"")};cw.length<2&&cw.push("Explain");
  try{if(k=="malumalu"||!wantFull())return briefNotes(N,c);const o=FM[k](N,d,c);return dg0&&typeof o=="string"?o+"\n\n::diagram "+dg0:o}catch(e){return FM.teacher(N,1,c)}}
 const modelFromMd=t=>modelText(normMd(t));
-function modelPicker(){const cur=modelName(),pl=planName();
- let h='<div style="padding:10px 18px;color:var(--sub);line-height:1.4">Your plan: <b>'+pl+'</b>. Pick the model that answers you.</div>';
- if(PLAN_TEST_MODE&&isOwner())h+='<div class="row" data-chg="1"><div><b>Change plan (testing)</b><small>Only the owner account sees this</small></div></div>';
- if(PTAG[pl])h+='<div class="sec">'+PTAG[pl]+'</div>';
- PMOD[pl].forEach(k=>{const M=MODELS[k];
-  h+='<div class="row" data-m="'+k+'"><span style="width:10px;height:10px;border-radius:50%;background:'+GCOL[M.g]+';flex:none;margin-right:12px"></span><div><b>'+M.n+' '+mver(k)+'</b>'+(k==cur?' (in use)':'')+'<small>'+mdesc(k).map(esc).join('<br>')+'</small></div></div>'});
- if(pl!="Premium")h+='<div class="row" data-up="1"><div><b>See plans and subscribe</b><small>Unlock more on a higher plan</small></div></div>';
- showP("Choose model",h,closeP,e=>{if(e.target.closest("[data-chg]")){closeP();activatePlan();return}
-  if(e.target.closest("[data-up]")){closeP();plans();return}
-  const r=e.target.closest("[data-m]");if(!r)return;const k=r.dataset.m;
-  if(!PMOD[planName()].includes(k))return;
-  try{localStorage.setItem(MK(),k)}catch(x){}updPlan();closeP()})}
-
-const MGUIDE={"Teaching & Lessons":["Use these when you want to learn a topic, follow a lesson or understand a concept.","Teacher explains simply. Tutor helps with hard topics. Lecturer gives detailed academic teaching. Professor goes deepest, for advanced and complex topics."],
-"Examinations & Revision":["Use these when you are revising or getting ready for exams.","Examiner gives exam-style questions and marking guides. Instructor guides you through exercises. Mentor gives study and exam-preparation advice and answers the most."],
-"Research & Academic Writing":["Use these for research, projects and academic writing.","Researcher helps with research questions, evidence and write-up. Librarian finds and organises resources. Philosopher does deep reasoning and analysis."]};
+const IDROLE={Free:"Clear, concise help with the essential explanation.",Basic:"Classroom-style teaching with examples and clear explanations.",Standard:"Interactive, personalised teaching and guided practice.",Premium:"The deepest, most comprehensive academic teaching, adapted to your class."};
 function modelsGuide(){const pl=planName(),RK={Free:0,Basic:1,Standard:2,Premium:3};
- let h='<div style="padding:10px 18px;color:var(--sub);line-height:1.5">Ask Tr. David is an <b>academic intelligence system</b>. You are on the <b>'+pl+'</b> plan.</div>';
+ let h='<div style="padding:10px 18px;color:var(--sub);line-height:1.5">Your plan decides your teaching identity. You are on <b>'+identLabel(pl)+'</b>. Every plan gives correct, curriculum-based answers; higher plans teach in more depth with more support.</div>';
  PLANS4.forEach(P=>{const on=RK[P]<=RK[pl];
-  h+='<div class="sec">'+P.toUpperCase()+(PTAG[P]?' · '+PTAG[P]:'')+'</div>';
-  PMOD[P].forEach(k=>{const M=MODELS[k];
-   h+='<div class="row" style="cursor:default"><span style="width:10px;height:10px;border-radius:50%;background:'+GCOL[M.g]+';flex:none;margin-right:12px;opacity:'+(on?1:.35)+'"></span><div><b>'+M.n+' '+mver(k,P)+'</b> · '+(on?'<span style="color:#00a884">Available on your plan</span>':'Needs '+P+' plan')+'<small>'+mdesc(k,P).map(esc).join('<br>')+'</small></div></div>'})});
- h+='<div style="padding:14px 18px 24px"><button class="pcp" data-up="1" style="width:100%">See plans and subscribe</button></div>';
- showP("AI models",h,settings,e=>{if(e.target.closest("[data-up]"))plans(1)})}
+  h+='<div class="row" style="cursor:default"><span style="width:10px;height:10px;border-radius:50%;background:'+PCOL[P]+';flex:none;margin-right:12px;opacity:'+(on?1:.35)+'"></span><div><b>'+identLabel(P)+'</b>'+(P==pl?' · <span style="color:#00a884">Your plan</span>':(on?'':' · Needs '+P+' plan'))+'<small>'+esc(IDROLE[P])+'</small></div></div>'});
+ if(pl!="Premium")h+='<div style="padding:14px 18px 24px"><button class="pcp" data-up="1" style="width:100%">See plans and subscribe</button></div>';
+ showP("Teaching identity",h,settings,e=>{if(e.target.closest("[data-up]"))plans(1)})}
 
 /* MODEL STYLE: the stored answer is one text for everyone. The ai_style function rewrites it in the chosen model's own writing style
  (how it summarises, analyses and describes). This has nothing to do with the microphone.
@@ -6131,7 +6093,7 @@ PIC={Free:'<svg viewBox="0 0 24 24"><path d="M5 19c0-8 5-13 14-14 0 9-5 14-14 14
 Basic:'<svg viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>',
 Standard:'<svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg>',
 Premium:'<svg viewBox="0 0 24 24"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/></svg>'};
-function updPlan(){const k=modelName(),M=MODELS[k],l=document.getElementById("psl"),r=document.getElementById("psr");if(l)l.innerHTML='<i style="background:'+GCOL[M.g]+'"></i><b>'+M.n+'</b>';if(r){const pn=planName();r.innerHTML='<span class="pic'+(pn=="Premium"?" fill":"")+'" style="color:'+(PICOL[pn]||"#6b7c85")+'">'+(PIC[pn]||PIC.Free)+'</span><b>'+pn+'</b>';r.setAttribute("aria-label","Your plan: "+pn)}const sp=document.getElementById("pss");if(sp){const on=!!D.lock&&D.sub!="General";sp.innerHTML='<svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2zM4 19V5M9 7h6"/></svg><b>'+(on?esc(D.sub):"Subject")+"</b>";sp.classList.toggle("on",on);sp.setAttribute("aria-label",on?"Subject: "+D.sub+". Tap to change":"Choose subject");const ip=document.getElementById("inp");if(ip)ip.placeholder=on?"Ask a "+D.sub+" question":"Ask questions, make research"}}
+function updPlan(){const k=modelName(),M=MODELS[k],l=document.getElementById("psl"),r=document.getElementById("psr");if(l)l.innerHTML='<i style="background:'+(PCOL[planName()]||"#6b7c85")+'"></i><b>'+identLabel(planName())+'</b>';if(r){const pn=planName();r.innerHTML='<span class="pic'+(pn=="Premium"?" fill":"")+'" style="color:'+(PICOL[pn]||"#6b7c85")+'">'+(PIC[pn]||PIC.Free)+'</span><b>'+pn+'</b>';r.setAttribute("aria-label","Your plan: "+pn)}const sp=document.getElementById("pss");if(sp){const on=!!D.lock&&D.sub!="General";sp.innerHTML='<svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2zM4 19V5M9 7h6"/></svg><b>'+(on?esc(D.sub):"Subject")+"</b>";sp.classList.toggle("on",on);sp.setAttribute("aria-label",on?"Subject: "+D.sub+". Tap to change":"Choose subject");const ip=document.getElementById("inp");if(ip)ip.placeholder=on?"Ask a "+D.sub+" question":"Ask questions, make research"}}
 /* PLAN LOCK: the plan is kept in the database (app_users.plan, default Free) and copied here after login.
  Nobody can switch it from the app except the owner account (username DAVID, checked in the database).
  Other accounts stay on Free until you mark their paid plan (admin page to be built). */
@@ -6164,17 +6126,17 @@ function activatePlan(){uiAlert("Your plan is set by the admin after payment.")}
 /* TESTING SWITCH: the chip at the bottom opens the model picker. While the app is being built the owner account also sees Change plan (Free, Basic, Standard, Premium)
  there, so every model can be tried on every plan. TO GO BACK TO THE REAL SUBSCRIPTION: set PLAN_TEST_MODE to false. The Change plan row then disappears. */
 const PLAN_TEST_MODE=false;
-document.getElementById("psl").onclick=()=>modelPicker();document.getElementById("psr").onclick=()=>plans(1);
+document.getElementById("psl").onclick=()=>modelsGuide();document.getElementById("psr").onclick=()=>plans(1);
 function limitMsg(){D.msgs.push({s:"i",lim:1,t:"**"+LIM+"**",ts:Date.now()});save();render()}
 function freeReset(){FQW({v:3,cap:newCap(),used:0,left:null,seen:Date.now()});const rm=a=>{for(let i=a.length;i--;)if(a[i].lim)a.splice(i,1)};rm(D.msgs);D.chats.forEach(c=>rm(c.msgs));D.msgs.push({s:"i",note:1,ok:1,t:"Your free plan has been reset. You can continue asking.",ts:Date.now()});save();render();const h=document.getElementById("plh");if(h){const l=h.querySelector(".cpl");if(l)l.innerHTML="Your free words have been reset."}}
 let _pn=performance.now();
 setInterval(()=>{const n=performance.now(),d=n-_pn;_pn=n;if(!(window.AK&&AK.me()))return;const q=FQ();if(q.left==null){if(q.used>=q.cap)capped();return}
  const w=Date.now()-q.seen;q.left-=(w>3000?w:d);q.seen=Date.now();if(q.left<=0){freeReset();return}FQW(q)},1000);
 function curPlan(q){const pn=planName(),col=PICOL[pn]||"#6b7c85",capped=pn=="Free"&&q.used>=q.cap;
- const MSG={Free:"You are on the Free plan. <b>Upgrade to Basic</b> to unlock Teacher and Examiner. Go <b>Standard</b> or <b>Premium</b> for more.",
-  Basic:"You are on Basic. <b>Upgrade to Standard</b> for Teacher 1.3 and Examiner 1.2, or <b>Premium</b> to add Philosopher.",
-  Standard:"Great choice! You are on Standard. <b>Upgrade to Premium</b> for advanced Teacher and Examiner, exam prediction guides and Philosopher.",
-  Premium:"<b>Full features available.</b> Every model answers at its fullest. Thank you for being a Premium learner. Enjoy learning without limits!"};
+ const MSG={Free:"You are on <b>Free \u2014 Learning Assistant</b>: clear, concise answers. <b>Upgrade to Basic</b> for classroom-style teaching with the Teacher, or go <b>Standard</b> or <b>Premium</b> for more.",
+  Basic:"You are on <b>Basic \u2014 Teacher</b>. <b>Upgrade to Standard</b> for the Tutor (interactive, personalised teaching) or <b>Premium</b> for the Lecturer (the deepest teaching).",
+  Standard:"Great choice! You are on <b>Standard \u2014 Tutor</b>. <b>Upgrade to Premium</b> for the Lecturer: the most comprehensive teaching.",
+  Premium:"<b>Premium \u2014 Lecturer.</b> You have the deepest, most comprehensive teaching. Thank you for being a Premium learner. Enjoy learning without limits!"};
  const lim=capped?`<div class="cpl">${LIM1}${rtime()?`<br>Your free plan resets at <b>${rtime()}</b>`:""}</div>`:"";
  return `<div class="cpn" id="plh" style="--a:${col}"><div class="cpt"><span class="cpi">${PIC[pn]||PIC.Free}</span><div><small>Your current plan</small><div class="cpm">${pn}</div></div></div><div class="cpx">${MSG[pn]||MSG.Free}${expLine()}</div>${lim}</div>`}
 /* ===== PAYMENT PROOF (screenshot upload) + WhatsApp confirmation ===== */
@@ -6236,7 +6198,7 @@ function momoBind(){const b=$("mmb");if(!b)return;const pl=$("mmp"),pd=$("mmd"),
    else{say(j&&j.message||"Could not start the payment. Try again.","var(--red,#d33)");b.disabled=false}}
   catch(e){say("Could not reach the server. Check your internet and try again.","var(--red,#d33)");b.disabled=false}}}
 function plans(fs){
- const q=FQ(),P=[["Basic","500","2,800","9,000","Teacher 1.2, Examiner 1.0","#2f80ed"],["Standard","750","4,550","16,500","Teacher 1.3, Examiner 1.2","#00a884"],["Premium","1,100","6,650","24,000","Teacher 1.3, Examiner 1.2, Philosopher 1.1","#8b5cf6"]],
+ const q=FQ(),P=[["Basic","500","2,800","9,000","Basic \u2014 Teacher","#2f80ed"],["Standard","750","4,550","16,500","Standard \u2014 Tutor","#00a884"],["Premium","1,100","6,650","24,000","Premium \u2014 Lecturer","#8b5cf6"]],
  cur=planName(),RK={Free:0,Basic:1,Standard:2,Premium:3},UP=P.filter(x=>RK[x[0]]>RK[cur]||(cur=="Premium"&&x[0]=="Premium"));
  showP("Upgrade plans",curPlan(q)+(UP.length?`<div class="sec">${cur=="Premium"?"YOUR PLAN":"UPGRADE PLANS"}</div>`:"")+
  UP.map(x=>`<div class="pc" style="--a:${x[5]}"><div class="pch"><i>${PIC[x[0]]}</i><b>${x[0]}</b>${x[0]==cur?'<span style="margin-left:auto;font-size:12px;font-weight:700;background:rgba(255,255,255,.25);padding:3px 10px;border-radius:12px">YOUR PLAN</span>':""}</div><div class="ptag">${x[4]}</div><div class="pst"><div><b>${x[1]}</b><span>Daily</span></div><div><b>${x[2]}</b><span>Weekly</span></div><div><b>${x[3]}</b><span>Monthly</span></div></div></div>`).join("")+
@@ -6901,11 +6863,94 @@ function bpHandle(q){const s=String(q||"");if(s.length>400)return false;const t=
  const S=S0||bpSubj(t,1);let bt=S?bpText(S):bpMaster();
  if(PRANK[planName()]<1){bt=String(bt).split("\n").slice(0,14).join("\n");push({t:bt,bp:1});D.msgs.push({s:"i",note:1,up:1,t:SOFT_UP(),ts:Date.now()});save();render();return true}
  push({t:bt,bp:1});return true}
+/* ===== CHEMISTRY COACH (Item 1-style revision, command words, scenario practice, answer coaching) =====
+   Spec: "Ask Teacher David, Complete Chemistry Revision & Item 1 Specification". Server: Edge Function chem_coach (prompt chem-v1.0).
+   The app only DECIDES the route and keeps the conversation state; the notes, command-word lessons, scenarios and coaching are written by chem_coach.
+   Only UCE learners in Chemistry (or a General chat that is clearly about one of the ten areas) are routed here, and only for the requests below.
+   Everything else (narrow questions, owner topics, quizzes, pasted scenarios without a coaching request) keeps using the existing pipeline unchanged.
+   Plan rules: CHEM_MIN says the lowest plan for each kind of request. Lower plans fall through to the existing pipeline (and its upgrade message).
+   Change a value here to move a feature to another plan. */
+const CHEM_MIN={question:"Free",summary:"Free",command_word:"Free",scenario:"Free",coach:"Free",practice:"Basic",attempt:"Basic",reveal:"Basic",example:"Standard",simpler:"Standard",more:"Premium",again:"Free",about:"Free"};
+const CHEM_RX=/\b(acids?|alkal(?:i|is|ine)|neutrali[sz]ation|ph scale|indicators?|antacids?|litmus|hard(?:ness| water)|soft water|water hardness|water treatment|soaps?|detergents?|scum|charcoal|carbonisation|carbon (?:monoxide|dioxide)|incomplete combustion|radioactiv\w*|radiation|nuclear|fission|fuels?|biogas|acid rain|greenhouse|air pollution|water pollution|soil pollution|filtration|distillation|crystalli[sz]ation|chromatography|separation of mixtures|periodic table|halogens|noble gases|chemical reactions?|word equations?|balanc\w+ equations?|item 1|item one|chemistry)\b/i;
+const CH_REVEAL=/\b(show|give|see|reveal|tell)( me)?( the)?( model)? (answers?|solution)|i give up|i (do not|don'?t) know|^\s*(skip|reveal|answer|answers)\s*[.!]?\s*$/i;
+const CH_CMD=/\b(command words?|(?:what|which) (?:does|do|is) (?:the )?(?:word )?(?:identify|state|explain|suggest|advise|calculate|discuss effects|describe|compare|distinguish|outline|classify|draw|label|write an equation)'? (?:mean|ask|want|require|expect)|what (?:does|do) (?:the )?examiners? (?:want|expect)|how (?:do|should|can) (?:i|we) answer (?:an? )?(?:identify|state|explain|suggest|advise|calculate|discuss(?: effects)?|describe|compare|distinguish|outline|classify|draw|label|write an equation)(?: question| type| command| task)?|meaning of (?:the )?(?:command word )?(?:identify|state|explain|suggest|advise|calculate|describe|compare|distinguish|outline|classify))\b/i;
+const CH_COACH=/\b(how (?:do|should|can|would|could) (?:i|we) (?:answer|approach|tackle|attempt|respond to|write)|help me (?:to )?(?:answer|understand how to answer)|guide me (?:to |on |through )?(?:answer|this)|teach me how to answer|how to answer (?:this|these|the following))\b/i;
+const CH_SCN=/\b(scenario|item 1|item one|letter[- ]writing|report (?:scenario|question))\b/i,CH_MAKE=/\b(give|create|generate|make|write|set|show|need|want|another|new|more|prepare)\b/i,CH_TRY=/\b(practi[sc]e|test me|let me (?:try|answer)|ask me|i want to (?:try|answer))\b/i;
+const CH_PRAC=/\b(practi[sc]e (?:question|questions|exam|item|scenario)|exam practice|ask me (?:a |an |another |one )?(?:question|one)|give me (?:a |another )?question to (?:try|answer))\b/i;
+const CH_SUM=/\b(summary|summari[sz]e|revision notes?|revise|revision|notes? (?:on|about|for)|everything (?:about|on)|all about|complete (?:notes|revision)|full (?:notes|revision))\b/i;
+function chemActive(){for(let i=D.msgs.length;i--;){const x=D.msgs[i];if(x.s=="i"&&!x.note&&!x.lim&&!x.err&&x.t){return x.chem||null}}return null}
+function chemAllowed(k){try{return PRANK[planName()]>=PRANK[CHEM_MIN[k]||"Free"]}catch(e){return true}}
+function chemIntent(q){
+ q=String(q||"").trim();if(q.length<2||q.length>6000)return null;
+ const lv=lvKey();if(lv!="UCE")return null;
+ const sub=D.sub,act=chemActive();
+ if(D.lock&&sub!="General"&&sub!="Chemistry")return null;
+ if(!(sub=="Chemistry"||act||((sub=="General"||sub=="Science")&&CHEM_RX.test(q))))return null;
+ const t=" "+q.toLowerCase().replace(/[^a-z0-9'?\s]/g," ").replace(/\s+/g," ").trim()+" ",short=q.length<260;
+ const mk=(k,s)=>chemAllowed(k)?{k,s:s||k}:null;
+ /* 1. a practice question is waiting for the learner's attempt */
+ if(act&&act.await&&act.q){
+  if(CH_REVEAL.test(t))return mk("reveal");
+  const other=CH_CMD.test(t)||CH_COACH.test(t)||(short&&CH_SUM.test(t)&&CHEM_RX.test(q))||(short&&CH_SCN.test(t)&&CH_MAKE.test(t))||CH_PRAC.test(t);
+  const newQ=/\?\s*$/.test(q)&&q.length<90&&/^\s*(what|why|how|when|where|who|which|can|could|is|are|does|do|please)\b/i.test(q);
+  if(!other&&!newQ&&q.length>=12)return mk("attempt");
+ }
+ /* 2. command words */
+ if(q.length<220&&CH_CMD.test(t))return mk("command_word");
+ /* 3. how do I answer this? */
+ if(CH_COACH.test(t))return mk("coach");
+ /* 4. make me a scenario (full package) or practise (attempt first) */
+ if(short&&CH_SCN.test(t)&&CH_MAKE.test(t))return CH_TRY.test(t)?mk("practice"):mk("scenario");
+ if(short&&CH_PRAC.test(t))return mk("practice");
+ /* 5. complete revision of one of the ten areas */
+ if(short&&CH_SUM.test(t)&&(CHEM_RX.test(q)||act))return mk("summary");
+ /* 6. short follow-ups on the Chemistry answer that is on screen */
+ if(act&&!act.await&&short){
+  if(/^\s*(please )?(ask me (a |an |another |one )?(question|one)|test me|practi[sc]e|give me (a |another )?(question|practice))/.test(t))return mk("practice");
+  if(/\b(simpler|more simply|make it (simple|easy|easier)|in (a )?(very )?simple (words|terms|language))\b/.test(t))return mk("simpler","followup");
+  if(/\b(another|one more|more|an?|some) examples?\b|^\s*(give me )?examples?\b/.test(t))return mk("example");
+  if(/^\s*(tell me more|more( details?)?|go on|expand|elaborate|in more detail)\s*\??\s*$/.test(t))return mk("more","followup");
+  if(/^\s*(please )?((explain|say|tell me) (that|it|this) again|again|repeat( that)?|i (do not|don'?t) (understand|get)( it| that| this)?)\s*\??\s*$/.test(t)||/step by step/.test(t))return mk("again","followup");
+  if(/^\s*(and |what about|how about) (the )?[a-z' ]{3,60}\??\s*$/.test(t))return mk("about","followup");
+ }
+ /* 7. anything else about Chemistry: a narrow question, a concept or an example, answered at the scope asked (quizzes and small talk keep their own routes) */
+ if((sub=="Chemistry"||act)&&q.length>=4&&!/\b(quiz|quizzes|quizz|examine me)\b/i.test(t)&&!(typeof RX_SI!="undefined"&&(RX_SI.test(t)||RX_DE.test(t)))&&!(typeof smallTalk=="function"&&smallTalk(q)))return mk("question");
+ return null}
+async function askChem(q,CI){
+ if(capped())return limitMsg();
+ const now=Date.now(),raw=String(q).replace(/[ \t]+\n/g,"\n").trim().slice(0,6000);stamps=stamps.filter(t=>now-t<6e4);
+ const err=x=>{D.msgs.push({s:"i",err:1,t:x,q:raw.slice(0,300),ts:Date.now()});save();render()};
+ if(!navigator.onLine)return err("No internet connection. Please connect to the internet and tap Retry.");
+ stamps.push(now);const tok=++AN;window.ASKQ_RAW=raw;window.ASKQ=raw;
+ const ch=D.chats.find(c=>c.id==D.cur);if(ch&&(ch.title=="New chat"||ch.title=="Chat"))ch.title=raw.slice(0,32);
+ const act=chemActive();
+ let hist=D.msgs.filter(x=>!x.note&&!x.err&&!x.lim&&x.t);if(hist.length&&hist[hist.length-1].s=="o")hist=hist.slice(0,-1);
+ hist=hist.slice(-4).map(x=>({r:x.s=="o"?"learner":"david",t:String(x.t).replace(/\s+/g," ").slice(0,900)}));
+ $("stat").textContent="preparing your Chemistry answer…";$("send").innerHTML=STOP;
+ const m={s:"i",t:"",ts:Date.now(),q:raw.slice(0,300),stream:1,tq:raw.slice(0,120),tsub:"Chemistry"};
+ D.msgs.push(m);sm=m;stream=setTimeout(()=>{},9e5);render();
+ let j=null;const c=new AbortController(),tm=setTimeout(()=>c.abort(),90000);
+ try{const r=await fetch(SBU.replace("/rest/v1/","/functions/v1/")+"chem_coach",{method:"POST",signal:c.signal,headers:{apikey:SBK,"Content-Type":"application/json"},
+   body:JSON.stringify({text:raw,intent:CI.s,level:D.lvl,class:String(D.cls||"").replace(/^Primary /,"P").replace(/^Senior /,"S"),tok:tokNow(),
+    ctx:act?{topic:act.topic||"",concept:act.concept||"",question:(CI.k=="attempt"||CI.k=="reveal"||act.await)?act.q||"":"",awaiting:!!act.await}:{},history:hist})});
+  if(r.ok)j=await r.json()}catch(e){j=null}finally{clearTimeout(tm)}
+ if(stream==null||tok!=AN){D.msgs=D.msgs.filter(x=>x!==m);save();render();return}
+ const drop=()=>{D.msgs=D.msgs.filter(x=>x!==m);sm=null;stopS()};
+ if(j&&j.ok&&j.md){
+  m.t=String(j.md);m.tq=String(j.concept||raw).slice(0,120);
+  m.chem={topic:j.topic_area||"",concept:j.concept||"",intent:j.intent||CI.k,await:j.awaiting_attempt?1:0,q:j.awaiting_attempt?String(j.practice_question||""):"",raw:raw};
+  stopS();logAct("ask",m,m.t);return}
+ drop();
+ if(j&&j.status=="busy")return err("Many learners are asking right now. Please try again in a little while.");
+ /* the learner still gets an answer: anything the Chemistry function cannot handle goes to the normal pipeline */
+ if(j&&(j.status=="off_topic"||j.status=="rejected"||j.status=="not_configured"||j.status=="bad_output"||j.status=="error"))return askCore(q,null,null);
+ return err(navigator.onLine?"I could not write this Chemistry answer just now. Please tap Retry or send it again.":"No internet connection. Please connect to the internet and tap Retry.")}
 function ask(q,mode){
  if(stream!=null||INTP)return;
  if(!mode){try{gdSense("q",q)}catch(e){}}
  if(!mode){let b=false;try{b=bpHandle(q)}catch(e){b=false}if(b)return}
  if(!mode&&fileAsk(q)){fileNote(q);return}
+ if(!mode){let CI=null;try{CI=chemIntent(q)}catch(e){CI=null}if(CI)return askChem(q,CI)}
  if(!mode&&looksScenario(q))return askScenario(q);
  if(!mode){let k=null;try{k=coreAsk(q)}catch(e){}if(k)q=k}
  if(!mode){let h=false;try{h=sqHandle(q)}catch(e){h=false}if(h)return}
@@ -6962,7 +7007,7 @@ function askCore(q,mode,I){
     if(!(a2&&(a2.t||a2.busy))&&AIWHY!="net"&&AIWHY!="offline"&&AIWHY!="timeout"){try{a2=await aiAnswer(q,FU,2)}catch(e){}if(stream==null||tok!=AN)return}}
    if(a2&&a2.busy){logUn(q);stopS();return err("Many learners are asking right now. Please try again in a little while.")}
    if(a2&&a2.t)f=a2;else{const w=AIWHY;logUn(q);stopS();
-    return err(w=="net"||w=="offline"||!navigator.onLine?"No internet connection. Please connect to the internet and tap Retry.":"The answer is taking longer than expected. Please tap Retry."+(isOwner()?" ("+(w||"unknown")+")":""))}}
+    return err(w=="v4"?(D.sub=="Chemistry"&&lvKey()=="UCE"?"I could not write this Chemistry answer just now. Please tap Retry.":"This subject is being rebuilt in the new answer format. Chemistry is ready now and the other subjects are coming soon."):w=="net"||w=="offline"||!navigator.onLine?"No internet connection. Please connect to the internet and tap Retry.":"The answer is taking longer than expected. Please tap Retry."+(isOwner()?" ("+(w||"unknown")+")":""))}}
   if(f.un&&!mode&&!FU)logUn(q);
   if(f.fmt&&!f.aase&&!f.un&&!mode&&f.t!==window.DIRECT_T){const st=await styleAnswer(f.t,q);if(stream==null||tok!=AN)return;if(st){f.sty={t:f.t,k:modelName(),L:lvKey(),pl:planName()};f.t=st.md+(modelName()=="examiner"?"\n\n*Written by the Ask Tr. David Academic Intelligence System in the UNEB exam format. It is not an official UNEB exam.*":"")}}
   if(f&&f.t&&!f.aase&&!f.diff&&!f.exl&&!f.quiz&&!f.qz&&!f.w&&!f.un){f.t=lessonClean(f.t);if(!mode){try{f.t=await workOutEx(f.t)}catch(e){}if(stream==null||tok!=AN)return}}
@@ -6972,7 +7017,7 @@ function askCore(q,mode,I){
   try{if(f&&f.t&&!f.part&&!f.un&&!f.w&&!f.quiz&&!f.qz&&!f.diff&&!f.exl&&!FU&&!mode){const V=AASE.visual(window.AASE_LAST);f.vis={need:V.need,kind:V.kind};f.t=AASE.addVisual(f.t,window.AASE_LAST,V,{lib:libFor})}}catch(e){}
   let chk=0;if(FU&&FU.chkk&&f&&f.t&&!f.un&&!f.w&&!f.quiz&&!f.qz&&!FU.local){f.t+="\n\n"+FU.chkk;chk=1}
   if(!mode&&!FU&&!f.un&&!f.w&&!f.diff&&!f.exl&&f.t&&!/^\s*\*\*Senior \d/.test(f.t)){const hd=curHeader(q,f.filed);if(hd)f.t=hd+f.t.replace(/^#[^\n]*\n(?:(?:\*\*)?(?:Topic|Class):[^\n]*\n)*/,"")}
-  const m={s:"i",t:"",ts:Date.now(),q,mode,stream:1,fk:FU&&FU.kind||undefined,chk:chk||undefined,tq:CTX&&CTX.tq||undefined,tsub:CTX&&(CTX.sub||D.sub)||undefined},w=f.t.split(/(?<=\s)/);if(f.quiz)m.quiz=f.quiz;if(f.qz)m.qz=f.qz;if(f.w)m.w=f.w;if(f.aid)m.aid=f.aid;if(f.vis)m.vis=f.vis;if(f.sty)m.sty=f.sty;if(f.ai)m.ai=1;if(f.tid)m.tid=f.tid;if(f.fmt){const M=MODELS[modelName()];m.mdl=M.n+" "+M.v}{const ln=levelNote(f.lv,f.cls);if(ln)m.lvn=ln}
+  const m={s:"i",t:"",ts:Date.now(),q,mode,stream:1,fk:FU&&FU.kind||undefined,chk:chk||undefined,tq:CTX&&CTX.tq||undefined,tsub:CTX&&(CTX.sub||D.sub)||undefined},w=f.t.split(/(?<=\s)/);if(f.quiz)m.quiz=f.quiz;if(f.qz)m.qz=f.qz;if(f.w)m.w=f.w;if(f.aid)m.aid=f.aid;if(f.vis)m.vis=f.vis;if(f.sty)m.sty=f.sty;if(f.ai)m.ai=1;if(f.tid)m.tid=f.tid;if(f.fmt){m.mdl=IDENT[planName()]}{const ln=levelNote(f.lv,f.cls);if(ln)m.lvn=ln}
   thinkOff();typeOn();D.msgs.push(m);sm=m;let k=0;if(!(FU&&FU.local))logAct("ask",m,f.t);stream=setInterval(()=>{m.t+=w[k++]||"";if(k>=w.length){stopS();if(gn){D.msgs.push({s:"i",note:1,up:1,t:gn,ts:Date.now()});save();render()}if(capped())limitMsg()}else render()},35)},600)}
 $("msgs").addEventListener("click",e=>{
 
@@ -6988,7 +7033,7 @@ $("msgs").addEventListener("click",e=>{
  if(a=="ab")m.ab=!m.ab;if(a=="bm"){m.bm=!m.bm;if(m.bm)libAdd(m);else libDel(libKey(m));ownerAct(m.bm?"save":"unsave",m)}if(a=="up"){m.fb=1;m.rs="thanks";sendFb(m);setTimeout(()=>{m.rdone=1;try{save();render()}catch(e){}},2500)}if(a=="dn"){m.fb=-1;m.rs="sorry";sendFb(m)}if(a=="ign"){m.rdone=1}if(a=="rep"){m.rdone=1;setTimeout(()=>supportOpen("complaint","About this answer: "),0)}
   if(a=="pick"&&m.pick==null){m.pick=+b.dataset.k;if(m.qz&&m.pick==m.quiz[2])m.qz.score++}
  if(a=="nq"&&m.qz&&m.pick!=null&&m.qz.n<m.qz.list.length-1){const z=m.qz;z.n++;m.quiz=["q",z.list[z.n][1],z.list[z.n][2]];m.pick=null;m.t=qText(z.t,z)}
- if(a=="regen"){redoReply(i).then(h=>{if(h)return;const k=D.msgs.indexOf(m);if(k<0)return;D.msgs.splice(k,1);save();render();ask(m.q,m.mode)});return}
+ if(a=="regen"){redoReply(i).then(h=>{if(h)return;const k=D.msgs.indexOf(m);if(k<0)return;D.msgs.splice(k,1);save();render();ask((m.chem&&m.chem.raw)||m.q,m.mode)});return}
  if(a=="retry"){D.msgs.splice(i,1);save();render();ask(m.q,m.mode);return}
  save();render()});
 function subs(){$("subs").innerHTML='<button data-all="1">All subjects</button>'+subsList().map(x=>`<button class="${x==D.sub?"on":""}" data-s="${x}">${x}</button>`).join("");const o=$("subs").querySelector(".on");if(o)o.scrollIntoView({inline:"center",block:"nearest"})}
@@ -7973,6 +8018,7 @@ const HANDOFF={
  ]
  ],
  "log": [
+ ["2026-11-14","Answer engine version 4 (Chemistry only for now): the app no longer calls ai_answer, ai_answer_v2 or ai_answer_v3 (code removed). Every UCE Chemistry message that is not a quiz or small talk goes to chem_coach, narrow questions included. Other subjects get the message that they are being rebuilt; stored owner topics and find_answer still work. The old Edge Functions still exist on Supabase until deleted in the dashboard. Chemistry coach (Item 1-style revision, command words, scenario practice, answer coaching) built from the Complete Chemistry Revision and Item 1 specification. New Edge Function chem_coach (prompt chem-v1.0, deployed; ai_answer_v3 and scenario_answer untouched). The app routes only these Chemistry requests to it, for UCE only: complete revision of one of the ten areas (ten-part notes), command-word lessons (meaning, what the examiner expects, sample instruction, model answer, why it works), a scenario in any of seven formats with a model answer for every task, how do I answer this coaching in six steps, practice mode (question first, then the learner attempts, then feedback and model answers, or show answer), and short follow-ups on the Chemistry answer on screen (explain again, simpler, another example, tell me more, what about..., ask me a question). Narrow questions, owner topics, quizzes and pasted scenarios without a coaching request still use the existing pipeline. CHEM_MIN in the script sets the lowest plan for each request type (Practice Basic, examples and simpler Standard, tell me more Premium, the rest Free, matching the existing GATE rules). The function checks every answer with a second Gemini pass and repairs once; code adds the original-practice-question and not-official labels. Tested with scripts and a mocked Gemini only; not opened in a browser or on a phone, and no live Gemini call has been made yet."],
   ["2026-11-08","Academic Answer Structuring Engine, step 8 built (diagram and illustration decision) with three fixes from the step 6 and 7 follow-up list. Step 8: AASE.visual decides for each question whether ONE visual helps and which kind (labelled diagram for parts and functions, set-up diagram for a real experiment, circuit diagram, flowchart for a process, classification tree, comparison table for differences, timeline for history, graph, sketch map, sketch for a geometry calculation, equation line, accounting layout). Definitions, state and list questions and plain calculations get none. The decision is sent to Gemini inside format_rules and in the academic summary; the app's own library diagram is put in the right place; a diagram to draw line is added only when the learner asked for a drawing; decorative figures are removed when none is needed. Fix 1, wrong subject: when the chat is set to Science, why do plants need light now stays Biology (plant, animal, seed, leaf, breathe, sweat, grow and similar words now count for Biology, and shared words such as light, heat, energy and sound no longer decide the subject on a question about living things; everyday rust, burn, hot and melt words were also added for Chemistry and Physics). Tested on 32 mixed questions, none wrong. Fix 2, the old layout no longer wins: a new answer from Gemini AND every stored answer (find_answer and owner-written answers) is put in the chosen layout even if one section is missing (nothing is made up), for every plan and every model, and the style rewrite and the lesson clean-up no longer undo it. Opening headings such as What it is, Introduction and Definition now match each other. Fix 3, saved topics: for a definition, uses, importance, characteristics, steps, process or parts and functions question, the saved topic is arranged under the chosen headings, with detail following the plan (Free 3 points, Basic 5, Standard 8, Premium all). Layouts a saved topic cannot fill honestly (differences, causes and effects, advantages and disadvantages, calculations, practicals) keep the old layout. The ai_answer_v3 function was updated to version t06-v3.1 (file ai_answer_v3_index.ts, deployed by the owner): it reads format_rules and academic and returns a layout_md field written under the chosen headings, which the app uses when the layout matches. Written and tested with scripts only; not yet opened in a browser or on a phone."],
   ["2026-11-08","Academic Answer Structuring Engine, step 7 built (answer structuring): AASE.prompt turns the chosen layout into clear instructions for Gemini (exact headings in order, headings that must not appear, rules, wording for the learner's class, no filler, numbered steps, never skip working, never invent facts) and it is sent in format_rules instead of the old lesson-style text. AASE.structure reads the answer that comes back, matches its sections to the chosen headings (so Working matches Solution, Method matches Procedure), puts them in the chosen order, drops headings that must not appear (for example Procedure in a theory question), removes filler lines and reports what is missing. Nothing is invented: if a required heading is missing, or maths working is only one line, the answer is left as it was and the app's normal layout is used. The restructured answer is used only for a new full answer (not a follow-up), only when the plan shows full answers, and not for a plain definition or general explanation, which keep the teacher style. Saved answers and the topic path are unchanged. Step 6 also now says Final answer, with the unit given by a rule. Steps 8 to 10 are next."],
   ["2026-11-08","Academic Answer Structuring Engine, step 6 built (academic format selection): from the question type, subject and whether it is theory, practical, calculation or a standard record, the engine now chooses the layout: format, ordered headings (optional ones marked), answer style (points, explained, steps or essay), what must not appear (for example practical headings on a theory question) and the rules to follow. Differences list A then B then the differences; similarities list only shared points; causes come before effects; maths and science calculations get given, required, formula, substitution, working, final answer; real experiments get aim, apparatus, procedure, observations, results, conclusion; accounting records get a standard layout; several asks in one question are combined in the order asked. All layouts are tables in AASE.FORMATS, CALC, PRACTICAL, THEORY and LAYOUTS so they can be edited without touching the code. The choice is sent to ai_answer inside the academic field. Answers are not reformatted yet; steps 7 to 10 are next. Three small fixes in steps 4 and 5 went with it: how can soil erosion be controlled and solutions of are now problems and solutions, and an experiment to show that something is no longer taken for a maths proof."],

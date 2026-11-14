@@ -5,7 +5,7 @@
    - Never touches Supabase or any other site. */
 
 const CACHE_PREFIX = "ask-tr-david-";
-const CACHE = CACHE_PREFIX + "v9";
+const CACHE = CACHE_PREFIX + "v10";
 const SHELL = ["./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png", "./badge-96.png", "./blank-96.png", "./og-image.png"];
 
 self.addEventListener("install", (event) => {

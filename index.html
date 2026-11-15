@@ -1225,7 +1225,7 @@ addEventListener('resize',fit);fit();start(0);
 <div id="ps"><button id="psl" type="button" aria-label="Your plan"></button><button id="pss" type="button" aria-label="Choose subject"></button><span id="psr"></span></div>
 </div>
 <div id="dlgx" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);place-items:center;z-index:120;padding:20px"><div style="background:var(--sheet,#fff);color:var(--text,#111);border-radius:14px;padding:20px;width:100%;max-width:320px;box-shadow:0 4px 18px rgba(0,0,0,.3)"><div id="dlgm" style="font-size:16px;line-height:1.4;margin-bottom:14px;white-space:pre-wrap"></div><input id="dlgi" autocomplete="off" style="display:none;width:100%;box-sizing:border-box;margin-bottom:14px;padding:10px;font-size:16px;border:1px solid var(--line,#ccc);border-radius:8px;background:var(--wall,#fff);color:inherit"><div style="display:flex;justify-content:flex-end;gap:8px"><button id="dlgc" style="background:none;border:0;padding:8px 14px;font-size:15px;color:inherit;cursor:pointer">Cancel</button><button id="dlgo" style="background:var(--green,#00a884);color:#fff;border:0;border-radius:8px;padding:8px 18px;font-size:15px;cursor:pointer">OK</button></div></div></div>
-<div id="more"><div data-a="n">New chat</div><div data-a="h">Chat history</div><div data-a="b">My library</div><div data-a="nt" id="mnt">Notifications</div><div data-a="ct">Contact us</div><div data-a="pl">Upgrade plan</div><div data-a="cc" style="color:#e03131">Clear chat</div></div>
+<div id="more"><div data-a="n">New chat</div><div data-a="h">Chat history</div><div data-a="b">My library</div><div data-a="rv">Revision</div><div data-a="nt" id="mnt">Notifications</div><div data-a="ct">Contact us</div><div data-a="pl">Upgrade plan</div><div data-a="cc" style="color:#e03131">Clear chat</div></div>
 <div id="adm" aria-label="Admin panel"></div>
 <div id="panel"></div>
 <div id="scrim"><div id="sheet"></div></div>
@@ -2399,6 +2399,41 @@ function aboutPage(){HBACK=null;
   if(a=="pv")privacyPage();if(a=="tc")termsPage();if(a=="sp")supportOpen();if(a=="cu")contactUs()})}
 function libAll(){libSync();const o={sv:(D.lib||[]).slice().sort((a,b)=>b.sv-a.sv),lk:[],sh:[]};D.chats.forEach(c=>c.msgs.forEach(m=>{if(m.s!="i"||m.err)return;if(m.fb==1)o.lk.push(m);if(m.sh)o.sh.push(m)}));o.sh.sort((a,b)=>b.sh-a.sh);return o}
 function saved(){library("sv")}
+/* Revision: short summary notes for Mathematics, Physics and Chemistry. They are read from the database through two read-only functions and are open to every plan. */
+const RVS=[["math","Mathematics"],["phys","Physics"],["chem","Chemistry"]],RVC={};let RVK="";
+function rvApi(fn,body){return fetch(SBU+"rpc/"+fn,{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify(body)}).then(r=>{if(!r.ok)throw new Error("rv");return r.json()})}
+function revision(k){
+ RVK=k||RVK||(RVS.find(x=>x[1]==D.sub)||RVS[0])[0];
+ const key=RVK,nm=(RVS.find(x=>x[0]==key)||[])[1]||"",
+ tabs=`<div class="sws" style="padding:14px 16px 6px;gap:8px">${RVS.map(x=>`<button class="lk ${key==x[0]?"on":""}" data-s="${x[0]}">${x[1]}</button>`).join("")}</div><div class="t" style="padding:2px 18px 8px;line-height:1.5">Short notes to help you revise. They summarise and simplify. They are not the syllabus.</div>`,
+ draw=L=>{const g={};L.forEach(x=>{(g[x.cls]=g[x.cls]||[]).push(x)});
+  return Object.keys(g).sort().map(c=>`<div class="sec">Senior ${esc(String(c).replace(/^S/,""))}</div>`+g[c].map(x=>`<div class="row" data-k="${esc(x.slug)}"><div>${esc(x.title)}<small>Term ${esc(String(x.term))}</small></div></div>`).join("")).join("")+'<div style="height:30px"></div>'};
+ showP("Revision",tabs+'<div id="rvl"><div class="empty">Loading notes…</div></div>',()=>HUB?settings():closeP(),e=>{
+  const s=e.target.closest("[data-s]");if(s){revision(s.dataset.s);return}
+  const r=e.target.closest("[data-r]");if(r){revision(key);return}
+  const t=e.target.closest("[data-k]");if(t)rvNote(key,t.dataset.k)});
+ const put=L=>{const b=$("rvl");if(b&&RVK==key)b.innerHTML=L.length?draw(L):'<div class="empty">No notes yet for this subject.</div>'};
+ if(RVC[key]){put(RVC[key]);return}
+ rvApi("revision_index",{p_subject:key}).then(L=>{RVC[key]=Array.isArray(L)?L:[];put(RVC[key])}).catch(()=>{const b=$("rvl");if(b&&RVK==key)b.innerHTML='<div class="empty">Could not load the notes. Check your connection.<div class="chips" style="justify-content:center;margin-top:12px"><button data-r="1">Try again</button></div></div>'})}
+function rvNote(key,slug){
+ const nm=(RVS.find(x=>x[0]==key)||[])[1]||"",it=(RVC[key]||[]).find(x=>x.slug==slug),title=it?it.title:"Revision note",
+ back=()=>revision(key),
+ view=n=>{const li=a=>(a||[]).map(z=>`<li style="margin:4px 0">${esc(String(z))}</li>`).join("");
+  const qs=(n.quick_checks||[]).map((z,i)=>{const m=String(z).match(/^Q:\s*([\s\S]*?)\s+A:\s*([\s\S]*)$/),q=m?m[1]:String(z),a=m?m[2]:"";
+   return `<div style="margin:10px 0;padding:10px 12px;border:1px solid var(--line);border-radius:12px"><div><b>${i+1}.</b> ${esc(q)}</div>${a?`<div class="rva" style="display:none;margin-top:8px;color:var(--green)"><b>Answer:</b> ${esc(a)}</div><div class="chips" style="margin-top:8px"><button data-an="1">Show answer</button></div>`:""}</div>`}).join("");
+  showP(esc(title),`<div style="padding:14px 18px;line-height:1.55"><div class="t" style="margin-bottom:6px">${esc(nm)}${it?" · Senior "+esc(String(it.cls).replace(/^S/,""))+" · Term "+esc(String(it.term)):""}</div>`+
+   `<div class="sec" style="padding:8px 0 4px">In short</div><div>${esc(n.summary||"")}</div>`+
+   ((n.key_points||[]).length?`<div class="sec" style="padding:14px 0 4px">Key points</div><ul style="margin:0;padding-left:20px">${li(n.key_points)}</ul>`:"")+
+   ((n.memory_aids||[]).length?`<div class="sec" style="padding:14px 0 4px">Memory aid</div><ul style="margin:0;padding-left:20px">${li(n.memory_aids)}</ul>`:"")+
+   (qs?`<div class="sec" style="padding:14px 0 4px">Quick check</div>${qs}`:"")+
+   `<div class="chips" style="margin-top:14px"><button data-ask="1">Ask David about this</button></div>`+
+   `<div class="t" style="margin-top:14px;font-size:12px">These notes are original revision aids, not official UNEB or NCDC material.</div></div><div style="height:30px"></div>`,back,e=>{
+    const a=e.target.closest("[data-an]");if(a){const d=a.closest("div").previousElementSibling;if(d){const o=d.style.display=="none";d.style.display=o?"block":"none";a.textContent=o?"Hide answer":"Show answer"}return}
+    if(e.target.closest("[data-ask]")){closeP();const i=$("inp");i.value="Teach me "+title+" in "+nm;send()}})};
+ const ck=key+"/"+slug;
+ if(RVC[ck]){view(RVC[ck]);return}
+ showP(esc(title),'<div class="empty">Loading…</div>',back);
+ rvApi("revision_note",{p_subject:key,p_slug:slug}).then(n=>{if(!n||!n.summary)throw new Error("rv");RVC[ck]=n;view(n)}).catch(()=>showP(esc(title),'<div class="empty">Could not load this note. Check your connection and try again.</div>',back))}
 let LIBT="sv";
 function library(t){LIBT=t||LIBT;const L=libAll(),T=[["sv","Saved"],["lk","Liked"],["sh","Shared"]],items=L[LIBT];
  const EM={sv:"No saved answers yet. Tap Save under an answer to keep it here.",lk:"No liked answers yet. Tap Helpful under an answer you like.",sh:"Nothing shared yet. Answers you share from now on appear here."};
@@ -2544,7 +2579,7 @@ $("sx").onclick=closeSearch;$("sq").oninput=()=>{q=$("sq").value.trim().toLowerC
 $("more").onclick=e=>{const a=e.target.closest("[data-a]")?.dataset.a;if(!a)return;$("more").style.display="none";
  if(a=="s"){$("srch").style.display="flex";$("sq").focus()}
  if(a=="cc"){if(D.msgs.length){toTrash(D.msgs.slice());D.msgs.length=0;stopEdit();save();render()}}
- if(a=="nt")notifs(true);if(a=="ct"){HUB=true;HBACK=closeP;if(isOwner())contactUs();else supportOpen()}if(a=="pl")plans(0);if(a=="ex")exportChat();if(a=="n")newChat();if(a=="h")chatHistory();if(a=="b")saved()};
+ if(a=="nt")notifs(true);if(a=="ct"){HUB=true;HBACK=closeP;if(isOwner())contactUs();else supportOpen()}if(a=="pl")plans(0);if(a=="ex")exportChat();if(a=="n")newChat();if(a=="h")chatHistory();if(a=="b")saved();if(a=="rv")revision()};
 $("editing").onclick=stopEdit;$("send").onclick=()=>stream!=null?stopS():send();$("inp").onkeydown=e=>{if(e.key=="Enter")send()};
 let tm,sx,sy;
 $("msgs").addEventListener("pointerdown",e=>{const b=e.target.closest(".b.o");if(!b)return;sx=e.clientX;sy=e.clientY;tm=setTimeout(()=>sheet(+b.dataset.i),500)});
@@ -5344,7 +5379,7 @@ async function dbAnswer(q,mode){
  else{const[d,a]=await Promise.all([get("detail"),get("answer")]);r=d||a;if(r)t=txt(r)}
  let st2=null;if(r&&!mode){try{st2=AASE.enforce(t,window.AASE_LAST)}catch(e){}}return r?{t:mode?t:(st2||modelFromMd(t)),aid:r.answer_id,fmt:mode?0:1,aase:st2?1:undefined}:null}
 /* NEW QUESTIONS. The old ai_answer, ai_answer_v2 and ai_answer_v3 answering code was removed on 2026-11-14 (answer engine version 4).
-   Chemistry (UCE and UACE) is answered by chem_coach through askChem; UCE Physics by phys_coach through askPhys. Other subjects have no AI engine yet: aiAnswer returns nothing and the learner is told so. */
+   Chemistry (UCE and UACE) is answered by chem_coach through askChem; UCE Physics by phys_coach through askPhys; UCE Mathematics by math_coach through askMath. Other subjects have no AI engine yet: aiAnswer returns nothing and the learner is told so. */
 const escRex=x=>x.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
 const fullQ=q=>String(q||"").trim().slice(0,8000);
 let AIWHY="";
@@ -5376,7 +5411,7 @@ let REDOING=0;
 async function redoReply(i){
  const m=D.msgs[i];if(!m||REDOING)return true;
  const q=String(m.q||"").replace(/\s+/g," ").trim(),prev=String(m.t||"");
- if(m.s!="i"||m.err||m.note||m.lim||m.quiz||m.qz||m.w||m.mode||m.chem||m.phys||m.stream||prev.length<20||q.length<3||q.length>300||!navigator.onLine)return false;
+ if(m.s!="i"||m.err||m.note||m.lim||m.quiz||m.qz||m.w||m.mode||m.chem||m.phys||m.math||m.stream||prev.length<20||q.length<3||q.length>300||!navigator.onLine)return false;
  try{gdSense("redo")}catch(e){}
  if(capped()){limitMsg();return true}
  REDOING=1;const st=$("stat"),old=st.textContent;st.textContent="writing another way…";
@@ -6745,13 +6780,13 @@ const BP=[
   ["2","Other comprehension aspects","Understanding, interpretation, inference and use of text evidence",BPC],
   ["3 or 4","Composition and functional writing","Writing in response to a scenario","Choose 1 of 2"]],
  mk:"Item marks are not stated in the UNEB report extract. Use the official scoring guide.",src:"UNEB Report on Work of Candidates, UCE 2024, 112/1 English."},
-{k:"Mathematics",rx:/\b(maths?|mathematics)\b/,code:"456/1",time:"2 h 15 min",ans:"4 items",comp:"Items 1 and 2",ch:"Section B: one of Items 3 or 4 (Part I), and one of Items 5 or 6 (Part II)",
- lay:"Section A has 2 compulsory scenario items. Section B has Part I and Part II, each with 2 scenario items, and you answer 1 from each part. Scenarios come from Numbers, Patterns and Algebra, Data and Probability, and Geometry and Measures.",
- it:[["1","Numbers","Ratios, fractions, converting words to figures, LCM, time and timetables (2024)",BPC],
-  ["2","Cross-topic scenario","Section A scenario; the topic mix depends on the paper",BPC],
-  ["3 or 4","Section B, Part I","One scenario from the four themes above","Choose 1 of 2"],
-  ["5 or 6","Section B, Part II","One scenario from the four themes above","Choose 1 of 2"]],
- mk:"Item marks are not stated in the report. Do not assume equal marks. Use the official scoring guide.",src:"UNEB Report on Work of Candidates, UCE 2024, 456/1 Mathematics; UCE Mathematics Elements of Construct 2024."},
+{k:"Mathematics",rx:/\b(maths?|mathematics)\b/,code:"456/1 (one paper; no Paper 2 or practical paper is recorded)",time:"2 h 15 min (as printed in the reviewed 2024 paper; the 2025 copy gives the same)",ans:"4 items",comp:"Items 1 and 2",ch:"Section B: one of Items 3 or 4 (Part I), and one of Items 5 or 6 (Part II)",
+ lay:"Paper 1 has 6 scenario items. Section A has 2 compulsory items. Section B has Part I (Items 3 and 4) and Part II (Items 5 and 6), and you answer 1 from each part, so 4 items in total. Extra items are not scored. Answer booklets and graph paper are provided. A silent, non-programmable scientific calculator and mathematical tables with a list of formulae may be used. The Part I and Part II grouping is confirmed by the app owner. Follow the instructions printed on your own paper.",
+ it:[["1","Section A scenario","Stored 2024 item: route distance (right-triangle distance), bursary discount, school expenses, instalments and a payment-plan recommendation. Stored 2025 item: HCF, fractions, percentages, decimals and ratios in real-life problems. The topic changes from year to year.",BPC],
+  ["2","Section A scenario","Stored 2024 item: selling cows and goats (variables, inequalities, feasible region, maximising revenue). Stored 2025 item: variables, equations, proportions and gradient. The topic changes from year to year.",BPC],
+  ["3 and 4","Section B, Part I (choose 1 of 2)","Stored 2024 items: Item 3 school arrival-time data (grouped frequency, mean, ogive, assembly time); Item 4 malaria survey (three-set Venn diagram and probability). Stored 2025 items: Item 3 matrices, data and probability; Item 4 histogram, frequency table and mean.","See Section B rule"],
+  ["5 and 6","Section B, Part II (choose 1 of 2)","Stored 2024 items: Item 5 travel directions (bearings, speed, distance, time, departure time); Item 6 roof structure and iron sheets (area, unit conversion, discounts). Stored 2025 items: Item 5 foreign exchange, bearings, trigonometry and units; Item 6 scale factors, units and taxation.","See Section B rule"]],
+ mk:"Item marks are not stored. Do not assume equal marks. Use the official scoring guide.",src:"2024 item summaries: third-party hosted copy of the 2024 UNEB Paper 1 (456/1) with scoring guide. 2025 item summaries: UNEB Report on Work of Candidates, UCE 2025, 456/1 (hosted copy). Topic links are not yet checked by a subject reviewer."},
 {k:"Physics",rx:/\bphysics\b/,code:"535/1 (theory), 535/2 (practical); 535/3 only as an alternative practical arrangement",time:"2 h 30 min (535/1, as printed in the reviewed 2024 and 2025 papers)",ans:"5 items",comp:"Items 1, 2 and 3",ch:"Section B: one of Items 4 or 5 (Part I), and one of Items 6 or 7 (Part II)",
  lay:"Paper 1 has 7 items. Section A has 3 compulsory items. Section B has Part I and Part II with 2 items each, and you answer 1 from each part, so 5 items in total. Extra items are not scored. Paper 2 (practical) has 2 items and you answer 1; the 2025 copy gives 15 minutes for reading and planning in a 2-hour paper. 535/3 is not an extra paper: centres register candidates for 535/2 first, and use 535/3 only when numbers are too large for one day. Follow the instructions printed on your own paper.",
  it:[["1","Section A scenario","Stored 2024 item: echoes and unclear sound; coloured clothes under coloured lights. Stored 2025 item: rainbow formation, electromagnetic spectrum, sound-wave amplitude and frequency. The topic changes from year to year.",BPC],
@@ -7027,13 +7062,91 @@ async function askPhys(q,CI){
  /* the learner still gets an answer: anything the Physics function cannot handle goes to the normal pipeline */
  if(j&&(j.status=="off_topic"||j.status=="rejected"||j.status=="not_configured"||j.status=="bad_output"||j.status=="error"))return askCore(q,null,null);
  return err(navigator.onLine?"I could not write this Physics answer just now. Please tap Retry or send it again.":"No internet connection. Please connect to the internet and tap Retry.")}
+/* ===== MATHEMATICS COACH (UCE Mathematics: topic teaching, command words, scenario and modelling practice, graph and geometry coaching, past-paper item questions) =====
+   Source: "Ask Teacher David, UCE Mathematics Master Development Reference". Server: Edge Function math_coach (prompt math-v1.0) with the math_* tables and math_retrieve.
+   This is a separate copy of the Physics route above: Chemistry and Physics code is untouched. Only UCE learners in Mathematics (or a General chat that is clearly about school Mathematics) are routed here.
+   The same plan rules apply: MATH_MIN is the lowest plan for each kind of request (same values as CHEM_MIN); the real plan is read on the server from the login token.
+   Not routed here: UACE Mathematics, quizzes, small talk. They keep using the existing pipeline. Chemistry and Physics are asked first in General chats, so shared words go to them as before. */
+const MATH_MIN=Object.assign({},CHEM_MIN);
+const MATH_RX=/\b(mathematics|maths?|456\/1|simultaneous equations?|quadratic|inequalit(?:y|ies)|linear programming|feasible region|matri(?:x|ces)|pythagoras|trigonometry|sine rule|cosine rule|logarithms?|surds?|indices|venn diagrams?|probability|sample space|bearings?|gradient|highest common factor|\bhcf\b|\blcm\b|composite functions?|inverse functions?|number bases?|standard form|ogive|cumulative frequency|histograms?|loci|locus|set notation|scale factors?|enlargement|exchange rates?|simple interest|compound interest|hire purchase|arithmetic progression|geometric progression|nth term|completing the square|factori[sz]e|expand(?:ing)? brackets|change the subject|equation of (?:a )?(?:straight )?line)\b/i;
+const MATH_CMD=/\b(command words?|what (?:does|do|is) (?:the )?(?:command )?(?:word )?(?:determine|show that|find|solve|calculate|construct|plot|sketch|interpret|recommend|justify|advise|estimate|prove|compare|distinguish|define the variables|form an? (?:equation|inequality)|complete the table) (?:mean|ask|want|require|expect)|what (?:does|do) (?:the )?examiners? (?:want|expect)|how (?:do|should|can) (?:i|we) answer (?:an? )?(?:determine|show that|find|solve|calculate|construct|plot|sketch|interpret|recommend|justify|advise|estimate|prove|compare)(?: question| type| command| task)?|meaning of (?:the )?(?:command word )?(?:determine|show that|find|solve|calculate|construct|plot|sketch|interpret|recommend|justify|advise|estimate|prove))\b/i;
+function mathActive(){for(let i=D.msgs.length;i--;){const x=D.msgs[i];if(x.s=="i"&&!x.note&&!x.lim&&!x.err&&x.t){return x.math||null}}return null}
+function mathAllowed(k){try{return PRANK[planName()]>=PRANK[MATH_MIN[k]||"Free"]}catch(e){return true}}
+function mathIntent(q){
+ q=String(q||"").trim();if(q.length<2||q.length>6000)return null;
+ const lv=lvKey();if(lv!="UCE")return null;
+ const sub=D.sub,act=mathActive();
+ if(sub!="Mathematics"&&sub!="General")return null;
+ if(D.lock&&sub!="General"&&sub!="Mathematics")return null;
+ if(!(sub=="Mathematics"||act||MATH_RX.test(q)))return null;
+ const t=" "+q.toLowerCase().replace(/[^a-z0-9'?\s]/g," ").replace(/\s+/g," ").trim()+" ",short=q.length<260;
+ const mk=(k,s)=>mathAllowed(k)?{k,s:s||k}:null;
+ /* 1. a practice question is waiting for the learner's attempt */
+ if(act&&act.await&&act.q){
+  if(CH_REVEAL.test(t))return mk("reveal");
+  const other=CH_CMD.test(t)||MATH_CMD.test(t)||CH_COACH.test(t)||(short&&CH_SUM.test(t)&&MATH_RX.test(q))||(short&&CH_SCN.test(t)&&CH_MAKE.test(t))||CH_PRAC.test(t);
+  const newQ=/\?\s*$/.test(q)&&q.length<90&&/^\s*(what|why|how|when|where|who|which|can|could|is|are|does|do|please)\b/i.test(q);
+  if(!other&&!newQ&&q.length>=12)return mk("attempt");
+ }
+ /* 2. command words */
+ if(q.length<220&&(CH_CMD.test(t)||MATH_CMD.test(t)))return mk("command_word");
+ /* 3. how do I answer this? */
+ if(CH_COACH.test(t))return mk("coach");
+ /* 4. make me a scenario (full package) or practise (attempt first) */
+ if(short&&CH_SCN.test(t)&&CH_MAKE.test(t))return CH_TRY.test(t)?mk("practice"):mk("scenario");
+ if(short&&CH_PRAC.test(t))return mk("practice");
+ /* 5. complete revision of one of the ten areas */
+ if(short&&CH_SUM.test(t)&&(MATH_RX.test(q)||act||sub=="Mathematics"))return mk("summary");
+ /* 6. short follow-ups on the Mathematics answer that is on screen */
+ if(act&&!act.await&&short){
+  if(/^\s*(please )?(ask me (a |an |another |one )?(question|one)|test me|practi[sc]e|give me (a |another )?(question|practice))/.test(t))return mk("practice");
+  if(/\b(simpler|more simply|make it (simple|easy|easier)|in (a )?(very )?simple (words|terms|language))\b/.test(t))return mk("simpler","followup");
+  if(/\b(another|one more|more|an?|some) examples?\b|^\s*(give me )?examples?\b/.test(t))return mk("example");
+  if(/^\s*(tell me more|more( details?)?|go on|expand|elaborate|in more detail)\s*\??\s*$/.test(t))return mk("more","followup");
+  if(/^\s*(please )?((explain|say|tell me) (that|it|this) again|again|repeat( that)?|i (do not|don'?t) (understand|get)( it| that| this)?)\s*\??\s*$/.test(t)||/step by step/.test(t))return mk("again","followup");
+  if(/^\s*(and |what about|how about) (the )?[a-z' ]{3,60}\??\s*$/.test(t))return mk("about","followup");
+ }
+ /* 7. anything else about Mathematics: a narrow question, a concept or an example, answered at the scope asked (quizzes and small talk keep their own routes) */
+ if((sub=="Mathematics"||act)&&q.length>=4&&!/\b(quiz|quizzes|quizz|examine me)\b/i.test(t)&&!(typeof RX_SI!="undefined"&&(RX_SI.test(t)||RX_DE.test(t)))&&!(typeof smallTalk=="function"&&smallTalk(q)))return mk("question");
+ return null}
+async function askMath(q,CI){
+ if(capped())return limitMsg();
+ const now=Date.now(),raw=String(q).replace(/[ \t]+\n/g,"\n").trim().slice(0,6000);stamps=stamps.filter(t=>now-t<6e4);
+ const err=x=>{D.msgs.push({s:"i",err:1,t:x,q:raw.slice(0,300),ts:Date.now()});save();render()};
+ if(!navigator.onLine)return err("No internet connection. Please connect to the internet and tap Retry.");
+ stamps.push(now);const tok=++AN;window.ASKQ_RAW=raw;window.ASKQ=raw;
+ const ch=D.chats.find(c=>c.id==D.cur);if(ch&&(ch.title=="New chat"||ch.title=="Chat"))ch.title=raw.slice(0,32);
+ const act=mathActive();
+ let hist=D.msgs.filter(x=>!x.note&&!x.err&&!x.lim&&x.t);if(hist.length&&hist[hist.length-1].s=="o")hist=hist.slice(0,-1);
+ hist=hist.slice(-4).map(x=>({r:x.s=="o"?"learner":"david",t:String(x.t).replace(/\s+/g," ").slice(0,900)}));
+ $("stat").textContent="preparing your Mathematics answer…";$("send").innerHTML=STOP;
+ const m={s:"i",t:"",ts:Date.now(),q:raw.slice(0,300),stream:1,tq:raw.slice(0,120),tsub:"Mathematics"};
+ D.msgs.push(m);sm=m;stream=setTimeout(()=>{},9e5);render();
+ let j=null;const c=new AbortController(),tm=setTimeout(()=>c.abort(),90000);
+ try{const r=await fetch(SBU.replace("/rest/v1/","/functions/v1/")+"math_coach",{method:"POST",signal:c.signal,headers:{apikey:SBK,"Content-Type":"application/json"},
+   body:JSON.stringify({text:raw,intent:CI.s,level:D.lvl,class:String(D.cls||"").replace(/^Primary /,"P").replace(/^Senior /,"S"),tok:tokNow(),
+    ctx:act?{topic:act.topic||"",concept:act.concept||"",question:(CI.k=="attempt"||CI.k=="reveal"||act.await)?act.q||"":"",awaiting:!!act.await}:{},history:hist})});
+  if(r.ok)j=await r.json()}catch(e){j=null}finally{clearTimeout(tm)}
+ if(stream==null||tok!=AN){D.msgs=D.msgs.filter(x=>x!==m);save();render();return}
+ const drop=()=>{D.msgs=D.msgs.filter(x=>x!==m);sm=null;stopS()};
+ if(j&&j.ok&&j.md){
+  m.t=String(j.md);m.tq=String(j.concept||raw).slice(0,120);
+  m.math={topic:j.topic_area||"",concept:j.concept||"",intent:j.intent||CI.k,await:j.awaiting_attempt?1:0,q:j.awaiting_attempt?String(j.practice_question||""):"",raw:raw};
+  stopS();logAct("ask",m,m.t);return}
+ drop();
+ if(j&&j.status=="busy")return err("Many learners are asking right now. Please try again in a little while.");
+ if(j&&j.status=="limit"){try{const q=FQ();q.used=Math.max(q.used,q.cap);const ms=j.retry_at?new Date(j.retry_at).getTime()-Date.now():0;q.left=Math.max(60000,ms||0);q.at=Date.now()+q.left;q.seen=Date.now();FQW(q)}catch(e){}return limitMsg()}
+ /* the learner still gets an answer: anything the Mathematics function cannot handle goes to the normal pipeline */
+ if(j&&(j.status=="off_topic"||j.status=="rejected"||j.status=="not_configured"||j.status=="bad_output"||j.status=="error"))return askCore(q,null,null);
+ return err(navigator.onLine?"I could not write this Mathematics answer just now. Please tap Retry or send it again.":"No internet connection. Please connect to the internet and tap Retry.")}
 function ask(q,mode){
  if(stream!=null||INTP)return;
  if(!mode){try{gdSense("q",q)}catch(e){}}
  if(!mode){let b=false;try{b=bpHandle(q)}catch(e){b=false}if(b)return}
  if(!mode&&fileAsk(q)){fileNote(q);return}
- if(!mode){let CI=null;if(D.sub!="Physics"){try{CI=chemIntent(q)}catch(e){CI=null}}if(CI)return askChem(q,CI)}
+ if(!mode){let CI=null;if(D.sub!="Physics"&&D.sub!="Mathematics"){try{CI=chemIntent(q)}catch(e){CI=null}}if(CI)return askChem(q,CI)}
  if(!mode){let PI=null;try{PI=physIntent(q)}catch(e){PI=null}if(PI)return askPhys(q,PI)}
+ if(!mode){let MI=null;try{MI=mathIntent(q)}catch(e){MI=null}if(MI)return askMath(q,MI)}
  if(!mode&&looksScenario(q))return askScenario(q);
  if(!mode){let k=null;try{k=coreAsk(q)}catch(e){}if(k)q=k}
  if(!mode){let h=false;try{h=sqHandle(q)}catch(e){h=false}if(h)return}
@@ -7116,7 +7229,7 @@ $("msgs").addEventListener("click",e=>{
  if(a=="ab")m.ab=!m.ab;if(a=="bm"){m.bm=!m.bm;if(m.bm)libAdd(m);else libDel(libKey(m));ownerAct(m.bm?"save":"unsave",m)}if(a=="up"){m.fb=1;m.rs="thanks";sendFb(m);setTimeout(()=>{m.rdone=1;try{save();render()}catch(e){}},2500)}if(a=="dn"){m.fb=-1;m.rs="sorry";sendFb(m)}if(a=="ign"){m.rdone=1}if(a=="rep"){m.rdone=1;setTimeout(()=>supportOpen("complaint","About this answer: "),0)}
   if(a=="pick"&&m.pick==null){m.pick=+b.dataset.k;if(m.qz&&m.pick==m.quiz[2])m.qz.score++}
  if(a=="nq"&&m.qz&&m.pick!=null&&m.qz.n<m.qz.list.length-1){const z=m.qz;z.n++;m.quiz=["q",z.list[z.n][1],z.list[z.n][2]];m.pick=null;m.t=qText(z.t,z)}
- if(a=="regen"){redoReply(i).then(h=>{if(h)return;const k=D.msgs.indexOf(m);if(k<0)return;D.msgs.splice(k,1);save();render();ask((m.chem&&m.chem.raw)||(m.phys&&m.phys.raw)||m.q,m.mode)});return}
+ if(a=="regen"){redoReply(i).then(h=>{if(h)return;const k=D.msgs.indexOf(m);if(k<0)return;D.msgs.splice(k,1);save();render();ask((m.chem&&m.chem.raw)||(m.phys&&m.phys.raw)||(m.math&&m.math.raw)||m.q,m.mode)});return}
  if(a=="retry"){D.msgs.splice(i,1);save();render();ask(m.q,m.mode);return}
  save();render()});
 function subs(){$("subs").innerHTML='<button data-all="1">All subjects</button>'+subsList().map(x=>`<button class="${x==D.sub?"on":""}" data-s="${x}">${x}</button>`).join("");const o=$("subs").querySelector(".on");if(o)o.scrollIntoView({inline:"center",block:"nearest"})}
@@ -8101,6 +8214,7 @@ const HANDOFF={
  ]
  ],
  "log": [
+  ["2026-11-15","UCE Mathematics coach added (separate from Chemistry and Physics). The 45 NCDC programme-planner topics (Senior 1 to Senior 4) plus the Senior 4 Term 3 revision pathway are stored as scope records, with the reviewed 2024 and 2025 Paper 1 (456/1) rules and all six items of each year. New Edge Function math_coach (prompt math-v1.0) mirrors phys_coach: the real plan is read on the server, the Free word limit is shared, and answers are checked by a second pass. UCE learners in Mathematics are routed to it for topic notes, Mathematics command words, scenario and modelling practice, how-do-I-answer coaching, step-by-step working and past-paper item questions; Chemistry and Physics are unchanged. Past-paper answers name the year and item, and say they are not official; items that are not stored are never described. The Mathematics paper-structure table now follows the stored record (it previously described 2024 Item 1 as a ratios and timetable item, which did not match the reviewed paper). The topic records are scope summaries only: worked examples, formulae and exercises for each topic are still to be written and reviewed. UACE Mathematics still uses the existing pipeline. Checked with a syntax test and database queries only; not opened in a browser or on a phone, and no live Gemini call has been made yet."],
   ["2026-11-15","UCE Physics coach added (separate from Chemistry). All 31 NCDC Physics topics (Senior 1 to Senior 4) are stored with notes, equations, worked examples, misconceptions and practical links, plus the 2024 Paper 1 items and the reviewed 2025 Items 1 and 2, and the Paper 1, Paper 2 and Paper 3 arrangements. New Edge Function phys_coach (prompt phys-v1.0) mirrors chem_coach: the real plan is read on the server, Free word limits are shared, answers are checked by a second pass. Physics learners in UCE are routed to it for topic notes, command words, scenario and practical practice, how-do-I-answer coaching and past-paper item questions; Chemistry is unchanged. Past-paper answers say which year and item they come from and are labelled as not official; items that are not stored are never described. The Physics paper-structure table now shows the reviewed 535/1 and 535/2 format. The topic records are blueprint notes that a Physics teacher still has to review. UACE Physics still uses the existing pipeline. Tested with database queries only; not opened in a browser or on a phone, and no live Gemini call has been made yet."],
  ["2026-11-14","Answer engine version 4 (Chemistry only for now): the app no longer calls ai_answer, ai_answer_v2 or ai_answer_v3 (code removed). Every UCE Chemistry message that is not a quiz or small talk goes to chem_coach, narrow questions included. Other subjects get the message that they are being rebuilt; stored owner topics and find_answer still work. The old Edge Functions still exist on Supabase until deleted in the dashboard. Chemistry coach (Item 1-style revision, command words, scenario practice, answer coaching) built from the Complete Chemistry Revision and Item 1 specification. New Edge Function chem_coach (prompt chem-v1.0, deployed; ai_answer_v3 and scenario_answer untouched). The app routes only these Chemistry requests to it, for UCE only: complete revision of one of the ten areas (ten-part notes), command-word lessons (meaning, what the examiner expects, sample instruction, model answer, why it works), a scenario in any of seven formats with a model answer for every task, how do I answer this coaching in six steps, practice mode (question first, then the learner attempts, then feedback and model answers, or show answer), and short follow-ups on the Chemistry answer on screen (explain again, simpler, another example, tell me more, what about..., ask me a question). Narrow questions, owner topics, quizzes and pasted scenarios without a coaching request still use the existing pipeline. CHEM_MIN in the script sets the lowest plan for each request type (Practice Basic, examples and simpler Standard, tell me more Premium, the rest Free, matching the existing GATE rules). The function checks every answer with a second Gemini pass and repairs once; code adds the original-practice-question and not-official labels. Tested with scripts and a mocked Gemini only; not opened in a browser or on a phone, and no live Gemini call has been made yet."],
   ["2026-11-08","Academic Answer Structuring Engine, step 8 built (diagram and illustration decision) with three fixes from the step 6 and 7 follow-up list. Step 8: AASE.visual decides for each question whether ONE visual helps and which kind (labelled diagram for parts and functions, set-up diagram for a real experiment, circuit diagram, flowchart for a process, classification tree, comparison table for differences, timeline for history, graph, sketch map, sketch for a geometry calculation, equation line, accounting layout). Definitions, state and list questions and plain calculations get none. The decision is sent to Gemini inside format_rules and in the academic summary; the app's own library diagram is put in the right place; a diagram to draw line is added only when the learner asked for a drawing; decorative figures are removed when none is needed. Fix 1, wrong subject: when the chat is set to Science, why do plants need light now stays Biology (plant, animal, seed, leaf, breathe, sweat, grow and similar words now count for Biology, and shared words such as light, heat, energy and sound no longer decide the subject on a question about living things; everyday rust, burn, hot and melt words were also added for Chemistry and Physics). Tested on 32 mixed questions, none wrong. Fix 2, the old layout no longer wins: a new answer from Gemini AND every stored answer (find_answer and owner-written answers) is put in the chosen layout even if one section is missing (nothing is made up), for every plan and every model, and the style rewrite and the lesson clean-up no longer undo it. Opening headings such as What it is, Introduction and Definition now match each other. Fix 3, saved topics: for a definition, uses, importance, characteristics, steps, process or parts and functions question, the saved topic is arranged under the chosen headings, with detail following the plan (Free 3 points, Basic 5, Standard 8, Premium all). Layouts a saved topic cannot fill honestly (differences, causes and effects, advantages and disadvantages, calculations, practicals) keep the old layout. The ai_answer_v3 function was updated to version t06-v3.1 (file ai_answer_v3_index.ts, deployed by the owner): it reads format_rules and academic and returns a layout_md field written under the chosen headings, which the app uses when the layout matches. Written and tested with scripts only; not yet opened in a browser or on a phone."],

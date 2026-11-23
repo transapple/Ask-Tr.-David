@@ -310,7 +310,7 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 #annrow button{border-radius:8px;font:600 12.5px inherit;padding:6px 12px;cursor:pointer;line-height:1.2}
 #annr{border:0;background:var(--green);color:#fff}#annx{border:1px solid var(--line);background:none;color:var(--text)}
 #jump{position:fixed;right:14px;bottom:calc(87px + env(safe-area-inset-bottom,0px));width:42px;height:42px;border-radius:50%;border:0;background:var(--sheet,#fff);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.3);display:none;place-items:center;z-index:5;cursor:pointer}
-#auth{position:fixed;inset:0;z-index:30;background:var(--bg);color:var(--text);overflow-y:auto;display:block}.ab{max-width:420px;margin:0 auto;padding-bottom:40px}
+#auth{position:fixed;inset:0;z-index:30;background:var(--bg);color:var(--text);overflow-y:auto;display:none}.ab{max-width:420px;margin:0 auto;padding-bottom:40px}
 .fw{padding:6px 18px}.fw label{font-size:13px;color:var(--sub);display:flex;justify-content:space-between;margin-bottom:3px}.fw .fld{width:100%}.hn{font-size:12px;min-height:16px;color:var(--sub);white-space:pre-wrap;margin-top:3px}.hn.e{color:#e03131}.hn.g{color:var(--green)}.hn .ok{color:var(--green)}.hn .no{color:var(--sub)}.hn .lk{margin:4px 4px 0 0}
 .fe{padding:6px 18px;font-size:14px;white-space:pre-wrap}.btn{display:block;margin:10px 18px;width:calc(100% - 36px);padding:13px;border:0;border-radius:24px;background:var(--green);color:#fff;font:inherit;font-weight:600;cursor:pointer}.btn:disabled{opacity:.6}.pcard{text-align:center;padding:22px 18px 12px}.pav{width:72px;height:72px;border-radius:50%;background:var(--green);color:#fff;font-size:30px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 10px}.pcn{font-size:18px;font-weight:700}.pcu{font-size:13px;color:var(--sub);margin-top:2px}.pbn{margin:14px 18px 4px;padding:13px 14px;border-radius:0;border-left-width:6px;background:rgba(255,159,10,.16);border:1px solid rgba(255,159,10,.45);line-height:1.4;font-weight:600}.pbn.ok{background:rgba(0,168,132,.12);border-color:rgba(0,168,132,.4)}
 .psb{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:-6px 18px 18px}.psb a{display:block;text-align:center;text-decoration:none;background:var(--a);color:#fff;font-size:12px;font-weight:600;padding:6px 0;border-radius:14px;line-height:1.2}.psb a:active{opacity:.8}
@@ -358,6 +358,7 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 #permGate .pm-st{flex:0 0 auto;font-size:13px;font-weight:700;padding:4px 10px;border-radius:99px;background:rgba(255,255,255,.2)}
 #permGate .pm-st.ok{background:#12b886}
 #permGate .pm-st.no{background:#e03131}
+#permGate .pm-st.un{background:#f59f00;color:#111}
 #permGate button.pm-go{margin-top:8px;height:54px;border:0;border-radius:16px;background:#ffd400;color:#111;font:inherit;font-size:17px;font-weight:800;cursor:pointer}
 #permGate button.pm-go:disabled{opacity:.7}
 #permGate button.pm-re{margin-top:10px;height:48px;border:2px solid rgba(255,255,255,.7);border-radius:16px;background:none;color:#fff;font:inherit;font-size:15px;font-weight:700;cursor:pointer}
@@ -438,6 +439,7 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
       <span>Install</span>
     </button>
     <button type="button" id="pgWatch" class="pg-watch"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg><span>Watch how to install</span></button>
+    
     <p id="pgMsg" class="pg-msg" role="status" aria-live="polite" hidden></p>
   </div>
 </div>
@@ -862,7 +864,7 @@ nav{display:flex;align-items:center;gap:12px}nav button{width:40px;height:40px;b
 #ap #annr{border:0;background:var(--green);color:#fff}
 #ap #annx{border:1px solid var(--line);background:none;color:var(--text)}
 #ap #jump{position:fixed;right:14px;bottom:calc(87px + env(safe-area-inset-bottom,0px));width:42px;height:42px;border-radius:50%;border:0;background:var(--sheet,#fff);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.3);display:none;place-items:center;z-index:5;cursor:pointer}
-#ap #auth{position:fixed;inset:0;z-index:30;background:var(--bg);color:var(--text);overflow-y:auto;display:block}
+#ap #auth{position:fixed;inset:0;z-index:30;background:var(--bg);color:var(--text);overflow-y:auto;display:none}
 #ap .ab{max-width:420px;margin:0 auto;padding-bottom:40px}
 #ap .fw{padding:6px 18px}
 #ap .fw label{font-size:13px;color:var(--sub);display:flex;justify-content:space-between;margin-bottom:3px}
@@ -952,6 +954,7 @@ nav{display:flex;align-items:center;gap:12px}nav button{width:40px;height:40px;b
 #ap #permGate .pm-st{flex:0 0 auto;font-size:13px;font-weight:700;padding:4px 10px;border-radius:99px;background:rgba(255,255,255,.2)}
 #ap #permGate .pm-st.ok{background:#12b886}
 #ap #permGate .pm-st.no{background:#e03131}
+#permGate .pm-st.un{background:#f59f00;color:#111}
 #ap #permGate button.pm-go{margin-top:8px;height:54px;border:0;border-radius:16px;background:#ffd400;color:#111;font:inherit;font-size:17px;font-weight:800;cursor:pointer}
 #ap #permGate button.pm-go:disabled{opacity:.7}
 #ap #permGate button.pm-re{margin-top:10px;height:48px;border:2px solid rgba(255,255,255,.7);border-radius:16px;background:none;color:#fff;font:inherit;font-size:15px;font-weight:700;cursor:pointer}
@@ -3979,7 +3982,7 @@ MP("BODMAS (order of operations)",/bodmas|order of operations|operations? order|
 `## Common mistakes\n- Working strictly from left to right.\n- Doing addition before multiplication.`,
 [["6 + 4 × 2 = ?",["20","14","16"],1],["(6 + 4) × 2 = ?",["20","14","12"],0],["20 ? 12 ÷ 4 = ?",["2","17","8"],1]]),
 
-MP("Circles",/circles?|circumference|\bradius\b|\bdiameter\b|\bpi\b|?|semi-?circle|\bchord\b/,
+MP("Circles",/circles?|circumference|\bradius\b|\bdiameter\b|\bpi\b|\u03c0|semi-?circle|\bchord\b/,
 [["P6",[3],"Parts of a circle: centre, radius, diameter, chord, arc."],["P7",[2],"Circumference C = ? × d and area A = ? × r². Use ? = 22/7 or 3.14."]],
 `A **circle** is a round shape where every point on its edge is the same distance from the centre. The **radius** goes from the centre to the edge. The **diameter** goes across through the centre. The **circumference** is the distance around.`,
 `- Diameter = 2 × radius.\n- Circumference C = ? × d = 2 × ? × r.\n- Area A = ? × r × r.\n- Use ? = 22/7 (when the radius is a multiple of 7) or 3.14.`,
@@ -8572,14 +8575,14 @@ function form(el,items,btn,go,extra,pre){
   if(r&&!r.ok){const u=items.find(x=>x[1]=="username"),p=items.find(x=>x[1]=="phone");if(r.suggest&&u)fb(u[0],r);else if(/already exist/i.test(r.err||"")&&p)fb(p[0],r);else er(r.err||"Try again.")}}}
 const L=(s,t)=>`<div class="al" data-go="${s}">${t}</div>`,BK='<div class="bk" data-go="login">Back to login</div>',AR=(a,b)=>`<div class="ar">${a}${b}</div>`;
 async function done(r,rm){if(r.ok){const S=rm===false?SS:LS;wipe();T=r.token;ME=r.me;keep(S,{access_token:r.token,refresh_token:r.rt,expires_in:r.exp});S.setItem("ask_me",JSON.stringify(ME));await enter()}return r}
-function scr(n){const f=$("af"),h=t=>$("ah").textContent=t;$("auth").style.display="block";window.__authScr=n;window.__authGo=scr;try{window.__backSync&&window.__backSync()}catch(e){}
+function scr(n){const f=$("af"),h=t=>$("ah").textContent=t;$("auth").style.display="block";window.__askReady=1;window.__authScr=n;window.__authGo=scr;try{window.__backSync&&window.__backSync()}catch(e){}
  const FG=(w,id)=>async v=>{const r=await rpc("acct_forgot",{p_what:w,p_user:v.u,p_phone:v.p,p_secret:v.s,p_new:v.n});if(r.ok){scr("login");er((w=="pin"?"Pin":"Password")+" updated. Please login.",1)}return r};
  if(n=="login"){h("Login");form(f,[["i","login","Username"],["p","cpw","Password"]],"Login",async v=>done(await rpc("acct_login",{p_id:v.i,p_pass:v.p}),v.rm),AR(L("fp","Forgot password"),L("create","Create account")),'<label class="rm"><input type="checkbox" id="rm" checked>Remember login</label>')}
  if(n=="create"){h("Create account");form(f,[["n","names","Names"],["u","username","Username"],["p","phone","Phone"],["k","cls","Class or combination"],["d","dob","Date of birth"],["w","password","Password"],["c","pin","Pin"]],"Create account",async v=>{const r=await rpc("acct_create",{p_names:v.n,p_user:v.u,p_phone:v.p,p_pass:v.w,p_pin:v.c,p_cls:v.k});if(r.ok){try{LS.setItem("ask_cls_"+((r.me&&r.me.username)||v.u),v.k)}catch(e){}try{if(/^Senior [56]$/.test(v.k))LS.setItem("ask_yr_"+((r.me&&r.me.username)||v.u),v.k)}catch(e){}try{window.__ask3&&await window.__ask3.cls(r.token,v.k,v.d)}catch(e){}try{const rc=(($("refc")||{}).value||"").trim().toUpperCase();if(rc){const cr=await rpc("ref_claim",{p_t:r.token,p_code:rc});LS.removeItem("ask_ref");if(!cr.ok&&!cr.net)LS.setItem("ask_ref_msg",String(cr.err||"The referral code could not be used."))}}catch(e){}}return done(r)},L("login","I already have an account: Login"),'<div class="fw"><label>Referral code (optional)</label><div class="pw"><input class="fld" id="refc" maxlength="12" autocomplete="off" autocapitalize="characters" placeholder="Leave empty if you have none" value="'+String(LS.getItem("ask_ref")||"").replace(/[^A-Z0-9]/g,"")+'"></div></div>')}
  if(n=="fp"){h("Forgot password");form(f,[["u","uname","Username"],["p","phoneo","Phone"],["s","cpin","Pin"],["n","password","New password"]],"Reset password",FG("password"),AR(L("fn","Forgot pin"),L("ct","Forgot password and pin"))+BK)}
  if(n=="fn"){h("Forgot pin");form(f,[["u","uname","Username"],["p","phoneo","Phone"],["s","cpw","Password"],["n","pin","New pin"]],"Reset pin",FG("pin"),L("ct","Forgot password and pin")+BK)}
  if(n=="ct"){h("Contact us");f.innerHTML='<div class="fw" style="line-height:1.5">If you forgot both your password and your pin, contact us and we will help you recover your account.</div>'+`<a class="btn" style="text-align:center;text-decoration:none" href="tel:+256788737517">Call 0788 737 517</a><a class="btn" style="text-align:center;text-decoration:none;background:#25d366;margin-top:10px" href="https://wa.me/256788737517" target="_blank" rel="noopener">WhatsApp</a><a class="btn" style="text-align:center;text-decoration:none;background:var(--sub);margin-top:10px" href="mailto:asktrdavid@gmail.com">Email asktrdavid@gmail.com</a>`+BK;f.onclick=e=>{if(e.target.dataset.go)scr(e.target.dataset.go)};f.oninput=null;f.onfocusin=null}}
-async function enter(){try{if(ME&&window.__syncFirst)await __syncFirst(ME.username)}catch(e){}$("auth").style.display="none";window.__authScr="";try{window.__backSync&&window.__backSync()}catch(e){}if(ME){D.pname=GNm();const c=LS.getItem("ask_cls_"+ME.username);if(c&&CLASSES.includes(c))applyCls(c);else D.cls="";save()}render();link();evLog("open");try{annSync();window.refSync&&refSync();if(D.notif)pushOn()}catch(e){}if(ME&&!D.cls)clsPick();try{window.__ask3&&__ask3.afterLogin()}catch(e){}admHide();try{updPlan()}catch(e){}}
+async function enter(){try{if(ME&&window.__syncFirst)await Promise.race([__syncFirst(ME.username),new Promise(z=>setTimeout(z,6000))])}catch(e){}$("auth").style.display="none";window.__authScr="";try{window.__backSync&&window.__backSync()}catch(e){}if(ME){D.pname=GNm();const c=LS.getItem("ask_cls_"+ME.username);if(c&&CLASSES.includes(c))applyCls(c);else D.cls="";save()}render();link();evLog("open");try{annSync();window.refSync&&refSync();if(D.notif)pushOn()}catch(e){}if(ME&&!D.cls)clsPick();try{window.__ask3&&__ask3.afterLogin()}catch(e){}admHide();try{updPlan()}catch(e){}}
 async function out(){admHide();try{await(window.__syncFlush&&__syncFlush())}catch(e){}rpc("acct_logout",{p_t:T});wipe();ME=null;closeP();scr("login")}
 const UI={names:[["n","names","New names"],["a","cpw","Confirm password"]],username:[["n","username","New username"],["a","cpw","Confirm password"]],phone:[["n","phone","New phone"],["a","cpw","Confirm password"]],password:[["n","password","New password"],["a","uname","Confirm username"],["b","cpw","Old password"],["c","cpin","Pin"]],pin:[["n","pin","New pin"],["a","uname","Confirm username"],["b","cpw","Password"],["c","cpin","Old pin"]]};
 function upd(w){showP("Update "+w,'<div id="ff"></div>',account);form($("ff"),UI[w],"Save",async v=>{const r=await rpc("acct_change",{p_t:T,p_what:w,p_new:v.n,p_a:v.a,p_b:v.b||"",p_c:v.c||""});if(r.relogin){out();return r}if(r.ok){ME=r.me;stg().setItem("ask_me",JSON.stringify(ME));account();uiAlert("Updated.")}return r})}
@@ -8592,7 +8595,7 @@ async function link(){if(H=="#wn"){H="";try{history.replaceState(null,"",locatio
   showP("Shared answer",`<div style="padding:14px 18px"><div class="t">${esc(p.l+" · "+p.s)}</div><b>${esc(p.q||"")}</b><div class="md" style="margin-top:6px">${md(p.t)}</div></div><button class="btn" id="gx">Ask your own question</button>`,closeP,e=>{if(e.target.id=="gx"){closeP();if(LV.includes(p.l)){D.lvl=p.l;fixSub();setSub(subsList().includes(p.s)?p.s:D.sub);save()}}})}catch(e){}}
 window.AK={me:()=>ME,open:account,upd,short:async m=>{const b={p_l:D.lvl,p_s:D.sub,p_q:(m.q||"").slice(0,300),p_t:m.t.slice(0,6000)};let r=await rpc("ask_share_put",b);if(!(r.ok&&r.id))r=await rpc("ask_share_put",b);return r.ok&&r.id?BASE+"#k="+r.id:BASE},link:m=>BASE+"#s="+b64(JSON.stringify({l:D.lvl,s:D.sub,q:(m.q||"").slice(0,300),t:m.t.slice(0,6000)})),area:()=>BASE+"#a="+D.lvl+"~"+D.sub};
 $("alogo").style.cssText+=";background:url("+AVATAR+") center/cover";
-(async()=>{if(!T){scr(LS.getItem("ask_ref")?"create":"login");return}const r=await rpc("acct_me",{p_t:T});if(r.ok){ME=r.me;stg().setItem("ask_me",JSON.stringify(ME));enter()}else if(r.net&&stg().getItem("ask_me")){ME=JSON.parse(stg().getItem("ask_me"));enter()}else{T="";LS.removeItem("ask_tok");SS.removeItem("ask_tok");scr("login")}})();
+(async()=>{if(!T){scr(LS.getItem("ask_ref")?"create":"login");return}const r=await Promise.race([rpc("acct_me",{p_t:T}),new Promise(z=>setTimeout(()=>z({ok:false,net:1}),8000))]);if(r.ok){ME=r.me;stg().setItem("ask_me",JSON.stringify(ME));enter()}else if(r.net&&stg().getItem("ask_me")){ME=JSON.parse(stg().getItem("ask_me"));enter()}else{T="";LS.removeItem("ask_tok");SS.removeItem("ask_tok");scr("login")}})();
 })();
 </script>
 
@@ -8825,7 +8828,6 @@ async function admThread(t){
     <h1>Allow permissions</h1>
     <p class="pm-sub">Ask Tr. David needs these to work well. You can open the app after you allow all of them.</p>
     <div class="pm-row" data-p="notif"><div class="pm-ic"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0"/></svg></div><div class="pm-t"><b>Notifications</b><span>Announcements and updates, even when the app is closed</span></div><div class="pm-st" data-s="notif"></div></div>
-    <div class="pm-row" data-p="mic"><div class="pm-ic"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg></div><div class="pm-t"><b>Microphone</b><span>Ask your questions by voice</span></div><div class="pm-st" data-s="mic"></div></div>
     <div class="pm-row" data-p="cam"><div class="pm-ic"><svg viewBox="0 0 24 24"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div><div class="pm-t"><b>Camera</b><span>Ask about a photo of your work</span></div><div class="pm-st" data-s="cam"></div></div>
     <button class="pm-go" id="pmGo" type="button">Allow all permissions</button>
     <button class="pm-re" id="pmRe" type="button" style="display:none">I have allowed it, check again</button>
@@ -8833,7 +8835,7 @@ async function admThread(t){
   </div>
 </div>
 <script>
-/* Permission gate: on every open, Notifications, Microphone and Camera must be allowed.
+/* Permission gate: on every open, Notifications and Camera must be allowed.
    Until then the app cannot be used. Once notifications are allowed, phone alerts are switched on automatically. */
 (function () {
   var gate = document.getElementById("permGate");
@@ -8857,12 +8859,13 @@ async function admThread(t){
   /* returns "granted" | "denied" | "prompt" | "na" (this device cannot offer it, so it is not required) */
   function stateOf(p) {
     if (p === "notif") {
-      if (!("Notification" in window)) return Promise.resolve("na");
+      if (!("Notification" in window)) return Promise.resolve("unsup");
       var n = Notification.permission;
       return Promise.resolve(n === "granted" ? "granted" : n === "denied" ? "denied" : "prompt");
     }
     var kind = p === "mic" ? "audioinput" : "videoinput";
-    return hasDevice(kind).then(function (has) {
+    if (p === "cam" && !(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) return Promise.resolve("unsup");
+    return (p === "cam" ? Promise.resolve(true) : hasDevice(kind)).then(function (has) { /* the camera is compulsory: never skipped */
       if (!has) return "na";
       var fallback = function () { return flag(KEY[p]) === "1" ? "granted" : "prompt"; };
       if (!(navigator.permissions && navigator.permissions.query)) return fallback();
@@ -8895,19 +8898,22 @@ async function admThread(t){
   }
 
   function paint(st) {
-    ["notif", "mic", "cam"].forEach(function (p) {
+    ["notif", "cam"].forEach(function (p) {
       var el = gate.querySelector('[data-s="' + p + '"]'); if (!el) return;
       var s = st[p];
-      el.className = "pm-st" + (s === "granted" || s === "na" ? " ok" : s === "denied" ? " no" : "");
-      el.textContent = s === "granted" ? "Allowed" : s === "na" ? "Not needed" : s === "denied" ? "Blocked" : "Not yet";
+      el.className = "pm-st" + (s === "granted" || s === "na" ? " ok" : s === "unsup" ? " un" : s === "denied" ? " no" : "");
+      el.textContent = s === "granted" ? "Allowed" : s === "na" ? "Not needed" : s === "unsup" ? "Not supported here" : s === "denied" ? "Blocked" : "Not yet";
     });
-    var blocked = ["notif", "mic", "cam"].filter(function (p) { return st[p] === "denied"; });
+    var blocked = ["notif", "cam"].filter(function (p) { return st[p] === "denied"; });
     var help = document.getElementById("pmHelp"), re = document.getElementById("pmRe");
     if (blocked.length) {
       help.innerHTML = "<b>" + blocked.map(function (p) { return NAMES[p]; }).join(", ") + " blocked</b>" +
         "Your phone will not ask again. Open your phone Settings, then Apps, then Ask Tr. David, then Permissions, and allow " +
         blocked.map(function (p) { return NAMES[p]; }).join(", ") +
         ". In a browser, tap the lock icon next to the address, then Permissions. Come back here and the app opens by itself.";
+      help.classList.add("on"); re.style.display = "";
+    } else if (st.notif === "unsup" || st.cam === "unsup") {
+      help.innerHTML = "<b>" + (st.notif === "unsup" ? "Notifications" : "Camera") + " not supported in this browser</b>Notifications and Camera must be allowed to use Ask Tr. David. Open this page in Chrome, or install the app from the install page, then allow notifications.";
       help.classList.add("on"); re.style.display = "";
     } else { help.classList.remove("on"); re.style.display = "none"; }
   }
@@ -8934,10 +8940,10 @@ async function admThread(t){
 
   function check() {
     if (root.classList.contains("pg-on")) return Promise.resolve(); /* install page is showing; gate comes after it */
-    return Promise.all([stateOf("notif"), stateOf("mic"), stateOf("cam")]).then(function (a) {
-      var st = { notif: a[0], mic: a[1], cam: a[2] };
+    return Promise.all([stateOf("notif"), stateOf("cam")]).then(function (a) {
+      var st = { notif: a[0], cam: a[1] };
       watched = true;
-      var ok = a.every(function (s) { return s === "granted" || s === "na"; });
+      var ok = a[0] === "granted" && a[1] === "granted"; /* notifications and camera are both compulsory; the microphone is not asked for */
       if (ok) { paint(st); done(); return true; }
       paint(st); lock(true); shown = true; return false;
     });
@@ -8949,7 +8955,7 @@ async function admThread(t){
     var go = document.getElementById("pmGo"); go.disabled = true; go.textContent = "Waiting for you?";
     /* notifications first: it needs the tap itself on some phones */
     var chain = Promise.resolve();
-    ["notif", "mic", "cam"].forEach(function (p) {
+    ["notif", "cam"].forEach(function (p) {
       chain = chain.then(function () {
         return stateOf(p).then(function (s) { return s === "prompt" ? ask(p) : null; });
       });
@@ -8961,8 +8967,9 @@ async function admThread(t){
 
   document.getElementById("pmGo").addEventListener("click", allow);
   document.getElementById("pmRe").addEventListener("click", function () { check(); });
-  document.addEventListener("visibilitychange", function () { if (!document.hidden && shown) check(); });
-  window.addEventListener("focus", function () { if (shown) check(); });
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) check(); });
+  window.addEventListener("focus", function () { check(); });
+  setInterval(function () { if (!document.hidden && !busy) check(); }, 4000); /* if notifications are switched off later, the app locks again */
 
   /* the install page hides first; when the person continues, the gate takes over */
   try { new MutationObserver(function () { if (!root.classList.contains("pg-on")) check(); }).observe(root, { attributes: true, attributeFilter: ["class"] }); } catch (e) {}
@@ -8972,14 +8979,14 @@ async function admThread(t){
   check().then(function (ok) {
     if (ok === false && !busy) {
       /* ask right away on open; if the phone wants a tap first, the button does it */
-      stateOf("mic").then(function () { allowAuto(); });
+      allowAuto();
     }
   });
   function allowAuto() {
     if (busy) return;
     busy = true;
     var chain = Promise.resolve();
-    ["notif", "mic", "cam"].forEach(function (p) {
+    ["notif", "cam"].forEach(function (p) {
       chain = chain.then(function () {
         return stateOf(p).then(function (s) { return s === "prompt" ? ask(p) : null; });
       });

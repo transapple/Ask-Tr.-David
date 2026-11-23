@@ -5421,7 +5421,7 @@ async function aiAnswer(q,FUx,loose){
  if(loose)return null; /* the server already retries once; a failed question is saved there and the learner taps Retry */
  AIWHY="v4";
  try{
-  const tk=tokNow();if(!tk){AIWHY="auth";return null}
+  let tk=tokNow();try{if(window.AK&&AK.tok){const f=await AK.tok();if(f)tk=f}}catch(e){}if(!tk){AIWHY="auth";return null}
   const ids=window.__A3IDS||{},alias={"Religious Education":["Christian Religious Education"],"Literature in English":["English"],"Divinity":["Christian Religious Education"],"Islamic Studies":["Islamic Religious Education"],"Fine Art":["Art and Design"],"Technical Drawing":["Art and Design"],"Performing Arts":["Art and Design"]};
   let sid=ids[D.sub];if(!sid)for(const a of(alias[D.sub]||[]))if(ids[a]){sid=ids[a];break}
   if(!sid)return null;
@@ -7057,7 +7057,7 @@ async function askChem(q,CI){
  if(j&&j.status=="busy")return err("Many learners are asking right now. Please try again in a little while.");
  if(j&&j.status=="limit"){try{const q=FQ();q.used=Math.max(q.used,q.cap);const ms=j.retry_at?new Date(j.retry_at).getTime()-Date.now():0;q.left=Math.max(60000,ms||0);q.at=Date.now()+q.left;q.seen=Date.now();FQW(q)}catch(e){}return limitMsg()}
  /* the learner still gets an answer: anything the Chemistry function cannot handle goes to the normal pipeline */
- if(j&&(j.status=="off_topic"||j.status=="rejected"||j.status=="not_configured"||j.status=="bad_output"||j.status=="error"))return askCore(q,null,null);
+ if(navigator.onLine&&(!j||j.status=="off_topic"||j.status=="rejected"||j.status=="not_configured"||j.status=="bad_output"||j.status=="error"))return askCore(q,null,null);
  return err(navigator.onLine?"I could not write this Chemistry answer just now. Please tap Retry or send it again.":"No internet connection. Please connect to the internet and tap Retry.")}
 /* ===== PHYSICS COACH (UCE Physics: topic teaching, command words, scenario and practical practice, past-paper item questions) =====
    Source: "Ask Teacher David, UCE Physics Master Development Reference". Server: Edge Function phys_coach (prompt phys-v1.0) with the phys_* tables and phys_retrieve.
@@ -7133,7 +7133,7 @@ async function askPhys(q,CI){
  if(j&&j.status=="busy")return err("Many learners are asking right now. Please try again in a little while.");
  if(j&&j.status=="limit"){try{const q=FQ();q.used=Math.max(q.used,q.cap);const ms=j.retry_at?new Date(j.retry_at).getTime()-Date.now():0;q.left=Math.max(60000,ms||0);q.at=Date.now()+q.left;q.seen=Date.now();FQW(q)}catch(e){}return limitMsg()}
  /* the learner still gets an answer: anything the Physics function cannot handle goes to the normal pipeline */
- if(j&&(j.status=="off_topic"||j.status=="rejected"||j.status=="not_configured"||j.status=="bad_output"||j.status=="error"))return askCore(q,null,null);
+ if(navigator.onLine&&(!j||j.status=="off_topic"||j.status=="rejected"||j.status=="not_configured"||j.status=="bad_output"||j.status=="error"))return askCore(q,null,null);
  return err(navigator.onLine?"I could not write this Physics answer just now. Please tap Retry or send it again.":"No internet connection. Please connect to the internet and tap Retry.")}
 /* ===== MATHEMATICS COACH (UCE Mathematics: topic teaching, command words, scenario and modelling practice, graph and geometry coaching, past-paper item questions) =====
    Source: "Ask Teacher David, UCE Mathematics Master Development Reference". Server: Edge Function math_coach (prompt math-v1.0) with the math_* tables and math_retrieve.
@@ -7210,7 +7210,7 @@ async function askMath(q,CI){
  if(j&&j.status=="busy")return err("Many learners are asking right now. Please try again in a little while.");
  if(j&&j.status=="limit"){try{const q=FQ();q.used=Math.max(q.used,q.cap);const ms=j.retry_at?new Date(j.retry_at).getTime()-Date.now():0;q.left=Math.max(60000,ms||0);q.at=Date.now()+q.left;q.seen=Date.now();FQW(q)}catch(e){}return limitMsg()}
  /* the learner still gets an answer: anything the Mathematics function cannot handle goes to the normal pipeline */
- if(j&&(j.status=="off_topic"||j.status=="rejected"||j.status=="not_configured"||j.status=="bad_output"||j.status=="error"))return askCore(q,null,null);
+ if(navigator.onLine&&(!j||j.status=="off_topic"||j.status=="rejected"||j.status=="not_configured"||j.status=="bad_output"||j.status=="error"))return askCore(q,null,null);
  return err(navigator.onLine?"I could not write this Mathematics answer just now. Please tap Retry or send it again.":"No internet connection. Please connect to the internet and tap Retry.")}
 function ask(q,mode){
  if(stream!=null||INTP)return;
@@ -8646,7 +8646,7 @@ async function link(){if(H=="#wn"){H="";try{history.replaceState(null,"",locatio
   if(m[1]=="k"){const r=await rpc("ask_share_get",{p_id:m[2].replace(/[^a-zA-Z0-9]/g,"").slice(0,24)});if(!r.ok){uiAlert(r.err||"This shared answer could not be opened.");return}p={l:r.l,s:r.s,q:r.q,t:r.t}}
   else p=JSON.parse(decodeURIComponent(escape(atob(m[2].replace(/-/g,"+").replace(/_/g,"/")))));
   showP("Shared answer",`<div style="padding:14px 18px"><div class="t">${esc(p.l+" ? "+p.s)}</div><b>${esc(p.q||"")}</b><div class="md" style="margin-top:6px">${md(p.t)}</div></div><button class="btn" id="gx">Ask your own question</button>`,closeP,e=>{if(e.target.id=="gx"){closeP();if(LV.includes(p.l)){D.lvl=p.l;fixSub();setSub(subsList().includes(p.s)?p.s:D.sub);save()}}})}catch(e){}}
-window.AK={me:()=>ME,open:account,upd,short:async m=>{const b={p_l:D.lvl,p_s:D.sub,p_q:(m.q||"").slice(0,300),p_t:m.t.slice(0,6000)};let r=await rpc("ask_share_put",b);if(!(r.ok&&r.id))r=await rpc("ask_share_put",b);return r.ok&&r.id?BASE+"#k="+r.id:BASE},link:m=>BASE+"#s="+b64(JSON.stringify({l:D.lvl,s:D.sub,q:(m.q||"").slice(0,300),t:m.t.slice(0,6000)})),area:()=>BASE+"#a="+D.lvl+"~"+D.sub};
+window.AK={tok:async()=>{try{const r=await acctGet();return(r&&r.t)||""}catch(e){return""}},me:()=>ME,open:account,upd,short:async m=>{const b={p_l:D.lvl,p_s:D.sub,p_q:(m.q||"").slice(0,300),p_t:m.t.slice(0,6000)};let r=await rpc("ask_share_put",b);if(!(r.ok&&r.id))r=await rpc("ask_share_put",b);return r.ok&&r.id?BASE+"#k="+r.id:BASE},link:m=>BASE+"#s="+b64(JSON.stringify({l:D.lvl,s:D.sub,q:(m.q||"").slice(0,300),t:m.t.slice(0,6000)})),area:()=>BASE+"#a="+D.lvl+"~"+D.sub};
 $("alogo").style.cssText+=";background:url("+AVATAR+") center/cover";
 (async()=>{if(!T){scr(LS.getItem("ask_ref")?"create":"login");return}const r=await Promise.race([rpc("acct_me",{p_t:T}),new Promise(z=>setTimeout(()=>z({ok:false,net:1}),8000))]);if(r.ok){ME=r.me;stg().setItem("ask_me",JSON.stringify(ME));enter()}else if(r.net&&stg().getItem("ask_me")){ME=JSON.parse(stg().getItem("ask_me"));enter()}else{T="";LS.removeItem("ask_tok");SS.removeItem("ask_tok");scr("login")}})();
 })();

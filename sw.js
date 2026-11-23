@@ -2,10 +2,11 @@
    - Required by Chrome/Edge/Samsung Internet before they allow a real install.
    - Keeps a copy of the app so it opens with no signal, and always loads the newest version when online.
    - Shows phone alerts for announcements and updates ({ id, title, body } payload), also when the app is closed.
+   - Shows "your limit has reset" ({ tag: "limit-reset", title, body } payload) when a learner's usage limit ends.
    - Never touches Supabase or any other site. */
 
 const CACHE_PREFIX = "ask-tr-david-";
-const CACHE = CACHE_PREFIX + "v11";
+const CACHE = CACHE_PREFIX + "v12";
 const SHELL = ["./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png", "./badge-96.png", "./blank-96.png", "./og-image.png"];
 
 self.addEventListener("install", (event) => {
@@ -68,7 +69,7 @@ self.addEventListener("fetch", (event) => {
   );
 });
 
-// Phone alert for an announcement or update (sent by the ann_push function).
+// Phone alert: an announcement or update (ann_push), or "your limit has reset" (limit_reset_push).
 self.addEventListener("push", (event) => {
   let data = {};
   try {
@@ -76,6 +77,24 @@ self.addEventListener("push", (event) => {
   } catch (e) {
     data = { title: "Ask Tr. David", body: event.data ? event.data.text() : "" };
   }
+
+  // Limit reset: short message, no alert if the learner is already looking at the app.
+  if (data.tag === "limit-reset") {
+    event.waitUntil((async () => {
+      const list = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+      if (list.some((c) => c.visibilityState === "visible")) return;
+      await self.registration.showNotification(String(data.title || "Ask Tr. David"), {
+        body: String(data.body || "Your limit has reset. You can ask again now.").slice(0, 120),
+        tag: "limit-reset",
+        icon: "./icon-192.png",
+        badge: "./badge-96.png",
+        timestamp: Date.now(),
+        data: { kind: "limit" }
+      });
+    })());
+    return;
+  }
+
   const id = data.id != null ? String(data.id) : String(Date.now());
   event.waitUntil((async () => {
     // The post's title is the notification's own title (bold and larger on the phone).
@@ -97,15 +116,16 @@ self.addEventListener("push", (event) => {
   })());
 });
 
-// Tapping the alert opens the app on What's new.
+// Tapping the alert opens the app (What's new for announcements, the chat for a limit reset).
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
+  const isLimit = !!(event.notification.data && event.notification.data.kind === "limit");
   event.waitUntil((async () => {
     const list = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
     for (const c of list) {
-      try { await c.focus(); c.postMessage({ openWN: 1 }); return; } catch (e) {}
+      try { await c.focus(); if (!isLimit) c.postMessage({ openWN: 1 }); return; } catch (e) {}
     }
-    await self.clients.openWindow(new URL("./#wn", self.registration.scope).href);
+    await self.clients.openWindow(new URL(isLimit ? "./" : "./#wn", self.registration.scope).href);
   })());
 });
 

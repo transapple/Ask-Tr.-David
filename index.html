@@ -5194,8 +5194,8 @@ function arithSolve(q){
   const N=m[2].match(/\d+(?:\.\d+)?/g).map(Number);
   if(N.length>=2&&N.length<=15)return statW(m[1]=="average"?"mean":m[1],N)}
  if((m=t.match(/(\d+(?:\.\d+)?)\s*(?:%|percent|per cent)\s*of\s*(\d+(?:\.\d+)?)/))&&(t.match(/\d+(?:\.\d+)?/g)||[]).length==2)return percW(+m[1],+m[2]);
- if((m=t.match(/(\d+)\s*\/\s*(\d+)\s*(\+|plus|-|minus|?|\*|x|times|?|divided by|\/)\s*(\d+)\s*\/\s*(\d+)/))&&(t.match(/\d+/g)||[]).length==4){
-  const o=m[3],op=/\+|plus/.test(o)?"+":/-|minus/.test(o)?"-":/?|\*|x|times/.test(o)?"*":"/";
+ if((m=t.match(/(\d+)\s*\/\s*(\d+)\s*(\+|plus|-|minus|\u2212|\*|x|times|\u00d7|\u00f7|divided by|\/)\s*(\d+)\s*\/\s*(\d+)/))&&(t.match(/\d+/g)||[]).length==4){
+  const o=m[3],op=/\+|plus/.test(o)?"+":/-|minus/.test(o)?"-":/\u00d7|\*|x|times/.test(o)?"*":"/";
   return fracW(+m[1],+m[2],op,+m[4],+m[5])}
  if(/\d\.\d/.test(t)||/(^|[\s(=])-\d/.test(t))return null;
  if((t.match(/\d+/g)||[]).length!=2)return null;
@@ -5205,8 +5205,8 @@ function arithSolve(q){
  else if((m=t.match(/subtract\s+(\d+)\s+from\s+(\d+)/))){a=+m[2];b=+m[1];op="-"}
  else if((m=t.match(/product of\s+(\d+)\s+and\s+(\d+)/))){a=+m[1];b=+m[2];op="*"}
  else if((m=t.match(/divide\s+(\d+)\s+by\s+(\d+)/))){a=+m[1];b=+m[2];op="/"}
- else if((m=t.match(/(?<![\d.\/])(\d+)\s*(\+|plus|-|minus|?|\*|x|times|multiplied by|?|divided by|\s\/\s)\s*(\d+)(?!\d|[.,]\d|\/|%)/))){
-  a=+m[1];b=+m[3];const o=m[2].trim();op=/^(\+|plus)$/.test(o)?"+":/^(-|minus)$/.test(o)?"-":/^(?|\*|x|times|multiplied by)$/.test(o)?"*":"/"}
+ else if((m=t.match(/(?<![\d.\/])(\d+)\s*(\+|plus|-|minus|\u2212|\*|x|times|multiplied by|\u00d7|\u00f7|divided by|\s\/\s)\s*(\d+)(?!\d|[.,]\d|\/|%)/))){
+  a=+m[1];b=+m[3];const o=m[2].trim();op=/^(\+|plus)$/.test(o)?"+":/^(-|minus)$/.test(o)?"-":/^(\u00d7|\*|x|times|multiplied by)$/.test(o)?"*":"/"}
  else return null;
  if(a>999999999||b>999999999)return null;
  if(op=="+")return addW(a,b);if(op=="-")return subW(a,b);

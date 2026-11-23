@@ -584,6 +584,7 @@ nav{display:flex;align-items:center;gap:12px}nav button{width:40px;height:40px;b
 #ap #hsb input{flex:1;min-width:0;border:0;outline:0;background:none;color:var(--text);font:inherit;font-size:16px}
 #ap .lc .lcm{max-height:92px;overflow:hidden;font-size:15px;-webkit-mask-image:linear-gradient(#000 60%,transparent);mask-image:linear-gradient(#000 60%,transparent)}
 #ap .lc.open .lcm{max-height:none;-webkit-mask-image:none;mask-image:none}
+#ap .lc,.lc{cursor:pointer;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}#ap .lc .lcm,.lc .lcm{display:none}#ap .lc.open .lcm,.lc.open .lcm{display:block;-webkit-user-select:text;user-select:text}
 @keyframes tb0{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-6px);opacity:1}}
 @keyframes tb1{0%,100%{transform:scale(.6);opacity:.5}50%{transform:scale(1.35);opacity:1}}
 @keyframes tb2{0%{transform:translateX(-4px);opacity:.2}50%{transform:translateX(4px);opacity:1}100%{transform:translateX(-4px);opacity:.2}}
@@ -2127,7 +2128,7 @@ function render(){
  $("nm").textContent=D.name;if(!$("av").firstElementChild)$("av").innerHTML='<img src="'+AVATAR+'" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block">';let h="",last="",n=0;const lb=D.msgs.map(x=>x.s).lastIndexOf("i");
  D.msgs.forEach((m,i)=>{if(q&&!m.t.toLowerCase().includes(q))return;n++;const d=dl(m.ts);if(d!=last){h+=`<div class="day">${d}</div>`;last=d}
  if(m.s=="i"){h+=bub(m,i,i==lb);return}
- h+=`<div class="b ${m.s}" data-i="${i}">${m.img?'<img src="'+m.img+'">':""}${m.att?'<div class="attb">&#128206; '+esc(m.att.n)+'</div>':""}${hl(m.t)}<small>${m.ed?"edited ":""}${hm(m.ts)}${m.s=="o"?`<span class="${m.st==2?"rd":""}" style="display:inline-flex">${m.st?K2:K1}</span>`:""}</small></div>`});
+ h+=`<div class="b ${m.s}" data-i="${i}">${m.img?'<img src="'+m.img+'">':""}${m.att?(window.__IMGB&&__IMGB[m.ts]?'<img class="pvimg" data-pv="'+m.ts+'" src="'+__IMGB[m.ts].url+'" alt="">':'<div class="attb">&#128206; '+esc(m.att.n)+'</div>'):""}${hl(m.t)}<small>${m.ed?"edited ":""}${hm(m.ts)}${m.s=="o"?`<span class="${m.st==2?"rd":""}" style="display:inline-flex">${m.st?K2:K1}</span>`:""}</small></div>`});
  if(D.msgs.length)HQC={};if(!D.msgs.length&&!q)h=empty();$("cnt").textContent=q?n+" found":"";if(q&&!n)h='<div class="day">No messages found</div>';
  $("msgs").innerHTML=h;if(typeof thinkBub=="function")thinkBub();ancFix(M0);if(newAnc)ancTop(M0);else M0.scrollTop=goBottom?1e9:prev0;RS.cur=D.cur;RS.n=D.msgs.length;subs();window.__askReady=1}
 function stopEdit(){ei=null;$("inp").value="";$("editing").style.display="none"}
@@ -2135,9 +2136,11 @@ function send(){
  if(window.ATD_MAINT)return;
  const v=$("inp").value.trim(),P=window.__att,A=P&&P.ready?P:null;if((!v&&!A)||stream!=null)return;
  if(P&&!P.ready&&!P.err){try{uiAlert("Still reading your file. Please wait a moment.")}catch(e){}return}
- if(ei!=null){const m=D.msgs[ei];if(m){m.t=v;m.ed=1;m.st=2;D.msgs.splice(ei+1);stopEdit();save();render();m.att?attAsk(attQ(v,m.att)):ask(v);return}stopEdit();return}
- const m={s:"o",t:v||(A?"Please help me with this file.":""),ts:Date.now(),st:0};if(A)m.att={n:A.name,t:A.text};D.msgs.push(m);$("inp").value="";if(A)attClear();save();render();
- m.st=2;A?attAsk(attQ(v,m.att)):ask(v)}
+ if(ei!=null){const m=D.msgs[ei];if(m){m.t=v;m.ed=1;m.st=2;D.msgs.splice(ei+1);stopEdit();save();render();m.att&&m.att.img?(window.__IMGB&&__IMGB[m.ts]?askImage(m,__IMGB[m.ts].blob,v):ask(v)):m.att?attAsk(attQ(v,m.att)):ask(v);return}stopEdit();return}
+ const m={s:"o",t:v||(A?"Please help me with this file.":""),ts:Date.now(),st:0};if(A)m.att=A.img?{n:A.name,img:1}:{n:A.name,t:A.text};
+ if(A&&A.img){(window.__IMGB=window.__IMGB||{})[m.ts]={blob:A.blob,url:A.url};A.sent=1}
+ D.msgs.push(m);$("inp").value="";if(A)attClear();save();render();
+ m.st=2;A&&A.img?askImage(m,A.blob,v):A?attAsk(attQ(v,m.att)):ask(v)}
 /* MY LIBRARY: a saved answer is a copy kept in D.lib, so clearing a chat, deleting a chat or emptying Trash never removes it. Only Unsave removes it. */
 function libKey(m){return m.lid||(m.lid=m.ts+"_"+String(m.q||"").slice(0,24))}
 function libAdd(m){D.lib=D.lib||[];const id=libKey(m);if(D.libGone)delete D.libGone[id];if(D.lib.some(y=>y.id==id))return;D.lib.push({id,q:m.q||"",t:m.t,ts:m.ts,sv:Date.now(),sub:m.tsub||D.sub})}
@@ -2254,7 +2257,7 @@ function hub(){HUB=true;HBACK=null;
  ${h_hd("My Ask Tr. David")}${h_grp(h_row("lib",HI.lib,"My library")+h_row("gd",HI.ab,"How to use Ask Tr. David")+h_row("pz",HI.pz,"Personalization")+h_row("mem",HI.mem,"Memory"))}
  ${h_hd("Account")}${h_grp(h_row("up",HI.up,"Upgrade plan",{c:"var(--green)"})+h_row("rf",HI.star,"Refer and earn")+h_row("us",HI.us,"Usage and limits")+h_row("cl",HI.cls,"Class",{v:D.cls?esc(D.cls):"Not chosen"})+(m.username?h_row("un",HI.user,"Username",{v:esc(m.username),n:1,x:1}):""))}
  ${h_grp(h_row("ap",HI.sun,"Appearance",{v:apv,d:1})+apO+h_row("ak",HI.pal,"Accent color",{v:`<b class="dot" style="background:${D.acc||"#00a884"}"></b>${acn}`,d:1})+acO)}
- ${h_grp(h_row("gn",HI.gen,"General")+h_row("nf",HI.bell,"Notifications")+h_row("vo",HI.vo,"Voice")+h_row("sf",HI.sf,"Safety")+h_row("sl",HI.sl,"Security and login")+h_row("pc",HI.sf,"Privacy center")+h_row("hd",HI.hd,"History and data")+h_row("rb",HI.bug,"Report bug",{c:"var(--green)",n:1})+h_row("ab",HI.ab,"About us"))}
+ ${h_grp(h_row("gn",HI.gen,"General")+h_row("nf",HI.bell,"Notifications")+h_row("sf",HI.sf,"Safety")+h_row("sl",HI.sl,"Security and login")+h_row("pc",HI.sf,"Privacy center")+h_row("hd",HI.hd,"History and data")+h_row("rb",HI.bug,"Report bug",{c:"var(--green)",n:1})+h_row("ab",HI.ab,"About us"))}
  ${h_grp(h_row("lo",HI.lo,"Log out",{c:"#e5173f",n:1}))}<div style="height:110px"></div>`,closeP,e=>{
   const o=e.target.closest("[data-o]");
   if(o){const i=o.dataset.o.indexOf(":"),k=o.dataset.o.slice(0,i),v=o.dataset.o.slice(i+1);HSC=$("pbody").scrollTop;
@@ -2469,13 +2472,22 @@ function library(t){LIBT=t||LIBT;const L=libAll(),T=[["sv","Saved"],["lk","Liked
  const EM={sv:"No saved answers yet. Tap Save under an answer to keep it here.",lk:"No liked answers yet. Tap Helpful under an answer you like.",sh:"Nothing shared yet. Answers you share from now on appear here."};
  const ago=m=>new Date(LIBT=="sh"?m.sh:m.ts).toLocaleDateString([],{day:"numeric",month:"short",year:"numeric"});
  showP("My library",`<div class="sws" style="padding:14px 16px 6px;gap:8px">${T.map(x=>`<button class="lk ${LIBT==x[0]?"on":""}" data-t="${x[0]}">${x[1]} ? ${L[x[0]].length}</button>`).join("")}</div>`+
-  (items.length?items.map((m,i)=>`<div class="gc lc" data-i="${i}" style="padding:14px 16px"><b>${esc(m.q||"Answer")}</b><div class="t" style="margin:2px 0 8px">${ago(m)}${LIBT=="sh"&&m.shn>1?" ? shared "+m.shn+" times":""}</div><div class="md lcm">${md(m.t)}</div><div style="display:flex;gap:8px;margin-top:10px"><button class="lk" data-x="open">Read more</button><button class="lk" data-x="copy">Copy</button><button class="lk dg" data-x="rm">${LIBT=="sv"?"Unsave":LIBT=="lk"?"Remove like":"Remove from list"}</button></div></div>`).join(""):`<div class="empty" style="padding:40px 28px">${EM[LIBT]}</div>`)+'<div style="height:30px"></div>',
+  (items.length?'<div class="t" style="padding:4px 18px 0">Tap a title to read it. Press and hold for Copy or Remove.</div>'+items.map((m,i)=>`<div class="gc lc" data-i="${i}" style="padding:14px 16px"><b>${esc(m.q||"Answer")}</b><div class="t" style="margin:2px 0 8px">${ago(m)}${LIBT=="sh"&&m.shn>1?" ? shared "+m.shn+" times":""}</div><div class="md lcm">${md(m.t)}</div></div>`).join(""):`<div class="empty" style="padding:40px 28px">${EM[LIBT]}</div>`)+'<div style="height:30px"></div>',
   ()=>HUB?settings():closeP(),e=>{
    const t=e.target.closest("[data-t]");if(t){library(t.dataset.t);return}
-   const x=e.target.closest("[data-x]");if(!x)return;const c=x.closest(".lc"),m=items[+c.dataset.i],k=x.dataset.x;
-   if(k=="open"){c.classList.toggle("open");x.textContent=c.classList.contains("open")?"Show less":"Read more"}
-   if(k=="copy"){try{navigator.clipboard.writeText(m.t.replace(/[#*`|]/g,""));x.textContent="Copied"}catch(er){}}
-   if(k=="rm"){if(LIBT=="sv")libDel(m.id);else if(LIBT=="lk")m.fb=0;else{delete m.sh;delete m.shn}save();render();library()}})}
+   if(Date.now()-(window.__lpT||0)<700)return;
+   const c=e.target.closest(".lc");if(c)c.classList.toggle("open")});
+ const pb=$("pbody");if(pb){pb._items=items;if(!pb._lp){pb._lp=1;let tm=null,sx=0,sy=0;
+  const stop=()=>{clearTimeout(tm);tm=null};
+  const sheet=(m)=>{window.__lpT=Date.now();const o=document.createElement("div");o.style.cssText="position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.45);display:flex;align-items:flex-end";
+   const rm=LIBT=="sv"?"Unsave":LIBT=="lk"?"Remove like":"Remove from list",bs="display:block;width:100%;padding:16px;border:0;border-radius:14px;background:var(--bg,#fff);color:var(--text,#111);font:inherit;font-size:16px;margin-top:8px";
+   o.innerHTML='<div style="width:100%;padding:12px 12px calc(12px + env(safe-area-inset-bottom,0px))"><button type="button" data-k="copy" style="'+bs+'">Copy</button><button type="button" data-k="rm" style="'+bs+';color:#e5392f">'+rm+'</button><button type="button" data-k="no" style="'+bs+'">Cancel</button></div>';
+   const t0=Date.now();o.onclick=ev=>{if(Date.now()-t0<600)return;const k=ev.target.dataset&&ev.target.dataset.k;window.__lpT=Date.now();o.remove();if(k=="copy"){try{navigator.clipboard.writeText(m.t.replace(/[#*`|]/g,""))}catch(er){}}
+    if(k=="rm"){if(LIBT=="sv")libDel(m.id);else if(LIBT=="lk")m.fb=0;else{delete m.sh;delete m.shn}save();render();library()}};document.body.appendChild(o)};
+  pb.addEventListener("touchstart",e=>{const c=e.target.closest(".lc");if(!c)return;const t=e.touches[0];sx=t.clientX;sy=t.clientY;stop();tm=setTimeout(()=>{tm=null;const m=(pb._items||[])[+c.dataset.i];if(m)sheet(m)},550)},{passive:true});
+  pb.addEventListener("touchmove",e=>{const t=e.touches[0];if(Math.abs(t.clientX-sx)>10||Math.abs(t.clientY-sy)>10)stop()},{passive:true});
+  pb.addEventListener("touchend",stop);pb.addEventListener("touchcancel",stop);
+  pb.addEventListener("contextmenu",e=>{if(e.target.closest(".lc"))e.preventDefault()})}}}
 function fontStyle(){const c=D.font||"";showP("Font style",`<div class="sec">Choose a font</div><div class="sws">${[["","Default"],["serif","Serif"],["rounded","Rounded"],["mono","Typewriter"]].map(a=>`<button class="lk ${c==a[0]?"on":""}" data-fo="${a[0]}">${a[1]}</button>`).join("")}</div><div class="t" style="padding:0 18px;line-height:1.5">The font changes across the whole app. Pick Default to go back.</div>`,settings,e=>{const v=e.target.dataset.fo;if(v==null)return;if(v)D.font=v;else delete D.font;applyTheme();save();fontStyle()})}
 function permsPage(){
  const items=[["notif","Notifications","Announcements and updates",'<path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0"/>'],["microphone","Microphone","Ask your questions by voice",'<rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/>'],["camera","Camera","Ask about a photo of your work",'<path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/>']];
@@ -6093,7 +6105,7 @@ async function styleAnswer(t,q){
  For each one the owner sees what the learner asked, then approves (kept for good), edits, or rejects (a rejected item is deleted for good). */
 const SVLBL={draft:"Waiting",approved:"Approved",published:"Approved"};
 let SVK="q",SVT="draft",SVL=[],SVC={};
-const svRpc=(fn,a)=>fetch(SBU+"rpc/"+fn,{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify(a)}).then(r=>r.json());
+const svRpc=(fn,a)=>{const h={apikey:SBK,"Content-Type":"application/json"};if(/^ref_/.test(fn)){const t=tokNow();if(t)h.Authorization="Bearer "+t}return fetch(SBU+"rpc/"+fn,{method:"POST",headers:h,body:JSON.stringify(a)}).then(r=>r.json())};
 const svRpcA=(fn,a)=>{let t="";try{t=localStorage.getItem("ask_tok")||sessionStorage.getItem("ask_tok")||""}catch(e){}return fetch(SBU+"rpc/"+fn,{method:"POST",headers:{apikey:SBK,Authorization:"Bearer "+t,"Content-Type":"application/json"},body:JSON.stringify(a)}).then(r=>r.json())};
 const svWho=x=>String((x&&(x.asker_name||x.asked_by_name||x.learner_name||x.asker_names||x.user_names||x.names||x.asked_by_username||x.asker_username))||"").trim(),
  svWhoH=x=>`<div style="padding:12px 18px 0;font-size:17px;font-weight:700;color:var(--text)">${svWho(x)?esc(svWho(x)):'<span style="color:var(--sub);font-weight:600">Name not recorded</span>'}</div>`,
@@ -7219,6 +7231,35 @@ async function askMath(q,CI){
  /* the learner still gets an answer: anything the Mathematics function cannot handle goes to the normal pipeline */
  if(navigator.onLine&&(!j||j.status=="off_topic"||j.status=="rejected"||j.status=="not_configured"||j.status=="bad_output"||j.status=="error"))return askCore(q,null,null);
  return err(navigator.onLine?"I could not write this Mathematics answer just now. Please tap Retry or send it again.":"No internet connection. Please connect to the internet and tap Retry.")}
+/* PHOTO QUESTIONS: the picture goes to Gemini through the image_ask function and is never saved. It lives in memory (window.__IMGB) only; the chat keeps just the file name. */
+async function askImage(m,blob,v){
+ if(capped())return limitMsg();
+ const raw=String(v||"Please solve this and show the full working step by step.").slice(0,500);
+ const err=x=>{D.msgs.push({s:"i",err:1,t:x,q:raw.slice(0,300),ts:Date.now()});save();render()};
+ if(!navigator.onLine)return err("No internet connection. Please connect to the internet and tap Retry.");
+ const tok=++AN;window.ASKQ_RAW=raw;window.ASKQ=raw;
+ const ch=D.chats.find(c=>c.id==D.cur);if(ch&&(ch.title=="New chat"||ch.title=="Chat"))ch.title=(D.sub||"Photo")+" photo";
+ $("stat").textContent="reading your picture?";$("send").innerHTML=STOP;
+ const a={s:"i",t:"",ts:Date.now(),q:raw.slice(0,300),stream:1,tq:raw.slice(0,120),tsub:D.sub};
+ D.msgs.push(a);sm=a;stream=setTimeout(()=>{},9e5);render();thinkOn();
+ let j=null;const c=new AbortController(),tm=setTimeout(()=>c.abort(),90000);
+ try{const b64=await new Promise((ok,no)=>{const fr=new FileReader();fr.onload=()=>ok(String(fr.result).split(",")[1]);fr.onerror=no;fr.readAsDataURL(blob)});
+  const r=await fetch(SBU.replace("/rest/v1/","/functions/v1/")+"image_ask",{method:"POST",signal:c.signal,headers:{apikey:SBK,"Content-Type":"application/json"},
+   body:JSON.stringify({image:b64,mime:"image/jpeg",question:raw,subject:D.sub,subjects:subsList(),level:D.lvl,class:String(D.cls||"").replace(/^Primary /,"P").replace(/^Senior /,"S"),tok:tokNow()})});
+  if(r.ok)j=await r.json()}catch(e){j=null}finally{clearTimeout(tm);thinkOff()}
+ if(stream==null||tok!=AN){D.msgs=D.msgs.filter(x=>x!==a);save();render();return}
+ const drop=()=>{D.msgs=D.msgs.filter(x=>x!==a);sm=null;stopS()};
+ /* another subject: one plain line, no class/term/topic guesses */
+ if(j&&j.status=="wrong_subject"){a.t="This looks like "+String(j.detected||"another subject")+". Please switch subject.";a.nohdr=1;stopS();return}
+ if(j&&j.ok&&j.md){a.t=String(j.md);a.nohdr=1;a.tq=raw.slice(0,120);stopS();logAct("ask",a,a.t);return}
+ drop();
+ if(j&&j.status=="busy")return err("Many learners are asking right now. Please try again in a little while.");
+ if(j&&j.status=="limit")return limitMsg();
+ return err(navigator.onLine?"I could not read this picture just now. Please tap Retry or send it again.":"No internet connection. Please connect to the internet and tap Retry.")}
+document.addEventListener("click",e=>{const im=e.target.closest&&e.target.closest(".pvimg");if(!im)return;const x=window.__IMGB&&__IMGB[im.dataset.pv];if(!x)return;
+ const o=document.createElement("div");o.style.cssText="position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;padding:12px";
+ o.innerHTML='<img src="'+x.url+'" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:8px"><button type="button" aria-label="Close" style="position:absolute;top:calc(12px + env(safe-area-inset-top,0px));right:14px;background:rgba(255,255,255,.18);color:#fff;border:0;border-radius:50%;width:40px;height:40px;font-size:24px">&times;</button>';
+ o.onclick=()=>o.remove();document.body.appendChild(o)});
 function ask(q,mode){
  if(stream!=null||INTP)return;
  if(!mode){try{gdSense("q",q)}catch(e){}}
@@ -7293,7 +7334,7 @@ function askCore(q,mode,I){
   if(!f.part&&!f.lv&&!f.un){const Tm=topicOf(q);if(Tm&&Tm.sl){f.lv=Tm.sl;f.cls=Tm.cls}}
   try{if(f&&f.t&&!f.part&&!f.un&&!f.w&&!f.quiz&&!f.qz&&!f.diff&&!f.exl&&!FU&&!mode){const V=AASE.visual(window.AASE_LAST);f.vis={need:V.need,kind:V.kind};f.t=AASE.addVisual(f.t,window.AASE_LAST,V,{lib:libFor})}}catch(e){}
   let chk=0;if(FU&&FU.chkk&&f&&f.t&&!f.un&&!f.w&&!f.quiz&&!f.qz&&!FU.local){f.t+="\n\n"+FU.chkk;chk=1}
-  if(!mode&&!FU&&!f.un&&!f.w&&!f.diff&&!f.exl&&f.t&&!/^\s*\*\*Senior \d/.test(f.t)){const hd=curHeader(q,f.filed);if(hd)f.t=hd+f.t.replace(/^#[^\n]*\n(?:(?:\*\*)?(?:Topic|Class):[^\n]*\n)*/,"")}
+  if(!mode&&!f.nohdr&&!FU&&!f.un&&!f.w&&!f.diff&&!f.exl&&f.t&&!/^\s*\*\*Senior \d/.test(f.t)){const hd=curHeader(q,f.filed);if(hd)f.t=hd+f.t.replace(/^#[^\n]*\n(?:(?:\*\*)?(?:Topic|Class):[^\n]*\n)*/,"")}
   const m={s:"i",t:"",ts:Date.now(),q,mode,stream:1,fk:FU&&FU.kind||undefined,chk:chk||undefined,tq:CTX&&CTX.tq||undefined,tsub:CTX&&(CTX.sub||D.sub)||undefined},w=f.t.split(/(?<=\s)/);if(f.quiz)m.quiz=f.quiz;if(f.qz)m.qz=f.qz;if(f.w)m.w=f.w;if(f.aid)m.aid=f.aid;if(f.srv)m.srv=1;if(f.vis)m.vis=f.vis;if(f.sty)m.sty=f.sty;if(f.ai)m.ai=1;if(f.tid)m.tid=f.tid;if(f.fmt){m.mdl=IDENT[planName()]}{const ln=levelNote(f.lv,f.cls);if(ln)m.lvn=ln}
   thinkOff();typeOn();D.msgs.push(m);sm=m;let k=0;if(!(FU&&FU.local))logAct("ask",m,f.t);stream=setInterval(()=>{m.t+=w[k++]||"";if(k>=w.length){stopS();if(gn){D.msgs.push({s:"i",note:1,up:1,t:gn,ts:Date.now()});save();render()}if(capped())limitMsg()}else render()},35)},600)}
 $("msgs").addEventListener("click",e=>{
@@ -7553,7 +7594,7 @@ function clsPick(fp){const g=(t,l)=>`<div class="sec">${t}</div><div class="sws"
 function referPage(){
  const hd="Refer and earn",bad='<div class="empty" style="padding:40px 28px">Could not load. Check your internet and try again.</div>';
  showP(hd,'<div class="empty" style="padding:40px 28px">Loading…</div>',hub);
- fetch(SBU+"rpc/ref_my",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_t:tokNow()})}).then(r=>r.json()).then(j=>{
+ svRpc("ref_my",{p_t:tokNow()}).then(j=>{
   if(!j||!j.ok||!j.code){showP(hd,bad,hub);return}
   try{syncPlan()}catch(e){}
   const base=(location.protocol=="https:"&&!/^(localhost|127\.|10\.|192\.168\.)/.test(location.hostname))?location.origin+location.pathname:"https://asktrdavid.vercel.app/",
@@ -8590,7 +8631,7 @@ const acct=async(f,b)=>{switch(f){
  case"acct_change":{const g=await acctGet();if(!g.t)return g.net?NETERR:{ok:false,err:"Please log in again.",relogin:true};return fcall({action:"change",what:b.p_what,new:b.p_new,a:b.p_a,b:b.p_b,c:b.p_c},g.t)}
  case"acct_username":return fcall({action:"username_available",username:b.p_u});
  case"acct_phone":return{ok:true};
- case"ref_claim":return{ok:false,err:"Referral codes are not available yet."}}
+ case"ref_claim":try{const r=await fetch(U+"ref_claim",{method:"POST",headers:HD(b.p_t),body:JSON.stringify({p_t:"",p_code:b.p_code})});const j=await r.json();return j&&typeof j.ok=="boolean"?j:{ok:false,err:"The referral code could not be used."}}catch(e){return{ok:false,net:1,err:"No internet."}}}
  return{ok:false,err:"Something went wrong. Try again."}};
 const rpc=(f,b)=>/^(acct_|ref_claim$)/.test(f)?acct(f,b):rpcOld(f,b);
 setInterval(()=>{if(T)acctGet()},240000);document.addEventListener("visibilitychange",()=>{if(!document.hidden&&T)acctGet()});
@@ -9365,14 +9406,16 @@ function load(src){return libs[src]||(libs[src]=new Promise((ok,no)=>{const s=do
 const esc2=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 function paint(){const a=window.__att;if(!a){strip.style.display="none";strip.innerHTML="";return}
  strip.style.display="block";
- strip.innerHTML='<div class="atc"><span class="atn">&#128206; '+esc2(a.name)+'</span><span class="ats'+(a.err?' ater':'')+'">'+esc2(a.err||(a.ready?"Ready":(a.msg||"Reading...")))+'</span><button class="atx" type="button" aria-label="Remove file">&times;</button></div>';
+ strip.innerHTML='<div class="atc">'+(a.url?'<img src="'+a.url+'" alt="" style="width:40px;height:40px;object-fit:cover;border-radius:8px;margin-right:8px">':'')+'<span class="atn">'+(a.url?'':'&#128206; ')+esc2(a.name)+'</span><span class="ats'+(a.err?' ater':'')+'">'+esc2(a.err||(a.ready?"Ready":(a.msg||"Reading...")))+'</span><button class="atx" type="button" aria-label="Remove file">&times;</button></div>';
  strip.querySelector(".atx").onclick=()=>window.attClear()}
-window.attClear=function(){window.__att=null;try{inp.value=""}catch(e){}paint()};
+window.attClear=function(){const o=window.__att;if(o&&o.url&&!o.sent){try{URL.revokeObjectURL(o.url)}catch(e){}}window.__att=null;try{inp.value=""}catch(e){}paint()};
 window.attQ=function(v,a){return (v||"Explain this and help me understand it.")+"\n\nText from my file \""+a.n+"\":\n"+String(a.t||"").slice(0,CAP)};
 window.attAsk=function(q){window.__attQ=1;try{ask(q)}finally{window.__attQ=0}};
 async function ocr(srcs,st){await load(TES);const w=await Tesseract.createWorker("eng");let out="";
  try{for(let i=0;i<srcs.length;i++){if(st)st(srcs.length>1?"Reading page "+(i+1)+" of "+srcs.length+"...":"Reading the picture...");const r=await w.recognize(srcs[i]);out+=r.data.text+"\n";if(out.length>CAP)break}}finally{try{await w.terminate()}catch(e){}}
  return out}
+function shrinkJ(f){return new Promise((ok,no)=>{const u=URL.createObjectURL(f),im=new Image();im.onerror=()=>{URL.revokeObjectURL(u);no(new Error("img"))};
+ im.onload=()=>{const k=Math.min(1,1800/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext("2d").drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(b=>{c.width=c.height=0;b?ok(b):no(new Error("img"))},"image/jpeg",.85)};im.src=u})}
 function shrink(f){return new Promise((ok,no)=>{const u=URL.createObjectURL(f),im=new Image();im.onerror=()=>{URL.revokeObjectURL(u);no(new Error("img"))};
  im.onload=()=>{const k=Math.min(1,2200/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext("2d").drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(b=>{c.width=c.height=0;b?ok(b):no(new Error("img"))},"image/png")};im.src=u})}
 async function readPdf(f,st){await load(PDFJS);const L=window.pdfjsLib;
@@ -9408,6 +9451,7 @@ inp.addEventListener("change",async()=>{
  if(f.size>MAX){alertU("This file is too big. The maximum is 10 MB.");return}
  const a={name:nm,text:"",ready:false,err:"",msg:"Reading..."};window.__att=a;paint();
  const st=m=>{if(window.__att===a){a.msg=m;paint()}};
+ if(/^(jpg|jpeg|png|webp|gif)$/.test(ext)){try{const b=await shrinkJ(f);if(window.__att!==a)return;a.blob=b;a.url=URL.createObjectURL(b);a.img=1;a.ready=true;paint()}catch(e){if(window.__att!==a)return;a.err="Could not open this picture";paint();setTimeout(()=>{if(window.__att===a)attClear()},3500)}f=null;return}
  try{let t=await extract(f,ext,st);t=String(t||"").replace(/\u0000/g,"").replace(/[ \t]+\n/g,"\n").replace(/\n{3,}/g,"\n\n").trim();
   if(window.__att!==a)return;
   if(t.length<3){a.err="No readable text found";paint();setTimeout(()=>{if(window.__att===a)attClear()},3500);return}

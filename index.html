@@ -2451,7 +2451,7 @@ function rvNote(key,slug){
  view=n=>{const li=a=>(a||[]).map(z=>`<li style="margin:4px 0">${esc(String(z))}</li>`).join("");
   const qs=(n.quick_checks||[]).map((z,i)=>{const m=String(z).match(/^Q:\s*([\s\S]*?)\s+A:\s*([\s\S]*)$/),q=m?m[1]:String(z),a=m?m[2]:"";
    return `<div style="margin:10px 0;padding:10px 12px;border:1px solid var(--line);border-radius:12px"><div><b>${i+1}.</b> ${esc(q)}</div>${a?`<div class="rva" style="display:none;margin-top:8px;color:var(--green)"><b>Answer:</b> ${esc(a)}</div><div class="chips" style="margin-top:8px"><button data-an="1">Show answer</button></div>`:""}</div>`}).join("");
-  showP(esc(title),`<div style="padding:14px 18px;line-height:1.55"><div class="t" style="margin-bottom:6px">${esc(nm)}${it?" ? Senior "+esc(String(it.cls).replace(/^S/,""))+" ? Term "+esc(String(it.term)):""}</div>`+
+  showP(esc(title),`<div style="padding:14px 18px;line-height:1.55"><div class="t" style="margin-bottom:6px">${esc(nm)}${it?" \u00b7 Senior "+esc(String(it.cls).replace(/^S/,""))+" \u00b7 Term "+esc(String(it.term)):""}</div>`+
    `<div class="sec" style="padding:8px 0 4px">In short</div><div>${esc(n.summary||"")}</div>`+
    ((n.key_points||[]).length?`<div class="sec" style="padding:14px 0 4px">Key points</div><ul style="margin:0;padding-left:20px">${li(n.key_points)}</ul>`:"")+
    ((n.memory_aids||[]).length?`<div class="sec" style="padding:14px 0 4px">Memory aid</div><ul style="margin:0;padding-left:20px">${li(n.memory_aids)}</ul>`:"")+
@@ -2462,7 +2462,7 @@ function rvNote(key,slug){
     if(e.target.closest("[data-ask]")){closeP();const i=$("inp");i.value="Teach me "+title+" in "+nm;send()}})};
  const ck=key+"/"+slug;
  if(RVC[ck]){view(RVC[ck]);return}
- showP(esc(title),'<div class="empty">Loading?</div>',back);
+ showP(esc(title),'<div class="empty">Loading…</div>',back);
  rvApi("revision_note",{p_subject:key,p_slug:slug}).then(n=>{if(!n||!n.summary)throw new Error("rv");RVC[ck]=n;view(n)}).catch(()=>showP(esc(title),'<div class="empty">Could not load this note. Check your connection and try again.</div>',back))}
 let LIBT="sv";
 function library(t){LIBT=t||LIBT;const L=libAll(),T=[["sv","Saved"],["lk","Liked"],["sh","Shared"]],items=L[LIBT];
@@ -2679,7 +2679,7 @@ function curRoute(q){if(lvKey()!="UCE")return null;const r=curScore(q);if(!r.len
  const ss=Object.keys(all).sort((a,b)=>all[b]-all[a]);if(all[ss[0]]<4)return null;if(ss[1]&&all[ss[0]]-all[ss[1]]<2)return null;
  return{sub:ss[0],score:all[ss[0]],all,top:r.filter(x=>x.s==ss[0]).slice(0,3)}}
 /* The line every O-Level answer starts with: Class, then Term, then Topic (up to two close matches, inside the chat's subject). */
-function curHeader(q,fd){try{if(lvKey()!="UCE")return"";if(fd&&/^S[1-4]$/.test(fd.class||"")&&fd.topic)return"**Senior "+fd.class[1]+(fd.term?" ? Term "+fd.term:"")+" ? Topic: "+String(fd.topic).slice(0,120)+"**\n\n";const r=curScore(q);if(!r.length)return"";const fam=relSubs(D.sub),mine=r.filter(x=>fam.includes(x.s));if(!mine.length||mine[0].sc<4)return"";const b=mine[0].sc,L=[];for(const x of mine){if(x.sc<b*.8||L.length>=2)break;L.push("**Senior "+x.c+" ? Term "+x.t+" ? Topic: "+x.n+"**")}return L.join("  \n")+"\n\n"}catch(e){return""}}
+function curHeader(q,fd){try{if(lvKey()!="UCE")return"";if(fd&&/^S[1-4]$/.test(fd.class||"")&&fd.topic)return"**Senior "+fd.class[1]+(fd.term?" \u00b7 Term "+fd.term:"")+" ? Topic: "+String(fd.topic).slice(0,120)+"**\n\n";const r=curScore(q);if(!r.length)return"";const fam=relSubs(D.sub),mine=r.filter(x=>fam.includes(x.s));if(!mine.length||mine[0].sc<4)return"";const b=mine[0].sc,L=[];for(const x of mine){if(x.sc<b*.8||L.length>=2)break;L.push("**Senior "+x.c+" \u00b7 Term "+x.t+" ? Topic: "+x.n+"**")}return L.join("  \n")+"\n\n"}catch(e){return""}}
 /* topics to hand to the AI: best matches inside the chat's subject family, else overall; each says subject, class, term */
 function curHint(q){try{if(lvKey()!="UCE")return undefined;const r=curScore(q);if(!r.length||r[0].sc<3)return undefined;const fam=relSubs(D.sub),mine=r.filter(x=>fam.includes(x.s)),pick=(mine.length?mine:r).slice(0,3);
  return pick.map(x=>({subject:x.s,class:"S"+x.c,term:x.t,topic:x.n}))}catch(e){return undefined}}
@@ -5886,9 +5886,16 @@ const wantRQ=()=>/\b(revision questions?|practice questions?|review questions?|q
 const wantCBA=()=>/\b(competency|assess(ment)?|cba|scenario|exam questions?|exam practice|past papers?|test me)\b/i.test(window.ASKQ||"");
 function exPick(T,arr,n){arr=arr.filter(Boolean);if(!arr.length)return[];let S={};try{S=JSON.parse(sessionStorage.getItem("ask_exseen")||"{}")}catch(e){}const k=String(T).toLowerCase();let seen=S[k]||[],idx=arr.map((_,i)=>i).filter(i=>!seen.includes(i));const pick=idx.slice(0,n);if(pick.length<n){const rest=arr.map((_,i)=>i).filter(i=>!pick.includes(i)).slice(0,n-pick.length);S[k]=rest;rest.forEach(i=>pick.push(i))}else S[k]=seen.concat(pick);try{sessionStorage.setItem("ask_exseen",JSON.stringify(S))}catch(e){}const res=pick.map(i=>arr[i]);exNote(res);return res}
 function workedEx(t,i){t=String(t).trim();const m=t.match(/^([^:]{3,90}):\s+(.+)$/);if(m&&/[=\d]/.test(m[2]))return"**Example "+i+":** "+m[1]+"\n**Working:** "+m[2];return"**Example "+i+":** "+t}
+/* KEY POINTS FIRST: when the learner asks for key points, main points, a summary or an overview, the points are listed first, one line each, and the definition, the detail and the examples follow. */
+function KPQ(){return /\b(key points?|main points?|important points?|summary|summari[sz]e|outline|overview|highlights?)\b/i.test(String(window.ASKQ_RAW||window.ASKQ||""))}
+function kpPts(N,a){const x=[].concat(N.ex||[],N.uses||[],N.mis||[]).map(y=>String(y).trim());const r=(a||[]).filter(p=>!x.includes(String(p).trim()));return r.length?r:(a||[])}
+function kpLine(p){p=String(p||"").replace(/\s+/g," ").trim();const m=p.match(/^\*\*([^*]+?)\*\*\s*:?\s*([\s\S]*)$/);
+ if(m){const lab=m[1].replace(/[:\s]+$/,""),first=(m[2].split(/(?<=[.!?])\s+/)[0]||"").replace(/[.;:,\s]+$/,"");return "**"+lab+":** "+(first?first+".":"")}
+ return (p.split(/(?<=[.!?])\s+/)[0]||p)}
 function ncdcNotes(N,d,c,extra){const T=c.T,P=c.P,
  pts=P.filter(x=>x!==N.d),body=pts.length?pts:P,kt=keyTerms(N);
  let o="# "+T+(N.cl?"\n"+N.cl:"");
+ if(KPQ()){const kl=take(kpPts(N,body),12).map(kpLine).filter(Boolean);if(kl.length)o+=sec("Key points",ul(kl))}
  o+=sec("What "+T+" means",(N.d?N.d+"\n":"")+(kt.length?"\n**Words to know:**\n"+ul(take(kt.filter(x=>!T.toLowerCase().includes(x.toLowerCase())),d+2)):""));
  o+=sec("Detailed Explanation","Let us go through "+T+" step by step.\n\n"+(N.body||nl(take(body,3+d))));
  const exs=exPick(T,N.ex.length?N.ex:N.uses,d>=3?2:1);
@@ -6007,10 +6014,10 @@ function directAnswer(N,c){
  if(!pool.length)return null;
  const cut=x=>{const a=sents(x);return a.length>1&&x.length>220?a[0]:x},pk=pool.slice(0,num).map(cut);
  return pk.length==1?pk[0]:pk.map(x=>"- "+x).join("\n")}
-function briefNotes(N,c){const dv=(N.focus&&/\b(what is|what are|what's|whats|define|definition|meaning of)\b/i.test(String(window.ASKQ_RAW||window.ASKQ||"")))?null:directAnswer(N,c);if(dv){window.DIRECT_T=dv;return dv}const T=c.T,pts=(c.P||[]).filter(x=>x!==N.d),k=pts.length?pts:(c.P||[]);
+function briefNotes(N,c){const dv=(KPQ()||(N.focus&&/\b(what is|what are|what's|whats|define|definition|meaning of)\b/i.test(String(window.ASKQ_RAW||window.ASKQ||""))))?null:directAnswer(N,c);if(dv){window.DIRECT_T=dv;return dv}const T=c.T,pts=(c.P||[]).filter(x=>x!==N.d),k=pts.length?pts:(c.P||[]);
  let o="# "+T+(N.cl?"\n"+N.cl:"");
- o+="\n"+(N.d||k[0]||"");
- if(k.length)o+="\n\n**Key points**\n"+ul(take(k,3));
+ if(KPQ()&&k.length){o+="\n\n**Key points**\n"+ul(take(kpPts(N,k),12).map(kpLine));o+="\n\n"+(N.d||"")}else{o+="\n"+(N.d||k[0]||"");
+ if(k.length)o+="\n\n**Key points**\n"+ul(take(k,3))}
  if(N.ex&&N.ex[0])o+="\n\n**Example:** "+N.ex[0];
  const sm=N.simple||"";if(sm)o+="\n\n**In short:** "+sm;
  return o+"\n\nAsk me to explain or give details if you want more."}
@@ -6049,13 +6056,13 @@ function focusN(N){
 function modelText(N){const dg0=N&&N.dg;N=focusN(N)||N;const k=modelName(),d=modelDepth(k),L=lvKey(),P=N.pts.length?N.pts:(N.d?[N.d]:[]),
  cw=L=="PLE"?["State","Give"]:L=="UCE"?["State","Explain","Describe"]:["Explain","Analyse","Evaluate"],
  c={T:N.n,P,L,cw,head:"# "+N.n+(N.cl?"\n"+N.cl:"")};cw.length<2&&cw.push("Explain");
- try{if(k=="malumalu"||!wantFull())return briefNotes(N,c);const o=FM[k](N,d,c);return dg0&&typeof o=="string"?o+"\n\n::diagram "+dg0:o}catch(e){return FM.teacher(N,1,c)}}
+ try{if(k=="malumalu"||(!wantFull()&&/\b(name|state|give|list|mention|identify)\s+(one|two|three|four|five|1|2|3|4|5|an?)\b|\bhow (many|much)\b/i.test(window.ASKQ||"")))return briefNotes(N,c);const o=FM[k](N,d,c);return dg0&&typeof o=="string"?o+"\n\n::diagram "+dg0:o}catch(e){return FM.teacher(N,1,c)}}
 const modelFromMd=t=>modelText(normMd(t));
 const IDROLE={Free:"Clear, concise help with the essential explanation.",Basic:"Classroom-style teaching with examples and clear explanations.",Standard:"Interactive, personalised teaching and guided practice.",Premium:"The deepest, most comprehensive academic teaching, adapted to your class."};
 function modelsGuide(){const pl=planName(),RK={Free:0,Basic:1,Standard:2,Premium:3};
  let h='<div style="padding:10px 18px;color:var(--sub);line-height:1.5">Your plan decides your teaching identity. You are on <b>'+identLabel(pl)+'</b>. Every plan gives correct, curriculum-based answers; higher plans teach in more depth with more support.</div>';
  PLANS4.forEach(P=>{const on=RK[P]<=RK[pl];
-  h+='<div class="row" style="cursor:default"><span style="width:10px;height:10px;border-radius:50%;background:'+PCOL[P]+';flex:none;margin-right:12px;opacity:'+(on?1:.35)+'"></span><div><b>'+identLabel(P)+'</b>'+(P==pl?' ? <span style="color:#00a884">Your plan</span>':(on?'':' ? Needs '+P+' plan'))+'<small>'+esc(IDROLE[P])+'</small></div></div>'});
+  h+='<div class="row" style="cursor:default"><span style="width:10px;height:10px;border-radius:50%;background:'+PCOL[P]+';flex:none;margin-right:12px;opacity:'+(on?1:.35)+'"></span><div><b>'+identLabel(P)+'</b>'+(P==pl?' \u00b7 <span style="color:#00a884">Your plan</span>':(on?'':' \u00b7 Needs '+P+' plan'))+'<small>'+esc(IDROLE[P])+'</small></div></div>'});
  if(pl!="Premium")h+='<div style="padding:14px 18px 24px"><button class="pcp" data-up="1" style="width:100%">See plans and subscribe</button></div>';
  showP("Teaching identity",h,settings,e=>{if(e.target.closest("[data-up]"))plans(1)})}
 
@@ -7545,7 +7552,7 @@ function clsPick(fp){const g=(t,l)=>`<div class="sec">${t}</div><div class="sws"
 /* REFER AND EARN: every learner has a code. A friend who signs up with it and asks 2 different questions earns the owner 2 free Premium days. The server counts and rewards; this page only shows it. */
 function referPage(){
  const hd="Refer and earn",bad='<div class="empty" style="padding:40px 28px">Could not load. Check your internet and try again.</div>';
- showP(hd,'<div class="empty" style="padding:40px 28px">Loading?</div>',hub);
+ showP(hd,'<div class="empty" style="padding:40px 28px">Loading…</div>',hub);
  fetch(SBU+"rpc/ref_my",{method:"POST",headers:{apikey:SBK,"Content-Type":"application/json"},body:JSON.stringify({p_t:tokNow()})}).then(r=>r.json()).then(j=>{
   if(!j||!j.ok||!j.code){showP(hd,bad,hub);return}
   try{syncPlan()}catch(e){}
@@ -7584,7 +7591,7 @@ const admSec=t=>ADMS.find(x=>x[2].some(y=>y[0]==t))||ADMS[0];
 const admCall=async(fn,a)=>{try{const j=await svRpc(fn,Object.assign({p_t:tokNow()},a||{}));return j&&typeof j.ok=="boolean"?j:{ok:false,err:"fail"}}catch(e){return{ok:false,err:"net"}}};
 const admMsg=j=>j&&j.err=="not allowed"?"This panel is only for the owner account.":j&&j.err=="net"?"No internet. Check your connection and try again.":"Could not load. Try again.";
 const admFail=(j,retry)=>'<div class="pbn" style="margin:14px 18px;line-height:1.5">'+admMsg(j)+'</div>'+(retry?'<div class="row" data-r="1"><div>Try again</div></div>':"");
-const admLd=()=>'<div style="padding:22px 18px;color:var(--sub)">Loading?</div>';
+const admLd=()=>'<div style="padding:22px 18px;color:var(--sub)">Loading…</div>';
 const admDate=d=>{try{return new Date(d).toLocaleDateString()}catch(e){return""}};
 const admN=x=>Number(x)||0;const admUN=id=>{const u=ADMUS.find(x=>x.id==id);return u?(u.names||u.username):"this user"};
 const abt=(a,l,c)=>`<button data-a="${a}" style="flex:1;min-width:30%;padding:12px 8px;border:0;border-radius:22px;font:inherit;font-weight:700;cursor:pointer;color:#fff;background:${c}">${l}</button>`;
@@ -7785,7 +7792,7 @@ async function admHome(){const s=ADMSEQ,b=$("abody");b.innerHTML=admLd();const j
 /* LEARNER REACTIONS: every Like / Unlike a learner tapped, with the learner's name, the question and the start of the answer. Unlikes are the ones to review first. */
 async function rxRoom(kind){
  if(!isOwner())return;kind=kind=="like"?"like":"dislike";
- showP("Learner reactions",'<div style="padding:22px 18px;color:var(--sub)">Loading?</div>',closeP);
+ showP("Learner reactions",'<div style="padding:22px 18px;color:var(--sub)">Loading…</div>',closeP);
  const j=await admCall("admin_reactions",{p_kind:kind,p_limit:100}),n=admN;
  if(!j.ok){$("pbody").innerHTML='<div class="pbn" style="margin:14px 18px;line-height:1.5">'+(j.err=="not allowed"?"This room is only for the owner account.":"Could not load. Check your connection and try again.")+'</div>';return}
  const C=j.counts||{},L=j.items||[];
@@ -8468,7 +8475,7 @@ function hoText(){const[d,t]=hoCount();let o="ASK TR. DAVID: PROJECT HANDOFF (up
 function handoff(){if(!isOwner())return;
  const[d,t]=hoCount(),pct=Math.round(d/t*100);
  const body=`<div style="padding:12px 18px"><b>${d} of ${t} done</b> <span style="color:var(--sub)">(${pct}%)</span><div style="height:8px;border-radius:4px;background:var(--wall);margin:8px 0"><div style="height:8px;border-radius:4px;background:var(--green);width:${pct}%"></div></div><small style="color:var(--sub)">Updated ${esc(HANDOFF.updated)}</small></div>
- <div class="row" data-a="cp"><div>Copy full handoff as text<small>Paste it to another Claude to continue</small></div></div>`+'<div class="sec">Files (only you see these)</div><div id="hof"><div style="padding:8px 18px;color:var(--sub)">Loading?</div></div>'+
+ <div class="row" data-a="cp"><div>Copy full handoff as text<small>Paste it to another Claude to continue</small></div></div>`+'<div class="sec">Files (only you see these)</div><div id="hof"><div style="padding:8px 18px;color:var(--sub)">Loading…</div></div>'+
  HANDOFF.tasks.map(g=>`<div class="sec">${esc(g[0])} (${g[1].filter(i=>i[1]).length}/${g[1].length})</div>`+g[1].map(i=>`<div class="row" style="display:block"><span style="color:${i[1]?"var(--green)":"var(--sub)"};font-weight:700">${i[1]?"&#10003;":"&#9675;"}</span> <span style="${i[1]?"":"font-weight:600"}">${esc(i[0])}</span></div>`).join("")).join("")+
  '<div class="sec">About</div>'+HANDOFF.about.map(a=>`<div style="padding:8px 18px"><b>${esc(a[0])}</b><div style="margin-top:3px;color:var(--sub);white-space:pre-wrap">${esc(a[1])}</div></div>`).join("")+
  '<div class="sec">Log</div>'+HANDOFF.log.map(l=>`<div style="padding:8px 18px"><small style="color:var(--sub)">${esc(l[0])}</small><div>${esc(l[1])}</div></div>`).join("");
@@ -8538,7 +8545,7 @@ function handoff(){if(!isOwner())return;
  mo.observe(document.body,{childList:true}); /* catches the message pop-up opening/closing */
  window.__backSync=sync;
 })();
-</script><div id="auth"><div class="ab"><div style="text-align:center;padding:calc(26px + env(safe-area-inset-top,0px)) 0 6px"><div class="av" id="alogo" style="margin:0 auto 8px;width:64px;height:64px"></div><b style="font-size:20px">Ask Tr. David</b><div class="t" id="ah">Loading?</div></div><div id="af"></div></div></div>
+</script><div id="auth"><div class="ab"><div style="text-align:center;padding:calc(26px + env(safe-area-inset-top,0px)) 0 6px"><div class="av" id="alogo" style="margin:0 auto 8px;width:64px;height:64px"></div><b style="font-size:20px">Ask Tr. David</b><div class="t" id="ah">Loading…</div></div><div id="af"></div></div></div>
 <script>
 (function(){
 const PUBLIC_URL="https://asktrdavid.vercel.app/",BASE=(/^https:$/.test(location.protocol)&&!/^(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(location.hostname))?location.origin+location.pathname:PUBLIC_URL,CONTACT="",
@@ -8688,7 +8695,7 @@ const spDown=(el,force)=>{if(force||el.scrollHeight-el.scrollTop-el.clientHeight
 let SPKIND="message",SPRATE=0,SPLAST="";
 function supportOpen(kind,pre){
  SPKIND=SPKL[kind]?kind:"message";SPRATE=0;SPLAST="";
- showP("Contact Tr. David",`<div class="spw"><div id="spm" class="spm"><div class="spe">Loading?</div></div><div class="spc">
+ showP("Contact Tr. David",`<div class="spw"><div id="spm" class="spm"><div class="spe">Loading…</div></div><div class="spc">
   <div class="spk" id="spk">${Object.keys(SPKL).map(k=>`<button data-k="${k}" class="${k===SPKIND?"on":""}">${SPKL[k]}</button>`).join("")}</div>
   <div class="sprt" id="sprt"><span>Rate the app:</span>${[1,2,3,4,5].map(n=>`<button data-r="${n}" aria-label="${n} star">?</button>`).join("")}</div>
   <div class="spi"><textarea id="spt" rows="1" maxlength="2000" placeholder="Write to Tr. David?"></textarea><button id="sps" aria-label="Send">${SPSEND}</button></div></div></div>`,settings,null);
@@ -8745,7 +8752,7 @@ async function admInbox(){
  admInboxBadge(SPL.reduce((a,t)=>a+(+t.unread||0),0))}
 async function admThread(t){
  if(!t)return;const s=++ADMSEQ,b=$("abody");let last="";
- b.innerHTML=`<div class="spth"><div class="spah"><button id="spbk" class="spbk">? Inbox</button><div style="flex:1;min-width:0"><b>${spE(t.names||t.username||"Learner")}</b><small>${spE(t.username||"")} ? ${spE(t.phone||"")} ? ${spE(t.plan||"")}</small></div><button id="spdl" class="spbk dg">Delete</button></div><div id="spm" class="spm"><div class="spe">Loading?</div></div><div class="spi"><textarea id="spt" rows="1" maxlength="2000" placeholder="Write a reply?"></textarea><button id="sps" aria-label="Send reply">${SPSEND}</button></div></div>`;
+ b.innerHTML=`<div class="spth"><div class="spah"><button id="spbk" class="spbk">? Inbox</button><div style="flex:1;min-width:0"><b>${spE(t.names||t.username||"Learner")}</b><small>${spE(t.username||"")} ? ${spE(t.phone||"")} ? ${spE(t.plan||"")}</small></div><button id="spdl" class="spbk dg">Delete</button></div><div id="spm" class="spm"><div class="spe">Loading…</div></div><div class="spi"><textarea id="spt" rows="1" maxlength="2000" placeholder="Write a reply?"></textarea><button id="sps" aria-label="Send reply">${SPSEND}</button></div></div>`;
  b.onclick=null;
  const back=()=>{ADMSEQ++;admInbox()};
  $("spbk").onclick=back;
@@ -9332,7 +9339,7 @@ setTimeout(topup,45000);
 
 /* ---------- owner: question bank page ---------- */
 async function bankAdmin(){
- if(!isOwner())return;showP("Question bank",'<div class="empty">Loading?</div>',HBACK||settings,null);
+ if(!isOwner())return;showP("Question bank",'<div class="empty">Loading…</div>',HBACK||settings,null);
  const [s,r]=await Promise.all([rpc("bank_stats",{p_t:tok()}),rpc("bank_review",{p_t:tok(),p_n:8})]);
  const rows=(s&&s.rows)||[],rev=(r&&r.rows)||[],E=x=>esc(String(x==null?"":x));
  let h='<div class="sec">COVERAGE</div>'+(rows.length?rows.map(x=>'<div class="row" style="cursor:default"><div><b>'+E(x.subject_name)+' ? '+E(x.class_label)+'</b><small>'+E(x.status)+' ? '+E(x.source)+'</small></div><span class="rv">'+E(x.n)+'</span></div>').join(""):'<div class="empty">No questions saved yet</div>');

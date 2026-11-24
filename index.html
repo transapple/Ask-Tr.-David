@@ -7625,8 +7625,8 @@ $("jump").onclick=()=>$("msgs").scrollTo({top:1e9,behavior:"smooth"});
 /* ===== ADMIN PANEL (owner only) =====
  One app, two modes for the owner account DAVID. Switch: Settings > Learner profile > Update account > Switch to Admin panel.
  Every admin database function checks the login token again (username DAVID with the owner phone), so other accounts are refused even if they find this code. */
-const ADMS=[["over","Overview",[["home","Summary"],["stats","Statistics"]]],["people","People",[["users","Learners"],["inbox","Inbox"],["rate","Ratings"]]],["money","Money",[["pay","Payments"],["free","Free days"],["refs","Referrals"],["proofs","Old proofs"]]],["learn","Learning",[["asks","Most asked"],["asked","Not understood"],["react","Likes and Unlikes"]]],["news","Post",[["news","Announcements"]]]];
-const ADMPG={home:()=>admHome(),stats:()=>admStats(),users:()=>admUsers(),inbox:()=>admInbox(),rate:()=>admRate(),pay:()=>admMomo(),free:()=>admFree(),refs:()=>admRefs(),proofs:()=>admPay(),asked:()=>admAsked(),react:()=>admReact(),asks:()=>admAsks(),news:()=>admNews()};
+const ADMS=[["over","Overview",[["home","Summary"],["stats","Statistics"]]],["people","People",[["users","Learners"],["inbox","Inbox"],["rate","Ratings"]]],["money","Money",[["pay","Payments"],["free","Free days"],["refs","Referrals"],["proofs","Old proofs"]]],["learn","Learning",[["asks","Most asked"],["asked","Not understood"],["react","Likes and Unlikes"]]],["notes","Notes",[["notes","Notes library"]]],["news","Post",[["news","Announcements"]]]];
+const ADMPG={home:()=>admHome(),stats:()=>admStats(),users:()=>admUsers(),inbox:()=>admInbox(),rate:()=>admRate(),pay:()=>admMomo(),free:()=>admFree(),refs:()=>admRefs(),proofs:()=>admPay(),asked:()=>admAsked(),react:()=>admReact(),asks:()=>admAsks(),news:()=>admNews(),notes:()=>admNotes()};
 let ADMON=false,ADMTAB="home",ADMSEQ=0,ADMUQ="",ADMUF="",ADMUL=[],ADMAS="open",ADMAL=[],ADMPL=[],ADMPR=[],ADMUNR=0;
 const admSec=t=>ADMS.find(x=>x[2].some(y=>y[0]==t))||ADMS[0];
 const admCall=async(fn,a)=>{try{const j=await svRpc(fn,Object.assign({p_t:tokNow()},a||{}));return j&&typeof j.ok=="boolean"?j:{ok:false,err:"fail"}}catch(e){return{ok:false,err:"net"}}};
@@ -9463,5 +9463,638 @@ inp.addEventListener("change",async()=>{
  catch(e){if(window.__att!==a)return;a.err="Could not read this file";paint();setTimeout(()=>{if(window.__att===a)attClear()},3500)}
  finally{f=null}});
 })();
+</script>
+<script>
+/* ===== NOTES LIBRARY (Admin panel > Notes, owner DAVID only) =====
+   Upload, edit, publish and test the study notes that learners get answers from.
+   It uses the owner's existing login (no second sign-in). Reading and small edits go straight to the tables, which the
+   database protects with its own admin rules. Saving a note goes through the notes_admin function, which splits the
+   note into searchable parts. The whole screen lives in its own shadow box, so it cannot clash with the rest of the app. */
+(function () {
+  "use strict";
+
+  var BASE = "https://pjdtlpnlvumpefxjmjpv.supabase.co", KEY = "sb_publishable_Y48beigB72EVErcQKDwrDA_sTxiHI6u";
+  var CD = "https://cdnjs.cloudflare.com/ajax/libs/";
+  var MAM = CD + "mammoth/1.6.0/mammoth.browser.min.js", PDFJS = CD + "pdf.js/3.11.174/pdf.min.js", PDFW = CD + "pdf.js/3.11.174/pdf.worker.min.js";
+  var KIND = { summary: "Summary", lesson: "Lesson", full_note: "Full notes" };
+
+  var host = null, root = null, booted = null, libs = {}, toastT;
+  var S = { classes: [], csub: [], names: {}, topics: [], topicNames: {}, notes: [], items: [], editId: null };
+
+  var CSS = `
+:host{display:block;
+  --n-ink:var(--text,#14201b);--n-mut:var(--sub,#5d6b65);--n-card:var(--bar,#fff);--n-bg:var(--bg,#fff);--n-line:var(--line,#dfe6e2);--n-acc:var(--green,#00a884);
+  --n-soft:color-mix(in srgb,var(--n-acc) 16%,transparent);
+  --n-warn:#d98a1c;--n-bad:#e5484d;--n-ok:#1f9d63;
+  --n-warn-s:color-mix(in srgb,var(--n-warn) 18%,transparent);--n-bad-s:color-mix(in srgb,var(--n-bad) 16%,transparent);--n-ok-s:color-mix(in srgb,var(--n-ok) 16%,transparent);
+  --n-r:12px}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit}
+.nl{padding:12px 14px 40px;color:var(--n-ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:grid;gap:14px}
+h2,h3,p{margin:0}h2{font-size:20px;line-height:1.2}h3{font-size:16px;line-height:1.25}
+code{background:var(--n-soft);padding:1px 5px;border-radius:5px;font-size:.9em}
+.muted{color:var(--n-mut)}
+.grow{flex:1}
+.error{color:var(--n-bad);background:var(--n-bad-s);padding:8px 10px;border-radius:8px;font-size:14px}
+label{display:block;font-size:13px;font-weight:600;color:var(--n-mut)}
+label input:not([type=checkbox]):not([type=radio]),label select,label textarea{display:block;margin-top:5px;font-weight:400}
+input:not([type=checkbox]):not([type=radio]),select,textarea{width:100%;color:var(--n-ink);background:var(--n-card);border:1px solid var(--n-line);border-radius:9px;padding:9px 11px;min-height:40px}
+textarea{resize:vertical;line-height:1.5}
+input:focus,select:focus,textarea:focus,button:focus-visible,.drop:focus-visible{outline:2px solid var(--n-acc);outline-offset:1px}
+select:disabled{opacity:.55}
+label.inline{display:flex;gap:8px;align-items:center;font-weight:500;color:var(--n-ink);font-size:14px}
+.btn{font-weight:600;border:1px solid var(--n-line);background:var(--n-card);color:var(--n-ink);border-radius:9px;padding:9px 14px;min-height:40px;cursor:pointer}
+.btn:hover{border-color:var(--n-acc)}
+.btn.primary{background:var(--n-acc);color:#fff;border-color:var(--n-acc)}
+.btn.ghost{background:transparent}
+.btn.sm{padding:5px 10px;min-height:32px;font-size:13px}
+.btn.danger{color:var(--n-bad)}
+.btn[disabled]{opacity:.55;cursor:not-allowed}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{border:0;border-radius:18px;padding:8px 14px;font-weight:600;cursor:pointer;background:var(--n-soft);color:var(--n-ink)}
+.tab.on{background:var(--n-acc);color:#fff}
+.pane{display:grid;gap:14px}
+.flow{display:flex;gap:8px 10px;align-items:center;flex-wrap:wrap;background:var(--n-card);border:1px solid var(--n-line);border-radius:var(--n-r);padding:12px 14px}
+.flow i{font-style:normal;color:var(--n-mut)}
+.flow-step{display:inline-flex;gap:6px;align-items:center;padding:4px 10px;border-radius:999px;border:1px solid var(--n-line);font-size:13px;font-weight:600}
+.flow-step b{display:grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--n-line);font-size:11px}
+.flow-step.on{background:var(--n-soft);border-color:var(--n-acc)}
+.flow-step.on b{background:var(--n-acc);color:#fff}
+.flow p{flex-basis:100%;font-size:13px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.stat{background:var(--n-card);border:1px solid var(--n-line);border-radius:var(--n-r);padding:10px 12px}
+.stat b{display:block;font-size:22px;line-height:1.1}
+.stat span{font-size:12px;color:var(--n-mut)}
+.bar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) minmax(0,1.4fr) auto;gap:8px}
+.list{display:grid;gap:10px}
+.group-h{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--n-mut);margin-top:6px}
+.note{background:var(--n-card);border:1px solid var(--n-line);border-radius:var(--n-r);padding:12px 14px;display:grid;gap:8px}
+.note-top{display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap}
+.note-top h3{flex:1;min-width:160px}
+.crumb{font-size:12.5px;color:var(--n-mut)}
+.meta{display:flex;gap:6px 12px;flex-wrap:wrap;font-size:12.5px;color:var(--n-mut)}
+.badge{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--n-line);color:var(--n-ink)}
+.badge.published{background:var(--n-ok-s);color:var(--n-ok)}
+.badge.draft,.badge.warn{background:var(--n-warn-s);color:var(--n-warn)}
+.badge.archived{color:var(--n-mut)}
+.actions{display:flex;gap:6px;flex-wrap:wrap}
+.empty{text-align:center;color:var(--n-mut);padding:30px 12px;background:var(--n-card);border:1px dashed var(--n-line);border-radius:var(--n-r)}
+.card{background:var(--n-card);border:1px solid var(--n-line);border-radius:var(--n-r);padding:14px;display:grid;gap:14px}
+.step-h{display:flex;gap:12px;align-items:flex-start}
+.num{flex:none;display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--n-acc);color:#fff;font-weight:800;font-size:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.align-end{display:flex;align-items:flex-end}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.kinds{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.kinds label{border:1px solid var(--n-line);border-radius:10px;padding:10px 12px;cursor:pointer;color:var(--n-ink);display:grid;grid-template-columns:auto 1fr;gap:0 8px;align-items:center}
+.kinds label small{grid-column:2;color:var(--n-mut);font-weight:400}
+.kinds label:has(input:checked){border-color:var(--n-acc);background:var(--n-soft)}
+.drop{border:2px dashed var(--n-line);border-radius:12px;padding:24px 14px;text-align:center;display:grid;gap:4px;cursor:pointer}
+.drop small{color:var(--n-mut)}
+.drop:hover,.drop.over{border-color:var(--n-acc);background:var(--n-soft)}
+.tip{font-size:14px;color:var(--n-mut)}
+.tip summary{cursor:pointer;font-weight:600;color:var(--n-ink)}
+.tip ul{margin:8px 0 0;padding-left:20px;display:grid;gap:4px}
+.item{border:1px solid var(--n-line);border-radius:10px;padding:12px;display:grid;gap:10px;margin-bottom:12px}
+.item-h{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.item-h input{flex:1;min-width:180px;font-weight:600}
+.item textarea{min-height:180px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13.5px}
+.item .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.item.ok{border-color:var(--n-ok)}
+.item.fail{border-color:var(--n-bad)}
+.savebar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;border-top:1px solid var(--n-line);padding-top:12px}
+.savelog{display:grid;gap:6px;font-size:14px}
+.savelog .good,.status .good{color:var(--n-ok)}.savelog .bad,.status .bad{color:var(--n-bad)}
+.progress{height:6px;background:var(--n-line);border-radius:99px;overflow:hidden}
+.progress>i{display:block;height:100%;background:var(--n-acc);width:0;transition:width .2s}
+.verdict{border-radius:var(--n-r);padding:12px 14px;font-weight:600}
+.verdict.yes{background:var(--n-ok-s);color:var(--n-ok)}
+.verdict.no{background:var(--n-warn-s);color:var(--n-warn)}
+.answer{white-space:pre-wrap;background:var(--n-card);border:1px solid var(--n-line);border-radius:var(--n-r);padding:14px;font-size:14.5px}
+.match{display:grid;gap:4px;border:1px solid var(--n-line);border-radius:10px;padding:10px 12px;background:var(--n-card);margin-top:8px}
+.match small{color:var(--n-mut)}
+.meter{height:6px;border-radius:99px;background:var(--n-line);overflow:hidden}
+.meter>i{display:block;height:100%;background:var(--n-acc)}
+.toast{position:fixed;left:50%;bottom:78px;transform:translateX(-50%);background:var(--n-ink);color:var(--n-bg);padding:10px 16px;border-radius:10px;font-weight:600;font-size:14px;max-width:90vw;z-index:20}
+@media (max-width:760px){
+  .bar{grid-template-columns:1fr 1fr}
+  .bar input,.bar .btn{grid-column:1/-1}
+  .grid3,.kinds,.item .grid2{grid-template-columns:1fr}
+}`;
+
+  var HTML = `
+<div id="wait" class="empty">Loading…</div>
+<div id="main" class="nl" hidden>
+  <nav class="tabs" aria-label="Notes sections">
+    <button class="tab on" data-tab="library" type="button">Library</button>
+    <button class="tab" data-tab="upload" type="button">Upload notes</button>
+    <button class="tab" data-tab="test" type="button">Test a question</button>
+  </nav>
+
+  <section id="tabLibrary" class="pane">
+    <div class="flow" aria-label="How a learner's question is answered">
+      <span class="flow-step on"><b>1</b> Your notes</span><i>→</i>
+      <span class="flow-step"><b>2</b> Saved answers</span><i>→</i>
+      <span class="flow-step"><b>3</b> Gemini, then saved</span>
+      <p class="muted">A learner's question is checked against your notes for their class and subject first. Only when nothing fits does it go on.</p>
+    </div>
+    <div class="stats" id="stats"></div>
+    <div class="bar">
+      <select id="fClass" aria-label="Class"><option value="">All classes</option></select>
+      <select id="fSubject" aria-label="Subject"><option value="">All subjects</option></select>
+      <select id="fStatus" aria-label="Status"><option value="">Any status</option><option value="published">Published</option><option value="draft">Draft</option><option value="archived">Archived</option></select>
+      <input id="fText" type="search" placeholder="Search titles…" aria-label="Search titles">
+      <button class="btn primary" id="btnNew" type="button">+ Upload notes</button>
+    </div>
+    <div id="list" class="list"></div>
+  </section>
+
+  <section id="tabUpload" class="pane" hidden>
+    <h2 id="upTitle">Upload notes</h2>
+    <div class="card">
+      <div class="step-h"><span class="num">1</span><div><h3>Where do these notes belong?</h3><p class="muted">Learners only receive notes from their own class and subject.</p></div></div>
+      <div class="grid3">
+        <label>Class<select id="uClass"><option value="">Choose class…</option></select></label>
+        <label>Subject<select id="uSubject" disabled><option value="">Choose class first</option></select></label>
+        <label>Topic<select id="uTopic" disabled><option value="">Choose subject first</option></select></label>
+      </div>
+      <div id="newTopicBox" class="grid3" hidden>
+        <label>New topic name<input id="ntName" placeholder="e.g. Acids, bases and salts"></label>
+        <label>Place it under (optional)<select id="ntParent"><option value="">Top-level topic</option></select></label>
+        <div class="align-end"><button class="btn" id="ntCreate" type="button">Create topic</button></div>
+      </div>
+    </div>
+    <div class="card" id="addBox">
+      <div class="step-h"><span class="num">2</span><div><h3>Add the notes</h3><p class="muted">Upload one or many files (.docx, .pdf, .txt, .md), or paste text. Each file becomes one note.</p></div></div>
+      <div class="kinds" role="radiogroup" aria-label="Type of note">
+        <label><input type="radio" name="kind" value="summary" checked> <b>Summary</b><small>Short revision notes</small></label>
+        <label><input type="radio" name="kind" value="lesson"> <b>Lesson</b><small>A taught lesson</small></label>
+        <label><input type="radio" name="kind" value="full_note"> <b>Full notes</b><small>Complete detailed notes</small></label>
+      </div>
+      <div id="drop" class="drop" tabindex="0" role="button" aria-label="Choose files to upload">
+        <span><b>Drop files here</b> or <u>choose files</u></span>
+        <small>.docx · .pdf · .txt · .md (scanned photos cannot be read)</small>
+        <input id="fileIn" type="file" multiple accept=".docx,.pdf,.txt,.md,.markdown,text/plain" hidden>
+      </div>
+      <div class="row"><button class="btn" id="btnPaste" type="button">Or paste / type notes</button><button class="btn ghost" id="btnTemplate" type="button">Download a writing template</button></div>
+      <details class="tip"><summary>How to write notes so they answer well</summary>
+        <ul>
+          <li>Start with a title line, then use headings: <code># Topic</code>, <code>## Definition</code>, <code>## Key points</code>, <code>## Example</code>.</li>
+          <li>Each heading becomes a searchable part, so a learner asking "define a base" finds the Definition part.</li>
+          <li>Use short bullet points (<code>- point</code>). Put worked examples under their own heading.</li>
+          <li>One topic per note. Many small notes work better than one huge note.</li>
+        </ul>
+      </details>
+    </div>
+    <div class="card" id="reviewBox" hidden>
+      <div class="step-h"><span class="num">3</span><div><h3>Check and save</h3><p class="muted">Edit anything you like. Nothing is saved until you press Save.</p></div></div>
+      <div id="items"></div>
+      <div class="savebar">
+        <label class="inline"><input type="checkbox" id="optPublish" checked> Publish now (learners can get these answers immediately)</label>
+        <span class="grow"></span>
+        <button class="btn ghost" id="btnClear" type="button">Clear</button>
+        <button class="btn primary" id="btnSave" type="button">Save notes</button>
+      </div>
+      <div id="saveLog" class="savelog" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section id="tabTest" class="pane" hidden>
+    <h2>Test a question</h2>
+    <p class="muted">See exactly what a learner would get. Nothing is counted against any learner's limit.</p>
+    <div class="card">
+      <div class="grid3">
+        <label>Class<select id="tClass"><option value="">Choose class…</option></select></label>
+        <label>Subject<select id="tSubject" disabled><option value="">Choose class first</option></select></label>
+      </div>
+      <label>Question<textarea id="tQ" rows="3" placeholder="e.g. What is an acid?"></textarea></label>
+      <div class="row"><button class="btn primary" id="tGo" type="button">Test</button><span id="tBusy" class="muted" hidden>Checking…</span></div>
+    </div>
+    <div id="tOut"></div>
+  </section>
+</div>
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>`;
+
+  /* ---------- helpers ---------- */
+  function $(s) { return root.querySelector(s); }
+  function $$(s) { return Array.prototype.slice.call(root.querySelectorAll(s)); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function enc(x) { return encodeURIComponent(String(x)); }
+  function toast(msg) {
+    var t = $("#toast"); if (!t) return; t.textContent = msg; t.hidden = false;
+    clearTimeout(toastT); toastT = setTimeout(function () { t.hidden = true; }, 3200);
+  }
+  function ask(msg, ok, label) {
+    if (typeof uiConfirm === "function") uiConfirm(msg, ok, label || "OK");
+    else if (window.confirm(msg)) ok();
+  }
+  function clsName(id) { var c = S.classes.find(function (x) { return x.id === id; }); return c ? c.name : "Class " + id; }
+  function subjName(id) { return S.names[id] || "Subject"; }
+  function words(t) { return (String(t).match(/[\p{L}\p{N}]+/gu) || []).length; }
+  function options(sel, list, ph, val) {
+    sel.innerHTML = '<option value="">' + esc(ph) + "</option>" + list.map(function (o) { return '<option value="' + esc(o.v) + '">' + esc(o.t) + "</option>"; }).join("");
+    if (val != null) sel.value = val;
+  }
+  function subjectsOf(classId) {
+    return S.csub.filter(function (r) { return r.class_id === Number(classId); })
+      .map(function (r) { return { v: r.subject_id, t: r.display_name || S.names[r.subject_id] || "Subject" }; })
+      .sort(function (a, b) { return a.t.localeCompare(b.t); });
+  }
+  function load(src) {
+    return libs[src] || (libs[src] = new Promise(function (ok, no) {
+      var s = document.createElement("script"); s.src = src; s.onload = ok;
+      s.onerror = function () { delete libs[src]; no(new Error("Could not load the file reader. Check your connection.")); };
+      document.head.appendChild(s);
+    }));
+  }
+
+  /* ---------- talking to Supabase with the owner's login ---------- */
+  async function token() {
+    try { if (window.AK && AK.tok) { var t = await AK.tok(); if (t) return t; } } catch (e) { /* fall back */ }
+    try { return tokNow(); } catch (e) { return ""; }
+  }
+  async function api(method, path, body) {
+    var h = { apikey: KEY, Authorization: "Bearer " + (await token()), "Content-Type": "application/json" };
+    var r;
+    try { r = await fetch(BASE + path, { method: method, headers: h, body: body === undefined ? undefined : JSON.stringify(body) }); }
+    catch (e) { return { ok: false, status: 0, data: null, msg: "No internet. Check your connection and try again." }; }
+    var j = null; try { j = await r.json(); } catch (e) { /* empty body */ }
+    return { ok: r.ok, status: r.status, data: j, msg: r.ok ? "" : ((j && (j.message || j.error_description || j.msg)) || "Something went wrong (" + r.status + ").") };
+  }
+  function get(p) { return api("GET", "/rest/v1/" + p); }
+  async function callFn(body) {
+    var r = await api("POST", "/functions/v1/notes_admin", body);
+    if (!r.ok || !r.data || r.data.ok === false) throw new Error((r.data && r.data.err) || r.msg || "Something went wrong.");
+    return r.data;
+  }
+
+  /* ---------- start ---------- */
+  async function boot() {
+    var wait = $("#wait"), main = $("#main");
+    var p = await api("POST", "/rest/v1/rpc/has_permission", { p_code: "curriculum.manage" });
+    if (p.status === 0) { wait.textContent = p.msg; return null; }
+    if (p.data !== true) {
+      wait.innerHTML = "This account is not allowed to manage notes yet.<br><small>It needs the <code>curriculum.manage</code> permission in the database.</small>";
+      return null;
+    }
+    await loadRef();
+    setupSelectors();
+    wait.hidden = true; main.hidden = false;
+    await loadLibrary();
+    return "ok";
+  }
+  function start() {
+    if (booted === "ok") { loadLibrary(); return; }
+    if (booted === "loading") return;
+    booted = "loading";
+    var wait = $("#wait"); wait.hidden = false; wait.textContent = "Loading…"; $("#main").hidden = true;
+    boot().then(function (r) { booted = r; }).catch(function (e) { booted = null; wait.hidden = false; wait.textContent = "Could not load: " + (e && e.message || "try again."); });
+  }
+
+  /* ---------- reference data ---------- */
+  async function loadRef() {
+    var a = await Promise.all([
+      get("classes?select=id,code,name,sort_order&is_active=eq.true&order=sort_order.asc"),
+      get("class_subjects?select=class_id,subject_id,display_name,subjects(name)&is_active=eq.true")
+    ]);
+    S.classes = a[0].ok && Array.isArray(a[0].data) ? a[0].data : [];
+    S.names = {};
+    S.csub = ((a[1].ok && Array.isArray(a[1].data)) ? a[1].data : []).map(function (r) {
+      var n = r.display_name || (r.subjects && r.subjects.name) || "Subject";
+      S.names[r.subject_id] = S.names[r.subject_id] || (r.subjects && r.subjects.name) || n;
+      return { class_id: r.class_id, subject_id: r.subject_id, display_name: r.display_name };
+    });
+  }
+  function classOpts() { return S.classes.map(function (c) { return { v: c.id, t: c.name }; }); }
+  function setupSelectors() {
+    options($("#fClass"), classOpts(), "All classes");
+    options($("#uClass"), classOpts(), "Choose class…");
+    options($("#tClass"), classOpts(), "Choose class…");
+    var all = Object.keys(S.names).map(function (id) { return { v: id, t: S.names[id] }; }).sort(function (a, b) { return a.t.localeCompare(b.t); });
+    options($("#fSubject"), all, "All subjects");
+  }
+
+  /* ---------- inner tabs ---------- */
+  function tab(name) {
+    $$(".tab").forEach(function (b) { b.classList.toggle("on", b.dataset.tab === name); });
+    ["library", "upload", "test"].forEach(function (n) { $("#tab" + n[0].toUpperCase() + n.slice(1)).hidden = n !== name; });
+    var b = document.getElementById("abody"); if (b) b.scrollTop = 0;
+  }
+
+  /* ================= LIBRARY ================= */
+  async function loadLibrary() {
+    var r = await get("study_notes?select=id,class_id,subject_id,topic_id,title,kind,status,chunk_count,embedded_count,use_count,updated_at&order=updated_at.desc&limit=1000");
+    if (!r.ok) { $("#list").innerHTML = '<div class="empty">Could not load notes: ' + esc(r.msg) + "</div>"; return; }
+    S.notes = Array.isArray(r.data) ? r.data : [];
+    var ids = Array.from(new Set(S.notes.map(function (n) { return n.topic_id; }).filter(Boolean)));
+    for (var i = 0; i < ids.length; i += 40) {
+      var t = await get("curriculum_topics?select=id,name&id=in.(" + ids.slice(i, i + 40).join(",") + ")");
+      if (t.ok && Array.isArray(t.data)) t.data.forEach(function (x) { S.topicNames[x.id] = x.name; });
+    }
+    renderLibrary();
+  }
+  function renderLibrary() {
+    var fc = $("#fClass").value, fs = $("#fSubject").value, fst = $("#fStatus").value, ft = $("#fText").value.trim().toLowerCase();
+    var rows = S.notes.filter(function (n) {
+      return (!fc || String(n.class_id) === fc) && (!fs || String(n.subject_id) === fs) && (!fst || n.status === fst) && (!ft || String(n.title).toLowerCase().indexOf(ft) >= 0);
+    });
+    var pub = S.notes.filter(function (n) { return n.status === "published"; }).length;
+    var parts = S.notes.reduce(function (a, n) { return a + (n.chunk_count || 0); }, 0);
+    var used = S.notes.reduce(function (a, n) { return a + (n.use_count || 0); }, 0);
+    $("#stats").innerHTML = [[S.notes.length, "notes"], [pub, "published"], [parts, "searchable parts"], [used, "answers given from notes"]]
+      .map(function (s) { return '<div class="stat"><b>' + s[0] + "</b><span>" + s[1] + "</span></div>"; }).join("");
+    if (!rows.length) {
+      $("#list").innerHTML = '<div class="empty">' + (S.notes.length ? "No notes match these filters." : "No notes yet. Press <b>Upload notes</b> to add your first one.") + "</div>"; return;
+    }
+    rows.sort(function (a, b) {
+      return (a.class_id - b.class_id) || subjName(a.subject_id).localeCompare(subjName(b.subject_id)) || (S.topicNames[a.topic_id] || "").localeCompare(S.topicNames[b.topic_id] || "") || String(a.title).localeCompare(String(b.title));
+    });
+    var html = "", last = "";
+    rows.forEach(function (n) {
+      var g = clsName(n.class_id) + " · " + subjName(n.subject_id);
+      if (g !== last) { html += '<div class="group-h">' + esc(g) + "</div>"; last = g; }
+      var unemb = (n.chunk_count || 0) > (n.embedded_count || 0);
+      html += '<article class="note" data-id="' + esc(n.id) + '"><div class="note-top"><h3>' + esc(n.title) + '</h3><span class="badge ' + esc(n.status) + '">' + esc(n.status) + "</span></div>" +
+        '<div class="crumb">' + esc(clsName(n.class_id)) + " › " + esc(subjName(n.subject_id)) + " › " + esc(S.topicNames[n.topic_id] || "No topic") + "</div>" +
+        '<div class="meta"><span>' + esc(KIND[n.kind] || n.kind) + "</span><span>" + (n.chunk_count || 0) + " parts</span><span>used " + (n.use_count || 0) + " times</span>" +
+        (unemb ? '<span class="badge warn">' + (n.chunk_count - (n.embedded_count || 0)) + " parts words-only</span>" : "") + "</div>" +
+        '<div class="actions"><button class="btn sm" data-a="edit" type="button">Edit</button>' +
+        (n.status === "published" ? '<button class="btn sm" data-a="draft" type="button">Unpublish</button>' : '<button class="btn sm" data-a="publish" type="button">Publish</button>') +
+        (n.status !== "archived" ? '<button class="btn sm" data-a="archive" type="button">Archive</button>' : "") +
+        (unemb ? '<button class="btn sm" data-a="reindex" type="button">Re-index</button>' : "") +
+        '<button class="btn sm danger" data-a="delete" type="button">Delete</button></div></article>';
+    });
+    $("#list").innerHTML = html;
+  }
+  async function listClick(e) {
+    var b = e.target.closest("button[data-a]"); if (!b) return;
+    var id = b.closest(".note").dataset.id, a = b.dataset.a;
+    try {
+      if (a === "edit") { await startEdit(id); return; }
+      if (a === "delete") {
+        ask("Delete this note permanently? Learners will no longer get answers from it.", async function () {
+          var d = await api("DELETE", "/rest/v1/study_notes?id=eq." + enc(id));
+          if (!d.ok) { toast(d.msg); return; }
+          toast("Note deleted"); await loadLibrary();
+        }, "Delete");
+        return;
+      }
+      if (a === "reindex") { b.disabled = true; b.textContent = "Re-indexing…"; await callFn({ action: "reindex", id: id }); toast("Re-indexed"); }
+      else {
+        var st = { publish: "published", draft: "draft", archive: "archived" }[a];
+        var u = await api("PATCH", "/rest/v1/study_notes?id=eq." + enc(id), { status: st });
+        if (!u.ok) throw new Error(u.msg);
+        toast("Now " + st);
+      }
+      await loadLibrary();
+    } catch (ex) { toast(ex.message || "Failed"); await loadLibrary(); }
+  }
+
+  /* ================= UPLOAD / EDIT ================= */
+  function resetUpload() {
+    S.items = []; S.editId = null;
+    $("#upTitle").textContent = "Upload notes";
+    $("#saveLog").innerHTML = ""; $("#addBox").hidden = false;
+    renderItems();
+  }
+  async function loadTopics(selectId) {
+    var c = $("#uClass").value, s = $("#uSubject").value;
+    S.topics = [];
+    if (c && s) {
+      var r = await get("curriculum_topics?select=id,name,parent_topic_id&class_id=eq." + enc(c) + "&subject_id=eq." + enc(s) + "&status=neq.retired&order=sort_order.asc,name.asc");
+      S.topics = r.ok && Array.isArray(r.data) ? r.data : [];
+    }
+    var top = S.topics.filter(function (t) { return !t.parent_topic_id; }), list = [];
+    top.forEach(function (t) {
+      list.push({ v: t.id, t: t.name });
+      S.topics.filter(function (x) { return x.parent_topic_id === t.id; }).forEach(function (x) { list.push({ v: x.id, t: "  ↳ " + x.name }); });
+    });
+    S.topics.filter(function (t) { return t.parent_topic_id && !top.some(function (p) { return p.id === t.parent_topic_id; }); }).forEach(function (t) { list.push({ v: t.id, t: t.name }); });
+    var sel = $("#uTopic");
+    sel.innerHTML = '<option value="">' + (c && s ? "No topic (general notes)" : "Choose subject first") + "</option>" + list.map(function (o) { return '<option value="' + esc(o.v) + '">' + esc(o.t) + "</option>"; }).join("") + (c && s ? '<option value="__new">+ Create a new topic…</option>' : "");
+    sel.disabled = !(c && s);
+    options($("#ntParent"), top.map(function (t) { return { v: t.id, t: t.name }; }), "Top-level topic");
+    if (selectId) sel.value = selectId;
+    $("#newTopicBox").hidden = sel.value !== "__new";
+  }
+
+  /* ---- reading files ---- */
+  function htmlToMd(rootEl) {
+    var out = [];
+    function inline(n) { return (n.textContent || "").replace(/\s+/g, " ").trim(); }
+    function walk(n) {
+      var t = n.tagName.toLowerCase();
+      if (/^h[1-6]$/.test(t)) { var lv = Math.min(Number(t[1]), 4); var x = inline(n); if (x) out.push("\n" + "#".repeat(lv) + " " + x + "\n"); }
+      else if (t === "p") { var p = inline(n); if (p) out.push(p + "\n"); }
+      else if (t === "ul" || t === "ol") {
+        Array.prototype.forEach.call(n.children, function (li, i) { var x = inline(li); if (x) out.push((t === "ol" ? (i + 1) + ". " : "- ") + x); });
+        out.push("");
+      } else if (t === "table") {
+        Array.prototype.forEach.call(n.querySelectorAll("tr"), function (tr) { out.push("- " + Array.prototype.map.call(tr.children, inline).join(" | ")); });
+        out.push("");
+      } else if (n.children && n.children.length) Array.prototype.forEach.call(n.children, walk);
+      else { var q = inline(n); if (q) out.push(q + "\n"); }
+    }
+    Array.prototype.forEach.call(rootEl.children, walk);
+    return out.join("\n");
+  }
+  async function readFile(f) {
+    var name = f.name.toLowerCase();
+    if (/\.(txt|md|markdown)$/.test(name) || f.type === "text/plain") return await f.text();
+    if (/\.docx$/.test(name)) {
+      await load(MAM);
+      var r = await window.mammoth.convertToHtml({ arrayBuffer: await f.arrayBuffer() });
+      var doc = new DOMParser().parseFromString("<body>" + r.value + "</body>", "text/html");
+      return htmlToMd(doc.body);
+    }
+    if (/\.pdf$/.test(name)) {
+      await load(PDFJS);
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFW;
+      var pdf = await window.pdfjsLib.getDocument({ data: new Uint8Array(await f.arrayBuffer()) }).promise, pages = [];
+      for (var i = 1; i <= pdf.numPages; i++) {
+        var tc = await (await pdf.getPage(i)).getTextContent(), line = [], y = null, lines = [];
+        tc.items.forEach(function (it) {
+          var yy = Math.round(it.transform[5]);
+          if (y !== null && Math.abs(yy - y) > 3) { lines.push(line.join(" ")); line = []; }
+          line.push(it.str); y = yy;
+        });
+        if (line.length) lines.push(line.join(" "));
+        pages.push(lines.join("\n"));
+      }
+      return pages.join("\n\n");
+    }
+    throw new Error("Unsupported file type");
+  }
+  function tidy(t) { return String(t).replace(/\r/g, "").replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim(); }
+  function titleOf(fn) { return fn.replace(/\.[^.]+$/, "").replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim(); }
+  function curKind() { return ($('input[name="kind"]:checked') || {}).value || "summary"; }
+  async function addFiles(files) {
+    var bad = [];
+    for (var i = 0; i < files.length; i++) {
+      var f = files[i];
+      try {
+        var text = tidy(await readFile(f));
+        if (text.length < 30) throw new Error("no readable text (a scanned picture?)");
+        S.items.push({ title: titleOf(f.name), body: text, kind: curKind(), file: f.name, kw: "" });
+      } catch (ex) { bad.push(f.name + ": " + ex.message); }
+    }
+    renderItems();
+    if (bad.length) toast("Could not read " + bad.join("; "));
+  }
+
+  /* ---- review list ---- */
+  function estParts(md) {
+    var secs = String(md).split(/^#{1,4}\s+.*$/m), n = 0;
+    secs.forEach(function (s) { var w = words(s); if (w) n += Math.ceil(w / 170); });
+    return Math.max(n, 1);
+  }
+  function renderItems() {
+    $("#reviewBox").hidden = !S.items.length;
+    $("#items").innerHTML = S.items.map(function (it, i) {
+      var w = words(it.body), warn = "";
+      if (w && w < 25) warn = '<span class="badge warn">Very short</span>';
+      return '<div class="item" data-i="' + i + '"><div class="item-h"><input class="item-title" placeholder="Note title" value="' + esc(it.title) + '" aria-label="Note title">' +
+        '<span class="muted wc">' + w + " words · about " + estParts(it.body) + " parts</span>" + warn + '<button class="btn sm danger" data-rm type="button">Remove</button></div>' +
+        '<textarea class="item-body" placeholder="Paste or type the notes here. Use # headings." aria-label="Note text">' + esc(it.body) + "</textarea>" +
+        '<div class="grid2"><label>Type<select class="item-kind">' + Object.keys(KIND).map(function (k) { return '<option value="' + k + '"' + (it.kind === k ? " selected" : "") + ">" + KIND[k] + "</option>"; }).join("") + "</select></label></div>" +
+        '<div class="status muted"></div></div>';
+    }).join("");
+  }
+  function onItemEdit(e) {
+    var el = e.target.closest(".item"); if (!el) return; var it = S.items[Number(el.dataset.i)]; if (!it) return;
+    if (e.target.matches(".item-title")) { it.title = e.target.value; it.saved = false; }
+    else if (e.target.matches(".item-body")) { it.body = e.target.value; it.saved = false; el.querySelector(".wc").textContent = words(it.body) + " words · about " + estParts(it.body) + " parts"; }
+    else if (e.target.matches(".item-kind")) { it.kind = e.target.value; it.saved = false; }
+  }
+  async function startEdit(id) {
+    var r = await get("study_notes?select=*&id=eq." + enc(id));
+    var n = r.ok && Array.isArray(r.data) ? r.data[0] : null;
+    if (!n) return toast("Could not open that note");
+    resetUpload(); S.editId = id;
+    $("#upTitle").textContent = "Edit note";
+    $("#uClass").value = String(n.class_id);
+    options($("#uSubject"), subjectsOf(n.class_id), "Choose subject…", n.subject_id); $("#uSubject").disabled = false;
+    await loadTopics(n.topic_id || "");
+    $("#addBox").hidden = true;
+    $("#optPublish").checked = n.status === "published";
+    S.items = [{ title: n.title, body: n.body_md, kind: n.kind, file: n.file_name || "", kw: (n.keywords || []).join(", ") }];
+    renderItems(); tab("upload");
+  }
+  async function saveAll() {
+    var c = Number($("#uClass").value), s = $("#uSubject").value, tp = $("#uTopic").value;
+    if (!c || !s) return toast("Choose the class and the subject first");
+    if (tp === "__new") return toast("Create the new topic first, or choose an existing one");
+    if (!S.items.length) return toast("Add some notes first");
+    for (var k = 0; k < S.items.length; k++) {
+      if (!S.items[k].title.trim()) return toast("Every note needs a title");
+      if (words(S.items[k].body) < 8) return toast("“" + S.items[k].title + "” is too short");
+    }
+    var btn = $("#btnSave"), log = $("#saveLog"); btn.disabled = true; log.innerHTML = '<div class="progress"><i id="bar"></i></div>';
+    var status = $("#optPublish").checked ? "published" : "draft", done = 0, failed = 0;
+    for (var i = 0; i < S.items.length; i++) {
+      var it = S.items[i], el = $$("#items .item")[i], st = el && el.querySelector(".status");
+      if (it.saved) { done++; continue; }
+      if (st) st.textContent = "Saving and preparing for search…";
+      try {
+        var res = await callFn({ action: "save", id: S.editId || undefined, class_id: c, subject_id: s, topic_id: tp || null, title: it.title.trim(), kind: it.kind, body_md: it.body, file_name: it.file || null, status: status });
+        it.saved = true; done++;
+        if (el) { el.classList.remove("fail"); el.classList.add("ok"); }
+        if (st) st.innerHTML = '<span class="good">Saved · ' + res.chunks + " searchable parts" + (res.warning ? " (some words-only)" : "") + "</span>";
+      } catch (ex) { failed++; if (el) el.classList.add("fail"); if (st) st.innerHTML = '<span class="bad">' + esc(ex.message) + "</span>"; }
+      $("#bar").style.width = Math.round(((i + 1) / S.items.length) * 100) + "%";
+    }
+    btn.disabled = false;
+    log.innerHTML += failed ? '<div class="bad">' + failed + " note(s) failed. Fix them and press Save again; the saved ones will not be repeated.</div>"
+      : '<div class="good"><b>' + done + " note" + (done === 1 ? "" : "s") + " saved.</b> " + (status === "published" ? "Learners can now get answers from " + (done === 1 ? "it" : "them") + "." : "Saved as draft: publish it from the Library when ready.") + ' <button class="btn sm" id="goLib" type="button">View library</button></div>';
+    await loadLibrary();
+    var g = $("#goLib"); if (g) g.addEventListener("click", function () { resetUpload(); tab("library"); });
+  }
+
+  /* ================= TEST ================= */
+  async function runTest() {
+    var c = Number($("#tClass").value), s = $("#tSubject").value, q = $("#tQ").value.trim();
+    if (!c || !s || !q) return toast("Choose class, subject and type a question");
+    var busy = $("#tBusy"), out = $("#tOut"), go = $("#tGo"); busy.hidden = false; go.disabled = true; out.innerHTML = "";
+    try {
+      var r = await callFn({ action: "test", class_id: c, subject_id: s, question: q });
+      var h = r.used_notes ? '<div class="verdict yes">A learner would get this answer from your notes (no AI used).</div>'
+        : '<div class="verdict no">Not found in your notes: this goes to the saved answers, then Gemini.<br><small>' + esc(r.why) + "</small></div>";
+      if (r.answer) h += '<h3 style="margin-top:12px">The answer the learner sees</h3><div class="answer">' + esc(r.answer) + "</div>";
+      h += '<h3 style="margin-top:12px">Closest parts of your notes</h3>' + ((r.matches || []).length ? r.matches.map(function (m) {
+        return '<div class="match"><b>' + esc(m.title) + " › " + esc(String(m.heading).split(" › ").pop()) + '</b><div class="meter"><i style="width:' + Math.round(m.similarity * 100) + '%"></i></div><small>Meaning match ' + m.similarity.toFixed(2) + " (needs " + esc(r.threshold) + ") · key words found " + Math.round(m.cover * 100) + "%</small><small>" + esc(m.preview) + "…</small></div>";
+      }).join("") : '<div class="empty">No notes exist for this class and subject yet.</div>');
+      out.innerHTML = h;
+    } catch (ex) { out.innerHTML = '<div class="error">' + esc(ex.message) + "</div>"; }
+    busy.hidden = true; go.disabled = false;
+  }
+
+  /* ---------- build the screen once, wire it up ---------- */
+  function construct() {
+    host = document.createElement("div");
+    root = host.attachShadow({ mode: "open" });
+    root.innerHTML = "<style>" + CSS + "</style>" + HTML;
+
+    $$(".tab").forEach(function (b) { b.addEventListener("click", function () { if (b.dataset.tab === "upload" && S.editId) resetUpload(); tab(b.dataset.tab); }); });
+    $("#btnNew").addEventListener("click", function () { resetUpload(); tab("upload"); });
+    ["#fClass", "#fSubject", "#fStatus"].forEach(function (s) { $(s).addEventListener("change", renderLibrary); });
+    $("#fText").addEventListener("input", renderLibrary);
+    $("#list").addEventListener("click", listClick);
+
+    $("#uClass").addEventListener("change", function () {
+      var c = this.value, ss = $("#uSubject");
+      options(ss, subjectsOf(c), c ? "Choose subject…" : "Choose class first"); ss.disabled = !c; loadTopics();
+    });
+    $("#uSubject").addEventListener("change", function () { loadTopics(); });
+    $("#uTopic").addEventListener("change", function () { $("#newTopicBox").hidden = this.value !== "__new"; if (this.value === "__new") $("#ntName").focus(); });
+    $("#ntCreate").addEventListener("click", async function () {
+      var name = $("#ntName").value.trim(); if (!name) return toast("Type the topic name");
+      var r = await api("POST", "/rest/v1/rpc/admin_notes_topic", { p_class: Number($("#uClass").value), p_subject: $("#uSubject").value, p_name: name, p_parent: $("#ntParent").value || null });
+      if (!r.ok || !r.data || !r.data.ok) return toast(r.msg || "Could not create the topic");
+      $("#ntName").value = ""; await loadTopics(r.data.topic_id); toast("Topic ready");
+    });
+
+    var drop = $("#drop"), fileIn = $("#fileIn");
+    drop.addEventListener("click", function () { fileIn.click(); });
+    drop.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileIn.click(); } });
+    fileIn.addEventListener("click", function (e) { e.stopPropagation(); });
+    fileIn.addEventListener("change", function () { addFiles(Array.prototype.slice.call(fileIn.files)); fileIn.value = ""; });
+    ["dragenter", "dragover"].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add("over"); }); });
+    ["dragleave", "drop"].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.remove("over"); }); });
+    drop.addEventListener("drop", function (e) { addFiles(Array.prototype.slice.call(e.dataTransfer.files)); });
+    $("#btnPaste").addEventListener("click", function () { S.items.push({ title: "", body: "", kind: curKind(), file: "", kw: "" }); renderItems(); var t = $$("#items .item-title"); if (t.length) t[t.length - 1].focus(); });
+    $("#btnTemplate").addEventListener("click", function () {
+      var t = "# Topic title\n\n## Definition\nWrite one or two clear sentences.\n\n## Key points\n- First point\n- Second point\n- Third point\n\n## Example\nA short worked example.\n\n## Common mistakes\n- A mistake learners often make\n";
+      var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([t], { type: "text/markdown" })); a.download = "notes-template.md"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    });
+    $("#items").addEventListener("input", onItemEdit);
+    $("#items").addEventListener("change", onItemEdit);
+    $("#items").addEventListener("click", function (e) {
+      if (!e.target.matches("[data-rm]")) return;
+      S.items.splice(Number(e.target.closest(".item").dataset.i), 1); renderItems();
+    });
+    $("#btnClear").addEventListener("click", function () {
+      if (!S.items.length) return;
+      ask("Remove everything waiting to be saved?", function () { S.items = []; $("#saveLog").innerHTML = ""; renderItems(); }, "Clear");
+    });
+    $("#btnSave").addEventListener("click", saveAll);
+    $("#tClass").addEventListener("change", function () {
+      var ss = $("#tSubject"); options(ss, subjectsOf(this.value), this.value ? "Choose subject…" : "Choose class first"); ss.disabled = !this.value;
+    });
+    $("#tGo").addEventListener("click", runTest);
+  }
+
+  /* ---------- the Admin panel calls this when the Notes tab opens ---------- */
+  window.admNotes = function () {
+    try { if (typeof isOwner === "function" && !isOwner()) return; } catch (e) { return; }
+    var b = document.getElementById("abody"); if (!b) return;
+    b.onclick = null; b.oninput = null; b.onchange = null;
+    b.innerHTML = "";
+    if (!host) construct();
+    b.appendChild(host);
+    start();
+  };
+})();
+
 </script>
 </body></html>

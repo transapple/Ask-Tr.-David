@@ -2128,7 +2128,7 @@ function render(){
  $("nm").textContent=D.name;if(!$("av").firstElementChild)$("av").innerHTML='<img src="'+AVATAR+'" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block">';let h="",last="",n=0;const lb=D.msgs.map(x=>x.s).lastIndexOf("i");
  D.msgs.forEach((m,i)=>{if(q&&!m.t.toLowerCase().includes(q))return;n++;const d=dl(m.ts);if(d!=last){h+=`<div class="day">${d}</div>`;last=d}
  if(m.s=="i"){h+=bub(m,i,i==lb);return}
- h+=`<div class="b ${m.s}" data-i="${i}">${m.img?'<img src="'+m.img+'">':""}${m.att?(window.__IMGB&&__IMGB[m.ts]?'<img class="pvimg" data-pv="'+m.ts+'" src="'+__IMGB[m.ts].url+'" alt="">':'<div class="attb">&#128206; '+esc(m.att.n)+'</div>'):""}${hl(m.t)}<small>${m.ed?"edited ":""}${hm(m.ts)}${m.s=="o"?`<span class="${m.st==2?"rd":""}" style="display:inline-flex">${m.st?K2:K1}</span>`:""}</small></div>`});
+ h+=`<div class="b ${m.s}" data-i="${i}">${m.img?'<img src="'+m.img+'">':""}${m.att?(window.__IMGB&&__IMGB[m.ts]&&__IMGB[m.ts].url?'<img class="pvimg" data-pv="'+m.ts+'" src="'+__IMGB[m.ts].url+'" alt="">':'<div class="attb">&#128206; '+esc(m.att.n)+'</div>'):""}${hl(m.t)}<small>${m.ed?"edited ":""}${hm(m.ts)}${m.s=="o"?`<span class="${m.st==2?"rd":""}" style="display:inline-flex">${m.st?K2:K1}</span>`:""}</small></div>`});
  if(D.msgs.length)HQC={};if(!D.msgs.length&&!q)h=empty();$("cnt").textContent=q?n+" found":"";if(q&&!n)h='<div class="day">No messages found</div>';
  $("msgs").innerHTML=h;if(typeof thinkBub=="function")thinkBub();ancFix(M0);if(newAnc)ancTop(M0);else M0.scrollTop=goBottom?1e9:prev0;RS.cur=D.cur;RS.n=D.msgs.length;subs();window.__askReady=1}
 function stopEdit(){ei=null;$("inp").value="";$("editing").style.display="none"}
@@ -7235,7 +7235,7 @@ async function askMath(q,CI){
 async function askImage(m,blob,v){
  if(capped())return limitMsg();
  const raw=String(v||"Please solve this and show the full working step by step.").slice(0,500);
- const err=x=>{D.msgs.push({s:"i",err:1,t:x,q:raw.slice(0,300),ts:Date.now()});save();render()};
+ const err=x=>{D.msgs.push({s:"i",err:1,t:x,q:raw.slice(0,300),img:1,mts:m.ts,ts:Date.now()});save();render()};
  if(!navigator.onLine)return err("No internet connection. Please connect to the internet and tap Retry.");
  const tok=++AN;window.ASKQ_RAW=raw;window.ASKQ=raw;
  const ch=D.chats.find(c=>c.id==D.cur);if(ch&&(ch.title=="New chat"||ch.title=="Chat"))ch.title=(D.sub||"Photo")+" photo";
@@ -7245,7 +7245,7 @@ async function askImage(m,blob,v){
  let j=null;const c=new AbortController(),tm=setTimeout(()=>c.abort(),90000);
  try{const b64=await new Promise((ok,no)=>{const fr=new FileReader();fr.onload=()=>ok(String(fr.result).split(",")[1]);fr.onerror=no;fr.readAsDataURL(blob)});
   const r=await fetch(SBU.replace("/rest/v1/","/functions/v1/")+"image_ask",{method:"POST",signal:c.signal,headers:{apikey:SBK,"Content-Type":"application/json"},
-   body:JSON.stringify({image:b64,mime:"image/jpeg",question:raw,subject:D.sub,subjects:subsList(),level:D.lvl,class:String(D.cls||"").replace(/^Primary /,"P").replace(/^Senior /,"S"),tok:tokNow()})});
+   body:JSON.stringify({image:b64,mime:blob.type||"image/jpeg",question:raw,subject:D.sub,subjects:subsList(),level:D.lvl,class:String(D.cls||"").replace(/^Primary /,"P").replace(/^Senior /,"S"),tok:tokNow()})});
   if(r.ok)j=await r.json()}catch(e){j=null}finally{clearTimeout(tm);thinkOff()}
  if(stream==null||tok!=AN){D.msgs=D.msgs.filter(x=>x!==a);save();render();return}
  const drop=()=>{D.msgs=D.msgs.filter(x=>x!==a);sm=null;stopS()};
@@ -7352,7 +7352,7 @@ $("msgs").addEventListener("click",e=>{
   if(a=="pick"&&m.pick==null){m.pick=+b.dataset.k;if(m.qz&&m.pick==m.quiz[2])m.qz.score++}
  if(a=="nq"&&m.qz&&m.pick!=null&&m.qz.n<m.qz.list.length-1){const z=m.qz;z.n++;m.quiz=["q",z.list[z.n][1],z.list[z.n][2]];m.pick=null;m.t=qText(z.t,z)}
  if(a=="regen"){redoReply(i).then(h=>{if(h)return;const k=D.msgs.indexOf(m);if(k<0)return;D.msgs.splice(k,1);save();render();ask((m.chem&&m.chem.raw)||(m.phys&&m.phys.raw)||(m.math&&m.math.raw)||m.q,m.mode)});return}
- if(a=="retry"){D.msgs.splice(i,1);save();render();ask(m.q,m.mode);return}
+ if(a=="retry"){D.msgs.splice(i,1);save();render();if(m.img&&window.__IMGB&&__IMGB[m.mts]){askImage({ts:m.mts},__IMGB[m.mts].blob,m.q);return}ask(m.q,m.mode);return}
  save();render()});
 function subs(){$("subs").innerHTML='<button data-all="1">All subjects</button>'+subsList().map(x=>`<button class="${x==D.sub?"on":""}" data-s="${x}">${x}</button>`).join("");const o=$("subs").querySelector(".on");if(o)o.scrollIntoView({inline:"center",block:"nearest"})}
 function allSubs(){showP("All subjects",[GR[lvIdx()]].map(g=>`<div class="sec">${g[0]}</div><div class="sws" style="gap:8px">${g[1].map(x=>`<button class="lk ${x==D.sub?"on":""}" data-s="${x}">${x}</button>`).join("")}</div>`).join(""),closeP,e=>{const x=e.target.dataset.s;if(x){closeP();setSub(x)}})}
@@ -9452,6 +9452,10 @@ inp.addEventListener("change",async()=>{
  const a={name:nm,text:"",ready:false,err:"",msg:"Reading..."};window.__att=a;paint();
  const st=m=>{if(window.__att===a){a.msg=m;paint()}};
  if(/^(jpg|jpeg|png|webp|gif)$/.test(ext)){try{const b=await shrinkJ(f);if(window.__att!==a)return;a.blob=b;a.url=URL.createObjectURL(b);a.img=1;a.ready=true;paint()}catch(e){if(window.__att!==a)return;a.err="Could not open this picture";paint();setTimeout(()=>{if(window.__att===a)attClear()},3500)}f=null;return}
+ if(ext==="pdf"){const b=new Blob([f],{type:"application/pdf"});a.blob=b;a.img=1;a.ready=true;paint();f=null;return}
+ if(ext==="docx"||ext==="txt"){try{let t=await extract(f,ext,st);t=String(t||"").replace(/\u0000/g,"").replace(/[ \t]+\n/g,"\n").replace(/\n{3,}/g,"\n\n").trim();if(window.__att!==a)return;
+   if(t.length<3){a.err="No readable text found";paint();setTimeout(()=>{if(window.__att===a)attClear()},3500);return}
+   a.blob=new Blob([t.slice(0,60000)],{type:"text/plain"});a.img=1;a.ready=true;paint()}catch(e){if(window.__att!==a)return;a.err="Could not read this file";paint();setTimeout(()=>{if(window.__att===a)attClear()},3500)}f=null;return}
  try{let t=await extract(f,ext,st);t=String(t||"").replace(/\u0000/g,"").replace(/[ \t]+\n/g,"\n").replace(/\n{3,}/g,"\n\n").trim();
   if(window.__att!==a)return;
   if(t.length<3){a.err="No readable text found";paint();setTimeout(()=>{if(window.__att===a)attClear()},3500);return}

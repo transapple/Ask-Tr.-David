@@ -340,7 +340,15 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 @media(prefers-color-scheme:dark){:root:not([data-theme="light"]) #iw{background:#2a3942;border-color:#3b4a54}}
 :root[data-theme="dark"] #iw{background:#2a3942;border-color:#3b4a54}
 :root[data-theme="light"] #iw{background:#e8eef7;border-color:#cdd8ea}
-#send{background:#1a73e8;color:#fff}#send:active{background:#1560c7}
+#send{background:#1a73e8;color:#fff}
+/* PLUS BUTTON (add a file): round, soft blue, rounded plus; turns a quarter on press */
+#cmp #att{width:34px;height:34px;padding:0;border-radius:50%;background:rgba(26,115,232,.13);color:#1a73e8;display:grid;place-items:center;flex-shrink:0;margin:0 4px 0 1px;transition:transform .18s ease,background .18s ease,box-shadow .18s ease;-webkit-tap-highlight-color:transparent}
+#cmp #att svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;transition:transform .22s ease}
+#cmp #att:active{background:rgba(26,115,232,.26);box-shadow:0 0 0 4px rgba(26,115,232,.10);transform:scale(.92)}
+#cmp #att:active svg{transform:rotate(90deg)}
+#cmp #att:focus-visible{outline:2px solid #1a73e8;outline-offset:2px}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) #cmp #att{background:rgba(138,180,248,.18);color:#8ab4f8}}
+:root[data-theme="dark"] #cmp #att{background:rgba(138,180,248,.18);color:#8ab4f8}#send:active{background:#1560c7}
 #wave{display:none;align-items:center;justify-content:center;gap:3px;height:30px;padding:0 6px;flex:1;min-width:0;overflow:hidden}
 #iw.rec #inp{display:none}
 #live{display:none;background:var(--bar);color:var(--text);padding:10px 18px 4px;font-size:16px;line-height:1.4;max-height:110px;overflow-y:auto;white-space:pre-wrap;word-wrap:break-word;-webkit-user-select:text;user-select:text}
@@ -395,7 +403,56 @@ svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 .b .exa small,.b .exe small,.b .exm small,#ap .b .exa small,#ap .b .exe small,#ap .b .exm small{float:none;display:block;margin:6px 0 0}
 .exq .exn,#ap .exq .exn{display:block;float:none;clear:both;margin-top:10px;padding-top:7px;border-top:1px solid var(--line);font-size:11.5px;line-height:1.4;color:var(--sub)}
 .exa p{margin:4px 0 0}.exm .exs,.exe .exs{margin:0 0 9px}.exm .exs:last-child,.exe .exs:last-child{margin-bottom:0}.exm .exs b,.exe .exs b{display:block;margin-bottom:2px}.exm ol,.exm ul{margin:3px 0 3px 18px;padding:0}
-</style></head><body>
+</style><style id="adm-ui">
+/* Admin panel: friendly layout. Uses the app theme variables, so light and dark both work. */
+#adm#adm{font-size:15px;-webkit-tap-highlight-color:transparent}
+#adm#adm .ah{padding:calc(12px + env(safe-area-inset-top,0px)) 16px 12px;border-bottom:1px solid var(--line)}
+#adm#adm .ah b{font-size:21px;letter-spacing:-.01em}
+#adm#adm .ah small{display:block;margin-top:1px;color:var(--sub);font-size:13px}
+#adm#adm .ahb{display:flex;align-items:center;gap:8px}
+#adm#adm .ah button{background:transparent;color:var(--green);border:1.5px solid var(--green);padding:7px 14px;border-radius:20px;font-size:14px;font-weight:700}
+#adm#adm .ah #arf{width:38px;height:38px;padding:0;font-size:19px;line-height:1;border-color:var(--line);color:var(--sub);display:grid;place-items:center}
+#adm#adm .ah button:active{opacity:.6}
+#adm#adm .as{padding:10px 14px;gap:8px;background:var(--bg);border-bottom:1px solid var(--line);scrollbar-width:none}
+#adm#adm .as::-webkit-scrollbar{display:none}
+#adm#adm .as button{padding:9px 16px;border-radius:20px;font-size:14px;background:color-mix(in srgb,var(--text) 7%,transparent);color:var(--text)}
+#adm#adm .as button.on{background:var(--green);color:#fff}
+#adm#adm #abody{padding-bottom:28px;scroll-behavior:smooth;overscroll-behavior:contain}
+#adm#adm .an{gap:4px;padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line)}
+#adm#adm .an button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:0;border-top:0;border-radius:14px;padding:7px 2px;font-size:11.5px;font-weight:700;position:relative;background:none;color:var(--sub)}
+#adm#adm .an button svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#adm#adm .an button.on{background:color-mix(in srgb,var(--green) 14%,transparent);color:var(--green);border-top:0}
+#adm#adm .an .spn{position:absolute;top:1px;left:calc(50% + 7px);margin:0}
+#adm#adm .asec{padding:20px 18px 8px;font-size:12px}
+#adm#adm .ag{gap:12px;padding:4px 14px 6px}
+#adm#adm .ac{border-radius:16px;padding:14px 15px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+#adm#adm .ac b{font-size:28px;margin:2px 0}
+#adm#adm .row{padding:14px 18px;min-height:50px}
+#adm#adm .row:active,#adm#adm .aat:active,#adm#adm .am:active{background:color-mix(in srgb,var(--text) 6%,transparent)}
+#adm#adm .ain{border-radius:14px;padding:13px 15px;font-size:15px}
+#adm#adm .ain:focus{outline:2px solid color-mix(in srgb,var(--green) 55%,transparent);outline-offset:0}
+#adm#adm .apl{padding:4px 11px;border-radius:12px;font-size:12.5px}
+#adm#adm .achips{display:flex;flex-wrap:wrap;gap:8px;padding:4px 18px 6px}
+#adm#adm .pf{background:color-mix(in srgb,var(--text) 78%,var(--bg));cursor:pointer}
+#adm#adm .pf:active{opacity:.7}
+#adm#adm .aat{display:flex;align-items:center;gap:14px;margin:8px 14px;padding:13px 14px;border-radius:16px;cursor:pointer;background:color-mix(in srgb,#ff9f0a 12%,var(--sheet));border:1px solid color-mix(in srgb,#ff9f0a 35%,var(--line))}
+#adm#adm .aat>div{flex:1;min-width:0}
+#adm#adm .aat b{display:block;font-size:15px}
+#adm#adm .aat small{display:block;color:var(--sub);font-size:13px;margin-top:1px}
+#adm#adm .aatd{flex:none;min-width:40px;height:40px;padding:0 8px;box-sizing:border-box;border-radius:20px;background:#ff9f0a;color:#fff;font-weight:800;font-size:16px;display:grid;place-items:center}
+#adm#adm .aatc{flex:none;color:var(--sub);font-size:24px;font-style:normal;line-height:1}
+#adm#adm .aok{margin:8px 14px;padding:15px 16px;border-radius:16px;background:color-mix(in srgb,var(--green) 12%,var(--sheet));border:1px solid color-mix(in srgb,var(--green) 30%,var(--line));color:var(--text);font-weight:600}
+#adm#adm .am{margin:8px 14px;padding:14px 16px;border-radius:16px;background:var(--sheet);border:1px solid var(--line);cursor:pointer}
+#adm#adm .am b{display:block;font-size:26px;margin:3px 0}
+#adm#adm .am small,#adm#adm .amn,#adm#adm .alib small{color:var(--sub);font-size:13px;line-height:1.45}
+#adm#adm .amn{display:block;padding:6px 18px 10px}
+#adm#adm .alib{margin:18px 14px 4px;padding:14px 16px;border-radius:16px;background:color-mix(in srgb,var(--text) 5%,transparent)}
+#adm#adm .alib small{display:block;margin-top:3px}
+#adm#adm .afoot{margin:10px 14px 0;padding:12px;text-align:center;color:var(--sub);font-size:13px;font-weight:600;cursor:pointer;border-radius:12px}
+#adm#adm .afoot:active{background:color-mix(in srgb,var(--text) 6%,transparent)}
+@media(min-width:620px){#adm#adm .ag{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head><body>
 <script>window.ATD_MAINT=false; /* Set to false to switch the maintenance screen off and let learners in again. */</script>
 <div id="maintGate" role="alertdialog" aria-modal="true" aria-label="Maintenance" style="position:fixed;inset:0;z-index:2147483647;background:#0f1d1a;color:#fff;display:none;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif">
 <div style="max-width:420px">
@@ -1250,7 +1307,7 @@ addEventListener('resize',fit);fit();start(0);
 <button id="jump" aria-label="Scroll to latest"><svg viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></svg></button>
 <div id="editing">Editing message. Tap here to cancel.</div>
 <div id="live" aria-live="polite"></div>
-<div id="attc" style="display:none"></div><div id="cmp"><div id="iw"><button class="ic" id="att" type="button" aria-label="Attach a file"><svg viewBox="0 0 24 24"><path d="M21 11.5l-8.6 8.6a5.5 5.5 0 01-7.8-7.8l8.6-8.6a3.7 3.7 0 015.2 5.2l-8.6 8.6a1.8 1.8 0 01-2.6-2.6l7.9-7.9"/></svg></button><input type="file" id="attf" accept=".pdf,.docx,.txt,image/jpeg,image/png,image/webp,image/gif" style="display:none"><button class="ic" id="mic" aria-label="Voice question"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg></button><div id="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><textarea id="inp" rows="1" placeholder="Ask questions, make research" autocomplete="off" autocapitalize="sentences" enterkeyhint="enter"></textarea><button id="send" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button></div></div>
+<div id="attc" style="display:none"></div><div id="cmp"><div id="iw"><button class="ic" id="att" type="button" aria-label="Add a file"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5.5v13M5.5 12h13"/></svg></button><input type="file" id="attf" accept=".pdf,.docx,.txt,image/jpeg,image/png,image/webp,image/gif" style="display:none"><button class="ic" id="mic" aria-label="Voice question"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg></button><div id="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><textarea id="inp" rows="1" placeholder="Ask questions, make research" autocomplete="off" autocapitalize="sentences" enterkeyhint="enter"></textarea><button id="send" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button></div></div>
 <div id="ps"><button id="psl" type="button" aria-label="Your plan"></button><button id="pss" type="button" aria-label="Choose subject"></button><span id="psr"></span></div>
 </div>
 <div id="dlgx" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);place-items:center;z-index:120;padding:20px"><div style="background:var(--sheet,#fff);color:var(--text,#111);border-radius:14px;padding:20px;width:100%;max-width:320px;box-shadow:0 4px 18px rgba(0,0,0,.3)"><div id="dlgm" style="font-size:16px;line-height:1.4;margin-bottom:14px;white-space:pre-wrap"></div><input id="dlgi" autocomplete="off" style="display:none;width:100%;box-sizing:border-box;margin-bottom:14px;padding:10px;font-size:16px;border:1px solid var(--line,#ccc);border-radius:8px;background:var(--wall,#fff);color:inherit"><div style="display:flex;justify-content:flex-end;gap:8px"><button id="dlgc" style="background:none;border:0;padding:8px 14px;font-size:15px;color:inherit;cursor:pointer">Cancel</button><button id="dlgo" style="background:var(--green,#00a884);color:#fff;border:0;border-radius:8px;padding:8px 18px;font-size:15px;cursor:pointer">OK</button></div></div></div>
@@ -2465,7 +2522,7 @@ function rvNote(key,slug){
     if(e.target.closest("[data-ask]")){closeP();const i=$("inp");i.value="Teach me "+title+" in "+nm;send()}})};
  const ck=key+"/"+slug;
  if(RVC[ck]){view(RVC[ck]);return}
- showP(esc(title),'<div class="empty">Loadingâ€¦</div>',back);
+ showP(esc(title),'<div class="empty">Loading?</div>',back);
  rvApi("revision_note",{p_subject:key,p_slug:slug}).then(n=>{if(!n||!n.summary)throw new Error("rv");RVC[ck]=n;view(n)}).catch(()=>showP(esc(title),'<div class="empty">Could not load this note. Check your connection and try again.</div>',back))}
 let LIBT="sv";
 function library(t){LIBT=t||LIBT;const L=libAll(),T=[["sv","Saved"],["lk","Liked"],["sh","Shared"]],items=L[LIBT];
@@ -6105,7 +6162,7 @@ async function styleAnswer(t,q){
  For each one the owner sees what the learner asked, then approves (kept for good), edits, or rejects (a rejected item is deleted for good). */
 const SVLBL={draft:"Waiting",approved:"Approved",published:"Approved"};
 let SVK="q",SVT="draft",SVL=[],SVC={};
-const svRpc=(fn,a)=>{const h={apikey:SBK,"Content-Type":"application/json"};if(/^ref_/.test(fn)){const t=tokNow();if(t)h.Authorization="Bearer "+t}return fetch(SBU+"rpc/"+fn,{method:"POST",headers:h,body:JSON.stringify(a)}).then(r=>r.json())};
+const svRpc=(fn,a)=>{const h={apikey:SBK,"Content-Type":"application/json"};if(/^(ref_|admin_)/.test(fn)){const t=tokNow();if(t)h.Authorization="Bearer "+t}if(/^admin_/.test(fn)&&a&&"p_t" in a){a=Object.assign({},a);delete a.p_t}return fetch(SBU+"rpc/"+fn,{method:"POST",headers:h,body:JSON.stringify(a)}).then(r=>r.json())};
 const svRpcA=(fn,a)=>{let t="";try{t=localStorage.getItem("ask_tok")||sessionStorage.getItem("ask_tok")||""}catch(e){}return fetch(SBU+"rpc/"+fn,{method:"POST",headers:{apikey:SBK,Authorization:"Bearer "+t,"Content-Type":"application/json"},body:JSON.stringify(a)}).then(r=>r.json())};
 const svWho=x=>String((x&&(x.asker_name||x.asked_by_name||x.learner_name||x.asker_names||x.user_names||x.names||x.asked_by_username||x.asker_username))||"").trim(),
  svWhoH=x=>`<div style="padding:12px 18px 0;font-size:17px;font-weight:700;color:var(--text)">${svWho(x)?esc(svWho(x)):'<span style="color:var(--sub);font-weight:600">Name not recorded</span>'}</div>`,
@@ -6185,13 +6242,13 @@ function admNewsDraw(j,msg){const b=$("abody");
  b.innerHTML=`<div class="asec">Post to What's new</div>
  <div style="display:flex;gap:6px;padding:4px 18px 8px">${svBtn(ANK=="announcement","Announcement","data-k","announcement")}${svBtn(ANK=="update","Update","data-k","update")}${svBtn(ANK=="referral","Referral push","data-k","referral")}</div>
  <div style="padding:0 18px 4px;color:var(--sub);font-size:13px">Send to</div>
- <select class="ain" id="anto"><option value="">Everyone</option>${ADMUS.map(u=>`<option value="${esc(u.id)}"${u.id==ANTO?" selected":""}>${esc(u.names||u.username)} (${esc(u.username)})${admN(u.devices)?"":" ? no phone alerts"}</option>`).join("")}</select>
+ <select class="ain" id="anto"><option value="">Everyone</option>${ADMUS.map(u=>`<option value="${esc(u.id)}"${u.id==ANTO?" selected":""}>${esc(u.names||u.username)} (${esc(u.username)})${admN(u.devices)?"":" · no phone alerts"}</option>`).join("")}</select>
  <input class="ain" id="ant" maxlength="100" placeholder="Title" autocomplete="off" value="${esc(ANT)}">
  <textarea class="ain" id="anb" maxlength="1000" placeholder="Message (optional)" style="min-height:110px;resize:vertical">${esc(ANB)}</textarea>
  <div id="anm" style="padding:2px 18px;min-height:20px;color:var(--sub)">${esc(msg)}</div>
  <div style="display:flex;gap:8px;padding:6px 18px 6px">${abt("send",ANTO?"Send to "+esc(admUN(ANTO)):"Send to everyone","#00a884")}</div>
  <div style="padding:2px 18px 10px;color:var(--sub);font-size:13px;line-height:1.45">${ANTO?`Only ${esc(admUN(ANTO))} sees it, in What's new and as a banner when they open the app. ${admN((ADMUS.find(u=>u.id==ANTO)||{}).devices)} of their phone${admN((ADMUS.find(u=>u.id==ANTO)||{}).devices)==1?"":"s"} will also get a phone alert, if Away alerts is on there.`:`Everyone sees it in What's new and as a banner when they open the app. ${admN(j.devices)} phone${admN(j.devices)==1?"":"s"} will also get a phone alert, because Away alerts is on there.`}</div>
- ${ANK=="referral"?'<div style="padding:0 18px 10px;color:var(--green);font-size:13px;line-height:1.45">Referral push: each learner gets this message with their own code and link, plus Share and Copy buttons.</div>':""}<div class="asec">Posted</div>`+(j.items.length?j.items.map((x,i)=>`<div class="row" style="display:block"><b>${esc(x.title)}</b> <small style="color:var(--sub)">${x.referral?"Referral push":x.kind=="update"?"Update":"Announcement"} ? ${admDate(x.created_at)}${x.to_user?" ? to "+esc(x.to_name||"one user"):""}</small>${x.body?`<div style="margin-top:2px;color:var(--sub)">${esc(x.body)}</div>`:""}<button data-del="${i}" style="margin-top:6px;border:0;background:none;color:#ff453a;font:inherit;font-weight:600;padding:4px 0;cursor:pointer">Delete</button></div>`).join(""):'<div style="padding:12px 18px;color:var(--sub)">Nothing posted yet.</div>');
+ ${ANK=="referral"?'<div style="padding:0 18px 10px;color:var(--green);font-size:13px;line-height:1.45">Referral push: each learner gets this message with their own code and link, plus Share and Copy buttons.</div>':""}<div class="asec">Posted</div>`+(j.items.length?j.items.map((x,i)=>`<div class="row" style="display:block"><b>${esc(x.title)}</b> <small style="color:var(--sub)">${x.referral?"Referral push":x.kind=="update"?"Update":"Announcement"} · ${admDate(x.created_at)}${x.to_user?" · to "+esc(x.to_name||"one user"):""}</small>${x.body?`<div style="margin-top:2px;color:var(--sub)">${esc(x.body)}</div>`:""}<button data-del="${i}" style="margin-top:6px;border:0;background:none;color:#ff453a;font:inherit;font-weight:600;padding:4px 0;cursor:pointer">Delete</button></div>`).join(""):'<div style="padding:12px 18px;color:var(--sub)">Nothing posted yet.</div>');
  b.onchange=e=>{if(e.target.id=="anto"){ANT=$("ant").value;ANB=$("anb").value;ANTO=e.target.value;admNewsDraw(j,"")}};
  b.onclick=async e=>{
   const k=e.target.closest("[data-k]");if(k){ANT=$("ant").value;ANB=$("anb").value;ANK=k.dataset.k;if(ANK=="referral"&&!ANT&&!ANB){ANT="Refer now and get free Premium";ANB="Refer a friend and get 2 free days of Premium. When your friend signs up with your link and asks 2 questions, the days are yours. Tap Share below to send your own link."}admNewsDraw(j,"");return}
@@ -7360,7 +7417,7 @@ function clsPick(fp){const g=(t,l)=>`<div class="sec">${t}</div><div class="sws"
 /* REFER AND EARN: every learner has a code. A friend who signs up with it and asks 2 different questions earns the owner 2 free Premium days. The server counts and rewards; this page only shows it. */
 function referPage(){
  const hd="Refer and earn",bad='<div class="empty" style="padding:40px 28px">Could not load. Check your internet and try again.</div>';
- showP(hd,'<div class="empty" style="padding:40px 28px">Loadingâ€¦</div>',hub);
+ showP(hd,'<div class="empty" style="padding:40px 28px">Loading?</div>',hub);
  svRpc("ref_my",{p_t:tokNow()}).then(j=>{
   if(!j||!j.ok||!j.code){showP(hd,bad,hub);return}
   try{syncPlan()}catch(e){}
@@ -7392,14 +7449,15 @@ $("jump").onclick=()=>$("msgs").scrollTo({top:1e9,behavior:"smooth"});
 /* ===== ADMIN PANEL (owner only) =====
  One app, two modes for the owner account DAVID. Switch: Settings > Learner profile > Update account > Switch to Admin panel.
  Every admin database function checks the login token again (username DAVID with the owner phone), so other accounts are refused even if they find this code. */
-const ADMS=[["over","Overview",[["home","Summary"],["stats","Statistics"]]],["people","People",[["users","Learners"],["inbox","Inbox"],["rate","Ratings"]]],["money","Money",[["pay","Payments"],["free","Free days"],["refs","Referrals"],["proofs","Old proofs"]]],["learn","Learning",[["asks","Most asked"],["asked","Not understood"],["react","Likes and Unlikes"]]],["notes","Notes",[["notes","Notes library"]]],["news","Post",[["news","Announcements"]]]];
-const ADMPG={home:()=>admHome(),stats:()=>admStats(),users:()=>admUsers(),inbox:()=>admInbox(),rate:()=>admRate(),pay:()=>admMomo(),free:()=>admFree(),refs:()=>admRefs(),proofs:()=>admPay(),asked:()=>admAsked(),react:()=>admReact(),asks:()=>admAsks(),news:()=>admNews(),notes:()=>admNotes()};
+const ADMS=[["over","Home",[["home","Summary"],["stats","Statistics"]]],["people","People",[["users","Learners"],["inbox","Inbox"],["rate","Ratings"],["news","Announcements"]]],["money","Money",[["pay","Payments"],["free","Free days"],["refs","Referrals"]]],["learn","Learning",[["asks","Most asked"],["asked","Not understood"],["react","Feedback"],["notes","Notes library"]]]];
+const ADMPG={home:()=>admHome(),stats:()=>admStats(),users:()=>admUsers(),inbox:()=>admInbox(),rate:()=>admRate(),pay:()=>admMomo(),free:()=>admFree(),refs:()=>admRefs(),asked:()=>admAsked(),react:()=>admReact(),asks:()=>admAsks(),news:()=>admNews(),notes:()=>admNotes()};
+const ADMI={over:'<svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>',people:'<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17.5" cy="9" r="2.5"/><path d="M17 14.2c2.6.2 4.5 2 4.5 4.8"/></svg>',money:'<svg viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><circle cx="12" cy="12" r="2.8"/></svg>',learn:'<svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 19V5.5"/></svg>'};
 let ADMON=false,ADMTAB="home",ADMSEQ=0,ADMUQ="",ADMUF="",ADMUL=[],ADMAS="open",ADMAL=[],ADMPL=[],ADMPR=[],ADMUNR=0;
 const admSec=t=>ADMS.find(x=>x[2].some(y=>y[0]==t))||ADMS[0];
 const admCall=async(fn,a)=>{try{const j=await svRpc(fn,Object.assign({p_t:tokNow()},a||{}));return j&&typeof j.ok=="boolean"?j:{ok:false,err:"fail"}}catch(e){return{ok:false,err:"net"}}};
 const admMsg=j=>j&&j.err=="not allowed"?"This panel is only for the owner account.":j&&j.err=="net"?"No internet. Check your connection and try again.":"Could not load. Try again.";
 const admFail=(j,retry)=>'<div class="pbn" style="margin:14px 18px;line-height:1.5">'+admMsg(j)+'</div>'+(retry?'<div class="row" data-r="1"><div>Try again</div></div>':"");
-const admLd=()=>'<div style="padding:22px 18px;color:var(--sub)">Loadingâ€¦</div>';
+const admLd=()=>'<div style="padding:22px 18px;color:var(--sub)">Loading?</div>';
 const admDate=d=>{try{return new Date(d).toLocaleDateString()}catch(e){return""}};
 const admN=x=>Number(x)||0;const admUN=id=>{const u=ADMUS.find(x=>x.id==id);return u?(u.names||u.username):"this user"};
 const abt=(a,l,c)=>`<button data-a="${a}" style="flex:1;min-width:30%;padding:12px 8px;border:0;border-radius:22px;font:inherit;font-weight:700;cursor:pointer;color:#fff;background:${c}">${l}</button>`;
@@ -7410,14 +7468,14 @@ function admHide(){ADMON=false;const a=$("adm");if(a)a.style.display="none"}
 function admClose(){admHide();try{localStorage.setItem("ask_mode_DAVID","user")}catch(e){}closeP()}
 function admOpen(){if(!isOwner())return;ADMON=true;try{localStorage.setItem("ask_mode_DAVID","admin")}catch(e){}
  const a=$("adm");a.style.display="flex";
- a.innerHTML=`<header class="ah"><div><b>Admin panel</b><small id="ahs">Ask Tr. David ? only you see this</small></div><button id="ax">Learner app</button></header><div class="as" id="asub"></div><div id="abody"></div><nav class="an">${ADMS.map(x=>`<button data-s="${x[0]}">${x[1]}</button>`).join("")}</nav>`;
- a.onclick=e=>{if(e.target.id=="ax"){admClose();return}const n=e.target.closest(".an button");if(n){admGo(ADMS.find(x=>x[0]==n.dataset.s)[2][0][0]);return}const t=e.target.closest(".as button");if(t)admGo(t.dataset.t)};
+ a.innerHTML=`<header class="ah"><div><b>Admin</b><small id="ahs">Only you see this</small></div><div class="ahb"><button id="arf" aria-label="Refresh" title="Refresh">?</button><button id="ax">Learner app</button></div></header><div class="as" id="asub"></div><div id="abody"></div><nav class="an">${ADMS.map(x=>`<button data-s="${x[0]}">${ADMI[x[0]]}<span>${x[1]}</span></button>`).join("")}</nav>`;
+ a.onclick=e=>{if(e.target.id=="ax"){admClose();return}if(e.target.id=="arf"){admGo(ADMTAB);return}const n=e.target.closest(".an button");if(n){admGo(ADMS.find(x=>x[0]==n.dataset.s)[2][0][0]);return}const t=e.target.closest(".as button");if(t)admGo(t.dataset.t)};
  admGo(ADMTAB);try{admPollUn()}catch(e){}}
-function admBadge(){const sp=document.querySelector('#adm .an button[data-s="people"]'),pi=document.querySelector('#adm .as button[data-t="inbox"]'),b=ADMUNR>0?'<i class="spn">'+ADMUNR+'</i>':"";if(sp)sp.innerHTML="People"+b;if(pi)pi.innerHTML="Inbox"+b}
+function admBadge(){const b=ADMUNR>0?'<i class="spn">'+(ADMUNR>99?"99+":ADMUNR)+'</i>':"",pb=document.querySelector('#adm .an button[data-s="people"]'),pi=document.querySelector('#adm .as button[data-t="inbox"]');if(pb)pb.innerHTML=ADMI.people+"<span>People</span>"+b;if(pi)pi.innerHTML="Inbox"+b}
 function admGo(t){if(!ADMPG[t])t="home";ADMTAB=t;ADMSEQ++;const S=admSec(t);
  document.querySelectorAll("#adm .an button").forEach(b=>b.classList.toggle("on",b.dataset.s==S[0]));
  const sb=$("asub");if(sb){sb.style.display=S[2].length>1?"flex":"none";sb.innerHTML=S[2].map(y=>`<button data-t="${y[0]}" class="${y[0]==t?"on":""}">${y[1]}</button>`).join("")}
- const hs=$("ahs");if(hs)hs.textContent=S[1]+" ? "+S[2].find(y=>y[0]==t)[1];
+ const hs=$("ahs");if(hs)hs.textContent=S[1]+" · "+S[2].find(y=>y[0]==t)[1];
  admBadge();const bd=$("abody");if(bd)bd.scrollTop=0;ADMPG[t]()}
 
 /* FREE DAYS: schedule windows when everyone gets a plan free. The database decides who gets what and when; this screen only edits the schedule. Times are East Africa Time (Kampala). */
@@ -7440,7 +7498,7 @@ const fwDur=n=>{const h=Math.floor(n/60),m=n%60;return(h?h+(h==1?" hour":" hours
 const fwOver=(a,b)=>String(b)<=String(a);
 const fwSpan=(a,b)=>fwT(a)+" to "+fwT(b)+(fwOver(a,b)?" (next day)":"");
 function admFreeDraw(j,msg){const b=$("abody"),F=FWF,dayTxt=a=>FWO.filter(d=>(a.weekdays||[]).includes(d)).map(d=>FWD[d]).join(", ");
- const st=j.active?`<b style="color:#00a884">ON now</b> ? Free ${esc(j.active.plan)} for everyone until ${fwLS(j.active.ends_at)}`:j.next?`Not active now. Next: <b>Free ${esc(j.next.plan)}</b> from ${fwLS(j.next.starts_at)}`:"Nothing scheduled. Everyone is on their own plan.";
+ const st=j.active?`<b style="color:#00a884">ON now</b> · Free ${esc(j.active.plan)} for everyone until ${fwLS(j.active.ends_at)}`:j.next?`Not active now. Next: <b>Free ${esc(j.next.plan)}</b> from ${fwLS(j.next.starts_at)}`:"Nothing scheduled. Everyone is on their own plan.";
  const sw=on=>`<span style="display:inline-block;width:46px;height:26px;border-radius:13px;position:relative;flex:none;background:${on?"var(--green)":"var(--line,#c9d1d6)"}"><span style="position:absolute;top:3px;left:${on?"23px":"3px"};width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.3)"></span></span>`;
  b.innerHTML=`<div class="asec">Free access now</div><div style="padding:4px 18px 8px;line-height:1.5">${st}</div>
  <div class="asec">${F.id?"Edit schedule":"New schedule"}</div>
@@ -7460,10 +7518,10 @@ function admFreeDraw(j,msg){const b=$("abody"),F=FWF,dayTxt=a=>FWO.filter(d=>(a.
  <div id="fwm" style="padding:6px 18px;min-height:20px;color:var(--sub)">${esc(msg)}</div>
  <div style="display:flex;gap:8px;padding:2px 18px 10px">${abt("save",F.id?"Save changes":"Save schedule","#00a884")}${F.id?abt("clear","Cancel","#6b7c85"):""}</div>
  <div class="asec">Schedules</div>`+(j.items.length?j.items.map((x,i)=>{const mins=x.minutes||fwMin(x.start_time,x.end_time),rec=x.recurring!==false,fin=x.finished,od=(x.on_dates||[]).map(fwD).join(", ");
-  return `<div class="row" style="display:block"><b>${esc(x.title)}</b> <small style="color:var(--sub)">Free ${esc(x.plan)}</small><div style="margin-top:2px;color:var(--sub);line-height:1.45">${esc(dayTxt(x)||"")}${od?(dayTxt(x)?" ? ":"")+esc(od):""}<br>${esc(fwSpan(x.start_time,x.end_time))} ? <b>${esc(fwDur(mins))}</b><br>${rec?"Repeats every week":fin?"Finished (it ran once and stopped)":"Runs once, then stops"+(x.starts_on?" ? from "+esc(fwD(x.starts_on)):"")}</div><div style="display:flex;gap:14px;margin-top:6px"><button data-tg="${i}" style="border:0;background:none;color:${x.enabled?"#00a884":"#6b7c85"};font:inherit;font-weight:700;padding:4px 0;cursor:pointer">${x.enabled?"On":"Off"}</button><button data-ed="${i}" style="border:0;background:none;color:#2f80ed;font:inherit;font-weight:600;padding:4px 0;cursor:pointer">Edit</button><button data-del="${i}" style="border:0;background:none;color:#ff453a;font:inherit;font-weight:600;padding:4px 0;cursor:pointer">Delete</button></div></div>`}).join(""):'<div style="padding:12px 18px;color:var(--sub)">No schedules yet.</div>');
+  return `<div class="row" style="display:block"><b>${esc(x.title)}</b> <small style="color:var(--sub)">Free ${esc(x.plan)}</small><div style="margin-top:2px;color:var(--sub);line-height:1.45">${esc(dayTxt(x)||"")}${od?(dayTxt(x)?" · ":"")+esc(od):""}<br>${esc(fwSpan(x.start_time,x.end_time))} · <b>${esc(fwDur(mins))}</b><br>${rec?"Repeats every week":fin?"Finished (it ran once and stopped)":"Runs once, then stops"+(x.starts_on?" · from "+esc(fwD(x.starts_on)):"")}</div><div style="display:flex;gap:14px;margin-top:6px"><button data-tg="${i}" style="border:0;background:none;color:${x.enabled?"#00a884":"#6b7c85"};font:inherit;font-weight:700;padding:4px 0;cursor:pointer">${x.enabled?"On":"Off"}</button><button data-ed="${i}" style="border:0;background:none;color:#2f80ed;font:inherit;font-weight:600;padding:4px 0;cursor:pointer">Edit</button><button data-del="${i}" style="border:0;background:none;color:#ff453a;font:inherit;font-weight:600;padding:4px 0;cursor:pointer">Delete</button></div></div>`}).join(""):'<div style="padding:12px 18px;color:var(--sub)">No schedules yet.</div>');
  const say=t=>{const m=$("fwm");if(m)m.textContent=t},redo=async(note)=>{const n=await admCall("admin_fw_list");if(n.ok)admFreeDraw(n,note||"");else admFree()};
  const upd=()=>{fwRead();const el=$("fwdur");if(!el)return;const n=fwMin(FWF.st,FWF.en),o=fwOver(FWF.st,FWF.en),ds=FWO.filter(d=>FWF.wd.includes(d)).map(d=>FWD[d]).join(", ");
-  el.innerHTML=`<b>Duration: ${esc(fwDur(n))}</b><br>${esc(fwT(FWF.st))} ${o?"until "+esc(fwT(FWF.en))+" the next day":"until "+esc(fwT(FWF.en))+" the same day"}<br>${ds?esc((FWF.rec?"Every ":"On ")+ds)+(FWF.rec?" ? repeats every week":" ? once, then stops"):"No day chosen yet"}`};
+  el.innerHTML=`<b>Duration: ${esc(fwDur(n))}</b><br>${esc(fwT(FWF.st))} ${o?"until "+esc(fwT(FWF.en))+" the next day":"until "+esc(fwT(FWF.en))+" the same day"}<br>${ds?esc((FWF.rec?"Every ":"On ")+ds)+(FWF.rec?" · repeats every week":" · once, then stops"):"No day chosen yet"}`};
  upd();$("fws").oninput=upd;$("fwe").oninput=upd;$("fws").onchange=upd;$("fwe").onchange=upd;
  b.onclick=async e=>{
   const p=e.target.closest("[data-p]");if(p){fwRead();FWF.plan=p.dataset.p;admFreeDraw(j,"");return}
@@ -7523,7 +7581,7 @@ function admRefsList(){const j=RFJ,el=$("rfl");if(!el||!j)return;
  el.innerHTML=it.map(x=>{const st=rfSt(x),col=st=="done"?"#00a884":st=="cancelled"?"#ff453a":"#6b7c85",lab=st=="done"?"Earned":st=="cancelled"?"Cancelled":"Waiting "+admN(x.asked)+"/2",
   open=RFX==x.id&&st!="cancelled",hasDays=st=="done"&&admN(x.rewarded_days)>0;
   return `<div class="row" style="display:block"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div style="min-width:0"><b>${esc(String(x.referrer||"A learner"))}</b> <small style="color:var(--sub)">@${esc(String(x.referrer_user||""))}</small><div style="color:var(--sub);font-size:13px;margin-top:2px">invited <b style="color:var(--text);font-weight:600">${esc(String(x.referred||"A learner"))}</b> @${esc(String(x.referred_user||""))}</div></div><span style="flex:none;font-weight:700;color:${col}">${lab}</span></div>
-  <div style="color:var(--sub);font-size:13px;margin-top:4px">Joined ${rfDt(x.joined)}${x.completed_at?" ? earned "+rfDt(x.completed_at):""}${hasDays?" ? "+admN(x.rewarded_days)+" free days given":""}${x.cancelled_at?" ? cancelled "+rfDt(x.cancelled_at):""}${x.cancel_note?" ? ?"+esc(String(x.cancel_note))+"?":""}</div>
+  <div style="color:var(--sub);font-size:13px;margin-top:4px">Joined ${rfDt(x.joined)}${x.completed_at?" · earned "+rfDt(x.completed_at):""}${hasDays?" · "+admN(x.rewarded_days)+" free days given":""}${x.cancelled_at?" · cancelled "+rfDt(x.cancelled_at):""}${x.cancel_note?" · ?"+esc(String(x.cancel_note))+"?":""}</div>
   ${st=="cancelled"?`<button data-rs="${x.id}" style="margin-top:6px;border:0;background:none;color:#2f80ed;font:inherit;font-weight:600;padding:4px 0;cursor:pointer">Restore</button>`:open?`<div style="margin-top:8px;padding:10px;border-radius:12px;background:var(--wall)"><input class="ain" id="rfn" maxlength="200" placeholder="Reason (optional)" autocomplete="off" style="margin:0 0 8px;width:100%">${hasDays?`<label style="display:flex;gap:8px;align-items:center;font-size:14px;margin-bottom:8px"><input type="checkbox" id="rfv" checked>Also take back the ${admN(x.rewarded_days)} free days</label>`:""}<div style="display:flex;gap:8px">${abt("go","Cancel referral","#ff453a").replace('data-a="go"','data-go="'+x.id+'"')}${abt("keep","Keep it","#6b7c85").replace('data-a="keep"','data-keep="1"')}</div></div>`:`<button data-cn="${x.id}" style="margin-top:6px;border:0;background:none;color:#ff453a;font:inherit;font-weight:600;padding:4px 0;cursor:pointer">Cancel referral</button>`}</div>`}).join("")}
 
 
@@ -7568,45 +7626,41 @@ async function admStatsX(){const s=ADMSEQ,b=$("abody");b.innerHTML=admSeg()+admL
   h+=`<div style="display:flex;gap:6px;padding:10px 18px 0">${["ALL"].concat(lv).map(l=>`<span class="apl" data-l="${l}" style="cursor:pointer;background:${l==ADMSL?"#3b82f6":"#8a9aa3"}">${l=="ALL"?"All levels":l}</span>`).join("")}</div>`+admRng()
   +`<div style="display:flex;gap:12px;padding:10px 18px 0;font-size:12px;color:var(--sub)">${TN.map((t,i)=>`<span><i style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${TC[i]};margin-right:4px"></i>${t}</span>`).join("")}</div>`;
   for(const L of pick){const R=S.filter(x=>x.level==L).sort((a,c)=>n(c.asks)-n(a.asks)||String(a.subject).localeCompare(c.subject)),tot=R.reduce((a,x)=>a+n(x.asks),0),mx=Math.max(1,...R.map(x=>n(x.asks))),k=Math.ceil(R.length/3);
-   h+=`<div class="asec">${L} ? ${tot} question${tot==1?"":"s"} ? ${R.length} subjects</div><div style="padding:0 18px 6px">${R.map((x,i)=>{const t=tot==0?2:i<k?0:i>=R.length-k?2:1;return`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13px"><div style="width:38%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(x.subject)}</div><div style="flex:1;height:9px;border-radius:5px;background:var(--line)"><div style="height:9px;border-radius:5px;background:${TC[t]};width:${Math.round(n(x.asks)/mx*100)}%;min-width:${n(x.asks)?4:0}px"></div></div><div style="width:64px;text-align:right"><b>${n(x.asks)}</b><small style="color:var(--sub)"> ? ${n(x.users)}</small></div></div>`}).join("")}</div>`}
+   h+=`<div class="asec">${L} · ${tot} question${tot==1?"":"s"} · ${R.length} subjects</div><div style="padding:0 18px 6px">${R.map((x,i)=>{const t=tot==0?2:i<k?0:i>=R.length-k?2:1;return`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13px"><div style="width:38%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(x.subject)}</div><div style="flex:1;height:9px;border-radius:5px;background:var(--line)"><div style="height:9px;border-radius:5px;background:${TC[t]};width:${Math.round(n(x.asks)/mx*100)}%;min-width:${n(x.asks)?4:0}px"></div></div><div style="width:64px;text-align:right"><b>${n(x.asks)}</b><small style="color:var(--sub)"> · ${n(x.users)}</small></div></div>`}).join("")}</div>`}
   h+=note("Each bar is the number of questions asked in that subject in the last "+j.days+" days; the small number is how many different learners asked. Top, Middle and Least split each level into thirds."+(n(j.other_asks)?" "+n(j.other_asks)+" question"+(n(j.other_asks)==1?" was":"s were")+" asked with no subject recorded (General, or before this update).":""))}
  else{const P=j.plans||[],tot=P.reduce((a,x)=>a+n(x.members),0),paid=P.filter(x=>x.plan!="Free").reduce((a,x)=>a+n(x.members),0);
   h+=`<div class="ag">${C("Members",tot,"all accounts")}${C("On a plan",paid,"Basic, Standard or Premium")}${C("Free",tot-paid,"no subscription")}</div><div class="asec">Members per plan</div>`
-  +P.map(x=>{const open=ADMSP==x.plan;return`<div class="row" data-p="${esc(x.plan)}" style="cursor:pointer"><div><b>${esc(x.plan)}</b><small>${n(x.members)} member${n(x.members)==1?"":"s"} ? ${tot?Math.round(n(x.members)/tot*100):0}%</small></div><div>${open?"?":"?"}</div></div>${open?`<div style="padding:0 18px 10px">${(x.list||[]).slice(0,60).map(m=>`<div style="padding:5px 0;font-size:13px;border-bottom:1px solid var(--line)"><b>${esc(m.name||"")}</b> <span style="color:var(--sub)">@${esc(m.username||"")}${m.expires&&x.plan!="Free"?" ? until "+admDate(m.expires):""}</span></div>`).join("")}${(x.list||[]).length>60?'<div style="padding:6px 0;color:var(--sub);font-size:12px">Showing the 60 newest.</div>':""}</div>`:""}`}).join("")
+  +P.map(x=>{const open=ADMSP==x.plan;return`<div class="row" data-p="${esc(x.plan)}" style="cursor:pointer"><div><b>${esc(x.plan)}</b><small>${n(x.members)} member${n(x.members)==1?"":"s"} · ${tot?Math.round(n(x.members)/tot*100):0}%</small></div><div>${open?"?":"?"}</div></div>${open?`<div style="padding:0 18px 10px">${(x.list||[]).slice(0,60).map(m=>`<div style="padding:5px 0;font-size:13px;border-bottom:1px solid var(--line)"><b>${esc(m.name||"")}</b> <span style="color:var(--sub)">@${esc(m.username||"")}${m.expires&&x.plan!="Free"?" · until "+admDate(m.expires):""}</span></div>`).join("")}${(x.list||[]).length>60?'<div style="padding:6px 0;color:var(--sub);font-size:12px">Showing the 60 newest.</div>':""}</div>`:""}`}).join("")
   +note("A plan that has passed its end date counts as Free. Tap a plan to see who is on it.")}
  b.innerHTML=h}
 async function admHome(){const s=ADMSEQ,b=$("abody");b.innerHTML=admLd();const j=await admCall("admin_stats");if(s!==ADMSEQ)return;
  if(!j.ok){b.innerHTML=admFail(j,1);b.onclick=e=>{if(e.target.closest("[data-r]"))admHome()};return}
  const [rx,mm,un]=await Promise.all([admCall("admin_reactions",{p_kind:"dislike",p_limit:1}),admCall("admin_momo_list"),admCall("admin_support_unread")]);if(s!==ADMSEQ)return;
  const RX=rx.ok?(rx.counts||{}):{},MS=mm.ok?(mm.summary||[]):[],UN=un.ok?admN(un.n):0;
- const P=j.plans||{},n=admN,C=(l,v,sub)=>`<div class="ac"><span>${l}</span><b>${n(v)}</b><small>${sub}</small></div>`;
- const fm=v=>n(v).toLocaleString();
- const money=MS.length?MS.map(m=>`<div class="row" data-g="pay"><div><b>${fm(m.paid_month_total)} ${esc(m.currency)}</b> this month${m.environment=="sandbox"?' <span class="apl" style="background:#999">TEST</span>':""}<small>${n(m.paid_month_count)} paid this month ? ${n(m.paid_count)} paid in total ? ${n(m.pending_count)} waiting ? ${n(m.unpaid_count)} not paid</small></div></div>`).join(""):'<div style="padding:6px 18px 10px;color:var(--sub)">No Mobile Money payments yet.</div>';
- const att=[[UN,"unread messages","Learners wrote to you","inbox"],[j.unanswered_open,"questions not understood","Link them to an answer","asked"],[RX.unlikes_7d,"Unlikes in the last 7 days","See what learners found wrong","react"]].filter(x=>n(x[0])>0);
- b.innerHTML=`<div class="ag">${C("Learners",j.users_total,"+"+n(j.users_new_7d)+" this week")}${C("Signed in",j.logged_in_now,"accounts with a live login")}${C("Installs",j.installs_total,"+"+n(j.installs_7d)+" this week")}${C("Using today",j.devices_today,n(j.devices_7d)+" devices, "+n(j.accounts_7d)+" accounts this week")}</div>
- <div style="padding:0 18px 4px;color:var(--sub);font-size:12px;line-height:1.4">Installs and usage are counted from this version of the app onward.</div>
- <div class="asec">Needs your attention</div>${att.length?att.map(x=>`<div class="row" data-g="${x[3]}"><div><b>${n(x[0])}</b> ${x[1]}<small>${x[2]}</small></div></div>`).join(""):'<div style="padding:6px 18px 10px;color:var(--sub)">Nothing is waiting. All clear.</div>'}
+ const P=j.plans||{},n=admN,fm=v=>n(v).toLocaleString();
+ const C=(l,v,sub)=>`<div class="ac"><span>${l}</span><b>${fm(v)}</b><small>${sub}</small></div>`;
+ const att=[[UN,"unread message"+(n(UN)==1?"":"s"),"Learners wrote to you","inbox"],[j.unanswered_open,"question"+(n(j.unanswered_open)==1?"":"s")+" not understood","Link them to an answer","asked"],[RX.unlikes_7d,"Unlike"+(n(RX.unlikes_7d)==1?"":"s")+" this week","See what learners found wrong","react"]].filter(x=>n(x[0])>0);
+ const attH=att.length?att.map(x=>`<div class="aat" data-g="${x[3]}"><span class="ard">${fm(x[0])}</span><div><b>${x[1]}</b><small>${x[2]}</small></div><i class="arc">\u203a</i></div>`).join(""):'<div class="aok">\u2713 All clear. Nothing is waiting for you.</div>';
+ const money=MS.length?MS.map(m=>`<div class="am" data-g="pay"><small>This month${m.environment=="sandbox"?' <span class="apl" style="background:#999">TEST</span>':""}</small><b>${fm(m.paid_month_total)} ${esc(m.currency)}</b><small>${n(m.paid_month_count)} paid this month \u00b7 ${n(m.pending_count)} waiting \u00b7 ${n(m.paid_count)} paid in total</small></div>`).join(""):'<div class="amn">No Mobile Money payments yet.</div>';
+ b.innerHTML=`<div class="asec">Needs your attention</div>${attH}
+ <div class="asec">At a glance</div><div class="ag">${C("Learners",j.users_total,"+"+n(j.users_new_7d)+" this week")}${C("Signed in now",j.logged_in_now,"live logins")}${C("Installs",j.installs_total,"+"+n(j.installs_7d)+" this week")}${C("Using today",j.devices_today,n(j.accounts_7d)+" accounts this week")}</div>
  <div class="asec">Money</div>${money}
- <div class="asec">Plans right now</div><div style="display:flex;flex-wrap:wrap;gap:8px;padding:6px 18px 4px">${PLANS4.map(p=>`<span class="apl" style="background:${PCOL[p]}">${p} ${n(P[p])}</span>`).join("")}</div>
- <div style="padding:0 18px 6px;color:var(--sub);font-size:12px;line-height:1.4">This is what each learner has right now, including free days and referral days.</div>
- <div class="asec">Where plans come from (tap to see and cancel)</div><div style="display:flex;flex-wrap:wrap;gap:8px;padding:6px 18px 10px">${[["subscription","Subscription"],["free_days","Free days"],["referral","Referral"],["free","Free only"]].map(x=>`<span class="apl" data-pf="${x[0]}" style="background:#444;cursor:pointer">${x[1]} ${n((j.access||{})[x[0]])}</span>`).join("")}</div>
- <div class="asec">Library</div>
- <div class="row" style="cursor:default"><div><b>${n(j.questions_total)}</b> questions, <b>${n(j.answers_published)}</b> answers<small>AI requests in the last 24 hours: ${n(j.gemini_today)}</small></div></div>
- <div class="asec">Tools</div>
- <div class="row" data-g="ho"><div>Project handoff<small>Notes and files for the next Claude. Only you see this</small></div></div>
- <div class="row" data-g="rf"><div>Refresh this page</div></div>`;
- b.onclick=e=>{const pf=e.target.closest("[data-pf]");if(pf){ADMUF=pf.dataset.pf;ADMUQ="";admGo("users");return}const g=e.target.closest("[data-g]")?.dataset.g;if(!g)return;if(g=="ho")handoff();else if(g=="rf")admHome();else admGo(g)}}
+ <div class="asec">Plans right now</div><div class="achips">${PLANS4.map(p=>`<span class="apl" style="background:${PCOL[p]}">${p} ${fm(P[p])}</span>`).join("")}</div>
+ <div class="asec">How learners got their plan <span style="text-transform:none;letter-spacing:0;font-weight:500">(tap to see who)</span></div><div class="achips">${[["subscription","Subscription"],["free_days","Free days"],["referral","Referral"],["free","Free only"]].map(x=>`<span class="apl pf" data-pf="${x[0]}">${x[1]} ${fm((j.access||{})[x[0]])}</span>`).join("")}</div>
+ <div class="alib"><b>${fm(j.questions_total)}</b> questions \u00b7 <b>${fm(j.answers_published)}</b> answers published<small>AI requests in the last 24 hours: ${fm(j.gemini_today)}</small></div>
+ <div class="afoot" data-g="ho">Project handoff</div>`;
+ b.onclick=e=>{const pf=e.target.closest("[data-pf]");if(pf){ADMUF=pf.dataset.pf;ADMUQ="";admGo("users");return}const g=e.target.closest("[data-g]")?.dataset.g;if(!g)return;if(g=="ho")handoff();else admGo(g)}}
 
 /* LEARNER REACTIONS: every Like / Unlike a learner tapped, with the learner's name, the question and the start of the answer. Unlikes are the ones to review first. */
 async function rxRoom(kind){
  if(!isOwner())return;kind=kind=="like"?"like":"dislike";
- showP("Learner reactions",'<div style="padding:22px 18px;color:var(--sub)">Loadingâ€¦</div>',closeP);
+ showP("Learner reactions",'<div style="padding:22px 18px;color:var(--sub)">Loading?</div>',closeP);
  const j=await admCall("admin_reactions",{p_kind:kind,p_limit:100}),n=admN;
  if(!j.ok){$("pbody").innerHTML='<div class="pbn" style="margin:14px 18px;line-height:1.5">'+(j.err=="not allowed"?"This room is only for the owner account.":"Could not load. Check your connection and try again.")+'</div>';return}
  const C=j.counts||{},L=j.items||[];
  const h=`<div style="padding:12px 18px;color:var(--sub);line-height:1.5">Learners are asked after every answer: Like if it answered their question, Unlike if anything is wrong. Unlikes are reported here immediately.</div>
  <div style="display:flex;gap:6px;padding:4px 18px 12px">${svBtn(kind=="dislike","Unlike "+n(C.unlikes),"data-kd","dislike")}${svBtn(kind=="like","Like "+n(C.likes),"data-kd","like")}</div>`
- +(L.length?L.map(x=>`<div class="row" style="cursor:default"><div style="flex:1;min-width:0"><b>${esc(x.asker_name||x.asker_username||"Name not recorded")}</b><small>${esc(x.asker_username||"")} ? ${esc(new Date(x.created_at).toLocaleString())}</small>${x.question?`<div style="margin-top:4px;line-height:1.4">Learner asked: <b>?${esc(x.question)}?</b></div>`:""}${x.snippet?`<div style="margin-top:4px;color:var(--sub);font-size:13px;line-height:1.4">${esc(x.snippet)}</div>`:""}</div></div>`).join(""):`<div style="padding:18px;color:var(--sub)">${kind=="dislike"?"No Unlikes. Nothing is reported.":"No Likes yet."}</div>`);
+ +(L.length?L.map(x=>`<div class="row" style="cursor:default"><div style="flex:1;min-width:0"><b>${esc(x.asker_name||x.asker_username||"Name not recorded")}</b><small>${esc(x.asker_username||"")} · ${esc(new Date(x.created_at).toLocaleString())}</small>${x.question?`<div style="margin-top:4px;line-height:1.4">Learner asked: <b>?${esc(x.question)}?</b></div>`:""}${x.snippet?`<div style="margin-top:4px;color:var(--sub);font-size:13px;line-height:1.4">${esc(x.snippet)}</div>`:""}</div></div>`).join(""):`<div style="padding:18px;color:var(--sub)">${kind=="dislike"?"No Unlikes. Nothing is reported.":"No Likes yet."}</div>`);
  showP("Learner reactions",h,()=>{closeP();admGo("home")},e=>{const k=e.target.closest("[data-kd]");if(k)rxRoom(k.dataset.kd)})}
 
 /* USERS: find by username or phone, change plan */
@@ -7625,7 +7679,7 @@ function admUsers(){const s=ADMSEQ,b=$("abody");
  const run=async()=>{const my=++tk,q=$("auq")?$("auq").value.trim():"";ADMUQ=q;const j=await admCall("admin_find_users",{p_q:q,p_filter:ADMUF});if(my!==tk||s!==ADMSEQ)return;const L=$("aul");if(!L)return;
   if(!j.ok){L.innerHTML=admFail(j);return}
   ADMUL=j.items||[];
-  L.innerHTML=(ADMUL.length?"":'<div style="padding:18px;color:var(--sub)">No accounts found.</div>')+ADMUL.map((u,i)=>{const ep=u.eff_plan||u.plan,sr=u.eff_src||"";return `<div class="row" data-u="${i}"><div style="flex:1;min-width:0"><b>${esc(u.names)}</b><small>${esc(u.username)} ? ${esc(u.phone)}${sr&&sr!="free"?" ? "+ADMSRC[sr]:""}${u.free_blocked?" ? free days off":""}${u.ref_blocked?" ? referral off":""}</small></div><span class="apl" style="background:${PCOL[ep]||"#888"}">${esc(ep)}</span>${sr&&sr!="free"?`<button data-cx="${i}" style="margin-left:8px;padding:6px 12px;border:0;border-radius:16px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;color:#fff;background:#d93025;flex:none">Cancel</button>`:""}</div>`}).join("")};
+  L.innerHTML=(ADMUL.length?"":'<div style="padding:18px;color:var(--sub)">No accounts found.</div>')+ADMUL.map((u,i)=>{const ep=u.eff_plan||u.plan,sr=u.eff_src||"";return `<div class="row" data-u="${i}"><div style="flex:1;min-width:0"><b>${esc(u.names)}</b><small>${esc(u.username)} · ${esc(u.phone)}${sr&&sr!="free"?" · "+ADMSRC[sr]:""}${u.free_blocked?" · free days off":""}${u.ref_blocked?" · referral off":""}</small></div><span class="apl" style="background:${PCOL[ep]||"#888"}">${esc(ep)}</span>${sr&&sr!="free"?`<button data-cx="${i}" style="margin-left:8px;padding:6px 12px;border:0;border-radius:16px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;color:#fff;background:#d93025;flex:none">Cancel</button>`:""}</div>`}).join("")};
  $("auq").oninput=()=>{clearTimeout(tm);tm=setTimeout(run,350)};
  b.onclick=e=>{const f=e.target.closest("[data-f]");if(f){ADMUF=f.dataset.f;admUsers();return}
   const c=e.target.closest("[data-cx]");if(c){e.stopPropagation();admCancelLearner(ADMUL[+c.dataset.cx],()=>run());return}
@@ -7642,9 +7696,9 @@ async function admAccess(u,seq){const j=await admCall("admin_user_access",{p_use
  const bt=(k,on,l,c)=>'<button data-bk="'+k+'" data-on="'+on+'" style="padding:9px 16px;border:0;border-radius:18px;font:inherit;font-weight:700;cursor:pointer;color:#fff;background:'+c+';flex:none">'+l+'</button>';
  const row=(t,st,b)=>'<div class="row" style="cursor:default;align-items:center"><div style="flex:1;min-width:0"><b>'+t+'</b><small>'+st+'</small></div>'+b+'</div>';
  e.innerHTML='<div style="padding:4px 18px 8px;line-height:1.5">Right now '+esc(u.names)+' has <b>'+esc(j.effective)+'</b> from '+src+'.</div>'+(u.eff_src!="free"?'<div style="padding:0 18px 8px"><button data-cp="1" style="padding:11px 20px;border:0;border-radius:20px;font:inherit;font-weight:700;cursor:pointer;color:#fff;background:#d93025">Cancel this learner\'s plan</button></div>':"")
-  +row("Subscription",j.plan!="Free"?esc(j.plan)+(j.plan_expires_at?" ? ends "+esc(dt(j.plan_expires_at)):" ? no expiry"):"None (Free plan)",j.plan!="Free"?'<button data-rv="1" style="padding:9px 16px;border:0;border-radius:18px;font:inherit;font-weight:700;cursor:pointer;color:#fff;background:#d93025;flex:none">Revoke</button>':"")
+  +row("Subscription",j.plan!="Free"?esc(j.plan)+(j.plan_expires_at?" · ends "+esc(dt(j.plan_expires_at)):" · no expiry"):"None (Free plan)",j.plan!="Free"?'<button data-rv="1" style="padding:9px 16px;border:0;border-radius:18px;font:inherit;font-weight:700;cursor:pointer;color:#fff;background:#d93025;flex:none">Revoke</button>':"")
   +row("Free-days plan",j.free_blocked?"<span style=\"color:#d93025;font-weight:700\">Disabled for this learner</span>":"Allowed (when you schedule free days)",j.free_blocked?bt("free",0,"Allow","#00a884"):bt("free",1,"Disable","#d93025"))
-  +row("Referral plan",(j.ref_blocked?"<span style=\"color:#d93025;font-weight:700\">Disabled for this learner</span> ? ":"Allowed ? ")+(days||hrs?days+" days "+hrs+" h saved":"no saved days"),j.ref_blocked?bt("referral",0,"Allow","#00a884"):bt("referral",1,"Disable","#d93025"))
+  +row("Referral plan",(j.ref_blocked?"<span style=\"color:#d93025;font-weight:700\">Disabled for this learner</span> · ":"Allowed · ")+(days||hrs?days+" days "+hrs+" h saved":"no saved days"),j.ref_blocked?bt("referral",0,"Allow","#00a884"):bt("referral",1,"Disable","#d93025"))
   +'<div style="padding:8px 18px;color:var(--sub);font-size:13px;line-height:1.4">These only change this one learner. Disabling the referral plan freezes the saved days, and they continue when you allow it again. To put the learner on any plan you want, tap that plan in the Plan list above.</div>'}
 function admBlock(u,k,on){const nm=k=="free"?"Free-days plan":"Referral plan";
  uiConfirm((on?"Disable the "+nm+" for ":"Allow the "+nm+" for ")+u.username+"?"+(on?" Other learners are not affected.":""),async()=>{
@@ -7657,8 +7711,8 @@ function admUser(u){if(!u)return;ADMSEQ++;const b=$("abody");
   if(j.ok){u.plan=p;u.plan_expires_at=j.expires_at||null;if(u.username==="DAVID")syncPlan();admUser(u);const m=$("aum");if(m)m.textContent=p=="Free"?"Plan changed to Free.":"Plan set to "+p+(h?" for "+admDur(h)+". It ends by itself.":" with no expiry.")}
   else uiAlert(j.err=="bad plan"||j.err=="no such account"||j.err=="bad hours"?"Could not change the plan ("+j.err+").":admMsg(j))};
  const pick=p=>{ADMSEQ++;
-  const D=[["Daily ? 24 hours",24],["Weekly ? 7 days",168],["30 days",720]];
-  b.innerHTML=`<div class="row" data-b="1"><div>? Back</div></div><div style="padding:12px 18px;line-height:1.5"><b style="font-size:18px">${esc(u.names)}</b> ? ${p} plan<br><small style="color:var(--sub)">Choose how long it lasts. It expires by itself and the learner goes back to Free.</small></div><div class="asec">Duration</div>`
+  const D=[["Daily · 24 hours",24],["Weekly · 7 days",168],["30 days",720]];
+  b.innerHTML=`<div class="row" data-b="1"><div>? Back</div></div><div style="padding:12px 18px;line-height:1.5"><b style="font-size:18px">${esc(u.names)}</b> · ${p} plan<br><small style="color:var(--sub)">Choose how long it lasts. It expires by itself and the learner goes back to Free.</small></div><div class="asec">Duration</div>`
    +D.map(d=>`<div class="row" data-h="${d[1]}"><div><b>${d[0]}</b></div></div>`).join("")
    +`<div class="asec">Specific hours</div><div style="display:flex;gap:8px;padding:6px 18px"><input class="ain" id="ahr" type="number" min="1" max="8760" inputmode="numeric" placeholder="Number of hours" style="flex:1;margin:0"><button data-c="1" style="padding:0 18px;border:0;border-radius:22px;font:inherit;font-weight:700;cursor:pointer;color:#fff;background:${PCOL[p]||"#00a884"}">Set</button></div>`
    +`<div class="row" data-h="0"><div>No expiry<small>Stays until you change it</small></div></div>`;
@@ -7666,8 +7720,8 @@ function admUser(u){if(!u)return;ADMSEQ++;const b=$("abody");
    const hr=e.target.closest("[data-h]");if(hr){const h=+hr.dataset.h;uiConfirm("Put "+u.username+" on the "+p+" plan"+(h?" for "+admDur(h):" with no expiry")+"?",()=>apply(p,h),"Set plan");return}
    if(e.target.closest("[data-c]")){const h=parseInt($("ahr").value,10);if(!(h>=1&&h<=8760)){uiAlert("Enter a number of hours from 1 to 8760.");return}uiConfirm("Put "+u.username+" on the "+p+" plan for "+admDur(h)+"?",()=>apply(p,h),"Set plan")}}};
  const ex=u.plan!="Free"&&u.plan_expires_at?"Ends "+new Date(u.plan_expires_at).toLocaleString():(u.plan!="Free"?"No expiry":"");
- b.innerHTML=`<div class="row" data-b="1"><div>? Back to users</div></div><div style="padding:12px 18px;line-height:1.6"><b style="font-size:18px">${esc(u.names)}</b><br>${esc(u.username)} ? ${esc(u.phone)}<br><small style="color:var(--sub)">Joined ${admDate(u.created_at)}</small></div><div class="asec">Activity</div><div id="aus">${admLd()}</div><div class="asec">Plan</div>`
-  +PLANS4.map(p=>`<div class="row" data-p="${p}"><span style="width:10px;height:10px;border-radius:50%;background:${PCOL[p]};flex:none"></span><div><b>${p}</b>${p==u.plan?"<small>Current plan"+(ex?" ? "+ex:"")+"</small>":""}</div></div>`).join("")
+ b.innerHTML=`<div class="row" data-b="1"><div>? Back to users</div></div><div style="padding:12px 18px;line-height:1.6"><b style="font-size:18px">${esc(u.names)}</b><br>${esc(u.username)} · ${esc(u.phone)}<br><small style="color:var(--sub)">Joined ${admDate(u.created_at)}</small></div><div class="asec">Activity</div><div id="aus">${admLd()}</div><div class="asec">Plan</div>`
+  +PLANS4.map(p=>`<div class="row" data-p="${p}"><span style="width:10px;height:10px;border-radius:50%;background:${PCOL[p]};flex:none"></span><div><b>${p}</b>${p==u.plan?"<small>Current plan"+(ex?" · "+ex:"")+"</small>":""}</div></div>`).join("")
   +'<div style="padding:8px 18px;color:var(--sub);font-size:13px;line-height:1.4">Tap a paid plan to choose how long it lasts. It ends by itself when the time is over.</div><div id="aum" style="padding:6px 18px 10px;color:var(--green);font-weight:600;min-height:20px"></div><div class="asec">Where this learner gets access</div><div id="aax">'+admLd()+'</div>';
  admUserStats(u,ADMSEQ);admAccess(u,ADMSEQ);
  b.onclick=e=>{if(e.target.closest("[data-b]")){ADMSEQ++;admUsers();return}const kk=e.target.closest("[data-k]")?.dataset.k;if(kk){admActs(u,kk);return}
@@ -7683,40 +7737,25 @@ async function admUserStats(u,seq){const j=await admCall("admin_user_stats",{p_u
  if(!j.ok){e.innerHTML=admFail(j);return}
  const n=x=>Number(x||0),tot=ACT_T.reduce((a,t)=>a+n(j[t[0]]),0);
  e.innerHTML='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:6px 18px 4px">'+ACT_T.map(t=>`<div data-k="${t[0]}" style="cursor:pointer;border:1px solid var(--line);border-radius:12px;padding:10px 6px;text-align:center"><div style="font-size:22px;font-weight:800">${n(j[t[0]])}</div><div style="font-size:12px;color:var(--sub)">${t[1]}</div></div>`).join("")+'</div>'
-  +`<div style="padding:4px 18px 8px;color:var(--sub);font-size:13px;line-height:1.4">${n(j.opens)} app opens${j.last_action?" ? last activity "+esc(new Date(j.last_action).toLocaleString()):""}. Tap a count to see the details.${tot?"":" Nothing recorded yet: counts begin from the day this feature was published."}</div>`}
+  +`<div style="padding:4px 18px 8px;color:var(--sub);font-size:13px;line-height:1.4">${n(j.opens)} app opens${j.last_action?" · last activity "+esc(new Date(j.last_action).toLocaleString()):""}. Tap a count to see the details.${tot?"":" Nothing recorded yet: counts begin from the day this feature was published."}</div>`}
 async function admActs(u,k){const s=++ADMSEQ,b=$("abody"),T=ACT_T.find(t=>t[0]==k);b.innerHTML=admLd();const j=await admCall("admin_user_actions",{p_user:u.id,p_kind:k,p_limit:100});if(s!==ADMSEQ)return;
  b.onclick=e=>{if(e.target.closest("[data-b]"))admUser(u)};
- b.innerHTML=`<div class="row" data-b="1"><div>? Back to ${esc(u.names)}</div></div><div class="asec">${esc(T?T[1]:k)} ? ${esc(u.username)}</div>`
+ b.innerHTML=`<div class="row" data-b="1"><div>? Back to ${esc(u.names)}</div></div><div class="asec">${esc(T?T[1]:k)} · ${esc(u.username)}</div>`
   +(j.ok?((j.items||[]).length?j.items.map(x=>`<div class="row" style="cursor:default"><div style="flex:1;min-width:0"><b>${esc(ACT_L[x.action]||x.action)}</b><small>${esc(new Date(x.created_at).toLocaleString())}</small>${x.question?`<div style="margin-top:4px;line-height:1.4">?${esc(x.question)}?</div>`:""}${x.snippet?`<div style="margin-top:4px;color:var(--sub);font-size:13px;line-height:1.4">${esc(x.snippet)}</div>`:""}</div></div>`).join(""):'<div style="padding:18px;color:var(--sub)">Nothing recorded yet.</div>'):admFail(j))}
-/* PAY: payment screenshots sent by learners; delete removes the row from the database */
-async function admPay(){const s=ADMSEQ,b=$("abody");b.innerHTML=admLd();const j=await admCall("admin_proof_list");if(s!==ADMSEQ)return;
- if(!j.ok){b.innerHTML=admFail(j,1);b.onclick=e=>{if(e.target.closest("[data-r]"))admPay()};return}
- ADMPR=j.items||[];
- b.innerHTML=`<div class="asec">Old payment screenshots (${ADMPR.length})</div><div style="padding:0 18px 8px;color:var(--sub);line-height:1.5">Kept as a record only. Learners now pay with the Mobile Money prompt.</div>`+(ADMPR.length?"":'<div style="padding:18px;color:var(--sub);line-height:1.5">No old screenshots.</div>')
-  +ADMPR.map((x,i)=>`<div class="row" data-i="${i}"><div style="flex:1;min-width:0"><b>${esc(x.names||x.username||"Learner")}</b><small>${esc(x.username||"")} ? ${esc(x.phone||"")} ? ${esc(x.plan_wanted||"")} ? ${esc(new Date(x.created_at).toLocaleString())}</small></div></div>`).join("");
- b.onclick=e=>{const r=e.target.closest("[data-i]");if(r)admPayOne(ADMPR[+r.dataset.i])}}
-async function admPayOne(x){if(!x)return;const s=++ADMSEQ,b=$("abody");b.innerHTML=admLd();const j=await admCall("admin_proof_get",{p_id:x.id});if(s!==ADMSEQ)return;
- b.innerHTML=`<div class="row" data-b="1"><div>? Back to old screenshots</div></div><div style="padding:12px 18px;line-height:1.6"><b style="font-size:18px">${esc(x.names||x.username)}</b><br>${esc(x.username||"")} ? ${esc(x.phone||"")}<br><small style="color:var(--sub)">Paid for: ${esc(x.plan_wanted||"not stated")} ? ${esc(new Date(x.created_at).toLocaleString())}</small></div>`
-  +(j.ok?`<img alt="Payment screenshot" src="${j.image}" style="display:block;width:calc(100% - 36px);margin:6px 18px;border:1px solid var(--line)">`:admFail(j))
-  +`<div style="display:flex;gap:8px;padding:14px 18px 24px">${abt("set","Set plan","#00a884")}${abt("del","Delete","#d64545")}</div>`;
- b.onclick=async e=>{if(e.target.closest("[data-b]")){admPay();return}const a=e.target.closest("[data-a]")?.dataset.a;
-  if(a=="del")uiConfirm("Delete this screenshot permanently? It is also removed from the database.",async()=>{const r=await admCall("admin_proof_delete",{p_id:x.id});if(r.ok)admPay();else uiAlert(admMsg(r))},"Delete");
-  if(a=="set"){const f=await admCall("admin_find_users",{p_q:x.username||""});const u=f.ok&&(f.items||[]).find(i=>i.id==x.user_id);if(u)admUser(u);else uiAlert("Could not find that account.")}}}
-
 /* PAYMENTS: every Mobile Money payment saved by the momo-collections function (read only). A plan is only ever switched on by the server after MTN confirms. */
 let MMF="all",MML=[];
 const MMST={successful:["Paid","#00a884"],pending:["Waiting","#d98e04"],failed:["Not paid","#d64545"],rejected:["Declined","#d64545"],cancelled:["Cancelled","#d64545"],expired:["Expired","#d64545"]};
 async function admMomo(f){if(f)MMF=f;const s=ADMSEQ,b=$("abody");b.innerHTML=admLd();const j=await admCall("admin_momo_list");if(s!==ADMSEQ)return;
  if(!j.ok){b.innerHTML=admFail(j,1);b.onclick=e=>{if(e.target.closest("[data-r]"))admMomo()};return}
  MML=j.items||[];const n=admN,fm=v=>n(v).toLocaleString();
- const sm=(j.summary||[]).map(m=>`<div class="row" style="cursor:default"><div><b>${fm(m.paid_month_total)} ${esc(m.currency)}</b> paid this month${m.environment=="sandbox"?' <span class="apl" style="background:#999">TEST</span>':""}<small>${n(m.paid_month_count)} payments this month ? ${fm(m.paid_total)} ${esc(m.currency)} in total (${n(m.paid_count)} payments) ? ${n(m.pending_count)} waiting ? ${n(m.unpaid_count)} not paid</small></div></div>`).join("");
+ const sm=(j.summary||[]).map(m=>`<div class="row" style="cursor:default"><div><b>${fm(m.paid_month_total)} ${esc(m.currency)}</b> paid this month${m.environment=="sandbox"?' <span class="apl" style="background:#999">TEST</span>':""}<small>${n(m.paid_month_count)} payments this month · ${fm(m.paid_total)} ${esc(m.currency)} in total (${n(m.paid_count)} payments) · ${n(m.pending_count)} waiting · ${n(m.unpaid_count)} not paid</small></div></div>`).join("");
  const grp=x=>x.status=="successful"?"paid":x.status=="pending"?"wait":"fail";
  const cnt={all:MML.length,paid:0,wait:0,fail:0};MML.forEach(x=>cnt[grp(x)]++);
  const L=MML.filter(x=>MMF=="all"||grp(x)==MMF);
  b.innerHTML=`<div class="asec">Mobile Money summary</div>${sm||'<div style="padding:6px 18px 10px;color:var(--sub)">No payments yet.</div>'}
  <div style="display:flex;gap:6px;padding:10px 18px 12px;overflow-x:auto">${[["all","All"],["paid","Paid"],["wait","Waiting"],["fail","Not paid"]].map(k=>svBtn(MMF==k[0],k[1]+" "+cnt[k[0]],"data-f",k[0])).join("")}</div>`
   +(L.length?"":'<div style="padding:18px;color:var(--sub)">Nothing here.</div>')
-  +L.map((x,i)=>{const st=MMST[x.status]||[x.status,"#888"];return`<div class="row" data-i="${i}"><div style="flex:1;min-width:0"><b>${esc(x.names||x.username||"Learner")}</b><small>${esc(x.username||"")} ? ${esc(x.msisdn||"")} ? ${esc(x.plan)} ${esc(x.period)} ? ${fm(x.amount)} ${esc(x.currency)}${x.environment=="sandbox"?" ? TEST":""}</small><small>${esc(new Date(x.created_at).toLocaleString())}${x.status=="successful"&&x.plan_expires_at?" ? plan until "+esc(admDate(x.plan_expires_at)):""}${x.mtn_reason&&x.status!="successful"?" ? "+esc(String(x.mtn_reason).replace(/_/g," ").toLowerCase()):""}</small></div><span class="apl" style="background:${st[1]}">${st[0]}</span></div>`}).join("");
+  +L.map((x,i)=>{const st=MMST[x.status]||[x.status,"#888"];return`<div class="row" data-i="${i}"><div style="flex:1;min-width:0"><b>${esc(x.names||x.username||"Learner")}</b><small>${esc(x.username||"")} · ${esc(x.msisdn||"")} · ${esc(x.plan)} ${esc(x.period)} · ${fm(x.amount)} ${esc(x.currency)}${x.environment=="sandbox"?" · TEST":""}</small><small>${esc(new Date(x.created_at).toLocaleString())}${x.status=="successful"&&x.plan_expires_at?" · plan until "+esc(admDate(x.plan_expires_at)):""}${x.mtn_reason&&x.status!="successful"?" · "+esc(String(x.mtn_reason).replace(/_/g," ").toLowerCase()):""}</small></div><span class="apl" style="background:${st[1]}">${st[0]}</span></div>`}).join("");
  b.onclick=async e=>{const k=e.target.closest("[data-f]");if(k)return admMomo(k.dataset.f);const r=e.target.closest("[data-i]");if(!r)return;const x=L[+r.dataset.i];if(!x||!x.username)return;const f=await admCall("admin_find_users",{p_q:x.username});const u=f.ok&&(f.items||[]).find(i=>i.id==x.user_id);if(u)admUser(u)}}
 
 /* LIKES AND UNLIKES: what learners tapped after an answer, with the learner's name and the question */
@@ -7726,7 +7765,7 @@ async function admReact(k){if(k)RXK=k;const s=ADMSEQ,b=$("abody");b.innerHTML=ad
  const C=j.counts||{},L=j.items||[],n=admN;
  b.innerHTML=`<div style="padding:12px 18px;color:var(--sub);line-height:1.5">After every answer learners tap Like or Unlike. Check the Unlikes first: they show what was wrong.</div>
  <div style="display:flex;gap:6px;padding:4px 18px 12px">${svBtn(RXK=="dislike","Unlike "+n(C.unlikes),"data-kd","dislike")}${svBtn(RXK=="like","Like "+n(C.likes),"data-kd","like")}</div>`
- +(L.length?L.map(x=>`<div class="row" style="cursor:default"><div style="flex:1;min-width:0"><b>${esc(x.asker_name||x.asker_username||"Name not recorded")}</b><small>${esc(x.asker_username||"")} ? ${esc(new Date(x.created_at).toLocaleString())}</small>${x.question?`<div style="margin-top:4px;line-height:1.4">Asked: <b>?${esc(x.question)}?</b></div>`:""}${x.snippet?`<div style="margin-top:4px;color:var(--sub);font-size:13px;line-height:1.4">${esc(x.snippet)}</div>`:""}</div></div>`).join(""):`<div style="padding:18px;color:var(--sub)">${RXK=="dislike"?"No Unlikes. Nothing is reported.":"No Likes yet."}</div>`);
+ +(L.length?L.map(x=>`<div class="row" style="cursor:default"><div style="flex:1;min-width:0"><b>${esc(x.asker_name||x.asker_username||"Name not recorded")}</b><small>${esc(x.asker_username||"")} · ${esc(new Date(x.created_at).toLocaleString())}</small>${x.question?`<div style="margin-top:4px;line-height:1.4">Asked: <b>?${esc(x.question)}?</b></div>`:""}${x.snippet?`<div style="margin-top:4px;color:var(--sub);font-size:13px;line-height:1.4">${esc(x.snippet)}</div>`:""}</div></div>`).join(""):`<div style="padding:18px;color:var(--sub)">${RXK=="dislike"?"No Unlikes. Nothing is reported.":"No Likes yet."}</div>`);
  b.onclick=e=>{const k=e.target.closest("[data-kd]");if(k)admReact(k.dataset.kd)}}
 
 /* MOST ASKED: what learners ask, by subject. Subject -> every question in it -> who asked it, how they rated it and how long they read it. */
@@ -7734,7 +7773,7 @@ let ASKR=30;
 const admFmtT=v=>{v=admN(v);if(!v)return"not recorded";const m=Math.floor(v/60),r=v%60;return m?m+" min"+(r?" "+r+" sec":""):r+" sec"};
 const admRng2=()=>`<div style="display:flex;gap:6px;padding:10px 18px 4px">${[[7,"7 days"],[30,"30 days"],[0,"All time"]].map(x=>svBtn(ASKR==x[0],x[1],"data-rg",x[0])).join("")}</div>`;
 const admLv=l=>l?`<span class="apl" style="background:#6b7280">${esc(l)}</span> `:"";
-const admRx=(l,u)=>`<span style="color:var(--green);font-weight:700">${admN(l)} Like${admN(l)==1?"":"s"}</span> ? <span style="color:#d64545;font-weight:700">${admN(u)} Unlike${admN(u)==1?"":"s"}</span>`;
+const admRx=(l,u)=>`<span style="color:var(--green);font-weight:700">${admN(l)} Like${admN(l)==1?"":"s"}</span> · <span style="color:#d64545;font-weight:700">${admN(u)} Unlike${admN(u)==1?"":"s"}</span>`;
 async function admAsks(){const s=ADMSEQ,b=$("abody");b.innerHTML=admRng2()+admLd();const j=await admCall("admin_ask_stats",{p_mode:"overview",p_days:ASKR});if(s!==ADMSEQ)return;
  b.onclick=e=>{const k=e.target.closest("[data-rg]");if(k){ASKR=+k.dataset.rg;admAsks()}};
  if(!j.ok){b.innerHTML=admRng2()+admFail(j,1);b.onclick=e=>{const k=e.target.closest("[data-rg]");if(k){ASKR=+k.dataset.rg;admAsks()}else if(e.target.closest("[data-r]"))admAsks()};return}
@@ -7742,16 +7781,16 @@ async function admAsks(){const s=ADMSEQ,b=$("abody");b.innerHTML=admRng2()+admLd
  b.innerHTML=admRng2()+`<div class="ag">${C("Questions asked",j.total_asks,ASKR?"in the last "+ASKR+" days":"all time")}${C("Learners asking",j.total_learners,"different accounts")}</div>
  <div style="padding:0 18px 4px;color:var(--sub);font-size:12px;line-height:1.4">Reading time is counted from this version of the app onward. ${n(j.read_logged)} reading times recorded so far.</div>
  <div class="asec">Most used subjects</div>`
- +(SJ.length?SJ.map((x,i)=>`<div class="row" data-sj="${i}"><div style="flex:1;min-width:0"><b>${admLv(x.level)}${esc(x.subject)}</b><small>${n(x.asks)} questions asked ? ${n(x.questions)} different ? ${n(x.learners)} learner${n(x.learners)==1?"":"s"}</small><small>${admRx(x.likes,x.unlikes)} ? average reading ${admFmtT(x.avg_read_sec)}</small></div></div>`).join(""):'<div style="padding:12px 18px;color:var(--sub)">No questions in this period.</div>')
+ +(SJ.length?SJ.map((x,i)=>`<div class="row" data-sj="${i}"><div style="flex:1;min-width:0"><b>${admLv(x.level)}${esc(x.subject)}</b><small>${n(x.asks)} questions asked · ${n(x.questions)} different · ${n(x.learners)} learner${n(x.learners)==1?"":"s"}</small><small>${admRx(x.likes,x.unlikes)} · average reading ${admFmtT(x.avg_read_sec)}</small></div></div>`).join(""):'<div style="padding:12px 18px;color:var(--sub)">No questions in this period.</div>')
  +`<div class="asec">Most asked questions</div>`
- +(TQ.length?TQ.map((x,i)=>`<div class="row" data-tq="${i}"><div style="flex:1;min-width:0"><b>${esc(x.question)}</b><small>${admLv(x.level)}${esc(x.subject)} ? asked ${n(x.asks)} time${n(x.asks)==1?"":"s"} by ${n(x.learners)} learner${n(x.learners)==1?"":"s"}</small><small>${admRx(x.likes,x.unlikes)} ? average reading ${admFmtT(x.avg_read_sec)}</small></div></div>`).join(""):'<div style="padding:12px 18px;color:var(--sub)">Nothing yet.</div>');
+ +(TQ.length?TQ.map((x,i)=>`<div class="row" data-tq="${i}"><div style="flex:1;min-width:0"><b>${esc(x.question)}</b><small>${admLv(x.level)}${esc(x.subject)} · asked ${n(x.asks)} time${n(x.asks)==1?"":"s"} by ${n(x.learners)} learner${n(x.learners)==1?"":"s"}</small><small>${admRx(x.likes,x.unlikes)} · average reading ${admFmtT(x.avg_read_sec)}</small></div></div>`).join(""):'<div style="padding:12px 18px;color:var(--sub)">Nothing yet.</div>');
  b.onclick=e=>{const k=e.target.closest("[data-rg]");if(k){ASKR=+k.dataset.rg;admAsks();return}const a=e.target.closest("[data-sj]");if(a){const x=SJ[+a.dataset.sj];if(x)admAskSub(x.level,x.subject);return}const q=e.target.closest("[data-tq]");if(q){const x=TQ[+q.dataset.tq];if(x)admAskQ(x.key,"home",x)}}}
 async function admAskSub(lvl,sub){const s=++ADMSEQ,b=$("abody");b.innerHTML=admLd();const j=await admCall("admin_ask_stats",{p_mode:"subject",p_level:lvl||"",p_subject:sub,p_days:ASKR});if(s!==ADMSEQ)return;
  const back='<div class="row" data-b="1"><div>? Back to most asked</div></div>';b.onclick=e=>{if(e.target.closest("[data-b]"))admAsks()};
  if(!j.ok){b.innerHTML=back+admFail(j);return}
  const L=j.items||[],n=admN;
  b.innerHTML=back+`<div style="padding:8px 18px 4px"><b style="font-size:19px">${admLv(lvl)}${esc(sub)}</b><div style="color:var(--sub);margin-top:2px">${L.length} different question${L.length==1?"":"s"}${ASKR?" in the last "+ASKR+" days":", all time"}. Tap one to see who asked it.</div></div>`
- +(L.length?L.map((x,i)=>`<div class="row" data-q="${i}"><div style="flex:1;min-width:0"><b>${esc(x.question)}</b><small>Asked ${n(x.asks)} time${n(x.asks)==1?"":"s"} by ${n(x.learners)} learner${n(x.learners)==1?"":"s"} ? last ${esc(admDate(x.last_asked))}</small><small>${admRx(x.likes,x.unlikes)} ? average reading ${admFmtT(x.avg_read_sec)}</small></div></div>`).join(""):'<div style="padding:18px;color:var(--sub)">Nothing here.</div>');
+ +(L.length?L.map((x,i)=>`<div class="row" data-q="${i}"><div style="flex:1;min-width:0"><b>${esc(x.question)}</b><small>Asked ${n(x.asks)} time${n(x.asks)==1?"":"s"} by ${n(x.learners)} learner${n(x.learners)==1?"":"s"} · last ${esc(admDate(x.last_asked))}</small><small>${admRx(x.likes,x.unlikes)} · average reading ${admFmtT(x.avg_read_sec)}</small></div></div>`).join(""):'<div style="padding:18px;color:var(--sub)">Nothing here.</div>');
  b.onclick=e=>{if(e.target.closest("[data-b]")){admAsks();return}const r=e.target.closest("[data-q]");if(r){const x=L[+r.dataset.q];if(x)admAskQ(x.key,"sub",{level:lvl,subject:sub,question:x.question})}}}
 async function admAskQ(key,from,ctx){const s=++ADMSEQ,b=$("abody");b.innerHTML=admLd();const j=await admCall("admin_ask_stats",{p_mode:"question",p_q:key,p_days:ASKR});if(s!==ADMSEQ)return;
  const back=`<div class="row" data-b="1"><div>? Back${from=="sub"?" to "+esc(ctx.subject):" to most asked"}</div></div>`;
@@ -7759,7 +7798,7 @@ async function admAskQ(key,from,ctx){const s=++ADMSEQ,b=$("abody");b.innerHTML=a
  if(!j.ok){b.innerHTML=back+admFail(j);return}
  const L=j.items||[],n=admN,rt={like:["Liked","#00a884"],unlike:["Unliked","#d64545"]};
  b.innerHTML=back+`<div style="padding:8px 18px 6px"><b style="font-size:18px;line-height:1.35">${esc(j.question||(ctx&&ctx.question)||"")}</b>${ctx&&ctx.subject?`<div style="color:var(--sub);margin-top:4px">${admLv(ctx.level)}${esc(ctx.subject)}</div>`:""}</div><div class="asec">Who asked it (${L.length})</div>`
- +(L.length?L.map(x=>{const r=rt[x.rating];return`<div class="row" style="cursor:default"><div style="flex:1;min-width:0"><b>${esc(x.names||x.username||"Learner")}</b><small>${esc(x.username||"")} ? asked ${n(x.times)} time${n(x.times)==1?"":"s"} ? last ${esc(new Date(x.last_asked).toLocaleString())}</small><small>Reading time: ${admFmtT(x.read_sec)}</small></div><span class="apl" style="background:${r?r[1]:"#888"}">${r?r[0]:"No rating"}</span></div>`}).join(""):'<div style="padding:18px;color:var(--sub)">Nothing here.</div>');}
+ +(L.length?L.map(x=>{const r=rt[x.rating];return`<div class="row" style="cursor:default"><div style="flex:1;min-width:0"><b>${esc(x.names||x.username||"Learner")}</b><small>${esc(x.username||"")} · asked ${n(x.times)} time${n(x.times)==1?"":"s"} · last ${esc(new Date(x.last_asked).toLocaleString())}</small><small>Reading time: ${admFmtT(x.read_sec)}</small></div><span class="apl" style="background:${r?r[1]:"#888"}">${r?r[0]:"No rating"}</span></div>`}).join(""):'<div style="padding:18px;color:var(--sub)">Nothing here.</div>');}
 
 /* ASKED: questions the app did not understand */
 async function admAsked(st){if(st)ADMAS=st;const s=ADMSEQ,b=$("abody");b.innerHTML=admLd();const j=await admCall("admin_unanswered_list",{p_status:ADMAS});if(s!==ADMSEQ)return;
@@ -7767,16 +7806,16 @@ async function admAsked(st){if(st)ADMAS=st;const s=ADMSEQ,b=$("abody");b.innerHT
  ADMAL=j.items||[];const C=j.counts||{},L={open:"Open",answered:"Linked",dismissed:"Dismissed"};
  b.innerHTML=`<div style="padding:12px 18px 4px;color:var(--sub);line-height:1.5">Questions learners asked that the app could not match. Link each one to a question that already has an answer, so the next learner who asks it that way gets the answer.</div><div style="display:flex;gap:6px;padding:8px 18px 12px">${["open","answered","dismissed"].map(k=>svBtn(k==ADMAS,L[k]+" "+(C[k]||0),"data-s",k)).join("")}</div>`
   +(ADMAL.length?"":'<div style="padding:18px;color:var(--sub)">Nothing here.</div>')
-  +ADMAL.map((x,i)=>`<div class="row" data-i="${i}"><div><b>${esc(x.question_text)}</b><small>Asked ${admN(x.times_asked)} time${x.times_asked==1?"":"s"} ? ${esc(x.level_code)} ? ${esc(x.subject_name||"General")} ? ${admDate(x.last_asked_at)}${x.linked_title?" ? linked to ?"+esc(x.linked_title)+"?":""}</small></div></div>`).join("");
+  +ADMAL.map((x,i)=>`<div class="row" data-i="${i}"><div><b>${esc(x.question_text)}</b><small>Asked ${admN(x.times_asked)} time${x.times_asked==1?"":"s"} · ${esc(x.level_code)} · ${esc(x.subject_name||"General")} · ${admDate(x.last_asked_at)}${x.linked_title?" · linked to ?"+esc(x.linked_title)+"?":""}</small></div></div>`).join("");
  b.onclick=e=>{const k=e.target.closest("[data-s]");if(k)return admAsked(k.dataset.s);const r=e.target.closest("[data-i]");if(r)admAskOne(ADMAL[+r.dataset.i])}}
 function admAskOne(x){if(!x)return;const s=++ADMSEQ,b=$("abody");let R=[];
- b.innerHTML=`<div class="row" data-b="1"><div>? Back to questions</div></div><div style="padding:12px 18px;line-height:1.5"><b style="font-size:17px">${esc(x.question_text)}</b><br><small style="color:var(--sub)">Asked ${admN(x.times_asked)} times ? ${esc(x.level_code)} ? ${esc(x.subject_name||"General")}</small></div>`
+ b.innerHTML=`<div class="row" data-b="1"><div>? Back to questions</div></div><div style="padding:12px 18px;line-height:1.5"><b style="font-size:17px">${esc(x.question_text)}</b><br><small style="color:var(--sub)">Asked ${admN(x.times_asked)} times · ${esc(x.level_code)} · ${esc(x.subject_name||"General")}</small></div>`
   +(x.status=="open"?`<div class="asec">Link to a question that has an answer</div><input class="ain" id="aqs" value="${esc(x.question_text)}" autocomplete="off"><div id="aql"></div>`:"")
   +`<div id="aqm" style="padding:6px 18px;color:var(--green);font-weight:600;min-height:18px"></div><div style="display:flex;gap:8px;flex-wrap:wrap;padding:6px 18px 24px">${x.status=="open"?abt("ds","Dismiss","#6b7280"):abt("op","Move back to open","#6b7280")}</div>`;
  let tk=0,tm=0;
  const run=async()=>{const my=++tk,q=$("aqs")?$("aqs").value.trim():"";const j=await admCall("admin_questions_search",{p_q:q});if(my!==tk||s!==ADMSEQ)return;const L=$("aql");if(!L)return;
   if(!j.ok){L.innerHTML=admFail(j);return}R=j.items||[];
-  L.innerHTML=R.length?R.map((r,i)=>`<div class="row" data-q="${i}"><div><b>${esc(r.title)}</b><small>${esc(r.subject_name||"")} ? ${admN(r.phrasings)} other way${r.phrasings==1?"":"s"} of asking</small></div></div>`).join(""):'<div style="padding:10px 18px;color:var(--sub)">No saved question found. Try other words.</div>'};
+  L.innerHTML=R.length?R.map((r,i)=>`<div class="row" data-q="${i}"><div><b>${esc(r.title)}</b><small>${esc(r.subject_name||"")} · ${admN(r.phrasings)} other way${r.phrasings==1?"":"s"} of asking</small></div></div>`).join(""):'<div style="padding:10px 18px;color:var(--sub)">No saved question found. Try other words.</div>'};
  if(x.status=="open"){run();$("aqs").oninput=()=>{clearTimeout(tm);tm=setTimeout(run,350)}}
  const setSt=async(st,q)=>{const m=$("aqm");if(m)m.textContent="Saving?";const j=await admCall("admin_unanswered_set",{p_id:x.id,p_status:st,p_question:q||null});if(j.ok){ADMSEQ++;admAsked(st=="answered"?"open":st=="dismissed"?"open":"open")}else if(m)m.textContent=j.err=="pick a question"?"Pick a saved question first.":admMsg(j)};
  b.onclick=e=>{if(e.target.closest("[data-b]")){ADMSEQ++;admAsked();return}
@@ -7788,7 +7827,7 @@ function admAskOne(x){if(!x)return;const s=++ADMSEQ,b=$("abody");let R=[];
 /* PROJECT HANDOFF > Files (owner only, kept in the database, not in this page) */
 async function hoFiles(){const j=await admCall("admin_file_list"),el=$("hof");if(!el)return;
  if(!j.ok){el.innerHTML='<div style="padding:8px 18px;color:var(--sub)">'+esc(admMsg(j))+'</div>';return}
- el.innerHTML=(j.items||[]).length?j.items.map(f=>`<div class="row" data-f="${esc(f.name)}"><div>${esc(f.name)}<small>Tap to copy the whole file ? ${Math.round(admN(f.size)/102.4)/10} KB${f.note?" ? "+esc(f.note):""}</small></div></div>`).join(""):'<div style="padding:8px 18px;color:var(--sub)">No files saved.</div>'}
+ el.innerHTML=(j.items||[]).length?j.items.map(f=>`<div class="row" data-f="${esc(f.name)}"><div>${esc(f.name)}<small>Tap to copy the whole file · ${Math.round(admN(f.size)/102.4)/10} KB${f.note?" · "+esc(f.note):""}</small></div></div>`).join(""):'<div style="padding:8px 18px;color:var(--sub)">No files saved.</div>'}
 async function hoCopyFile(n){const j=await admCall("admin_file_get",{p_name:n});if(!j.ok){uiAlert(admMsg(j));return}admCopy(j.content,"Copied "+n+".")}
 
 /* ===== PROJECT HANDOFF =====
@@ -8034,7 +8073,7 @@ const HANDOFF={
    [
     ["Topics P1 to P7 with class and term tags (43 topics)",1],
     ["Class and term lookup: What topics are in Primary 4?",1],
-    ["Step-by-step working: + ? ? ?, fraction sums, percent of a number, LCM, HCF, mean, median, mode, range",1],
+    ["Step-by-step working: + ? × ÷, fraction sums, percent of a number, LCM, HCF, mean, median, mode, range",1],
     ["Teacher check of every topic against NCDC books and the new curriculum",0],
     ["Worked solutions for geometry, area, volume, ratio, speed, time and money questions",0],
     ["Move topics to Supabase so the owner can edit them",0]
@@ -8284,7 +8323,7 @@ function hoText(){const[d,t]=hoCount();let o="ASK TR. DAVID: PROJECT HANDOFF (up
 function handoff(){if(!isOwner())return;
  const[d,t]=hoCount(),pct=Math.round(d/t*100);
  const body=`<div style="padding:12px 18px"><b>${d} of ${t} done</b> <span style="color:var(--sub)">(${pct}%)</span><div style="height:8px;border-radius:4px;background:var(--wall);margin:8px 0"><div style="height:8px;border-radius:4px;background:var(--green);width:${pct}%"></div></div><small style="color:var(--sub)">Updated ${esc(HANDOFF.updated)}</small></div>
- <div class="row" data-a="cp"><div>Copy full handoff as text<small>Paste it to another Claude to continue</small></div></div>`+'<div class="sec">Files (only you see these)</div><div id="hof"><div style="padding:8px 18px;color:var(--sub)">Loadingâ€¦</div></div>'+
+ <div class="row" data-a="cp"><div>Copy full handoff as text<small>Paste it to another Claude to continue</small></div></div>`+'<div class="sec">Files (only you see these)</div><div id="hof"><div style="padding:8px 18px;color:var(--sub)">Loading?</div></div>'+
  HANDOFF.tasks.map(g=>`<div class="sec">${esc(g[0])} (${g[1].filter(i=>i[1]).length}/${g[1].length})</div>`+g[1].map(i=>`<div class="row" style="display:block"><span style="color:${i[1]?"var(--green)":"var(--sub)"};font-weight:700">${i[1]?"&#10003;":"&#9675;"}</span> <span style="${i[1]?"":"font-weight:600"}">${esc(i[0])}</span></div>`).join("")).join("")+
  '<div class="sec">About</div>'+HANDOFF.about.map(a=>`<div style="padding:8px 18px"><b>${esc(a[0])}</b><div style="margin-top:3px;color:var(--sub);white-space:pre-wrap">${esc(a[1])}</div></div>`).join("")+
  '<div class="sec">Log</div>'+HANDOFF.log.map(l=>`<div style="padding:8px 18px"><small style="color:var(--sub)">${esc(l[0])}</small><div>${esc(l[1])}</div></div>`).join("");
@@ -8354,7 +8393,7 @@ function handoff(){if(!isOwner())return;
  mo.observe(document.body,{childList:true}); /* catches the message pop-up opening/closing */
  window.__backSync=sync;
 })();
-</script><div id="auth"><div class="ab"><div style="text-align:center;padding:calc(26px + env(safe-area-inset-top,0px)) 0 6px"><div class="av" id="alogo" style="margin:0 auto 8px;width:64px;height:64px"></div><b style="font-size:20px">Ask Tr. David</b><div class="t" id="ah">Loadingâ€¦</div></div><div id="af"></div></div></div>
+</script><div id="auth"><div class="ab"><div style="text-align:center;padding:calc(26px + env(safe-area-inset-top,0px)) 0 6px"><div class="av" id="alogo" style="margin:0 auto 8px;width:64px;height:64px"></div><b style="font-size:20px">Ask Tr. David</b><div class="t" id="ah">Loading?</div></div><div id="af"></div></div></div>
 <script>
 (function(){
 const PUBLIC_URL="https://asktrdavid.vercel.app/",BASE=(/^https:$/.test(location.protocol)&&!/^(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(location.hostname))?location.origin+location.pathname:PUBLIC_URL,CONTACT="",
@@ -8427,7 +8466,7 @@ chips=(id,l)=>'<div>'+l.map(s=>`<button class="lk" data-f="${id}" data-v="${s}">
 er=(m,g)=>{const f=$("ferr");if(f){f.textContent=m;f.style.color=g?"var(--green)":"#e03131"}},
 fb=(id,r)=>{const h=$("h_"+id);if(!h)return;h.className="hn e";h.textContent=r.err||"";let sg=r.suggest;const ip=$("x_"+id);if((!sg||!sg.length)&&ip&&ip.dataset.k=="username"&&!r.net&&/taken|exist|already|available|use/i.test(r.err||""))sg=us(ip.value);if(sg&&sg.length)h.insertAdjacentHTML("beforeend",chips(id,sg))};
 function form(el,items,btn,go,extra,pre){
- el.innerHTML=items.map(([id,k,l])=>{const hid=k=="cpw"||k=="cpin";if(k=="dob"){const _n=new Date(),_mx=_n.toISOString().slice(0,10),_mn=new Date(_n.getFullYear()-100,0,1).toISOString().slice(0,10);return`<div class="fw"><label>${l}</label><input class="fld" id="x_${id}" data-k="${k}" data-id="${id}" type="date" min="${_mn}" max="${_mx}"><div class="hn" id="h_${id}"></div></div>`}if(k=="cls")return`<div class="fw"><label>${l}</label><select class="fld" id="x_${id}" data-k="${k}" data-id="${id}"><option value="">Select class or combination</option><optgroup label="Primary, O-Level and A-Level year">${CLASSES.filter(c=>!COMBOS.some(x=>x[0]==c)).map(c=>`<option value="${c}">${c}</option>`).join("")}</optgroup><optgroup label="A-Level combination">${COMBOS.map(x=>`<option value="${x[0]}">${x[0]} ? ${x[1]}</option>`).join("")}</optgroup></select><div class="hn" id="h_${id}"></div></div>`;return`<div class="fw"><label>${l}</label><div class="pw"><input class="fld" id="x_${id}" data-k="${k}" data-id="${id}" type="${hid?"password":"text"}" autocomplete="off" autocapitalize="off" ${/phone|pin/.test(k)?'inputmode="numeric"':""}>${hid?`<button type="button" class="eye" data-t="x_${id}" aria-label="Show password">${EYE}</button>`:""}</div><div class="hn" id="h_${id}"></div></div>`}).join("")+(pre||"")+'<div class="fe" id="ferr"></div><button class="btn" id="fgo">'+btn+"</button>"+(extra||"");
+ el.innerHTML=items.map(([id,k,l])=>{const hid=k=="cpw"||k=="cpin";if(k=="dob"){const _n=new Date(),_mx=_n.toISOString().slice(0,10),_mn=new Date(_n.getFullYear()-100,0,1).toISOString().slice(0,10);return`<div class="fw"><label>${l}</label><input class="fld" id="x_${id}" data-k="${k}" data-id="${id}" type="date" min="${_mn}" max="${_mx}"><div class="hn" id="h_${id}"></div></div>`}if(k=="cls")return`<div class="fw"><label>${l}</label><select class="fld" id="x_${id}" data-k="${k}" data-id="${id}"><option value="">Select class or combination</option><optgroup label="Primary, O-Level and A-Level year">${CLASSES.filter(c=>!COMBOS.some(x=>x[0]==c)).map(c=>`<option value="${c}">${c}</option>`).join("")}</optgroup><optgroup label="A-Level combination">${COMBOS.map(x=>`<option value="${x[0]}">${x[0]} · ${x[1]}</option>`).join("")}</optgroup></select><div class="hn" id="h_${id}"></div></div>`;return`<div class="fw"><label>${l}</label><div class="pw"><input class="fld" id="x_${id}" data-k="${k}" data-id="${id}" type="${hid?"password":"text"}" autocomplete="off" autocapitalize="off" ${/phone|pin/.test(k)?'inputmode="numeric"':""}>${hid?`<button type="button" class="eye" data-t="x_${id}" aria-label="Show password">${EYE}</button>`:""}</div><div class="hn" id="h_${id}"></div></div>`}).join("")+(pre||"")+'<div class="fe" id="ferr"></div><button class="btn" id="fgo">'+btn+"</button>"+(extra||"");
  el.oninput=e=>{const i=e.target,k=i.dataset.k;if(i.id=="refc"){const w=i.value.toUpperCase().replace(/[^A-Z0-9]/g,"");if(w!=i.value)i.value=w;return}if(!k)return;const id=i.dataset.id,h=$("h_"+id),v=mask(k,i.value);if(v!=i.value)i.value=v;if(!NEW[k])return;
   if(!v){h.className="hn";h.innerHTML="";return}
   if(!good(k,v)){h.className="hn";h.innerHTML=ck(k,v).map(c=>`<div class="${c[0]?"ok":"no"}">${c[0]?"?":"?"} ${c[1]}</div>`).join("")+(k=="password"?chips(id,PS[id]||(PS[id]=[gp(),gp(),gp()])):"");return}
@@ -8455,13 +8494,13 @@ async function enter(){try{if(ME&&window.__syncFirst)await Promise.race([__syncF
 async function out(){admHide();try{await(window.__syncFlush&&__syncFlush())}catch(e){}rpc("acct_logout",{p_t:T});wipe();ME=null;closeP();scr("login")}
 const UI={names:[["n","names","New names"],["a","cpw","Confirm password"]],username:[["n","username","New username"],["a","cpw","Confirm password"]],phone:[["n","phone","New phone"],["a","cpw","Confirm password"]],password:[["n","password","New password"],["a","uname","Confirm username"],["b","cpw","Old password"],["c","cpin","Pin"]],pin:[["n","pin","New pin"],["a","uname","Confirm username"],["b","cpw","Password"],["c","cpin","Old pin"]]};
 function upd(w){showP("Update "+w,'<div id="ff"></div>',account);form($("ff"),UI[w],"Save",async v=>{const r=await rpc("acct_change",{p_t:T,p_what:w,p_new:v.n,p_a:v.a,p_b:v.b||"",p_c:v.c||""});if(r.relogin){out();return r}if(r.ok){ME=r.me;stg().setItem("ask_me",JSON.stringify(ME));account();uiAlert("Updated.")}return r})}
-function account(){showP("Update account",`<div class="pcard"><div class="pav">${esc((ME.names||"?").charAt(0).toUpperCase())}</div><div class="pcn">${esc(ME.names)}</div><div class="pcu">${esc(ME.username)} ? ${esc(ME.phone)}</div></div>`+[["names","Update names"],["username","Update username"],["phone","Update phone"],["password","Update password"],["pin","Update pin"]].map(x=>`<div class="row" data-w="${x[0]}"><div>${x[1]}</div></div>`).join("")+(isOwner()?'<div class="row" data-w="adm"><div>Switch to Admin panel<small>Only you see this</small></div></div>':"")+'<div class="row danger" data-w="out"><div>Log out</div></div>',profile,e=>{const w=e.target.closest(".row")?.dataset.w;if(w=="out")out();else if(w=="adm"){closeP();admOpen()}else if(w)upd(w)})}
+function account(){showP("Update account",`<div class="pcard"><div class="pav">${esc((ME.names||"?").charAt(0).toUpperCase())}</div><div class="pcn">${esc(ME.names)}</div><div class="pcu">${esc(ME.username)} · ${esc(ME.phone)}</div></div>`+[["names","Update names"],["username","Update username"],["phone","Update phone"],["password","Update password"],["pin","Update pin"]].map(x=>`<div class="row" data-w="${x[0]}"><div>${x[1]}</div></div>`).join("")+(isOwner()?'<div class="row" data-w="adm"><div>Switch to Admin panel<small>Only you see this</small></div></div>':"")+'<div class="row danger" data-w="out"><div>Log out</div></div>',profile,e=>{const w=e.target.closest(".row")?.dataset.w;if(w=="out")out();else if(w=="adm"){closeP();admOpen()}else if(w)upd(w)})}
 const b64=s=>btoa(unescape(encodeURIComponent(s))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""),LV=["PLE","UCE","UACE"];
 async function link(){if(H=="#wn"){H="";try{history.replaceState(null,"",location.pathname+location.search)}catch(e){}try{notifs(true)}catch(e){}return}const m=H.match(/^#([sak])=(.+)$/);H="";if(!m)return;try{history.replaceState(null,"",location.pathname+location.search)}catch(e){}
  try{let p;if(m[1]=="a"){const[l,s]=decodeURIComponent(m[2]).split("~");if(LV.includes(l)){D.lvl=l;fixSub();setSub(subsList().includes(s)?s:D.sub);save()}return}
   if(m[1]=="k"){const r=await rpc("ask_share_get",{p_id:m[2].replace(/[^a-zA-Z0-9]/g,"").slice(0,24)});if(!r.ok){uiAlert(r.err||"This shared answer could not be opened.");return}p={l:r.l,s:r.s,q:r.q,t:r.t}}
   else p=JSON.parse(decodeURIComponent(escape(atob(m[2].replace(/-/g,"+").replace(/_/g,"/")))));
-  showP("Shared answer",`<div style="padding:14px 18px"><div class="t">${esc(p.l+" ? "+p.s)}</div><b>${esc(p.q||"")}</b><div class="md" style="margin-top:6px">${md(p.t)}</div></div><button class="btn" id="gx">Ask your own question</button>`,closeP,e=>{if(e.target.id=="gx"){closeP();if(LV.includes(p.l)){D.lvl=p.l;fixSub();setSub(subsList().includes(p.s)?p.s:D.sub);save()}}})}catch(e){}}
+  showP("Shared answer",`<div style="padding:14px 18px"><div class="t">${esc(p.l+" · "+p.s)}</div><b>${esc(p.q||"")}</b><div class="md" style="margin-top:6px">${md(p.t)}</div></div><button class="btn" id="gx">Ask your own question</button>`,closeP,e=>{if(e.target.id=="gx"){closeP();if(LV.includes(p.l)){D.lvl=p.l;fixSub();setSub(subsList().includes(p.s)?p.s:D.sub);save()}}})}catch(e){}}
 window.AK={tok:async()=>{try{const r=await acctGet();return(r&&r.t)||""}catch(e){return""}},me:()=>ME,open:account,upd,short:async m=>{const b={p_l:D.lvl,p_s:D.sub,p_q:(m.q||"").slice(0,300),p_t:m.t.slice(0,6000)};let r=await rpc("ask_share_put",b);if(!(r.ok&&r.id))r=await rpc("ask_share_put",b);return r.ok&&r.id?BASE+"#k="+r.id:BASE},link:m=>BASE+"#s="+b64(JSON.stringify({l:D.lvl,s:D.sub,q:(m.q||"").slice(0,300),t:m.t.slice(0,6000)})),area:()=>BASE+"#a="+D.lvl+"~"+D.sub};
 $("alogo").style.cssText+=";background:url("+AVATAR+") center/cover";
 (async()=>{if(!T){scr(LS.getItem("ask_ref")?"create":"login");return}const r=await Promise.race([rpc("acct_me",{p_t:T}),new Promise(z=>setTimeout(()=>z({ok:false,net:1}),8000))]);if(r.ok){ME=r.me;stg().setItem("ask_me",JSON.stringify(ME));enter()}else if(r.net&&stg().getItem("ask_me")){ME=JSON.parse(stg().getItem("ask_me"));enter()}else{T="";LS.removeItem("ask_tok");SS.removeItem("ask_tok");scr("login")}})();
@@ -8504,7 +8543,7 @@ const spDown=(el,force)=>{if(force||el.scrollHeight-el.scrollTop-el.clientHeight
 let SPKIND="message",SPRATE=0,SPLAST="";
 function supportOpen(kind,pre){
  SPKIND=SPKL[kind]?kind:"message";SPRATE=0;SPLAST="";
- showP("Contact Tr. David",`<div class="spw"><div id="spm" class="spm"><div class="spe">Loadingâ€¦</div></div><div class="spc">
+ showP("Contact Tr. David",`<div class="spw"><div id="spm" class="spm"><div class="spe">Loading?</div></div><div class="spc">
   <div class="spk" id="spk">${Object.keys(SPKL).map(k=>`<button data-k="${k}" class="${k===SPKIND?"on":""}">${SPKL[k]}</button>`).join("")}</div>
   <div class="sprt" id="sprt"><span>Rate the app:</span>${[1,2,3,4,5].map(n=>`<button data-r="${n}" aria-label="${n} star">?</button>`).join("")}</div>
   <div class="spi"><textarea id="spt" rows="1" maxlength="2000" placeholder="Write to Tr. David?"></textarea><button id="sps" aria-label="Send">${SPSEND}</button></div></div></div>`,settings,null);
@@ -8561,7 +8600,7 @@ async function admInbox(){
  admInboxBadge(SPL.reduce((a,t)=>a+(+t.unread||0),0))}
 async function admThread(t){
  if(!t)return;const s=++ADMSEQ,b=$("abody");let last="";
- b.innerHTML=`<div class="spth"><div class="spah"><button id="spbk" class="spbk">? Inbox</button><div style="flex:1;min-width:0"><b>${spE(t.names||t.username||"Learner")}</b><small>${spE(t.username||"")} ? ${spE(t.phone||"")} ? ${spE(t.plan||"")}</small></div><button id="spdl" class="spbk dg">Delete</button></div><div id="spm" class="spm"><div class="spe">Loadingâ€¦</div></div><div class="spi"><textarea id="spt" rows="1" maxlength="2000" placeholder="Write a reply?"></textarea><button id="sps" aria-label="Send reply">${SPSEND}</button></div></div>`;
+ b.innerHTML=`<div class="spth"><div class="spah"><button id="spbk" class="spbk">? Inbox</button><div style="flex:1;min-width:0"><b>${spE(t.names||t.username||"Learner")}</b><small>${spE(t.username||"")} · ${spE(t.phone||"")} · ${spE(t.plan||"")}</small></div><button id="spdl" class="spbk dg">Delete</button></div><div id="spm" class="spm"><div class="spe">Loading?</div></div><div class="spi"><textarea id="spt" rows="1" maxlength="2000" placeholder="Write a reply?"></textarea><button id="sps" aria-label="Send reply">${SPSEND}</button></div></div>`;
  b.onclick=null;
  const back=()=>{ADMSEQ++;admInbox()};
  $("spbk").onclick=back;
@@ -9148,7 +9187,7 @@ setTimeout(topup,45000);
 
 /* ---------- owner: question bank page ---------- */
 async function bankAdmin(){
- if(!isOwner())return;showP("Question bank",'<div class="empty">Loadingâ€¦</div>',HBACK||settings,null);
+ if(!isOwner())return;showP("Question bank",'<div class="empty">Loading?</div>',HBACK||settings,null);
  const [s,r]=await Promise.all([rpc("bank_stats",{p_t:tok()}),rpc("bank_review",{p_t:tok(),p_n:8})]);
  const rows=(s&&s.rows)||[],rev=(r&&r.rows)||[],E=x=>esc(String(x==null?"":x));
  let h='<div class="sec">COVERAGE</div>'+(rows.length?rows.map(x=>'<div class="row" style="cursor:default"><div><b>'+E(x.subject_name)+' ? '+E(x.class_label)+'</b><small>'+E(x.status)+' ? '+E(x.source)+'</small></div><span class="rv">'+E(x.n)+'</span></div>').join(""):'<div class="empty">No questions saved yet</div>');
@@ -9352,7 +9391,7 @@ label.inline{display:flex;gap:8px;align-items:center;font-weight:500;color:var(-
 }`;
 
   var HTML = `
-<div id="wait" class="empty">Loadingâ€¦</div>
+<div id="wait" class="empty">Loading?</div>
 <div id="main" class="nl" hidden>
   <nav class="tabs" aria-label="Notes sections">
     <button class="tab on" data-tab="library" type="button">Library</button>
@@ -9362,8 +9401,8 @@ label.inline{display:flex;gap:8px;align-items:center;font-weight:500;color:var(-
 
   <section id="tabLibrary" class="pane">
     <div class="flow" aria-label="How a learner's question is answered">
-      <span class="flow-step on"><b>1</b> Your notes</span><i>â†’</i>
-      <span class="flow-step"><b>2</b> Saved answers</span><i>â†’</i>
+      <span class="flow-step on"><b>1</b> Your notes</span><i>?</i>
+      <span class="flow-step"><b>2</b> Saved answers</span><i>?</i>
       <span class="flow-step"><b>3</b> Gemini, then saved</span>
       <p class="muted">A learner's question is checked against your notes for their class and subject first. Only when nothing fits does it go on.</p>
     </div>
@@ -9372,7 +9411,7 @@ label.inline{display:flex;gap:8px;align-items:center;font-weight:500;color:var(-
       <select id="fClass" aria-label="Class"><option value="">All classes</option></select>
       <select id="fSubject" aria-label="Subject"><option value="">All subjects</option></select>
       <select id="fStatus" aria-label="Status"><option value="">Any status</option><option value="published">Published</option><option value="draft">Draft</option><option value="archived">Archived</option></select>
-      <input id="fText" type="search" placeholder="Search titlesâ€¦" aria-label="Search titles">
+      <input id="fText" type="search" placeholder="Search titles?" aria-label="Search titles">
       <button class="btn primary" id="btnNew" type="button">+ Upload notes</button>
     </div>
     <div id="list" class="list"></div>
@@ -9383,7 +9422,7 @@ label.inline{display:flex;gap:8px;align-items:center;font-weight:500;color:var(-
     <div class="card">
       <div class="step-h"><span class="num">1</span><div><h3>Where do these notes belong?</h3><p class="muted">Learners only receive notes from their own class and subject.</p></div></div>
       <div class="grid3">
-        <label>Class<select id="uClass"><option value="">Choose classâ€¦</option></select></label>
+        <label>Class<select id="uClass"><option value="">Choose class?</option></select></label>
         <label>Subject<select id="uSubject" disabled><option value="">Choose class first</option></select></label>
         <label>Topic<select id="uTopic" disabled><option value="">Choose subject first</option></select></label>
       </div>
@@ -9402,7 +9441,7 @@ label.inline{display:flex;gap:8px;align-items:center;font-weight:500;color:var(-
       </div>
       <div id="drop" class="drop" tabindex="0" role="button" aria-label="Choose files to upload">
         <span><b>Drop files here</b> or <u>choose files</u></span>
-        <small>.docx Â· .pdf Â· .txt Â· .md (scanned photos cannot be read)</small>
+        <small>.docx · .pdf · .txt · .md (scanned photos cannot be read)</small>
         <input id="fileIn" type="file" multiple accept=".docx,.pdf,.txt,.md,.markdown,text/plain" hidden>
       </div>
       <div class="row"><button class="btn" id="btnPaste" type="button">Or paste / type notes</button><button class="btn ghost" id="btnTemplate" type="button">Download a writing template</button></div>
@@ -9433,11 +9472,11 @@ label.inline{display:flex;gap:8px;align-items:center;font-weight:500;color:var(-
     <p class="muted">See exactly what a learner would get. Nothing is counted against any learner's limit.</p>
     <div class="card">
       <div class="grid3">
-        <label>Class<select id="tClass"><option value="">Choose classâ€¦</option></select></label>
+        <label>Class<select id="tClass"><option value="">Choose class?</option></select></label>
         <label>Subject<select id="tSubject" disabled><option value="">Choose class first</option></select></label>
       </div>
       <label>Question<textarea id="tQ" rows="3" placeholder="e.g. What is an acid?"></textarea></label>
-      <div class="row"><button class="btn primary" id="tGo" type="button">Test</button><span id="tBusy" class="muted" hidden>Checkingâ€¦</span></div>
+      <div class="row"><button class="btn primary" id="tGo" type="button">Test</button><span id="tBusy" class="muted" hidden>Checking?</span></div>
     </div>
     <div id="tOut"></div>
   </section>
@@ -9516,7 +9555,7 @@ label.inline{display:flex;gap:8px;align-items:center;font-weight:500;color:var(-
     if (booted === "ok") { loadLibrary(); return; }
     if (booted === "loading") return;
     booted = "loading";
-    var wait = $("#wait"); wait.hidden = false; wait.textContent = "Loadingâ€¦"; $("#main").hidden = true;
+    var wait = $("#wait"); wait.hidden = false; wait.textContent = "Loading?"; $("#main").hidden = true;
     boot().then(function (r) { booted = r; }).catch(function (e) { booted = null; wait.hidden = false; wait.textContent = "Could not load: " + (e && e.message || "try again."); });
   }
 
@@ -9537,8 +9576,8 @@ label.inline{display:flex;gap:8px;align-items:center;font-weight:500;color:var(-
   function classOpts() { return S.classes.map(function (c) { return { v: c.id, t: c.name }; }); }
   function setupSelectors() {
     options($("#fClass"), classOpts(), "All classes");
-    options($("#uClass"), classOpts(), "Choose classâ€¦");
-    options($("#tClass"), classOpts(), "Choose classâ€¦");
+    options($("#uClass"), classOpts(), "Choose class?");
+    options($("#tClass"), classOpts(), "Choose class?");
     var all = Object.keys(S.names).map(function (id) { return { v: id, t: S.names[id] }; }).sort(function (a, b) { return a.t.localeCompare(b.t); });
     options($("#fSubject"), all, "All subjects");
   }
@@ -9580,11 +9619,11 @@ label.inline{display:flex;gap:8px;align-items:center;font-weight:500;color:var(-
     });
     var html = "", last = "";
     rows.forEach(function (n) {
-      var g = clsName(n.class_id) + " Â· " + subjName(n.subject_id);
+      var g = clsName(n.class_id) + " · " + subjName(n.subject_id);
       if (g !== last) { html += '<div class="group-h">' + esc(g) + "</div>"; last = g; }
       var unemb = (n.chunk_count || 0) > (n.embedded_count || 0);
       html += '<article class="note" data-id="' + esc(n.id) + '"><div class="note-top"><h3>' + esc(n.title) + '</h3><span class="badge ' + esc(n.status) + '">' + esc(n.status) + "</span></div>" +
-        '<div class="crumb">' + esc(clsName(n.class_id)) + " â€º " + esc(subjName(n.subject_id)) + " â€º " + esc(S.topicNames[n.topic_id] || "No topic") + "</div>" +
+        '<div class="crumb">' + esc(clsName(n.class_id)) + " ? " + esc(subjName(n.subject_id)) + " ? " + esc(S.topicNames[n.topic_id] || "No topic") + "</div>" +
         '<div class="meta"><span>' + esc(KIND[n.kind] || n.kind) + "</span><span>" + (n.chunk_count || 0) + " parts</span><span>used " + (n.use_count || 0) + " times</span>" +
         (unemb ? '<span class="badge warn">' + (n.chunk_count - (n.embedded_count || 0)) + " parts words-only</span>" : "") + "</div>" +
         '<div class="actions"><button class="btn sm" data-a="edit" type="button">Edit</button>' +
@@ -9608,7 +9647,7 @@ label.inline{display:flex;gap:8px;align-items:center;font-weight:500;color:var(-
         }, "Delete");
         return;
       }
-      if (a === "reindex") { b.disabled = true; b.textContent = "Re-indexingâ€¦"; await callFn({ action: "reindex", id: id }); toast("Re-indexed"); }
+      if (a === "reindex") { b.disabled = true; b.textContent = "Re-indexing?"; await callFn({ action: "reindex", id: id }); toast("Re-indexed"); }
       else {
         var st = { publish: "published", draft: "draft", archive: "archived" }[a];
         var u = await api("PATCH", "/rest/v1/study_notes?id=eq." + enc(id), { status: st });
@@ -9636,11 +9675,11 @@ label.inline{display:flex;gap:8px;align-items:center;font-weight:500;color:var(-
     var top = S.topics.filter(function (t) { return !t.parent_topic_id; }), list = [];
     top.forEach(function (t) {
       list.push({ v: t.id, t: t.name });
-      S.topics.filter(function (x) { return x.parent_topic_id === t.id; }).forEach(function (x) { list.push({ v: x.id, t: "  â†³ " + x.name }); });
+      S.topics.filter(function (x) { return x.parent_topic_id === t.id; }).forEach(function (x) { list.push({ v: x.id, t: "  ? " + x.name }); });
     });
     S.topics.filter(function (t) { return t.parent_topic_id && !top.some(function (p) { return p.id === t.parent_topic_id; }); }).forEach(function (t) { list.push({ v: t.id, t: t.name }); });
     var sel = $("#uTopic");
-    sel.innerHTML = '<option value="">' + (c && s ? "No topic (general notes)" : "Choose subject first") + "</option>" + list.map(function (o) { return '<option value="' + esc(o.v) + '">' + esc(o.t) + "</option>"; }).join("") + (c && s ? '<option value="__new">+ Create a new topicâ€¦</option>' : "");
+    sel.innerHTML = '<option value="">' + (c && s ? "No topic (general notes)" : "Choose subject first") + "</option>" + list.map(function (o) { return '<option value="' + esc(o.v) + '">' + esc(o.t) + "</option>"; }).join("") + (c && s ? '<option value="__new">+ Create a new topic?</option>' : "");
     sel.disabled = !(c && s);
     options($("#ntParent"), top.map(function (t) { return { v: t.id, t: t.name }; }), "Top-level topic");
     if (selectId) sel.value = selectId;
@@ -9723,7 +9762,7 @@ label.inline{display:flex;gap:8px;align-items:center;font-weight:500;color:var(-
       var w = words(it.body), warn = "";
       if (w && w < 25) warn = '<span class="badge warn">Very short</span>';
       return '<div class="item" data-i="' + i + '"><div class="item-h"><input class="item-title" placeholder="Note title" value="' + esc(it.title) + '" aria-label="Note title">' +
-        '<span class="muted wc">' + w + " words Â· about " + estParts(it.body) + " parts</span>" + warn + '<button class="btn sm danger" data-rm type="button">Remove</button></div>' +
+        '<span class="muted wc">' + w + " words · about " + estParts(it.body) + " parts</span>" + warn + '<button class="btn sm danger" data-rm type="button">Remove</button></div>' +
         '<textarea class="item-body" placeholder="Paste or type the notes here. Use # headings." aria-label="Note text">' + esc(it.body) + "</textarea>" +
         '<div class="grid2"><label>Type<select class="item-kind">' + Object.keys(KIND).map(function (k) { return '<option value="' + k + '"' + (it.kind === k ? " selected" : "") + ">" + KIND[k] + "</option>"; }).join("") + "</select></label></div>" +
         '<div class="status muted"></div></div>';
@@ -9732,7 +9771,7 @@ label.inline{display:flex;gap:8px;align-items:center;font-weight:500;color:var(-
   function onItemEdit(e) {
     var el = e.target.closest(".item"); if (!el) return; var it = S.items[Number(el.dataset.i)]; if (!it) return;
     if (e.target.matches(".item-title")) { it.title = e.target.value; it.saved = false; }
-    else if (e.target.matches(".item-body")) { it.body = e.target.value; it.saved = false; el.querySelector(".wc").textContent = words(it.body) + " words Â· about " + estParts(it.body) + " parts"; }
+    else if (e.target.matches(".item-body")) { it.body = e.target.value; it.saved = false; el.querySelector(".wc").textContent = words(it.body) + " words · about " + estParts(it.body) + " parts"; }
     else if (e.target.matches(".item-kind")) { it.kind = e.target.value; it.saved = false; }
   }
   async function startEdit(id) {
@@ -9742,7 +9781,7 @@ label.inline{display:flex;gap:8px;align-items:center;font-weight:500;color:var(-
     resetUpload(); S.editId = id;
     $("#upTitle").textContent = "Edit note";
     $("#uClass").value = String(n.class_id);
-    options($("#uSubject"), subjectsOf(n.class_id), "Choose subjectâ€¦", n.subject_id); $("#uSubject").disabled = false;
+    options($("#uSubject"), subjectsOf(n.class_id), "Choose subject?", n.subject_id); $("#uSubject").disabled = false;
     await loadTopics(n.topic_id || "");
     $("#addBox").hidden = true;
     $("#optPublish").checked = n.status === "published";
@@ -9756,19 +9795,19 @@ label.inline{display:flex;gap:8px;align-items:center;font-weight:500;color:var(-
     if (!S.items.length) return toast("Add some notes first");
     for (var k = 0; k < S.items.length; k++) {
       if (!S.items[k].title.trim()) return toast("Every note needs a title");
-      if (words(S.items[k].body) < 8) return toast("â€œ" + S.items[k].title + "â€ is too short");
+      if (words(S.items[k].body) < 8) return toast("?" + S.items[k].title + "? is too short");
     }
     var btn = $("#btnSave"), log = $("#saveLog"); btn.disabled = true; log.innerHTML = '<div class="progress"><i id="bar"></i></div>';
     var status = $("#optPublish").checked ? "published" : "draft", done = 0, failed = 0;
     for (var i = 0; i < S.items.length; i++) {
       var it = S.items[i], el = $$("#items .item")[i], st = el && el.querySelector(".status");
       if (it.saved) { done++; continue; }
-      if (st) st.textContent = "Saving and preparing for searchâ€¦";
+      if (st) st.textContent = "Saving and preparing for search?";
       try {
         var res = await callFn({ action: "save", id: S.editId || undefined, class_id: c, subject_id: s, topic_id: tp || null, title: it.title.trim(), kind: it.kind, body_md: it.body, file_name: it.file || null, status: status });
         it.saved = true; done++;
         if (el) { el.classList.remove("fail"); el.classList.add("ok"); }
-        if (st) st.innerHTML = '<span class="good">Saved Â· ' + res.chunks + " searchable parts" + (res.warning ? " (some words-only)" : "") + "</span>";
+        if (st) st.innerHTML = '<span class="good">Saved · ' + res.chunks + " searchable parts" + (res.warning ? " (some words-only)" : "") + "</span>";
       } catch (ex) { failed++; if (el) el.classList.add("fail"); if (st) st.innerHTML = '<span class="bad">' + esc(ex.message) + "</span>"; }
       $("#bar").style.width = Math.round(((i + 1) / S.items.length) * 100) + "%";
     }
@@ -9790,7 +9829,7 @@ label.inline{display:flex;gap:8px;align-items:center;font-weight:500;color:var(-
         : '<div class="verdict no">Not found in your notes: this goes to the saved answers, then Gemini.<br><small>' + esc(r.why) + "</small></div>";
       if (r.answer) h += '<h3 style="margin-top:12px">The answer the learner sees</h3><div class="answer">' + esc(r.answer) + "</div>";
       h += '<h3 style="margin-top:12px">Closest parts of your notes</h3>' + ((r.matches || []).length ? r.matches.map(function (m) {
-        return '<div class="match"><b>' + esc(m.title) + " â€º " + esc(String(m.heading).split(" â€º ").pop()) + '</b><div class="meter"><i style="width:' + Math.round(m.similarity * 100) + '%"></i></div><small>Meaning match ' + m.similarity.toFixed(2) + " (needs " + esc(r.threshold) + ") Â· key words found " + Math.round(m.cover * 100) + "%</small><small>" + esc(m.preview) + "â€¦</small></div>";
+        return '<div class="match"><b>' + esc(m.title) + " ? " + esc(String(m.heading).split(" ? ").pop()) + '</b><div class="meter"><i style="width:' + Math.round(m.similarity * 100) + '%"></i></div><small>Meaning match ' + m.similarity.toFixed(2) + " (needs " + esc(r.threshold) + ") · key words found " + Math.round(m.cover * 100) + "%</small><small>" + esc(m.preview) + "?</small></div>";
       }).join("") : '<div class="empty">No notes exist for this class and subject yet.</div>');
       out.innerHTML = h;
     } catch (ex) { out.innerHTML = '<div class="error">' + esc(ex.message) + "</div>"; }
@@ -9811,7 +9850,7 @@ label.inline{display:flex;gap:8px;align-items:center;font-weight:500;color:var(-
 
     $("#uClass").addEventListener("change", function () {
       var c = this.value, ss = $("#uSubject");
-      options(ss, subjectsOf(c), c ? "Choose subjectâ€¦" : "Choose class first"); ss.disabled = !c; loadTopics();
+      options(ss, subjectsOf(c), c ? "Choose subject?" : "Choose class first"); ss.disabled = !c; loadTopics();
     });
     $("#uSubject").addEventListener("change", function () { loadTopics(); });
     $("#uTopic").addEventListener("change", function () { $("#newTopicBox").hidden = this.value !== "__new"; if (this.value === "__new") $("#ntName").focus(); });
@@ -9847,7 +9886,7 @@ label.inline{display:flex;gap:8px;align-items:center;font-weight:500;color:var(-
     });
     $("#btnSave").addEventListener("click", saveAll);
     $("#tClass").addEventListener("change", function () {
-      var ss = $("#tSubject"); options(ss, subjectsOf(this.value), this.value ? "Choose subjectâ€¦" : "Choose class first"); ss.disabled = !this.value;
+      var ss = $("#tSubject"); options(ss, subjectsOf(this.value), this.value ? "Choose subject?" : "Choose class first"); ss.disabled = !this.value;
     });
     $("#tGo").addEventListener("click", runTest);
   }

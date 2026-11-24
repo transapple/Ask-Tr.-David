@@ -5421,7 +5421,7 @@ async function dbAnswer(q,mode){
  else{const[d,a]=await Promise.all([get("detail"),get("answer")]);r=d||a;if(r)t=txt(r)}
  let st2=null;if(r&&!mode){try{st2=AASE.enforce(t,window.AASE_LAST)}catch(e){}}return r?{t:mode?t:(st2||modelFromMd(t)),aid:r.answer_id,fmt:mode?0:1,aase:st2?1:undefined}:null}
 /* NEW QUESTIONS. The old ai_answer, ai_answer_v2 and ai_answer_v3 answering code was removed on 2026-11-14 (answer engine version 4).
-   Chemistry (UCE and UACE) is answered by chem_coach through askChem; UCE Physics by phys_coach through askPhys; UCE Mathematics by math_coach through askMath. Other subjects have no AI engine yet: aiAnswer returns nothing and the learner is told so. */
+   All subjects are answered through assistant_ask (Notes Library, then saved answers, then Gemini). The old Chemistry, Physics and Mathematics coaches were deleted in Nov 2026. */
 const escRex=x=>x.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
 const fullQ=q=>String(q||"").trim().slice(0,8000);
 let AIWHY="";
@@ -6995,242 +6995,6 @@ function bpHandle(q){const s=String(q||"");if(s.length>400)return false;const t=
  const S=S0||bpSubj(t,1);let bt=S?bpText(S):bpMaster();
  if(PRANK[planName()]<1){bt=String(bt).split("\n").slice(0,14).join("\n");push({t:bt,bp:1});D.msgs.push({s:"i",note:1,up:1,t:SOFT_UP(),ts:Date.now()});save();render();return true}
  push({t:bt,bp:1});return true}
-/* ===== CHEMISTRY COACH (Item 1-style revision, command words, scenario practice, answer coaching) =====
-   Spec: "Ask Teacher David, Complete Chemistry Revision & Item 1 Specification". Server: Edge Function chem_coach (prompt chem-v1.1).
-   The app only DECIDES the route and keeps the conversation state; the notes, command-word lessons, scenarios and coaching are written by chem_coach.
-   Only UCE learners in Chemistry (or a General chat that is clearly about one of the ten areas) are routed here, and only for the requests below.
-   Everything else (narrow questions, owner topics, quizzes, pasted scenarios without a coaching request) keeps using the existing pipeline unchanged.
-   Plan rules: CHEM_MIN says the lowest plan for each kind of request. Lower plans fall through to the existing pipeline (and its upgrade message).
-   Change a value here to move a feature to another plan. */
-const CHEM_MIN={question:"Free",summary:"Free",command_word:"Free",scenario:"Free",coach:"Free",practice:"Basic",attempt:"Basic",reveal:"Basic",example:"Standard",simpler:"Standard",more:"Premium",again:"Free",about:"Free"};
-const CHEM_RX=/\b(acids?|alkal(?:i|is|ine)|neutrali[sz]ation|ph scale|indicators?|antacids?|litmus|hard(?:ness| water)|soft water|water hardness|water treatment|soaps?|detergents?|scum|charcoal|carbonisation|carbon (?:monoxide|dioxide)|incomplete combustion|radioactiv\w*|radiation|nuclear|fission|fuels?|biogas|acid rain|greenhouse|air pollution|water pollution|soil pollution|filtration|distillation|crystalli[sz]ation|chromatography|separation of mixtures|periodic table|halogens|noble gases|chemical reactions?|word equations?|balanc\w+ equations?|item 1|item one|chemistry)\b/i;
-const CH_REVEAL=/\b(show|give|see|reveal|tell)( me)?( the)?( model)? (answers?|solution)|i give up|i (do not|don'?t) know|^\s*(skip|reveal|answer|answers)\s*[.!]?\s*$/i;
-const CH_CMD=/\b(command words?|(?:what|which) (?:does|do|is) (?:the )?(?:word )?(?:identify|state|explain|suggest|advise|calculate|discuss effects|describe|compare|distinguish|outline|classify|draw|label|write an equation)'? (?:mean|ask|want|require|expect)|what (?:does|do) (?:the )?examiners? (?:want|expect)|how (?:do|should|can) (?:i|we) answer (?:an? )?(?:identify|state|explain|suggest|advise|calculate|discuss(?: effects)?|describe|compare|distinguish|outline|classify|draw|label|write an equation)(?: question| type| command| task)?|meaning of (?:the )?(?:command word )?(?:identify|state|explain|suggest|advise|calculate|describe|compare|distinguish|outline|classify))\b/i;
-const CH_COACH=/\b(how (?:do|should|can|would|could) (?:i|we) (?:answer|approach|tackle|attempt|respond to|write)|help me (?:to )?(?:answer|understand how to answer)|guide me (?:to |on |through )?(?:answer|this)|teach me how to answer|how to answer (?:this|these|the following))\b/i;
-const CH_SCN=/\b(scenario|item 1|item one|letter[- ]writing|report (?:scenario|question))\b/i,CH_MAKE=/\b(give|create|generate|make|write|set|show|need|want|another|new|more|prepare)\b/i,CH_TRY=/\b(practi[sc]e|test me|let me (?:try|answer)|ask me|i want to (?:try|answer))\b/i;
-const CH_PRAC=/\b(practi[sc]e (?:question|questions|exam|item|scenario)|exam practice|ask me (?:a |an |another |one )?(?:question|one)|give me (?:a |another )?question to (?:try|answer))\b/i;
-const CH_SUM=/\b(summary|summari[sz]e|revision notes?|revise|revision|notes? (?:on|about|for)|everything (?:about|on)|all about|complete (?:notes|revision)|full (?:notes|revision))\b/i;
-function chemActive(){for(let i=D.msgs.length;i--;){const x=D.msgs[i];if(x.s=="i"&&!x.note&&!x.lim&&!x.err&&x.t){return x.chem||null}}return null}
-function chemAllowed(k){try{return PRANK[planName()]>=PRANK[CHEM_MIN[k]||"Free"]}catch(e){return true}}
-function chemIntent(q){
- q=String(q||"").trim();if(q.length<2||q.length>6000)return null;
- const lv=lvKey();if(lv!="UCE")return null;
- const sub=D.sub,act=chemActive();
- if(D.lock&&sub!="General"&&sub!="Chemistry")return null;
- if(!(sub=="Chemistry"||act||((sub=="General"||sub=="Science")&&CHEM_RX.test(q))))return null;
- const t=" "+q.toLowerCase().replace(/[^a-z0-9'?\s]/g," ").replace(/\s+/g," ").trim()+" ",short=q.length<260;
- const mk=(k,s)=>chemAllowed(k)?{k,s:s||k}:null;
- /* 1. a practice question is waiting for the learner's attempt */
- if(act&&act.await&&act.q){
-  if(CH_REVEAL.test(t))return mk("reveal");
-  const other=CH_CMD.test(t)||CH_COACH.test(t)||(short&&CH_SUM.test(t)&&CHEM_RX.test(q))||(short&&CH_SCN.test(t)&&CH_MAKE.test(t))||CH_PRAC.test(t);
-  const newQ=/\?\s*$/.test(q)&&q.length<90&&/^\s*(what|why|how|when|where|who|which|can|could|is|are|does|do|please)\b/i.test(q);
-  if(!other&&!newQ&&q.length>=12)return mk("attempt");
- }
- /* 2. command words */
- if(q.length<220&&CH_CMD.test(t))return mk("command_word");
- /* 3. how do I answer this? */
- if(CH_COACH.test(t))return mk("coach");
- /* 4. make me a scenario (full package) or practise (attempt first) */
- if(short&&CH_SCN.test(t)&&CH_MAKE.test(t))return CH_TRY.test(t)?mk("practice"):mk("scenario");
- if(short&&CH_PRAC.test(t))return mk("practice");
- /* 5. complete revision of one of the ten areas */
- if(short&&CH_SUM.test(t)&&(CHEM_RX.test(q)||act))return mk("summary");
- /* 6. short follow-ups on the Chemistry answer that is on screen */
- if(act&&!act.await&&short){
-  if(/^\s*(please )?(ask me (a |an |another |one )?(question|one)|test me|practi[sc]e|give me (a |another )?(question|practice))/.test(t))return mk("practice");
-  if(/\b(simpler|more simply|make it (simple|easy|easier)|in (a )?(very )?simple (words|terms|language))\b/.test(t))return mk("simpler","followup");
-  if(/\b(another|one more|more|an?|some) examples?\b|^\s*(give me )?examples?\b/.test(t))return mk("example");
-  if(/^\s*(tell me more|more( details?)?|go on|expand|elaborate|in more detail)\s*\??\s*$/.test(t))return mk("more","followup");
-  if(/^\s*(please )?((explain|say|tell me) (that|it|this) again|again|repeat( that)?|i (do not|don'?t) (understand|get)( it| that| this)?)\s*\??\s*$/.test(t)||/step by step/.test(t))return mk("again","followup");
-  if(/^\s*(and |what about|how about) (the )?[a-z' ]{3,60}\??\s*$/.test(t))return mk("about","followup");
- }
- /* 7. anything else about Chemistry: a narrow question, a concept or an example, answered at the scope asked (quizzes and small talk keep their own routes) */
- if((sub=="Chemistry"||act)&&q.length>=4&&!/\b(quiz|quizzes|quizz|examine me)\b/i.test(t)&&!(typeof RX_SI!="undefined"&&(RX_SI.test(t)||RX_DE.test(t)))&&!(typeof smallTalk=="function"&&smallTalk(q)))return mk("question");
- return null}
-async function askChem(q,CI){
- if(capped())return limitMsg();
- const now=Date.now(),raw=String(q).replace(/[ \t]+\n/g,"\n").trim().slice(0,6000);stamps=stamps.filter(t=>now-t<6e4);
- const err=x=>{D.msgs.push({s:"i",err:1,t:x,q:raw.slice(0,300),ts:Date.now()});save();render()};
- if(!navigator.onLine)return err("No internet connection. Please connect to the internet and tap Retry.");
- stamps.push(now);const tok=++AN;window.ASKQ_RAW=raw;window.ASKQ=raw;
- const ch=D.chats.find(c=>c.id==D.cur);if(ch&&(ch.title=="New chat"||ch.title=="Chat"))ch.title=raw.slice(0,32);
- const act=chemActive();
- let hist=D.msgs.filter(x=>!x.note&&!x.err&&!x.lim&&x.t);if(hist.length&&hist[hist.length-1].s=="o")hist=hist.slice(0,-1);
- hist=hist.slice(-4).map(x=>({r:x.s=="o"?"learner":"david",t:String(x.t).replace(/\s+/g," ").slice(0,900)}));
- $("stat").textContent="preparing your Chemistry answer?";$("send").innerHTML=STOP;
- const m={s:"i",t:"",ts:Date.now(),q:raw.slice(0,300),stream:1,tq:raw.slice(0,120),tsub:"Chemistry"};
- D.msgs.push(m);sm=m;stream=setTimeout(()=>{},9e5);render();thinkOn();
- let j=null;const c=new AbortController(),tm=setTimeout(()=>c.abort(),90000);
- try{const r=await fetch(SBU.replace("/rest/v1/","/functions/v1/")+"chem_coach",{method:"POST",signal:c.signal,headers:{apikey:SBK,"Content-Type":"application/json"},
-   body:JSON.stringify({text:raw,intent:CI.s,level:D.lvl,class:String(D.cls||"").replace(/^Primary /,"P").replace(/^Senior /,"S"),tok:tokNow(),
-    ctx:act?{topic:act.topic||"",concept:act.concept||"",question:(CI.k=="attempt"||CI.k=="reveal"||act.await)?act.q||"":"",awaiting:!!act.await}:{},history:hist})});
-  if(r.ok)j=await r.json()}catch(e){j=null}finally{clearTimeout(tm);thinkOff()}
- if(stream==null||tok!=AN){D.msgs=D.msgs.filter(x=>x!==m);save();render();return}
- const drop=()=>{D.msgs=D.msgs.filter(x=>x!==m);sm=null;stopS()};
- if(j&&j.ok&&j.md){
-  m.t=String(j.md);m.tq=String(j.concept||raw).slice(0,120);
-  m.chem={topic:j.topic_area||"",concept:j.concept||"",intent:j.intent||CI.k,await:j.awaiting_attempt?1:0,q:j.awaiting_attempt?String(j.practice_question||""):"",raw:raw};
-  stopS();logAct("ask",m,m.t);return}
- drop();
- if(j&&j.status=="busy")return err("Many learners are asking right now. Please try again in a little while.");
- if(j&&j.status=="limit"){try{const q=FQ();q.used=Math.max(q.used,q.cap);const ms=j.retry_at?new Date(j.retry_at).getTime()-Date.now():0;q.left=Math.max(60000,ms||0);q.at=Date.now()+q.left;q.seen=Date.now();FQW(q)}catch(e){}return limitMsg()}
- /* the learner still gets an answer: anything the Chemistry function cannot handle goes to the normal pipeline */
- if(navigator.onLine&&(!j||j.status=="off_topic"||j.status=="rejected"||j.status=="not_configured"||j.status=="bad_output"||j.status=="error"))return askCore(q,null,null);
- return err(navigator.onLine?"I could not write this Chemistry answer just now. Please tap Retry or send it again.":"No internet connection. Please connect to the internet and tap Retry.")}
-/* ===== PHYSICS COACH (UCE Physics: topic teaching, command words, scenario and practical practice, past-paper item questions) =====
-   Source: "Ask Teacher David, UCE Physics Master Development Reference". Server: Edge Function phys_coach (prompt phys-v1.0) with the phys_* tables and phys_retrieve.
-   This is a separate copy of the Chemistry route above: Chemistry code is untouched. Only UCE learners in Physics (or a General/Science chat that is clearly about Physics) are routed here.
-   The same plan rules apply: PHYS_MIN is the lowest plan for each kind of request (same values as CHEM_MIN); the real plan is read on the server from the login token.
-   Not routed here: UACE Physics, quizzes, small talk. They keep using the existing pipeline. Chemistry is asked first in General/Science chats, so shared words go to Chemistry as before. */
-const PHYS_MIN=Object.assign({},CHEM_MIN);
-const PHYS_RX=/\b(physics|535\/[123]|newton'?s?|hooke'?s?|ohm'?s?|refraction|refractive index|dispersion|total internal reflection|critical angle|lenses|convex lens|concave lens|plane mirror|concave mirror|convex mirror|principle of moments|centre of gravity|specific heat capacity|specific latent heat|latent heat|half[- ]life|geostationary|satellites?|transformers?|electromagnetic induction|electromagnets?|echoes?|wavelength|ammeter|voltmeter|kinetic energy|potential energy|momentum|acceleration|velocity|logic gates?|truth tables?|electrostatics|electroscope|conduction|convection|thermometers?|moments?|pressure|hydraulic|resistors?|resistance|current electricity|wave speed|ripple tank|sound waves?|magnetic fields?|solar system|stars and galaxies|expansion of solids|heat transfer|heat quantities|atomic models?|nuclear processes|digital electronics|reflection of light|nature of light|states of matter|mechanical properties)\b/i;
-function physActive(){for(let i=D.msgs.length;i--;){const x=D.msgs[i];if(x.s=="i"&&!x.note&&!x.lim&&!x.err&&x.t){return x.phys||null}}return null}
-function physAllowed(k){try{return PRANK[planName()]>=PRANK[PHYS_MIN[k]||"Free"]}catch(e){return true}}
-function physIntent(q){
- q=String(q||"").trim();if(q.length<2||q.length>6000)return null;
- const lv=lvKey();if(lv!="UCE")return null;
- const sub=D.sub,act=physActive();
- if(sub!="Physics"&&sub!="General"&&sub!="Science")return null;
- if(D.lock&&sub!="General"&&sub!="Physics")return null;
- if(!(sub=="Physics"||act||PHYS_RX.test(q)))return null;
- const t=" "+q.toLowerCase().replace(/[^a-z0-9'?\s]/g," ").replace(/\s+/g," ").trim()+" ",short=q.length<260;
- const mk=(k,s)=>physAllowed(k)?{k,s:s||k}:null;
- /* 1. a practice question is waiting for the learner's attempt */
- if(act&&act.await&&act.q){
-  if(CH_REVEAL.test(t))return mk("reveal");
-  const other=CH_CMD.test(t)||CH_COACH.test(t)||(short&&CH_SUM.test(t)&&PHYS_RX.test(q))||(short&&CH_SCN.test(t)&&CH_MAKE.test(t))||CH_PRAC.test(t);
-  const newQ=/\?\s*$/.test(q)&&q.length<90&&/^\s*(what|why|how|when|where|who|which|can|could|is|are|does|do|please)\b/i.test(q);
-  if(!other&&!newQ&&q.length>=12)return mk("attempt");
- }
- /* 2. command words */
- if(q.length<220&&CH_CMD.test(t))return mk("command_word");
- /* 3. how do I answer this? */
- if(CH_COACH.test(t))return mk("coach");
- /* 4. make me a scenario (full package) or practise (attempt first) */
- if(short&&CH_SCN.test(t)&&CH_MAKE.test(t))return CH_TRY.test(t)?mk("practice"):mk("scenario");
- if(short&&CH_PRAC.test(t))return mk("practice");
- /* 5. complete revision of one of the ten areas */
- if(short&&CH_SUM.test(t)&&(PHYS_RX.test(q)||act||sub=="Physics"))return mk("summary");
- /* 6. short follow-ups on the Physics answer that is on screen */
- if(act&&!act.await&&short){
-  if(/^\s*(please )?(ask me (a |an |another |one )?(question|one)|test me|practi[sc]e|give me (a |another )?(question|practice))/.test(t))return mk("practice");
-  if(/\b(simpler|more simply|make it (simple|easy|easier)|in (a )?(very )?simple (words|terms|language))\b/.test(t))return mk("simpler","followup");
-  if(/\b(another|one more|more|an?|some) examples?\b|^\s*(give me )?examples?\b/.test(t))return mk("example");
-  if(/^\s*(tell me more|more( details?)?|go on|expand|elaborate|in more detail)\s*\??\s*$/.test(t))return mk("more","followup");
-  if(/^\s*(please )?((explain|say|tell me) (that|it|this) again|again|repeat( that)?|i (do not|don'?t) (understand|get)( it| that| this)?)\s*\??\s*$/.test(t)||/step by step/.test(t))return mk("again","followup");
-  if(/^\s*(and |what about|how about) (the )?[a-z' ]{3,60}\??\s*$/.test(t))return mk("about","followup");
- }
- /* 7. anything else about Physics: a narrow question, a concept or an example, answered at the scope asked (quizzes and small talk keep their own routes) */
- if((sub=="Physics"||act)&&q.length>=4&&!/\b(quiz|quizzes|quizz|examine me)\b/i.test(t)&&!(typeof RX_SI!="undefined"&&(RX_SI.test(t)||RX_DE.test(t)))&&!(typeof smallTalk=="function"&&smallTalk(q)))return mk("question");
- return null}
-async function askPhys(q,CI){
- if(capped())return limitMsg();
- const now=Date.now(),raw=String(q).replace(/[ \t]+\n/g,"\n").trim().slice(0,6000);stamps=stamps.filter(t=>now-t<6e4);
- const err=x=>{D.msgs.push({s:"i",err:1,t:x,q:raw.slice(0,300),ts:Date.now()});save();render()};
- if(!navigator.onLine)return err("No internet connection. Please connect to the internet and tap Retry.");
- stamps.push(now);const tok=++AN;window.ASKQ_RAW=raw;window.ASKQ=raw;
- const ch=D.chats.find(c=>c.id==D.cur);if(ch&&(ch.title=="New chat"||ch.title=="Chat"))ch.title=raw.slice(0,32);
- const act=physActive();
- let hist=D.msgs.filter(x=>!x.note&&!x.err&&!x.lim&&x.t);if(hist.length&&hist[hist.length-1].s=="o")hist=hist.slice(0,-1);
- hist=hist.slice(-4).map(x=>({r:x.s=="o"?"learner":"david",t:String(x.t).replace(/\s+/g," ").slice(0,900)}));
- $("stat").textContent="preparing your Physics answer?";$("send").innerHTML=STOP;
- const m={s:"i",t:"",ts:Date.now(),q:raw.slice(0,300),stream:1,tq:raw.slice(0,120),tsub:"Physics"};
- D.msgs.push(m);sm=m;stream=setTimeout(()=>{},9e5);render();thinkOn();
- let j=null;const c=new AbortController(),tm=setTimeout(()=>c.abort(),90000);
- try{const r=await fetch(SBU.replace("/rest/v1/","/functions/v1/")+"phys_coach",{method:"POST",signal:c.signal,headers:{apikey:SBK,"Content-Type":"application/json"},
-   body:JSON.stringify({text:raw,intent:CI.s,level:D.lvl,class:String(D.cls||"").replace(/^Primary /,"P").replace(/^Senior /,"S"),tok:tokNow(),
-    ctx:act?{topic:act.topic||"",concept:act.concept||"",question:(CI.k=="attempt"||CI.k=="reveal"||act.await)?act.q||"":"",awaiting:!!act.await}:{},history:hist})});
-  if(r.ok)j=await r.json()}catch(e){j=null}finally{clearTimeout(tm);thinkOff()}
- if(stream==null||tok!=AN){D.msgs=D.msgs.filter(x=>x!==m);save();render();return}
- const drop=()=>{D.msgs=D.msgs.filter(x=>x!==m);sm=null;stopS()};
- if(j&&j.ok&&j.md){
-  m.t=String(j.md);m.tq=String(j.concept||raw).slice(0,120);
-  m.phys={topic:j.topic_area||"",concept:j.concept||"",intent:j.intent||CI.k,await:j.awaiting_attempt?1:0,q:j.awaiting_attempt?String(j.practice_question||""):"",raw:raw};
-  stopS();logAct("ask",m,m.t);return}
- drop();
- if(j&&j.status=="busy")return err("Many learners are asking right now. Please try again in a little while.");
- if(j&&j.status=="limit"){try{const q=FQ();q.used=Math.max(q.used,q.cap);const ms=j.retry_at?new Date(j.retry_at).getTime()-Date.now():0;q.left=Math.max(60000,ms||0);q.at=Date.now()+q.left;q.seen=Date.now();FQW(q)}catch(e){}return limitMsg()}
- /* the learner still gets an answer: anything the Physics function cannot handle goes to the normal pipeline */
- if(navigator.onLine&&(!j||j.status=="off_topic"||j.status=="rejected"||j.status=="not_configured"||j.status=="bad_output"||j.status=="error"))return askCore(q,null,null);
- return err(navigator.onLine?"I could not write this Physics answer just now. Please tap Retry or send it again.":"No internet connection. Please connect to the internet and tap Retry.")}
-/* ===== MATHEMATICS COACH (UCE Mathematics: topic teaching, command words, scenario and modelling practice, graph and geometry coaching, past-paper item questions) =====
-   Source: "Ask Teacher David, UCE Mathematics Master Development Reference". Server: Edge Function math_coach (prompt math-v1.0) with the math_* tables and math_retrieve.
-   This is a separate copy of the Physics route above: Chemistry and Physics code is untouched. Only UCE learners in Mathematics (or a General chat that is clearly about school Mathematics) are routed here.
-   The same plan rules apply: MATH_MIN is the lowest plan for each kind of request (same values as CHEM_MIN); the real plan is read on the server from the login token.
-   Not routed here: UACE Mathematics, quizzes, small talk. They keep using the existing pipeline. Chemistry and Physics are asked first in General chats, so shared words go to them as before. */
-const MATH_MIN=Object.assign({},CHEM_MIN);
-const MATH_RX=/\b(mathematics|maths?|456\/1|simultaneous equations?|quadratic|inequalit(?:y|ies)|linear programming|feasible region|matri(?:x|ces)|pythagoras|trigonometry|sine rule|cosine rule|logarithms?|surds?|indices|venn diagrams?|probability|sample space|bearings?|gradient|highest common factor|\bhcf\b|\blcm\b|composite functions?|inverse functions?|number bases?|standard form|ogive|cumulative frequency|histograms?|loci|locus|set notation|scale factors?|enlargement|exchange rates?|simple interest|compound interest|hire purchase|arithmetic progression|geometric progression|nth term|completing the square|factori[sz]e|expand(?:ing)? brackets|change the subject|equation of (?:a )?(?:straight )?line)\b/i;
-const MATH_CMD=/\b(command words?|what (?:does|do|is) (?:the )?(?:command )?(?:word )?(?:determine|show that|find|solve|calculate|construct|plot|sketch|interpret|recommend|justify|advise|estimate|prove|compare|distinguish|define the variables|form an? (?:equation|inequality)|complete the table) (?:mean|ask|want|require|expect)|what (?:does|do) (?:the )?examiners? (?:want|expect)|how (?:do|should|can) (?:i|we) answer (?:an? )?(?:determine|show that|find|solve|calculate|construct|plot|sketch|interpret|recommend|justify|advise|estimate|prove|compare)(?: question| type| command| task)?|meaning of (?:the )?(?:command word )?(?:determine|show that|find|solve|calculate|construct|plot|sketch|interpret|recommend|justify|advise|estimate|prove))\b/i;
-function mathActive(){for(let i=D.msgs.length;i--;){const x=D.msgs[i];if(x.s=="i"&&!x.note&&!x.lim&&!x.err&&x.t){return x.math||null}}return null}
-function mathAllowed(k){try{return PRANK[planName()]>=PRANK[MATH_MIN[k]||"Free"]}catch(e){return true}}
-function mathIntent(q){
- q=String(q||"").trim();if(q.length<2||q.length>6000)return null;
- const lv=lvKey();if(lv!="UCE")return null;
- const sub=D.sub,act=mathActive();
- if(sub!="Mathematics"&&sub!="General")return null;
- if(D.lock&&sub!="General"&&sub!="Mathematics")return null;
- if(!(sub=="Mathematics"||act||MATH_RX.test(q)))return null;
- const t=" "+q.toLowerCase().replace(/[^a-z0-9'?\s]/g," ").replace(/\s+/g," ").trim()+" ",short=q.length<260;
- const mk=(k,s)=>mathAllowed(k)?{k,s:s||k}:null;
- /* 1. a practice question is waiting for the learner's attempt */
- if(act&&act.await&&act.q){
-  if(CH_REVEAL.test(t))return mk("reveal");
-  const other=CH_CMD.test(t)||MATH_CMD.test(t)||CH_COACH.test(t)||(short&&CH_SUM.test(t)&&MATH_RX.test(q))||(short&&CH_SCN.test(t)&&CH_MAKE.test(t))||CH_PRAC.test(t);
-  const newQ=/\?\s*$/.test(q)&&q.length<90&&/^\s*(what|why|how|when|where|who|which|can|could|is|are|does|do|please)\b/i.test(q);
-  if(!other&&!newQ&&q.length>=12)return mk("attempt");
- }
- /* 2. command words */
- if(q.length<220&&(CH_CMD.test(t)||MATH_CMD.test(t)))return mk("command_word");
- /* 3. how do I answer this? */
- if(CH_COACH.test(t))return mk("coach");
- /* 4. make me a scenario (full package) or practise (attempt first) */
- if(short&&CH_SCN.test(t)&&CH_MAKE.test(t))return CH_TRY.test(t)?mk("practice"):mk("scenario");
- if(short&&CH_PRAC.test(t))return mk("practice");
- /* 5. complete revision of one of the ten areas */
- if(short&&CH_SUM.test(t)&&(MATH_RX.test(q)||act||sub=="Mathematics"))return mk("summary");
- /* 6. short follow-ups on the Mathematics answer that is on screen */
- if(act&&!act.await&&short){
-  if(/^\s*(please )?(ask me (a |an |another |one )?(question|one)|test me|practi[sc]e|give me (a |another )?(question|practice))/.test(t))return mk("practice");
-  if(/\b(simpler|more simply|make it (simple|easy|easier)|in (a )?(very )?simple (words|terms|language))\b/.test(t))return mk("simpler","followup");
-  if(/\b(another|one more|more|an?|some) examples?\b|^\s*(give me )?examples?\b/.test(t))return mk("example");
-  if(/^\s*(tell me more|more( details?)?|go on|expand|elaborate|in more detail)\s*\??\s*$/.test(t))return mk("more","followup");
-  if(/^\s*(please )?((explain|say|tell me) (that|it|this) again|again|repeat( that)?|i (do not|don'?t) (understand|get)( it| that| this)?)\s*\??\s*$/.test(t)||/step by step/.test(t))return mk("again","followup");
-  if(/^\s*(and |what about|how about) (the )?[a-z' ]{3,60}\??\s*$/.test(t))return mk("about","followup");
- }
- /* 7. anything else about Mathematics: a narrow question, a concept or an example, answered at the scope asked (quizzes and small talk keep their own routes) */
- if((sub=="Mathematics"||act)&&q.length>=4&&!/\b(quiz|quizzes|quizz|examine me)\b/i.test(t)&&!(typeof RX_SI!="undefined"&&(RX_SI.test(t)||RX_DE.test(t)))&&!(typeof smallTalk=="function"&&smallTalk(q)))return mk("question");
- return null}
-async function askMath(q,CI){
- if(capped())return limitMsg();
- const now=Date.now(),raw=String(q).replace(/[ \t]+\n/g,"\n").trim().slice(0,6000);stamps=stamps.filter(t=>now-t<6e4);
- const err=x=>{D.msgs.push({s:"i",err:1,t:x,q:raw.slice(0,300),ts:Date.now()});save();render()};
- if(!navigator.onLine)return err("No internet connection. Please connect to the internet and tap Retry.");
- stamps.push(now);const tok=++AN;window.ASKQ_RAW=raw;window.ASKQ=raw;
- const ch=D.chats.find(c=>c.id==D.cur);if(ch&&(ch.title=="New chat"||ch.title=="Chat"))ch.title=raw.slice(0,32);
- const act=mathActive();
- let hist=D.msgs.filter(x=>!x.note&&!x.err&&!x.lim&&x.t);if(hist.length&&hist[hist.length-1].s=="o")hist=hist.slice(0,-1);
- hist=hist.slice(-4).map(x=>({r:x.s=="o"?"learner":"david",t:String(x.t).replace(/\s+/g," ").slice(0,900)}));
- $("stat").textContent="preparing your Mathematics answer?";$("send").innerHTML=STOP;
- const m={s:"i",t:"",ts:Date.now(),q:raw.slice(0,300),stream:1,tq:raw.slice(0,120),tsub:"Mathematics"};
- D.msgs.push(m);sm=m;stream=setTimeout(()=>{},9e5);render();thinkOn();
- let j=null;const c=new AbortController(),tm=setTimeout(()=>c.abort(),90000);
- try{const r=await fetch(SBU.replace("/rest/v1/","/functions/v1/")+"math_coach",{method:"POST",signal:c.signal,headers:{apikey:SBK,"Content-Type":"application/json"},
-   body:JSON.stringify({text:raw,intent:CI.s,level:D.lvl,class:String(D.cls||"").replace(/^Primary /,"P").replace(/^Senior /,"S"),tok:tokNow(),
-    ctx:act?{topic:act.topic||"",concept:act.concept||"",question:(CI.k=="attempt"||CI.k=="reveal"||act.await)?act.q||"":"",awaiting:!!act.await}:{},history:hist})});
-  if(r.ok)j=await r.json()}catch(e){j=null}finally{clearTimeout(tm);thinkOff()}
- if(stream==null||tok!=AN){D.msgs=D.msgs.filter(x=>x!==m);save();render();return}
- const drop=()=>{D.msgs=D.msgs.filter(x=>x!==m);sm=null;stopS()};
- if(j&&j.ok&&j.md){
-  m.t=String(j.md);m.tq=String(j.concept||raw).slice(0,120);
-  m.math={topic:j.topic_area||"",concept:j.concept||"",intent:j.intent||CI.k,await:j.awaiting_attempt?1:0,q:j.awaiting_attempt?String(j.practice_question||""):"",raw:raw};
-  stopS();logAct("ask",m,m.t);return}
- drop();
- if(j&&j.status=="busy")return err("Many learners are asking right now. Please try again in a little while.");
- if(j&&j.status=="limit"){try{const q=FQ();q.used=Math.max(q.used,q.cap);const ms=j.retry_at?new Date(j.retry_at).getTime()-Date.now():0;q.left=Math.max(60000,ms||0);q.at=Date.now()+q.left;q.seen=Date.now();FQW(q)}catch(e){}return limitMsg()}
- /* the learner still gets an answer: anything the Mathematics function cannot handle goes to the normal pipeline */
- if(navigator.onLine&&(!j||j.status=="off_topic"||j.status=="rejected"||j.status=="not_configured"||j.status=="bad_output"||j.status=="error"))return askCore(q,null,null);
- return err(navigator.onLine?"I could not write this Mathematics answer just now. Please tap Retry or send it again.":"No internet connection. Please connect to the internet and tap Retry.")}
 /* PHOTO QUESTIONS: the picture goes to Gemini through the image_ask function and is never saved. It lives in memory (window.__IMGB) only; the chat keeps just the file name. */
 async function askImage(m,blob,v){
  if(capped())return limitMsg();
@@ -7265,9 +7029,7 @@ function ask(q,mode){
  if(!mode){try{gdSense("q",q)}catch(e){}}
  if(!mode){let b=false;try{b=bpHandle(q)}catch(e){b=false}if(b)return}
  if(!mode&&fileAsk(q)){fileNote(q);return}
- if(!mode){let CI=null;if(D.sub!="Physics"&&D.sub!="Mathematics"){try{CI=chemIntent(q)}catch(e){CI=null}}if(CI)return askChem(q,CI)}
- if(!mode){let PI=null;try{PI=physIntent(q)}catch(e){PI=null}if(PI)return askPhys(q,PI)}
- if(!mode){let MI=null;try{MI=mathIntent(q)}catch(e){MI=null}if(MI)return askMath(q,MI)}
+ /* Chemistry, Physics and Mathematics coaches are switched OFF (owner request, Nov 2026): every question now goes the same way: Notes Library, saved answers, then Gemini, through assistant_ask. */
  if(!mode&&looksScenario(q))return askScenario(q);
  if(!mode){let k=null;try{k=coreAsk(q)}catch(e){}if(k)q=k}
  if(!mode){let h=false;try{h=sqHandle(q)}catch(e){h=false}if(h)return}
@@ -7305,7 +7067,12 @@ function askCore(q,mode,I){
  if(!navigator.onLine)return err("No internet connection. Please connect to the internet and tap Retry.");
  stamps.push(now);sm=null;const tok=++AN;
  thinkOn();$("send").innerHTML=STOP;
- stream=setTimeout(async()=>{let f=FU&&FU.local?{t:FU.local}:null;
+ stream=setTimeout(async()=>{let f=FU&&FU.local?{t:FU.local}:null;let srvTried=0;
+   /* SERVER FIRST: a plain new question goes to assistant_ask, which checks the admin's Notes Library, then the saved answers, then Gemini. The built-in topics below only answer when the server gives nothing. */
+   if(!f&&!exl&&!mode&&!FU&&!bareG&&!smallTalk(q)){srvTried=1;let a0=null;try{a0=await aiAnswer(q,null)}catch(e){a0=null}if(stream==null||tok!=AN)return;
+    if(a0&&a0.limit){stopS();return limitMsg()}
+    if(a0&&a0.busy){logUn(q);stopS();return err("Many learners are asking right now. Please try again in a little while.")}
+    if(a0&&a0.t)f=a0}
   if(!f&&!exl&&mode=="Give an example"){try{f=await moreExample(q)}catch(e){f=null}if(stream==null||tok!=AN)return;if(f&&f.busy){stopS();return err("Many learners are asking right now. Please try again in a little while.")}}
   if(!f&&exl){try{f=await exampleList(q)}catch(e){f=null}if(stream==null||tok!=AN)return;if(f&&f.busy){stopS();return err("Many learners are asking right now. Please try again in a little while.")}}
   if(!f&&!exl&&!mode){let tl=null;try{tl=topicListReq(q0)}catch(e){}if(tl)f={t:tl,part:1,diff:1}}
@@ -7313,9 +7080,9 @@ function askCore(q,mode,I){
   if(!f&&FU&&FU.part){try{f=FU.exp?await expandPart(q,FU):await explainPart(q,FU)}catch(e){f=null}if(stream==null||tok!=AN)return;if(f&&f.busy){stopS();return err("Many learners are asking right now. Please try again in a little while.")}if(!f){if(FU.exp){const F2=ctxFollow(q);FU=F2||null;if(F2&&F2.local)f={t:F2.local};else if(F2)q=F2.q}else{FU.part=0;FU.kind="custom";FU.hint=FU_HINT.custom}}}if(!f)try{f=await Promise.race([dbAnswer(q,mode),new Promise(r=>setTimeout(()=>r(null),2500))])}catch(e){}
   if(stream==null||tok!=AN)return;
   if(!f)f=mock(q,mode);
-  {const lk=f.part?null:leakSub(f);if(lk){stopS();D.msgs.push({s:"i",note:1,up:0,t:"This chat is set to "+D.sub+", so I answer "+D.sub+" questions only. That answer belongs to "+lk+". Tap the subject button above to switch, or ask me something about "+D.sub+".",ts:Date.now()});save();render();return}}
+  {const lk=(f.part||f.srv)?null:leakSub(f);if(lk){stopS();D.msgs.push({s:"i",note:1,up:0,t:"This chat is set to "+D.sub+", so I answer "+D.sub+" questions only. That answer belongs to "+lk+". Tap the subject button above to switch, or ask me something about "+D.sub+".",ts:Date.now()});save();render();return}}
   if(f.un&&!mode){let x=null;try{x=await crossLevel(q)}catch(e){}if(stream==null||tok!=AN)return;if(x)f=x}
-  if(f.un&&!mode){const a=await aiAnswer(q,FU);if(stream==null||tok!=AN)return;
+  if(f.un&&!mode&&!srvTried){const a=await aiAnswer(q,FU);if(stream==null||tok!=AN)return;
    if(a&&a.limit){stopS();return limitMsg()}
    if(a&&a.busy){logUn(q);stopS();return err("Many learners are asking right now. Please try again in a little while.")}
    if(a&&a.t)f=a}
@@ -8350,6 +8117,7 @@ const HANDOFF={
  ]
  ],
  "log": [
+  ["2026-11-24","Coaches switched off and server-first answering. The Chemistry, Physics and Mathematics coaches (chem_coach, phys_coach, math_coach) are no longer called: their routing lines in ask() are removed and the whole coach code (CHEMISTRY, PHYSICS and MATHEMATICS COACH blocks: chemIntent, askChem, physIntent, askPhys, mathIntent, askMath and their word lists) is DELETED from this file; the chem_coach, phys_coach and math_coach functions were never deployed on Supabase. A plain new question now goes first to assistant_ask, which checks the admin Notes Library (published notes for the learner's class and subject), then the shared saved answers (exact, then meaning), then Gemini; the Gemini reply is saved and re-laid-out by the system for the learner's plan each time. The built-in topics only answer when the server gives nothing (no subject chosen, offline, error), and follow-ups, quizzes, scenarios and pictures keep their existing routes. Reason: the soap notes saved in the Notes Library never reached learners because the built-in Chemistry content answered first. Checked with a syntax test only; not opened in a browser or on a phone."],
   ["2026-11-15","UCE Mathematics coach added (separate from Chemistry and Physics). The 45 NCDC programme-planner topics (Senior 1 to Senior 4) plus the Senior 4 Term 3 revision pathway are stored as scope records, with the reviewed 2024 and 2025 Paper 1 (456/1) rules and all six items of each year. New Edge Function math_coach (prompt math-v1.0) mirrors phys_coach: the real plan is read on the server, the Free word limit is shared, and answers are checked by a second pass. UCE learners in Mathematics are routed to it for topic notes, Mathematics command words, scenario and modelling practice, how-do-I-answer coaching, step-by-step working and past-paper item questions; Chemistry and Physics are unchanged. Past-paper answers name the year and item, and say they are not official; items that are not stored are never described. The Mathematics paper-structure table now follows the stored record (it previously described 2024 Item 1 as a ratios and timetable item, which did not match the reviewed paper). The topic records are scope summaries only: worked examples, formulae and exercises for each topic are still to be written and reviewed. UACE Mathematics still uses the existing pipeline. Checked with a syntax test and database queries only; not opened in a browser or on a phone, and no live Gemini call has been made yet."],
   ["2026-11-15","UCE Physics coach added (separate from Chemistry). All 31 NCDC Physics topics (Senior 1 to Senior 4) are stored with notes, equations, worked examples, misconceptions and practical links, plus the 2024 Paper 1 items and the reviewed 2025 Items 1 and 2, and the Paper 1, Paper 2 and Paper 3 arrangements. New Edge Function phys_coach (prompt phys-v1.0) mirrors chem_coach: the real plan is read on the server, Free word limits are shared, answers are checked by a second pass. Physics learners in UCE are routed to it for topic notes, command words, scenario and practical practice, how-do-I-answer coaching and past-paper item questions; Chemistry is unchanged. Past-paper answers say which year and item they come from and are labelled as not official; items that are not stored are never described. The Physics paper-structure table now shows the reviewed 535/1 and 535/2 format. The topic records are blueprint notes that a Physics teacher still has to review. UACE Physics still uses the existing pipeline. Tested with database queries only; not opened in a browser or on a phone, and no live Gemini call has been made yet."],
  ["2026-11-14","Answer engine version 4 (Chemistry only for now): the app no longer calls ai_answer, ai_answer_v2 or ai_answer_v3 (code removed). Every UCE Chemistry message that is not a quiz or small talk goes to chem_coach, narrow questions included. Other subjects get the message that they are being rebuilt; stored owner topics and find_answer still work. The old Edge Functions still exist on Supabase until deleted in the dashboard. Chemistry coach (Item 1-style revision, command words, scenario practice, answer coaching) built from the Complete Chemistry Revision and Item 1 specification. New Edge Function chem_coach (prompt chem-v1.0, deployed; ai_answer_v3 and scenario_answer untouched). The app routes only these Chemistry requests to it, for UCE only: complete revision of one of the ten areas (ten-part notes), command-word lessons (meaning, what the examiner expects, sample instruction, model answer, why it works), a scenario in any of seven formats with a model answer for every task, how do I answer this coaching in six steps, practice mode (question first, then the learner attempts, then feedback and model answers, or show answer), and short follow-ups on the Chemistry answer on screen (explain again, simpler, another example, tell me more, what about..., ask me a question). Narrow questions, owner topics, quizzes and pasted scenarios without a coaching request still use the existing pipeline. CHEM_MIN in the script sets the lowest plan for each request type (Practice Basic, examples and simpler Standard, tell me more Premium, the rest Free, matching the existing GATE rules). The function checks every answer with a second Gemini pass and repairs once; code adds the original-practice-question and not-official labels. Tested with scripts and a mocked Gemini only; not opened in a browser or on a phone, and no live Gemini call has been made yet."],
